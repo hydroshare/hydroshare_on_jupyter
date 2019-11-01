@@ -1,4 +1,4 @@
-import { connect } from 'react-redux';
+/*import { connect } from 'react-redux';
 import App from '../App';
 import {
 
@@ -19,4 +19,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(App);
+)(App);*/

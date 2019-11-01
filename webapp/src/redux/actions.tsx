@@ -1,13 +1,17 @@
 /* This file contains all of the Redux actions. */
 
-export const ActionTypes = {
 
-};
+// const API_URL = window.WEBSOCKET_SERVER_URL;
 
-const API_URL = window.WEBSOCKET_SERVER_URL;
+import { ActionTypes, BaseAction } from "./reducers";
 
-export function doSomething() {
-  return dispatch => {
-    // TODO: Do something
+export interface ToggleRowsAction extends BaseAction {
+  type: ActionTypes.TOGGLE_ROWS;
+}
+
+export function toggleRows(): ToggleRowsAction {
+  console.log("button pressed")
+  return {
+    type: ActionTypes.TOGGLE_ROWS
   };
 }
