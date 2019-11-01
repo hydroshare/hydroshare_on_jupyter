@@ -15,9 +15,13 @@ type tableState = {
   rows: Row[]
 }
 
-const mapStateToProps = (state: TableState) => ({
-  showRows: state.showRows
-});
+type StateProps = {
+  showRows: boolean,
+}
+
+function mapStateToProps(state: TableState): StateProps {
+  return {showRows: state.showRows}
+}
 
 const mapDispatchToProps = (dispatch: Dispatch<ToggleRowsAction>) =>
   bindActionCreators({ toggleRows }, dispatch);
@@ -26,7 +30,7 @@ type tableProps = ReturnType<typeof mapStateToProps> &
   ReturnType<typeof mapDispatchToProps>;
 
 
-export class Table extends Component<tableProps, tableState> {
+export class Table extends Component<StateProps, tableState> {
 
   constructor(props: any){    
     super(props);    
