@@ -13,7 +13,7 @@ from login import username, password
 auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
 
-test_resource_id ='8b826c43f55043f583c85ae312a8894f'
+test_resource_id = '8b826c43f55043f583c85ae312a8894f'
 output_folder = 'hs_resources'
 
 def get_hs_resource(resource_id, output_folder, unzip_bool=False):
@@ -31,6 +31,7 @@ def get_metadata(resource_id):
     resource_md = hs.getSystemMetadata(resource_id)
     print(resource_md['resource_title'])
     pprint(resource_md)
+    return(resource_md)
 
 def get_user_info():
     # username
@@ -39,8 +40,9 @@ def get_user_info():
 def test_socket():
     pass
 
-get_metadata(test_resource_id)
-get_hs_resource(test_resource_id, output_folder)
-get_files()
-get_user_info()
-test_socket()
+if __name__ == '__main__':
+    get_metadata(test_resource_id)
+    get_hs_resource(test_resource_id, output_folder)
+    get_files()
+    get_user_info()
+    test_socket()
