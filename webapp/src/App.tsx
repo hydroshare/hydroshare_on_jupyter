@@ -2,14 +2,16 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { IRootState } from './store';
 
+import { Dispatch } from 'redux';
+import * as asyncactions from './store/async-actions';
+import { DemoActions } from './store/types';
+
+import FilterBar from './components/FilterBar';
+
 const mapStateToProps = ({ demo }: IRootState) => {
   const { list, loading } = demo;
   return { list, loading };
 }
-
-import { Dispatch } from 'redux';
-import * as asyncactions from './store/async-actions';
-import { DemoActions } from './store/types';
 
 const mapDispatcherToProps = (dispatch: Dispatch<DemoActions>) => {
   return {
@@ -48,6 +50,7 @@ class App extends React.Component<ReduxType, IState> {
         <ul>
           {list.map(l => <li key={l}>{l}</li>)}
         </ul>
+        <FilterBar />
       </div>
     );
   }

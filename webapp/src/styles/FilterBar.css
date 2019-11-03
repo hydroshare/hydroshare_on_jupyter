@@ -1,0 +1,10 @@
+@import './colors.scss';
+
+.filterParent{
+    width: 50%;
+    margin-left:25%;
+    height: 40px;
+    background-color: #d9eeec;
+    font-family: Futura,Trebuchet MS,Arial,sans-serif; 
+    padding: 5px;
+}
