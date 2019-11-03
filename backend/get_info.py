@@ -13,7 +13,7 @@ from login import username, password
 auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
 
-test_resource_id ='c40d9567678740dab868f35440a69b30'
+test_resource_id ='8b826c43f55043f583c85ae312a8894f'
 output_folder = 'hs_resources'
 
 def get_hs_resource(resource_id, output_folder, unzip_bool=False):
