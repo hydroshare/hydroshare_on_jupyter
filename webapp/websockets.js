@@ -1,6 +1,6 @@
 // This file helps integrate the WebSockets connection to the server with the Redux data store.
 // It is based off https://medium.com/@ianovenden/redux-websocket-integration-c1a0d22d3189
-
+/*
 import io from 'socket.io-client';
 
 let _store;
@@ -28,3 +28,4 @@ export const connect = () => {
 export const getSocket = () => _socket;
 
 export const emit = (type, payload) => _socket.emit(type, payload);
+*/
