@@ -8,8 +8,8 @@ const mapStateToProps = ({ demo }: IRootState) => {
 }
 
 import { Dispatch } from 'redux';
-import * as asyncactions from './store/demo/async-actions';
-import { DemoActions } from './store/demo/types';
+import * as asyncactions from './store/redux/async-actions';
+import { DemoActions } from './store/redux/types';
 
 const mapDispatcherToProps = (dispatch: Dispatch<DemoActions>) => {
   return {

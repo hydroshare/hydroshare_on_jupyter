@@ -1,6 +1,6 @@
 import { combineReducers, createStore } from 'redux';
-import { demoReducer } from './demo/reducer';
-import { IDemoState } from './demo/types';
+import { demoReducer } from './redux/reducer';
+import { IDemoState } from './redux/types';
 
 export interface IRootState {
     demo: IDemoState
