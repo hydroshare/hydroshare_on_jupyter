@@ -1,14 +1,18 @@
 import { action } from 'typesafe-actions';
-import { Constants } from './types';
+import { demoConstants, filterConstants } from './types';
 
 export function addItemToList(item: string) {
-    return action(Constants.ADD_ITEM, {
+    return action(demoConstants.ADD_ITEM, {
         item
     });
 }
 
 export function setLoading(loading: boolean) {
-    return action(Constants.SET_LOADING, {
+    return action(demoConstants.SET_LOADING, {
         loading
     });
+}
+
+export function selectAll() {
+    return action(filterConstants.SELECT_ALL);
 }
