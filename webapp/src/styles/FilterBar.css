@@ -3,8 +3,18 @@
 .filterParent{
     width: 50%;
     margin-left:25%;
-    height: 40px;
+    height: 60px;
     background-color: #d9eeec;
     font-family: Futura,Trebuchet MS,Arial,sans-serif; 
     padding: 5px;
+    box-shadow: 5px #64b2cd;
+}
+
+.delete-button{
+    margin-right:12px;
+    float:right;
+}
+
+.new-resource-button {
+    margin-right: 12px;
 }

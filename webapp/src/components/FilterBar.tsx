@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
+import {Button} from 'react-bootstrap';
 
-import { Button } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/FilterBar.css';
 
 import * as FilterBarActions from '../store/actions/FilterBar';
@@ -36,13 +37,21 @@ class FilterBar extends React.Component<ReduxType, never> {
     this.props.addItem(this.state.inputText);
     this.setState({inputText: ''});
   }*/
+    public deleteClick =() => {
+        console.log("Send message to backend to delete")
+    }
+
+    public createNewResource =() => {
+        console.log("Send message to backend to create new resource")
+    }
 
   public render() {
     // const { selectAll, sortBy } = this.props;
 
     return (
       <div className='filterParent'>
-          <Button>Delete</Button>
+            <Button className="new-resource-button" variant="outline-success" onClick={this.createNewResource}>+ New Resource</Button>
+            <Button className="delete-button" variant="danger" onClick={this.deleteClick}>Delete</Button>
       </div>
     );
   }
