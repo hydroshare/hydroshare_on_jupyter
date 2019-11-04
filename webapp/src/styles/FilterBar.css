@@ -7,14 +7,41 @@
     background-color: #d9eeec;
     font-family: Futura,Trebuchet MS,Arial,sans-serif; 
     padding: 5px;
-    box-shadow: 5px #64b2cd;
+    box-shadow: 0px 0px 2px 1px #64b2cd;
+    display: flex;
+}
+
+.filterForm {
+    margin: 6px;
+    width:500px;
+}
+
+.filterForm-checkbox{
+    width:0px;
+}
+
+.filterForm-searchBox{
+    width:200px;
 }
 
 .delete-button{
-    margin-right:12px;
-    float:right;
+    margin-right: 12px;
+    height: 36px;
+    padding-top: 3px;
+    margin-top: 6px;
 }
 
 .new-resource-button {
     margin-right: 12px;
+    margin-left: auto;
+    height: 36px;
+    margin-top: 6px;
+    padding-top: 4px;
+    align-self: flex-end;
+    margin-bottom: 7px;
+}
+
+.selectAll-checkbox{
+    margin-left: 12px;
+    margin-top: 6px;
 }

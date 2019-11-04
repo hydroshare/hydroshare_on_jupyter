@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import {Button} from 'react-bootstrap';
+import {Button, Form} from 'react-bootstrap';
+import { FaFileMedical, FaSearch, FaTrashAlt } from "react-icons/fa";
+import { Col } from 'reactstrap';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/FilterBar.css';
@@ -49,10 +51,30 @@ class FilterBar extends React.Component<ReduxType, never> {
     // const { selectAll, sortBy } = this.props;
 
     return (
-      <div className='filterParent'>
-            <Button className="new-resource-button" variant="outline-success" onClick={this.createNewResource}>+ New Resource</Button>
-            <Button className="delete-button" variant="danger" onClick={this.deleteClick}>Delete</Button>
-      </div>
+        <div className='filterParent'>
+            <Form className='filterForm'>
+                <Form.Row>
+                    <Col className="filterForm-checkbox" md="3">
+                        <Form.Check 
+                            type={'checkbox'}
+                            id={`select-all-checkbox`}
+                            className='selectAll-checkbox'
+                            label={`Select All`}
+                        />
+                    </Col>
+                    <Col className="filterForm-searchBox" md="6">
+                        <Form.Control placeholder="Search" />
+                    </Col>
+                    <Col md="3">
+                        <Button variant="primary" type="submit">
+                            <FaSearch /> Search
+                        </Button>
+                    </Col>
+                </Form.Row>
+            </Form>
+            <Button className="new-resource-button" variant="outline-success" onClick={this.createNewResource}><FaFileMedical/> New Resource</Button>
+            <Button className="delete-button" variant="danger" onClick={this.deleteClick}><FaTrashAlt /></Button>
+        </div>
     );
   }
 }
