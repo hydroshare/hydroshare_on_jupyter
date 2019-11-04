@@ -1,8 +1,23 @@
-import { DemoActions, demoConstants,  FilterActions, filterConstants, IDemoState, IFilterState } from './types';
+import {
+  UserActions,
+} from './actions';
+import {
+  DemoActions,
+  demoConstants,
+  FilterActions,
+  filterConstants,
+  IDemoState,
+  IFilterState,
+  IUserState,
+} from './types';
 
 const init: IDemoState = {
   list: [],
   loading: false
+};
+
+const initUserState: IUserState = {
+  name: '',
 };
 
 export function demoReducer(state: IDemoState = init, action: DemoActions): IDemoState {
@@ -15,6 +30,15 @@ export function demoReducer(state: IDemoState = init, action: DemoActions): IDem
       return state;
   }
 }
+
+export function userReducer(state: IUserState = initUserState, action: UserActions): IUserState {
+  switch (action.type) {
+    // TODO: Something useful
+    default:
+      return state;
+  }
+}
+
 
 const initFilter: IFilterState ={
   selectAll: false,

@@ -1,5 +1,12 @@
-import { action } from 'typesafe-actions';
+import {
+    action,
+    ActionType,
+} from 'typesafe-actions';
+
+import * as userActions from './actions/user';
 import { demoConstants, filterConstants } from './types';
+
+export type UserActions = ActionType<typeof userActions>;
 
 export function addItemToList(item: string) {
     return action(demoConstants.ADD_ITEM, {

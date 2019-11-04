@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { IRootState } from '../store';
 
 import { Dispatch } from 'redux';
-import * as actions from '../store/redux/actions';
-import { FilterActions } from '../store/redux/types';
+import * as actions from '../store/actions';
+import { FilterActions } from '../store/types';
 
 import {Button} from 'react-bootstrap';
 

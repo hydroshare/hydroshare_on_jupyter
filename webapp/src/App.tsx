@@ -7,6 +7,7 @@ import * as asyncactions from './store/async-actions';
 import { DemoActions } from './store/types';
 
 import FilterBar from './components/FilterBar';
+import Header from './containers/Header';
 
 const mapStateToProps = ({ demo }: IRootState) => {
   const { list, loading } = demo;
@@ -43,7 +44,8 @@ class App extends React.Component<ReduxType, IState> {
     const { list, loading } = this.props;
 
     return (
-      <div style={{margin: '20px'}}>
+      <div className="App">
+        <Header />
         <input value={this.state.inputText} onChange={this.onInputChange}/>
         <button onClick={this.onAddClick}>Add</button>
         {loading && <div>Loading...</div>}

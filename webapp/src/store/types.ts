@@ -15,6 +15,10 @@ export interface IFilterState {
     sortBy: string
 }
 
+export interface IUserState {
+    name: string
+}
+
 export enum demoConstants {
     ADD_ITEM = 'ADD_ITEM',
     SET_LOADING = 'SET_LOADING',
@@ -24,4 +28,9 @@ export enum demoConstants {
 export enum filterConstants {
     SELECT_ALL = 'SELECT_ALL',
     SORT_BY_NAME = 'SORT_BY_NAME'
+}
+
+export enum WebSocketMessages {
+    SET_USER_NAME = 'SET_USER_NAME'
+
 }
