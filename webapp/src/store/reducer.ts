@@ -1,54 +1,34 @@
 import {
-  UserActions,
-} from './actions';
+  FilterBarActions,
+} from './actions/action-names';
 import {
-  DemoActions,
-  demoConstants,
-  FilterActions,
-  filterConstants,
-  IDemoState,
-  IFilterState,
+  FilterBarActionTypes,
+  IFilterBarState,
   IUserState,
+  UserActionTypes,
 } from './types';
 
-const init: IDemoState = {
-  list: [],
-  loading: false
+const initFilterBarState: IFilterBarState = {
+  selectAll: false,
+  sortBy: 'Name'
 };
 
 const initUserState: IUserState = {
-  name: '',
+  name: 'Kyle Combes',
 };
 
-export function demoReducer(state: IDemoState = init, action: DemoActions): IDemoState {
+export function filterReducer(state: IFilterBarState = initFilterBarState, action: FilterBarActionTypes): IFilterBarState {
   switch (action.type) {
-    case demoConstants.ADD_ITEM:
-      return {...state, list: [...state.list, action.payload.item]};
-    case demoConstants.SET_LOADING:
-      return {...state, ...action.payload};
+    case FilterBarActions.SELECT_ALL:
+      return {...state, selectAll: !state.selectAll};
     default:
       return state;
   }
 }
 
-export function userReducer(state: IUserState = initUserState, action: UserActions): IUserState {
+export function userReducer(state: IUserState = initUserState, action: UserActionTypes): IUserState {
   switch (action.type) {
     // TODO: Something useful
-    default:
-      return state;
-  }
-}
-
-
-const initFilter: IFilterState ={
-  selectAll: false,
-  sortBy: 'Name'
-}
-
-export function filterReducer(state: IFilterState = initFilter, action: FilterActions): IFilterState {
-  switch (action.type) {
-    case filterConstants.SELECT_ALL:
-      return {...state, selectAll: !state.selectAll};
     default:
       return state;
   }

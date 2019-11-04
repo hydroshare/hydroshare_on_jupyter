@@ -1,36 +1,32 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { IRootState } from '../store';
-
 import { Dispatch } from 'redux';
-import * as actions from '../store/actions';
-import { FilterActions } from '../store/types';
 
-import {Button} from 'react-bootstrap';
-
+import { Button } from 'react-bootstrap';
 import '../styles/FilterBar.css';
+
+import * as FilterBarActions from '../store/actions/FilterBar';
+import {
+  FilterBarActionTypes,
+  IRootState,
+} from '../store/types';
 
 const mapStateToProps = ({ filter }: IRootState) => {
   const { selectAll, sortBy } = filter;
   return { selectAll, sortBy };
-}
+};
 
-const mapDispatcherToProps = (dispatch: Dispatch<FilterActions>) => {
+const mapDispatchToProps = (dispatch: Dispatch<FilterBarActionTypes>) => {
   return {
-    selectAll: () => dispatch(actions.selectAll())
+    selectAll: () => dispatch(FilterBarActions.selectAll())
   }
-}
+};
 
-type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatcherToProps>;
+type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
-interface IState {
-  inputText: string
-}
-
-class FilterBar extends React.Component<ReduxType, IState> {
-  public state: IState = {
-    inputText: ''
-  }
+class FilterBar extends React.Component<ReduxType, never> {
+  // TODO: Keep the input state in the Redux store so that it's preserved if the user navigates to view the
+  // resource details/contents and then comes back to the previous page (?)
 
   /*public onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({inputText: e.target.value});
@@ -52,4 +48,7 @@ class FilterBar extends React.Component<ReduxType, IState> {
   }
 }
 
-export default connect(mapStateToProps, mapDispatcherToProps)(FilterBar);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(FilterBar);

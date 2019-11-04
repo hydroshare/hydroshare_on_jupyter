@@ -1,15 +1,23 @@
 import * as React from 'react';
+import {connect} from 'react-redux';
+import { Dispatch } from 'redux';
 
-export interface IHeaderProps {
-  userName: string,
-  userAvatarUrl?: string,
-}
+import {
+  AllActionTypes,
+  IRootState
+} from '../store/types';
 
-interface IState {
-  test: string,
-}
+const mapStateToProps = ({ user }: IRootState) => ({
+  userName: user.name,
+});
 
-export class Header extends React.Component<IHeaderProps, IState> {
+const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => ({
+
+});
+
+type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
+
+class Header extends React.Component<ReduxType, never> {
 
   public render() {
     return (
@@ -30,3 +38,8 @@ export class Header extends React.Component<IHeaderProps, IState> {
   }
 
 }
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Header);
