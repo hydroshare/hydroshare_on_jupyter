@@ -22,9 +22,9 @@ const mapDispatchToProps = (dispatch: Dispatch<FilterBarActionTypes>) => {
   }
 };
 
-type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
+type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
-class FilterBar extends React.Component<ReduxType, never> {
+class FilterBar extends React.Component<PropsType, never> {
   // TODO: Keep the input state in the Redux store so that it's preserved if the user navigates to view the
   // resource details/contents and then comes back to the previous page (?)
 
