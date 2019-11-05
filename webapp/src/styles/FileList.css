@@ -6,3 +6,19 @@
   display: inline-block;
   width: 1em;
 }
+
+.FileList thead {
+  font-weight: bold;
+}
+
+.FileList td {
+  padding: 0.3em;
+}
+
+.FileList tr td {
+  border-top: 1px solid #dedede;
+}
+
+.FileList td:not(:first-child) {
+  border-left: 1px solid #dedede;
+}

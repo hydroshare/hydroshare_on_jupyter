@@ -1,31 +1,51 @@
 import * as React from 'react';
 import '../styles/FileList.css';
 
+const HUMAN_READABLE_FILE_SIZES = [
+  'B',
+  'KB',
+  'MB',
+  'GB',
+  'TB',
+  'YB',
+];
+
 export default class FileList extends React.Component {
 
   state  = {
     files: [
       {
-        name: 'Wonderful data',
-        size: 30123,
-        type: 'csv',
+        name: 'My glorious notebook',
+        size: 73949942858,
+        type: 'ipynb',
       },
       {
         contents: [
           {
             name: 'Wonderful data',
             type: 'csv',
-            size: 30123,
+            size: 30124234233,
           },
           {
             name: 'More wonderful data',
             type: 'csv',
-            size: 55243,
+            size: 552434233,
           },
           {
             name: 'Garbage data',
             type: 'csv',
-            size: 1002,
+            size: 10029939402,
+          },
+          {
+            name: 'Old data',
+            type: 'folder',
+            contents: [
+              {
+                name: 'Stubby',
+                type: 'csv',
+                size: 29934423,
+              },
+            ],
           },
         ],
         name: 'Data',
@@ -35,21 +55,35 @@ export default class FileList extends React.Component {
   };
 
   buildDirectoryTree = (contents, level=0) => {
-    let listItems = [];
+    let elements = [];
+    let directoryContentsSize = 0;
     contents.forEach(fileOrFolder => {
+      let subElements;
+      let itemSize;
+      if (fileOrFolder.type === 'folder') {
+        let children = this.buildDirectoryTree(fileOrFolder.contents, level+1);
+        itemSize = children.size;
+        subElements = children.elements;
+      } else {
+        itemSize = fileOrFolder.size;
+      }
+      directoryContentsSize += itemSize;
       let spacers = this.generateSpacers(level);
-      listItems.push(
+      elements.push(
         <tr>
           <td className="name">{spacers}{fileOrFolder.name}</td>
-          <td className="size">{fileOrFolder.size}</td>
+          <td className="type">{fileOrFolder.type}</td>
+          <td className="size">{this.getFormattedSizeString(itemSize)}</td>
         </tr>
       );
-      if (fileOrFolder.type === 'folder') {
-        let subItems = this.buildDirectoryTree(fileOrFolder.contents, level+1);
-        listItems = listItems.concat(subItems);
+      if (subElements) {
+        elements = elements.concat(subElements);
       }
     });
-    return listItems;
+    return {
+      elements,
+      size: directoryContentsSize,
+    };
   };
 
   generateSpacers = (count) => {
@@ -60,22 +94,25 @@ export default class FileList extends React.Component {
     return elems;
   };
 
-/*
-  getFormattedSizeString = sizeBytes => {
-    switch (Math.log10(sizeBytes)) {
 
-    }
-  }*/
+  // TODO: Write some unit tests
+  getFormattedSizeString = sizeBytes => {
+    let logSizeBase10Point24 = Math.log(sizeBytes)/Math.log(10.24);
+    let labelIndex = Math.floor(logSizeBase10Point24 / 3);
+    let sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10.24, labelIndex * 3));
+    return `${sizeInHumanReadableUnits}${HUMAN_READABLE_FILE_SIZES[labelIndex]}`;
+  };
 
   render() {
     return (
       <table className="FileList">
         <thead>
           <td>Name</td>
+          <td>Type</td>
           <td>Size</td>
         </thead>
         <tbody>
-          {this.buildDirectoryTree(this.state.files)}
+          {this.buildDirectoryTree(this.state.files).elements}
         </tbody>
       </table>
     )
