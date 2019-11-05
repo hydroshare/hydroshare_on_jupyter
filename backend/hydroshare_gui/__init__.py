@@ -24,7 +24,8 @@ def load_jupyter_server_extension(nbapp):
                 # data = conn.recv(1024)
                 test_resource_id = '8b826c43f55043f583c85ae312a8894f'
                 data = get_metadata(test_resource_id)['resource_title']
+                print(data)
                 if not data:
                     break
-                conn.sendall(data)
+                conn.sendall(data.encode('utf-8'))
                 break
