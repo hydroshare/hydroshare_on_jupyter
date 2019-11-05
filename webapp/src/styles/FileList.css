@@ -1,0 +1,8 @@
+.FileList {
+  width: 100%;
+}
+
+.FileList .spacer {
+  display: inline-block;
+  width: 1em;
+}
