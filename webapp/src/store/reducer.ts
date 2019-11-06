@@ -1,6 +1,6 @@
 import {
+  AppActions,
   FilterBarActions,
-  ResourceListActions,
 } from './actions/action-names';
 import {
   FilterBarActionTypes,
@@ -11,8 +11,6 @@ import {
   MainPageActionTypes,
   ProjectsActionTypes,
   UserActionTypes,
-  IResourceListState,
-  ResourceListActionTypes,
 } from './types';
 
 const initFilterBarState: IFilterBarState = {
@@ -21,7 +19,7 @@ const initFilterBarState: IFilterBarState = {
 };
 
 const initMainPageState: IMainPageState = {
-  openProjectId: 'test',
+  openProjectId: null,
 };
 
 const initProjectsState: IProjectsState = {
@@ -68,7 +66,25 @@ const initProjectsState: IProjectsState = {
           type: 'folder',
         },
       ],
+      hydroShareResource: {
+        author: 'Kyle Combes',
+        id: 'Test',
+        lastModified: 'May 5',
+        status: 'Published',
+      },
+      id: 'test',
       name: 'Testing'
+    },
+    vickyTest: {
+      files: [],
+      hydroShareResource: {
+        id: 'vickyTest',
+        author: 'Vicky McDermott',
+        lastModified: 'Sep 13',
+        status: 'Modified',
+      },
+      id: 'vickyTest',
+      name: 'Some cool data'
     }
   }
 };
@@ -79,6 +95,8 @@ const initUserState: IUserState = {
 
 export function mainPageReducer(state: IMainPageState = initMainPageState, action: MainPageActionTypes): IMainPageState {
   switch (action.type) {
+    case AppActions.VIEW_PROJECT:
+      return {...state, openProjectId: action.payload};
     default:
       return state;
   }
@@ -88,32 +106,6 @@ export function filterReducer(state: IFilterBarState = initFilterBarState, actio
   switch (action.type) {
     case FilterBarActions.SELECT_ALL:
       return {...state, selectAll: !state.selectAll};
-    default:
-      return state;
-  }
-}
-
-const initResourceListState: IResourceListState = {
-  resources: [
-    {
-      name: 'The most awesome discovery',
-      author: 'Kyle Combes',
-      lastModified: 'May 5',
-      status: 'Published',
-    },
-    {
-      name: 'Some cool data',
-      author: 'Vicky McDermott',
-      lastModified: 'Sep 13',
-      status: 'Modified',
-    }
-  ]
-}
-
-export function resourceListReducer(state: IResourceListState = initResourceListState, action: ResourceListActionTypes) {
-  switch (action.type) {
-    case ResourceListActions.GO_TO_FILES:
-      return state;
     default:
       return state;
   }

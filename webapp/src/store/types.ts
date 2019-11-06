@@ -4,19 +4,16 @@ import * as mainPageActions from './actions/App';
 import * as filterActions from './actions/FilterBar';
 import * as projectsActions from './actions/projects';
 import * as userActions from './actions/user';
-import * as resourceListActions from './actions/ResourceList';
 
 export type FilterBarActionTypes = ActionType<typeof filterActions>;
 export type MainPageActionTypes = ActionType<typeof mainPageActions>;
 export type ProjectsActionTypes = ActionType<typeof projectsActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
-export type ResourceListActionTypes = ActionType<typeof resourceListActions>;
 
 export type AllActionTypes = (
   FilterBarActionTypes
   | MainPageActionTypes
   | UserActionTypes
-  | ResourceListActionTypes
 );
 
 
@@ -25,7 +22,6 @@ export interface IRootState {
   filter: IFilterBarState
   projects: IProjectsState
   user: IUserState
-  resourceList: IResourceListState
 }
 
 export interface IFilterBarState {
@@ -42,9 +38,11 @@ export interface IFileOrFolder {
 }
 
 export interface IJupyterProject {
+  id: string
   files: IFileOrFolder[]
   name: string
   readmeMarkdown?: string
+  hydroShareResource?: IHydroShareResourceInfo
 }
 
 export interface IMainPageState {
@@ -62,13 +60,9 @@ export interface IUserState {
   name: string
 }
 
-export interface IResourceInfo {
-  name: string,
+export interface IHydroShareResourceInfo {
+  id: string
   author: string,
   lastModified: string,
   status: string,
-}
-
-export interface IResourceListState {
-  resources: IResourceInfo[]
 }

@@ -11,8 +11,8 @@ export default class App extends React.Component {
       <div className="App">
         <Header />
         <FilterBar />
-        <FileList />
         <ResourceList />
+        <FileList />
       </div>
     );
   }

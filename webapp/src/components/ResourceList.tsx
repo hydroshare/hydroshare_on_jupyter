@@ -9,20 +9,22 @@ import ContextMenu from 'react-context-menu';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/ResourceList.css';
 
-import * as ResourceListActions from '../store/actions/ResourceList';
+import * as AppActions from '../store/actions/App';
 import {
-  ResourceListActionTypes,
+  AllActionTypes,
+  IJupyterProject,
   IRootState,
 } from '../store/types';
 
-const mapStateToProps = ({ resourceList }: IRootState) => {
-  const { resources } = resourceList;
-  return { resources };
+const mapStateToProps = ({ projects }: IRootState) => {
+  return {
+    projectsList: Object.values(projects.allProjects),
+  };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<ResourceListActionTypes>) => {
+const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
-    goToFiles: (name: string) => dispatch(ResourceListActions.goToFiles(name))
+    viewProject: (project: IJupyterProject) => dispatch(AppActions.viewProject(project))
   }
 };
 
@@ -63,26 +65,34 @@ class ResourceList extends React.Component<ReduxType, never> {
   }*/
 
   public render() {
-    const { resources } = this.props;
+    const { projectsList } = this.props;
 
     return (
         <div className='resourcesParent'>
-            {resources.map((resource, i) => {     
-              console.log("Entered");                    
+            {projectsList.map((project: IJupyterProject, i: number) => {
+              const {
+                name,
+                hydroShareResource,
+              } = project;
+              const hydroShareInfoElems = [];
+              if (hydroShareResource) {
+                hydroShareInfoElems.push(<div className='resource-status'>{hydroShareResource.status}</div>);
+              }
+              const viewProject = () => this.props.viewProject(project);
               return (
-                <div key={i} className='resourcesLine' id={i+'-menu'} onClick={this.goToFiles}> 
+                <div key={i} className='resourcesLine' id={i+'-menu'} onClick={viewProject}>
                   <Form className='checkbox-form'>
-                    <Form.Check 
+                    <Form.Check
                       type='checkbox'
                       id={`default-checkbox`}
                     />
                   </Form>
-                  <div className='resource-name'>{resource.name}</div>
-                  <div className='resource-author'>{resource.author}</div>
-                  <div className='resource-lastModified'>{resource.lastModified}</div>
-                  <div className='resource-status'>{resource.status}</div>
+                  <div className='resource-name'>{name}</div>
+                  {/*<div className='resource-author'>{resource.author}</div>*/}
+                  {/*<div className='resource-lastModified'>{project.lastModified}</div>*/}
+                  {hydroShareInfoElems}
                   <ContextMenu contextId={i+'-menu'} items={[{label: 'Rename'}, {label: 'Delete'}, {label: 'Publish to Hydroshare'}, , {label: 'Locate in Hydroshare'}]} />
-                   </div>) 
+                   </div>)
             })}
         </div>
     );

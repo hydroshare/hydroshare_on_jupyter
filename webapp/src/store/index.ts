@@ -5,7 +5,6 @@ import {
   mainPageReducer,
   projectsReducer,
   userReducer,
-  resourceListReducer,
 } from './reducer';
 import {
   IRootState,
@@ -13,7 +12,6 @@ import {
 
 const store = createStore<IRootState, any, any, any>(
     combineReducers({
-        resourceList: resourceListReducer,
         filter: filterReducer,
         mainPage: mainPageReducer,
         projects: projectsReducer,

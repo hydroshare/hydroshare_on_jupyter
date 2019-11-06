@@ -8,10 +8,6 @@ export enum FilterBarActions {
   SORT_BY_NAME = 'SORT_BY_NAME',
 }
 
-export enum ResourceListActions {
-  GO_TO_FILES = "GO_TO_FILES",
-}
-
 export enum ProjectsActions {
   SET_PROJECTS = 'SET_PROJECTS',
 }
