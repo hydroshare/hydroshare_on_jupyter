@@ -42,7 +42,9 @@ def get_hs_resource(resource_id, output_folder, unzip=False):
 def get_files_in_directory_with_metadata():
     # uses HS API to retrieve metadata -- different than existing app
 
-    files = glob.glob('hs_resources/*/*/data/resourcemetadata.xml')
+    files = glob.glob('hs_resources/*/data/resourcemetadata.xml')
+    if len(files) == 0:
+        data = {}
 
     # TODO: Get ltime and size
     first_resource = True
@@ -61,17 +63,20 @@ def get_files_in_directory_with_metadata():
         if first_resource:
             first_resource = False
             data = {}
+            print("hello!!")
             for key in resource_metadata.keys():
                 data[key] = [resource_metadata[key]]
         else:
             for key in resource_metadata.keys():
                 data[key].append(resource_metadata[key])
 
-    metadata_df = pd.DataFrame.from_dict(data)
-    metadata_df.set_index('resource_title')
-    # print(metadata_df['resource_title'])
-    print(metadata_df)
-    return
+    metadata_df = "There is no data"
+    if len(files) > 0:
+        metadata_df = pd.DataFrame.from_dict(data)
+        metadata_df.set_index('resource_title')
+        # print(metadata_df['resource_title'])
+        print(metadata_df)
+    return data
 
 def get_metadata(resource_id):
     """
