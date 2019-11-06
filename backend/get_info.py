@@ -8,6 +8,7 @@
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from pprint import pprint
 from login import username, password
+from utilities import hydroshare
 
 # auth - Future: get this info'
 auth = HydroShareAuthBasic(username=username, password=password)
@@ -23,6 +24,7 @@ def get_hs_resource(resource_id, output_folder, unzip_bool=False):
 
 def get_files():
     # look at nb fetch for this
+
     pass
 
 def get_metadata(resource_id):
@@ -42,7 +44,7 @@ def test_socket():
 
 if __name__ == '__main__':
     get_metadata(test_resource_id)
-    get_hs_resource(test_resource_id, output_folder)
+    # get_hs_resource(test_resource_id, output_folder)
     get_files()
     get_user_info()
     test_socket()

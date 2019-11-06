@@ -6,11 +6,18 @@ $ gedit ~/.jupyter/jupyter_notebook_config.py
 
 becomes
 
-c.NotebookApp.nbserver_extensions = {'backend.hydroshare_gui':True}
+c.NotebookApp.nbserver_extensions = {'backend.hydroshare_gui': True}
 
+go to backend folder
 sudo python3 setup.py install
 
-JUST KIDDING
+attempted:
+- try installing without sudo
+- jupyter notebookin hydroshare-jupyter-gui
+- commenting out the c.NotebookApp line thing
+- jupyter serverextension enable --py backend
+- {'backend':True, 'hydroshare_gui':True}
 
-make server extension just hydroshare_gui
 
+
+warning: unknown distribution option
