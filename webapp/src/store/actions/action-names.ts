@@ -11,7 +11,3 @@ export enum FilterBarActions {
 export enum ProjectsActions {
   SET_PROJECTS = 'SET_PROJECTS',
 }
-
-export enum WebSocketMessages {
-  SET_USER_NAME = 'SET_USER_NAME',
-}
