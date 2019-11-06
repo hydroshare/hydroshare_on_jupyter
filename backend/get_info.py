@@ -42,12 +42,10 @@ def get_hs_resource(resource_id, output_folder, unzip=False):
 def get_files_in_directory_with_metadata():
     # uses HS API to retrieve metadata -- different than existing app
 
-    files = glob.glob('hs_resources/*/data/resourcemetadata.xml')
-    if len(files) == 0:
-        data = {}
+    files = glob.glob('hs_resources/*/*/data/resourcemetadata.xml')
+    data = {}
 
     # TODO: Get ltime and size
-    first_resource = True
     for f in files:
         # get ID and metadata
         resource_id = f.split('/')[1]
@@ -59,23 +57,27 @@ def get_files_in_directory_with_metadata():
         JH_resource_link = '<a href="{}" target="_blank">{}</a>'.format(cdir, resource_metadata['resource_title'])
         resource_metadata['JH_resource_link'] = JH_resource_link
 
+        resource_name = resource_metadata['resource_title']
+        data[resource_name] = resource_metadata
         # Made metadata dataframe if first resource
-        if first_resource:
-            first_resource = False
-            data = {}
-            print("hello!!")
-            for key in resource_metadata.keys():
-                data[key] = [resource_metadata[key]]
-        else:
-            for key in resource_metadata.keys():
-                data[key].append(resource_metadata[key])
+        # if first_resource:
+        #     first_resource = False
+        #     data = {}
+        #     print("hello!!")
+        #     for key in resource_metadata.keys():
+        #         data[key] = [resource_metadata[key]]
+        # else:
+        #     for key in resource_metadata.keys():
+        #         data[key].append(resource_metadata[key])
 
-    metadata_df = "There is no data"
-    if len(files) > 0:
-        metadata_df = pd.DataFrame.from_dict(data)
-        metadata_df.set_index('resource_title')
-        # print(metadata_df['resource_title'])
-        print(metadata_df)
+    # metadata_df = "There is no data"
+    # if len(files) > 0:
+    #     metadata_df = pd.DataFrame.from_dict(data)
+    #     metadata_df.set_index('resource_title')
+    #     # print(metadata_df['resource_title'])
+    #     print(metadata_df)
+    if len(data) == 0:
+        data = "There is no data"
     return data
 
 def get_metadata(resource_id):

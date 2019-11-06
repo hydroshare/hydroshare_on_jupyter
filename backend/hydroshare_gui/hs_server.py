@@ -15,9 +15,9 @@ class GetResourceHandler(tornado.web.RequestHandler):
         data = get_files_in_directory_with_metadata()
         self.write(data)
 
-class SecondHandler(tornado.web.RequestHandler):
+class NewProjectHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write("Hello vicky!")
+        self.write("Create new project")
 
 class HydroShareGUI(tornado.web.Application):
     is_closing = False
@@ -34,7 +34,7 @@ class HydroShareGUI(tornado.web.Application):
 
 application = HydroShareGUI([
     (r"/", GetResourceHandler),
-    (r"/vicky", SecondHandler)
+    (r"/new", NewProjectHandler)
 ])
 
 def start_server():
