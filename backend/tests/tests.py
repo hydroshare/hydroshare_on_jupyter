@@ -21,7 +21,7 @@ def test_get_user_info():
     info = get_user_info()
     assert len(info) > 0
 
-def test_socket():
+def test_server():
     # ??
     pass
 
