@@ -1,34 +1,101 @@
+"""
 # TODO
 # - get hs resource
 # - get files
 # - get metadata
 # - get user info
 
+CURRENT:
+- get hs resource (with files) with resource id
+- get metadata with resource id
+"""
+
 ### This works for public resources
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from pprint import pprint
 from login import username, password
-from utilities import hydroshare
+import os
+import glob
+from collections import OrderedDict
+import pandas as pd
+# os.chdir(os.path.expanduser('a path')) # will change working directory
+
 
 # auth - Future: get this info'
 auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
 
-test_resource_id = '8b826c43f55043f583c85ae312a8894f'
+test_resource_id = '92ade040a75647ed8c9be452a86d90f5'
 output_folder = 'hs_resources'
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+    print("Made {} folder for new resources".format(output_folder))
 
-def get_hs_resource(resource_id, output_folder, unzip_bool=False):
+def get_hs_resource(resource_id, output_folder, unzip=False):
     # Get actual resource
-    print("getting hs resource")
-    hs.getResource(resource_id, destination=output_folder, unzip=unzip_bool)
+    if not os.path.exists('{}/{}'.format(output_folder, resource_id)):
+        print("getting hs resource")
+        hs.getResource(resource_id, destination=output_folder, unzip=unzip)
+    else:
+        print("Resource already exists!")
 
-def get_files():
-    # look at nb fetch for this
+def get_files_in_directory_with_metadata():
+    # uses HS API to retrieve metadata -- different than existing app
 
-    pass
+    files = glob.glob('hs_resources/*/*/data/resourcemetadata.xml')
+
+    # TODO: Get ltime and size
+    first_resource = True
+    for f in files:
+        # get ID and metadata
+        resource_id = f.split('/')[1]
+        resource_metadata = hs.getSystemMetadata(resource_id)
+
+        # generate absolute path to content for href
+        content_dir = os.path.join(os.path.dirname(f), 'contents')
+        cdir = '/hub/user-redirect/notebooks/notebooks/' + content_dir
+        JH_resource_link = '<a href="{}" target="_blank">{}</a>'.format(cdir, resource_metadata['resource_title'])
+        resource_metadata['JH_resource_link'] = JH_resource_link
+
+        # Made metadata dataframe if first resource
+        if first_resource:
+            first_resource = False
+            data = {}
+            for key in resource_metadata.keys():
+                data[key] = [resource_metadata[key]]
+        else:
+            for key in resource_metadata.keys():
+                data[key].append(resource_metadata[key])
+
+    metadata_df = pd.DataFrame.from_dict(data)
+    metadata_df.set_index('resource_title')
+    # print(metadata_df['resource_title'])
+    print(metadata_df)
+    return
 
 def get_metadata(resource_id):
-    # get metadata for one resource
+    """
+    Get metadata for one resource. Contains:
+        - abstract
+        - authors
+        - bag_url
+        - coverages
+        - creator
+        - date_created
+        - date_last_updated
+        - discoverable
+        - doi
+        - immutable
+        - public
+        - published
+        - resource_id
+        - resource_map_url
+        - resource_title
+        - resource_type
+        - resource_url
+        - science_metadata_url
+        - shareable
+    """
     print("getting hs resource metadata")
     resource_md = hs.getSystemMetadata(resource_id)
     print(resource_md['resource_title'])
@@ -43,8 +110,8 @@ def test_socket():
     pass
 
 if __name__ == '__main__':
-    get_metadata(test_resource_id)
-    # get_hs_resource(test_resource_id, output_folder)
-    get_files()
-    get_user_info()
-    test_socket()
+    # get_metadata(test_resource_id)
+    # get_hs_resource(test_resource_id, output_folder, unzip=True)
+    get_files_in_directory_with_metadata()
+    # get_user_info()
+    # test_socket()
