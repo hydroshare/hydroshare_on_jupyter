@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import {Button, Form} from 'react-bootstrap';
-import { FaFileMedical, FaSearch, FaTrashAlt } from "react-icons/fa";
+import {Button, Dropdown, DropdownButton, Form} from 'react-bootstrap';
+import { FaFileMedical, FaRegFolder, FaRegFolderOpen, FaSearch, FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -27,6 +27,7 @@ const mapDispatchToProps = (dispatch: Dispatch<FilterBarActionTypes>) => {
 
 type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
+
 class FilterBar extends React.Component<ReduxType, never> {
   // TODO: Keep the input state in the Redux store so that it's preserved if the user navigates to view the
   // resource details/contents and then comes back to the previous page (?)
@@ -45,6 +46,10 @@ class FilterBar extends React.Component<ReduxType, never> {
 
     public createNewResource =() => {
         console.log("Send message to backend to create new resource")
+    }
+
+    public handleSortByChange = (e: any) => {
+        console.log("Sort by" + e.value)
     }
 
   public render() {
@@ -72,7 +77,14 @@ class FilterBar extends React.Component<ReduxType, never> {
                     </Col>
                 </Form.Row>
             </Form>
-            <Button className="new-resource-button" variant="outline-success" onClick={this.createNewResource}><FaFileMedical/> New Resource</Button>
+            <DropdownButton id="dropdown-basic-button" className="filter-sortBy" variant="info" onClick={this.handleSortByChange} title="Sort by">
+                <Dropdown.Item href="#/action-1">Name</Dropdown.Item>
+                <Dropdown.Item href="#/action-2">Date created</Dropdown.Item>
+                <Dropdown.Item href="#/action-3">Date updated</Dropdown.Item>
+            </DropdownButton>
+            <Button className="folder-open" variant="outline-success"><FaRegFolderOpen/></Button>
+            <Button className="folder" variant="outline-success"><FaRegFolder/></Button>
+            <Button className="new-resource-button" variant="outline-success" onClick={this.createNewResource}><FaFileMedical/> New Project</Button>
             <Button className="delete-button" variant="danger" onClick={this.deleteClick}><FaTrashAlt /></Button>
         </div>
     );

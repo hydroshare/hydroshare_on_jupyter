@@ -2,6 +2,7 @@ import { combineReducers, createStore } from 'redux';
 import {
   filterReducer,
   userReducer,
+  resourceListReducer,
 } from './reducer';
 import {
   IRootState,
@@ -9,6 +10,7 @@ import {
 
 const store = createStore<IRootState, any, any, any>(
     combineReducers({
+        resourceList: resourceListReducer,
         filter: filterReducer,
         user: userReducer,
     }));

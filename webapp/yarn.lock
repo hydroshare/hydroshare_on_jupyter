@@ -7258,6 +7258,13 @@ react-bootstrap@^1.0.0-beta.14:
     uncontrollable "^7.0.0"
     warning "^4.0.3"
 
+react-context-menu@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/react-context-menu/-/react-context-menu-3.0.1.tgz#476f6d057c6f1b57a727c292bad4519e046a0214"
+  integrity sha512-fp2UUu5YGEv1k1SUgNqIds+cKkprvuBIBzkAQBFUK/x3OPRj3KL6O4/h0KA2oLDOpZeaqC7HL6I5PN9b2Moi4g==
+  dependencies:
+    prop-types "^15.6.2"
+
 react-context-toolbox@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/react-context-toolbox/-/react-context-toolbox-2.0.2.tgz#35637287cb23f801e6ed802c2bb7a97e1f04e3fb"
