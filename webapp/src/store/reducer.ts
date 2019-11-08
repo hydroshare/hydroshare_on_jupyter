@@ -21,6 +21,7 @@ const initProjectsPageState: IProjectsPageState = {
 const initProjectDetailsPageState: IProjectDetailsPageState = {
   allSelected: false,
   selectedFilesAndFolders: new Set(),
+  searchTerm: '',
 };
 
 const initMainPageState: IMainPageState = {

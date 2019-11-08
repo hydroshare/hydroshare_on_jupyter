@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 
 import * as ProjectDetailsPageActions from '../store/actions/ProjectDetailsPage';
 
-import FilterBar from '../components/FilterBar';
+import FilterBarProjectDetails from '../components/FilterBarProjectDetails';
 import FileList from '../components/FileList';
 
 import * as projectPageActions from '../store/actions/projectPage';
@@ -64,11 +64,8 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
 
     return (
       <div className="page project-details">
-        <FilterBar
-          allSelected={this.props.allSelected}
-          toggleAllSelected={toggleAllSelected}
-          searchChange={this.handleSearchChange}
-        />
+        <FilterBarProjectDetails allSelected={this.props.allSelected}
+          toggleAllSelected={toggleAllSelected} searchChange={this.handleSearchChange}/>
         <FileList
           files={this.props.project.files}
           onFileOrFolderSelected={this.props.toggleSelectedOne}
