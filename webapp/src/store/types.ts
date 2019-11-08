@@ -4,22 +4,26 @@ import * as mainPageActions from './actions/App';
 import * as projectsActions from './actions/projects';
 import * as projectDetailsPageActions from './actions/ProjectDetailsPage';
 import * as userActions from './actions/user';
+import * as projectPageActions from './actions/projectPage';
 
 export type MainPageActionTypes = ActionType<typeof mainPageActions>;
+export type ProjectPageActionTypes = ActionType<typeof projectPageActions>;
 export type ProjectsActionTypes = ActionType<typeof projectsActions>;
 export type ProjectDetailsPageActions = ActionType<typeof projectDetailsPageActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
 
 export type AllActionTypes = (
-  ProjectDetailsPageActions
-  | MainPageActionTypes
+  MainPageActionTypes
   | UserActionTypes
+  | ProjectsActionTypes
+  | ProjectPageActionTypes
+  | ProjectDetailsPageActions
 );
 
 
 export interface IRootState {
   mainPage: IMainPageState
-  filter: IProjectsPageState
+  projectPage: IProjectsPageState
   projects: IProjectsState
   projectDetailsPage: IProjectDetailsPageState
   user: IUserState
@@ -33,6 +37,7 @@ export interface IProjectDetailsPageState {
 export interface IProjectsPageState {
   allSelected: boolean
   sortBy: string
+  searchTerm: string
 }
 
 export interface IFileOrFolder {

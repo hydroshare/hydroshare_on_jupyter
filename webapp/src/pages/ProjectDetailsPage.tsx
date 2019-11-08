@@ -8,6 +8,8 @@ import * as ProjectDetailsPageActions from '../store/actions/ProjectDetailsPage'
 import FilterBar from '../components/FilterBar';
 import FileList from '../components/FileList';
 
+import * as projectPageActions from '../store/actions/projectPage';
+
 import {
   AllActionTypes,
   IFileOrFolder,
@@ -34,12 +36,17 @@ const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
     toggleSelectedAll: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAll(project)),
     toggleSelectedOne: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOne(item)),
+    searchBy: (searchTerm: string) => dispatch(projectPageActions.searchBy(searchTerm))
   }
 };
 
 type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 class ProjectDetailsPage extends React.Component<PropsType, never> {
+
+  public handleSearchChange = (event: any) => {
+    this.props.searchBy(event.target.value)
+  }
 
   public render() {
     if (!this.props.project) {
@@ -60,6 +67,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
         <FilterBar
           allSelected={this.props.allSelected}
           toggleAllSelected={toggleAllSelected}
+          searchChange={this.handleSearchChange}
         />
         <FileList
           files={this.props.project.files}

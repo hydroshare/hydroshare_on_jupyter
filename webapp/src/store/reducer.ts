@@ -15,6 +15,7 @@ import {
 const initProjectsPageState: IProjectsPageState = {
   allSelected: false,
   sortBy: 'Name'
+  searchTerm: '',
 };
 
 const initProjectDetailsPageState: IProjectDetailsPageState = {
@@ -143,6 +144,10 @@ export function projectsDetailsPageReducer(state: IProjectDetailsPageState = ini
 
 export function projectsPageReducer(state: IProjectsPageState = initProjectsPageState, action: AllActionTypes): IProjectsPageState {
   switch (action.type) {
+    case FilterBarActions.SELECT_ALL:
+      return {...state, selectAll: !state.selectAll};
+    case FilterBarActions.SEARCH_BY:
+      return {...state, searchTerm: action.payload};
     default:
       return state;
   }
@@ -150,6 +155,8 @@ export function projectsPageReducer(state: IProjectsPageState = initProjectsPage
 
 export function projectsReducer(state: IProjectsState = initProjectsState, action: ProjectsActionTypes): IProjectsState {
   switch (action.type) {
+    case ProjectsActions.SET_PROJECTS:
+      return state;
     default:
       return state;
   }
