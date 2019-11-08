@@ -12,7 +12,7 @@ import {
 } from 'redux';
 
 import {
-  filterReducer,
+  projectsPageReducer,
   mainPageReducer,
   projectsReducer,
   userReducer,
@@ -25,7 +25,7 @@ export const history = createBrowserHistory();
 
 const store = createStore<IRootState, any, any, any>(
     combineReducers({
-        filter: filterReducer,
+        filter: projectsPageReducer,
         mainPage: mainPageReducer,
         projects: projectsReducer,
         router: connectRouter(history),

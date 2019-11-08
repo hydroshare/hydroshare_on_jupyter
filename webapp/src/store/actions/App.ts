@@ -1,9 +1,9 @@
-import { action } from 'typesafe-actions';
-import { AppActions } from './action-names';
+import { push } from 'connected-react-router';
+
 import {
   IJupyterProject,
 } from '../types';
 
 export function viewProject(project: IJupyterProject) {
-  return action(AppActions.VIEW_PROJECT, project.id);
+  return push('/projects/' + project.id);
 }

@@ -19,12 +19,12 @@ export type AllActionTypes = (
 
 export interface IRootState {
   mainPage: IMainPageState
-  filter: IFilterBarState
+  filter: IProjectsPageState
   projects: IProjectsState
   user: IUserState
 }
 
-export interface IFilterBarState {
+export interface IProjectsPageState {
   selectAll: boolean
   sortBy: string
 }

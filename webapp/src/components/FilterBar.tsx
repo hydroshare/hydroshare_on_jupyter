@@ -1,33 +1,17 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
-import {Button, Dropdown, DropdownButton, Form} from 'react-bootstrap';
+import {
+  Button,
+  Dropdown,
+  DropdownButton,
+  Form,
+} from 'react-bootstrap';
 import { FaFileMedical, FaRegFolder, FaRegFolderOpen, FaSearch, FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/FilterBar.css';
 
-import * as FilterBarActions from '../store/actions/FilterBar';
-import {
-  FilterBarActionTypes,
-  IRootState,
-} from '../store/types';
-
-const mapStateToProps = ({ filter }: IRootState) => {
-  const { selectAll, sortBy } = filter;
-  return { selectAll, sortBy };
-};
-
-const mapDispatchToProps = (dispatch: Dispatch<FilterBarActionTypes>) => {
-  return {
-    selectAll: () => dispatch(FilterBarActions.selectAll())
-  }
-};
-
-type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
-
-class FilterBar extends React.Component<PropsType, never> {
+export default class FilterBar extends React.Component {
   // TODO: Keep the input state in the Redux store so that it's preserved if the user navigates to view the
   // resource details/contents and then comes back to the previous page (?)
 
@@ -89,8 +73,3 @@ class FilterBar extends React.Component<PropsType, never> {
     );
   }
 }
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FilterBar);

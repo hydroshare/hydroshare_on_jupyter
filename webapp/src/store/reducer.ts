@@ -1,19 +1,17 @@
 import {
-  AppActions,
   FilterBarActions,
 } from './actions/action-names';
 import {
-  FilterBarActionTypes,
-  IFilterBarState,
+  IProjectsPageState,
   IMainPageState,
   IProjectsState,
   IUserState,
   MainPageActionTypes,
   ProjectsActionTypes,
-  UserActionTypes,
+  UserActionTypes, AllActionTypes,
 } from './types';
 
-const initFilterBarState: IFilterBarState = {
+const initProjectsPageState: IProjectsPageState = {
   selectAll: false,
   sortBy: 'Name'
 };
@@ -95,14 +93,12 @@ const initUserState: IUserState = {
 
 export function mainPageReducer(state: IMainPageState = initMainPageState, action: MainPageActionTypes): IMainPageState {
   switch (action.type) {
-    case AppActions.VIEW_PROJECT:
-      return {...state, openProjectId: action.payload};
     default:
       return state;
   }
 }
 
-export function filterReducer(state: IFilterBarState = initFilterBarState, action: FilterBarActionTypes): IFilterBarState {
+export function projectsPageReducer(state: IProjectsPageState = initProjectsPageState, action: AllActionTypes): IProjectsPageState {
   switch (action.type) {
     case FilterBarActions.SELECT_ALL:
       return {...state, selectAll: !state.selectAll};

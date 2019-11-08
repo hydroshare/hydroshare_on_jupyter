@@ -3,34 +3,31 @@ import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import './styles/App.css';
 
+import { ConnectedRouter } from 'connected-react-router';
+import {
+  Route,
+  Switch,
+} from 'react-router';
 import registerServiceWorker from './registerServiceWorker';
 import store, { history } from './store';
 
 import Header from './components/Header';
-import FilterBar from './components/FilterBar';
-import ResourceList from './components/ResourceList';
-import FileList from './components/FileList';
-import {ConnectedRouter} from 'connected-react-router';
-import {Route} from 'react-router';
+import ProjectsPage from './pages/ProjectsPage';
+import ProjectDetailsPage from './pages/ProjectDetailsPage';
 
 
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      {/*<Switch>*/}
-        <Route path="/">
-          <Header />
-        </Route>
-        <Route path="/">
-        <FilterBar />
-        </Route>
+      <Header />
+      <Switch>
         <Route exact={true} path="/">
-          <ResourceList />
+          <ProjectsPage />
         </Route>
-        <Route path="/">
-          <FileList />
+        <Route path="/projects/:projectId">
+          <ProjectDetailsPage />
         </Route>
-      {/*</Switch>*/}
+      </Switch>
     </ConnectedRouter>
   </Provider>,
   document.getElementById('root') as HTMLElement
