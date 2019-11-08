@@ -28,7 +28,7 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const store = createStore<IRootState, any, any, any>(
     combineReducers({
-        filter: projectsPageReducer,
+        projectPage: projectsPageReducer,
         mainPage: mainPageReducer,
         projects: projectsReducer,
         router: connectRouter(history),

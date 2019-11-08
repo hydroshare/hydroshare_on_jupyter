@@ -1,25 +1,26 @@
 import {ActionType} from 'typesafe-actions';
 
 import * as mainPageActions from './actions/App';
-import * as filterActions from './actions/FilterBar';
 import * as projectsActions from './actions/projects';
 import * as userActions from './actions/user';
+import * as projectPageActions from './actions/projectPage';
 
-export type FilterBarActionTypes = ActionType<typeof filterActions>;
 export type MainPageActionTypes = ActionType<typeof mainPageActions>;
+export type ProjectPageActionTypes = ActionType<typeof projectPageActions>;
 export type ProjectsActionTypes = ActionType<typeof projectsActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
 
 export type AllActionTypes = (
-  FilterBarActionTypes
-  | MainPageActionTypes
+  MainPageActionTypes
   | UserActionTypes
+  | ProjectsActionTypes
+  | ProjectPageActionTypes
 );
 
 
 export interface IRootState {
   mainPage: IMainPageState
-  filter: IProjectsPageState
+  projectPage: IProjectsPageState
   projects: IProjectsState
   user: IUserState
 }
@@ -27,6 +28,7 @@ export interface IRootState {
 export interface IProjectsPageState {
   selectAll: boolean
   sortBy: string
+  searchTerm: string
 }
 
 export interface IFileOrFolder {

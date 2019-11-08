@@ -5,23 +5,20 @@ import {
   DropdownButton,
   Form,
 } from 'react-bootstrap';
-import { FaFileMedical, FaRegFolder, FaRegFolderOpen, FaSearch, FaTrashAlt } from "react-icons/fa";
+import { FaFileMedical, FaRegFolder, FaRegFolderOpen, FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
 import '../styles/FilterBar.css';
 
-export default class FilterBar extends React.Component {
-  // TODO: Keep the input state in the Redux store so that it's preserved if the user navigates to view the
-  // resource details/contents and then comes back to the previous page (?)
+interface IFilterBarProps {
+  searchChange: any
+}
+export default class FilterBar extends React.Component<IFilterBarProps, never> {
 
-  /*public onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({inputText: e.target.value});
-  }
-
-  public onAddClick = () => {
-    this.props.addItem(this.state.inputText);
-    this.setState({inputText: ''});
-  }*/
+    constructor(props: IFilterBarProps) {
+      super(props);
+    }
+  
     public deleteClick =() => {
         console.log("Send message to backend to delete")
     }
@@ -34,6 +31,7 @@ export default class FilterBar extends React.Component {
         console.log("Sort by" + e.value)
     }
 
+
   public render() {
     // const { selectAll, sortBy } = this.props;
 
@@ -41,7 +39,7 @@ export default class FilterBar extends React.Component {
         <div className='filterParent'>
             <Form className='filterForm'>
                 <Form.Row>
-                    <Col className="filterForm-checkbox" md="3">
+                    <Col className="filterForm-checkbox" md="4">
                         <Form.Check
                             type={'checkbox'}
                             id={`select-all-checkbox`}
@@ -49,13 +47,8 @@ export default class FilterBar extends React.Component {
                             label={`Select All`}
                         />
                     </Col>
-                    <Col className="filterForm-searchBox" md="6">
-                        <Form.Control placeholder="Search" />
-                    </Col>
-                    <Col md="3">
-                        <Button variant="primary" type="submit">
-                            <FaSearch /> Search
-                        </Button>
+                    <Col className="filterForm-searchBox" md="8">
+                        <Form.Control onChange={this.props.searchChange} placeholder="Search" />
                     </Col>
                 </Form.Row>
             </Form>
