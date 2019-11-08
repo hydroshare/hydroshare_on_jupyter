@@ -3,10 +3,10 @@ import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { useParams } from 'react-router-dom'
 
-import * as FilterBarActions from '../store/actions/FilterBar';
-
-import FilterBar from '../components/FilterBar';
+import FilterBarProjectDetails from '../components/FilterBarProjectDetails';
 import FileList from '../components/FileList';
+
+import * as projectPageActions from '../store/actions/projectPage';
 
 import {
   AllActionTypes,
@@ -31,13 +31,17 @@ const mapStateToProps = ({ projects }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
-    selectAll: () => dispatch(FilterBarActions.selectAll())
+    searchBy: (searchTerm: string) => dispatch(projectPageActions.searchBy(searchTerm))
   }
 };
 
 type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 class ProjectDetailsPage extends React.Component<PropsType, never> {
+
+  public handleSearchChange = (event: any) => {
+    this.props.searchBy(event.target.value)
+  }
 
   public render() {
     if (!this.props.project) {
@@ -53,7 +57,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
 
     return (
       <div className="page project-details">
-        <FilterBar />
+        <FilterBarProjectDetails searchChange={this.handleSearchChange}/>
         <FileList
           files={this.props.project.files}
         />

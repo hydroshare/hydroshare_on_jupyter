@@ -8,14 +8,15 @@ import {
 import { FaFileMedical, FaRegFolder, FaRegFolderOpen, FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
-import '../styles/FilterBar.css';
+import '../styles/FilterBarProjectDetails.css';
 
-interface IFilterBarProps {
+interface IFilterBarProjectDetailsProps {
   searchChange: any
 }
-export default class FilterBar extends React.Component<IFilterBarProps, never> {
 
-    constructor(props: IFilterBarProps) {
+export default class FilterBarProjectDetails extends React.Component<IFilterBarProjectDetailsProps, never> {
+
+    constructor(props: IFilterBarProjectDetailsProps) {
       super(props);
     }
   

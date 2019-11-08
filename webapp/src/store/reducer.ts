@@ -1,5 +1,6 @@
 import {
   FilterBarActions,
+  ProjectsActions,
 } from './actions/action-names';
 import {
   IProjectsPageState,
@@ -13,7 +14,8 @@ import {
 
 const initProjectsPageState: IProjectsPageState = {
   selectAll: false,
-  sortBy: 'Name'
+  sortBy: 'Name',
+  searchTerm: '',
 };
 
 const initMainPageState: IMainPageState = {
@@ -102,6 +104,8 @@ export function projectsPageReducer(state: IProjectsPageState = initProjectsPage
   switch (action.type) {
     case FilterBarActions.SELECT_ALL:
       return {...state, selectAll: !state.selectAll};
+    case FilterBarActions.SEARCH_BY:
+      return {...state, searchTerm: action.payload};
     default:
       return state;
   }
@@ -109,6 +113,8 @@ export function projectsPageReducer(state: IProjectsPageState = initProjectsPage
 
 export function projectsReducer(state: IProjectsState = initProjectsState, action: ProjectsActionTypes): IProjectsState {
   switch (action.type) {
+    case ProjectsActions.SET_PROJECTS:
+      return state;
     default:
       return state;
   }
