@@ -1,11 +1,7 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
 
 import {
-  FilterBarActionTypes,
   IFileOrFolder,
-  IRootState,
 } from '../store/types';
 
 import '../styles/FileList.css';
@@ -19,31 +15,14 @@ const HUMAN_READABLE_FILE_SIZES = [
   'YB',
 ];
 
+interface IPropsInterface {
+  files: IFileOrFolder[]
+}
 
-const mapStateToProps = ({ mainPage, projects }: IRootState) => {
-  if (!mainPage.openProjectId || !projects.allProjects[mainPage.openProjectId]) {
-    // This will never be the case, since this component displaying is conditioned on this being false
-    return null;
-  }
-  const project = projects.allProjects[mainPage.openProjectId];
-  return {
-    files: project.files,
-    name: project.name,
-  }
-};
-
-const mapDispatchToProps = (dispatch: Dispatch<FilterBarActionTypes>) => {
-  return {
-
-  }
-};
-
-type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
-
-class FileList extends React.Component<PropsType, never> {
+export default class FileList extends React.Component<IPropsInterface, never> {
 
   public render() {
-    if (!this.props.name) {
+    if (!this.props.files) {
       return null;
     }
 
@@ -97,8 +76,3 @@ class FileList extends React.Component<PropsType, never> {
   };
 
 }
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FileList);
