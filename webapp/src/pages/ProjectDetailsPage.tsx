@@ -3,7 +3,11 @@ import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { useParams } from 'react-router-dom'
 
+<<<<<<< HEAD
 import FilterBarProjectDetails from '../components/FilterBarProjectDetails';
+=======
+import FilterBar from '../components/FilterBar';
+>>>>>>> search
 import FileList from '../components/FileList';
 
 import * as projectPageActions from '../store/actions/projectPage';
