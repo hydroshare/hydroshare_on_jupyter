@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { useParams } from 'react-router-dom'
 
 import FilterBarProjectDetails from '../components/FilterBarProjectDetails';
+
 import FileList from '../components/FileList';
 
 import * as projectPageActions from '../store/actions/projectPage';
