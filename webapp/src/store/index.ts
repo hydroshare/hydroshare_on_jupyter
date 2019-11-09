@@ -23,6 +23,9 @@ import {
 
 export const history = createBrowserHistory();
 
+// @ts-ignore
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
 const store = createStore<IRootState, any, any, any>(
     combineReducers({
         filter: projectsPageReducer,
@@ -32,7 +35,7 @@ const store = createStore<IRootState, any, any, any>(
         user: userReducer,
     }),
     {},
-    compose(
+    composeEnhancers(
       applyMiddleware(
         routerMiddleware(history),
       ),
