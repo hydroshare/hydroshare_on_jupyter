@@ -1,12 +1,11 @@
 @import './colors.scss';
 
 .filterParent{
-    width: 70%;
-    min-width: 950px;
+    width: 100%;
     margin: auto;
     height: 60px;
     background-color: #d9eeec;
-    font-family: Futura,Trebuchet MS,Arial,sans-serif; 
+    font-family: Futura,Trebuchet MS,Arial,sans-serif;
     padding: 5px;
     box-shadow: 1px 1px 2px 0px #64b2cd;
     display: flex;
@@ -53,11 +52,11 @@
 
 .new-resource-button {
     margin-right: 12px;
-    
+
     height: 36px;
     margin-top: 6px;
     padding-top: 4px;
-    
+
     margin-bottom: 7px;
 }
 

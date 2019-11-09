@@ -1,9 +1,8 @@
 .resourcesParent{
-    width: 70%;
-    min-width: 950px;
+    width: 100%;
     margin: auto;
     background-color: #edf7f6;
-    font-family: Futura,Trebuchet MS,Arial,sans-serif; 
+    font-family: Futura,Trebuchet MS,Arial,sans-serif;
     box-shadow: 1px 1px 2px 0px #64b2cd;
     display: flex;
     flex-direction:column;

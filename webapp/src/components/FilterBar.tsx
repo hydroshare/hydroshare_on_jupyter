@@ -8,7 +8,6 @@ import {
 import { FaFileMedical, FaRegFolder, FaRegFolderOpen, FaSearch, FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/FilterBar.css';
 
 export default class FilterBar extends React.Component {

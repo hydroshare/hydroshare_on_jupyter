@@ -22,17 +22,19 @@ class Header extends React.Component<ReduxType, never> {
   public render() {
     return (
       <header>
-        {/*TODO: Host this image ourselves*/}
-        <img
-          src="https://cpb-us-e1.wpmucdn.com/blog.umd.edu/dist/8/416/files/2016/10/logo-20nca6f-300x69.png"
-          alt="CUAHSI logo"
-        />
-        <button>
-          View Files in Jupyter
-        </button>
-        <span className="welcome-message">
-          Welcome, <span className="user-name">{this.props.userName}</span>
-        </span>
+        <div className="header-content">
+          {/*TODO: Host this image ourselves*/}
+          <img
+            src="https://cpb-us-e1.wpmucdn.com/blog.umd.edu/dist/8/416/files/2016/10/logo-20nca6f-300x69.png"
+            alt="CUAHSI logo"
+          />
+          <button>
+            View Files in Jupyter
+          </button>
+          <span className="welcome-message">
+            Welcome, <span className="user-name">{this.props.userName}</span>
+          </span>
+        </div>
       </header>
     )
   }

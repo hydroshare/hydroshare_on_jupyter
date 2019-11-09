@@ -17,3 +17,9 @@ body,
 .App {
   @import 'Header.css';
 }
+
+.page {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+}
