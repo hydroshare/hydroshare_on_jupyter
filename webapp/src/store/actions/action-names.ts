@@ -4,7 +4,8 @@ export enum AppActions {
 }
 
 export enum FilterBarActions {
-  SELECT_ALL = 'SELECT_ALL',
+  TOGGLE_SELECT_STATUS_ALL = 'TOGGLE_SELECT_STATUS_ALL',
+  TOGGLE_SELECT_STATUS_ONE = 'TOGGLE_SELECT_STATUS_ONE',
   SORT_BY_NAME = 'SORT_BY_NAME',
 }
 

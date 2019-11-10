@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import {
+  AllActionTypes,
   IFileOrFolder,
 } from '../store/types';
-
 import '../styles/FileList.css';
 
 const HUMAN_READABLE_FILE_SIZES = [
@@ -17,6 +17,7 @@ const HUMAN_READABLE_FILE_SIZES = [
 
 interface IPropsInterface {
   files: IFileOrFolder[]
+  onFileOrFolderSelected: (arg0: IFileOrFolder, arg1: boolean) => AllActionTypes,
 }
 
 export default class FileList extends React.Component<IPropsInterface, never> {
@@ -29,6 +30,7 @@ export default class FileList extends React.Component<IPropsInterface, never> {
     return (
       <table className="FileList">
         <thead>
+        <td />
         <td>Name</td>
         <td>Type</td>
         <td>Size</td>
@@ -44,8 +46,11 @@ export default class FileList extends React.Component<IPropsInterface, never> {
     let elements: React.ReactElement[] = [];
     contents.forEach(fileOrFolder => {
       const spacers = this.generateSpacers(level);
+      const isSelected = true;
+      const onSelectedToggled = (e: React.ChangeEvent<HTMLInputElement>) => this.props.onFileOrFolderSelected(fileOrFolder, e.target.checked);
       elements.push(
         <tr>
+          <input className="selectOne-checkbox" type="checkbox" checked={isSelected} onChange={onSelectedToggled} />
           <td className="name">{spacers}{fileOrFolder.name}</td>
           <td className="type">{fileOrFolder.type}</td>
           <td className="size">{this.getFormattedSizeString(fileOrFolder.size)}</td>

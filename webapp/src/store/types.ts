@@ -1,17 +1,17 @@
 import {ActionType} from 'typesafe-actions';
 
 import * as mainPageActions from './actions/App';
-import * as filterActions from './actions/FilterBar';
 import * as projectsActions from './actions/projects';
+import * as projectDetailsPageActions from './actions/ProjectDetailsPage';
 import * as userActions from './actions/user';
 
-export type FilterBarActionTypes = ActionType<typeof filterActions>;
 export type MainPageActionTypes = ActionType<typeof mainPageActions>;
 export type ProjectsActionTypes = ActionType<typeof projectsActions>;
+export type ProjectDetailsPageActions = ActionType<typeof projectDetailsPageActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
 
 export type AllActionTypes = (
-  FilterBarActionTypes
+  ProjectDetailsPageActions
   | MainPageActionTypes
   | UserActionTypes
 );
@@ -25,7 +25,7 @@ export interface IRootState {
 }
 
 export interface IProjectsPageState {
-  selectAll: boolean
+  allSelected: boolean
   sortBy: string
 }
 

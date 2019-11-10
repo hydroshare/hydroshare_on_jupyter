@@ -3,13 +3,13 @@ import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { useParams } from 'react-router-dom'
 
-import * as FilterBarActions from '../store/actions/FilterBar';
+import * as ProjectDetailsPageActions from '../store/actions/ProjectDetailsPage';
 
 import FilterBar from '../components/FilterBar';
 import FileList from '../components/FileList';
 
 import {
-  AllActionTypes,
+  AllActionTypes, IFileOrFolder,
   IRootState,
 } from '../store/types';
 
@@ -31,7 +31,8 @@ const mapStateToProps = ({ projects }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
-    selectAll: () => dispatch(FilterBarActions.selectAll())
+    allSelected: () => dispatch(ProjectDetailsPageActions.toggleAllSelected()),
+    toggleOneSelected: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleFileOrFolderSelected(item)),
   }
 };
 
@@ -56,6 +57,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
         <FilterBar />
         <FileList
           files={this.props.project.files}
+          onFileOrFolderSelected={this.props.toggleOneSelected}
         />
       </div>
     )

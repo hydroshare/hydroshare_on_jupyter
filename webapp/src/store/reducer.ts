@@ -12,7 +12,7 @@ import {
 } from './types';
 
 const initProjectsPageState: IProjectsPageState = {
-  selectAll: false,
+  allSelected: false,
   sortBy: 'Name'
 };
 
@@ -100,8 +100,8 @@ export function mainPageReducer(state: IMainPageState = initMainPageState, actio
 
 export function projectsPageReducer(state: IProjectsPageState = initProjectsPageState, action: AllActionTypes): IProjectsPageState {
   switch (action.type) {
-    case FilterBarActions.SELECT_ALL:
-      return {...state, selectAll: !state.selectAll};
+    case FilterBarActions.TOGGLE_SELECT_STATUS_ALL:
+      return {...state, allSelected: !state.allSelected};
     default:
       return state;
   }
