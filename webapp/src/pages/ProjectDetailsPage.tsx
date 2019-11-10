@@ -2,10 +2,15 @@ import * as React from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 
+<<<<<<< HEAD
 
 import * as ProjectDetailsPageActions from '../store/actions/ProjectDetailsPage';
 
 import FilterBarProjectDetails from '../components/FilterBarProjectDetails';
+=======
+import FilterBarProjectDetails from '../components/FilterBarProjectDetails';
+
+>>>>>>> search
 import FileList from '../components/FileList';
 
 import * as projectDetailsPageActions from '../store/actions/projectDetailsPage';
@@ -27,16 +32,22 @@ const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) =
   }
   return {
     project: projects.allProjects[projectId],
+<<<<<<< HEAD
     allSelected: projectDetailsPage.allSelected,
     selectedFilesAndFolders: projectDetailsPage.selectedFilesAndFolders,
+=======
+>>>>>>> search
     searchTerm: projects.searchTerm
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
+<<<<<<< HEAD
     toggleSelectedAll: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAll(project)),
     toggleSelectedOne: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOne(item)),
+=======
+>>>>>>> search
     searchProjectBy: (searchTerm: string) => dispatch(projectDetailsPageActions.searchProjectBy(searchTerm))
   }
 };
