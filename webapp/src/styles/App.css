@@ -1,22 +1,25 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap');
-@import 'colors';
-
-html,
-body,
-#root,
-.App {
-  margin: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
 
 * {
   box-sizing: border-box;
   font-family: Montserrat, sans-serif;
 }
 
+html,
+body,
+#root,
 .App {
-  text-align: center;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.App {
+  @import 'Header.css';
+}
+
+.page {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
 }
