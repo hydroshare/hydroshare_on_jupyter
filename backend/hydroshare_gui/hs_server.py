@@ -3,22 +3,21 @@
 
 import signal
 import logging
-from get_info import get_metadata
+from get_info import get_files_in_directory_with_metadata
 
 import tornado.ioloop
 import tornado.web
 import tornado.options
 
 
-class MainHandler(tornado.web.RequestHandler):
+class GetResourceHandler(tornado.web.RequestHandler):
     def get(self):
-        test_resource_id = '8b826c43f55043f583c85ae312a8894f'
-        data = get_metadata(test_resource_id)['resource_title']
+        data = get_files_in_directory_with_metadata()
         self.write(data)
 
-class SecondHandler(tornado.web.RequestHandler):
+class NewProjectHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write("Hello vicky!")
+        self.write("Create new project")
 
 class HydroShareGUI(tornado.web.Application):
     is_closing = False
@@ -34,8 +33,8 @@ class HydroShareGUI(tornado.web.Application):
 
 
 application = HydroShareGUI([
-    (r"/", MainHandler),
-    (r"/vicky", SecondHandler)
+    (r"/", GetResourceHandler),
+    (r"/new", NewProjectHandler)
 ])
 
 def start_server():
