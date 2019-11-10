@@ -23,6 +23,7 @@ const initMainPageState: IMainPageState = {
 };
 
 const initProjectsState: IProjectsState = {
+  searchTerm: '',
   allProjects: {
     'test': {
       files: [
@@ -106,6 +107,17 @@ export function projectsPageReducer(state: IProjectsPageState = initProjectsPage
       return {...state, selectAll: !state.selectAll};
     case FilterBarActions.SEARCH_BY:
       return {...state, searchTerm: action.payload};
+    default:
+      return state;
+  }
+}
+
+export function projectDetailsPageReducer(state: IProjectsState, action: AllActionTypes): IProjectsState {
+  switch (action.type) {
+    case FilterBarActions.SEARCH_PROJECT_BY:
+      return {...state, searchTerm: action.payload};
+    case ProjectsActions.SET_PROJECTS:
+        return state;
     default:
       return state;
   }

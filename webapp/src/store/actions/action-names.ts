@@ -7,6 +7,7 @@ export enum FilterBarActions {
   SELECT_ALL = 'SELECT_ALL',
   SORT_BY_NAME = 'SORT_BY_NAME',
   SEARCH_BY = 'SEARCH_BY',
+  SEARCH_PROJECT_BY = 'SEARCH_PROJECT_BY',
 }
 
 export enum ProjectsActions {

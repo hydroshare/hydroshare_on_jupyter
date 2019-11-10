@@ -7,7 +7,7 @@ import FilterBarProjectDetails from '../components/FilterBarProjectDetails';
 
 import FileList from '../components/FileList';
 
-import * as projectPageActions from '../store/actions/projectPage';
+import * as projectDetailsPageActions from '../store/actions/projectDetailsPage';
 
 import {
   AllActionTypes,
@@ -27,12 +27,13 @@ const mapStateToProps = ({ projects }: IRootState) => {
   return {
     // @ts-ignore
     project: projects.allProjects[projectId],
+    searchTerm: projects.searchTerm
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
-    searchBy: (searchTerm: string) => dispatch(projectPageActions.searchBy(searchTerm))
+    searchProjectBy: (searchTerm: string) => dispatch(projectDetailsPageActions.searchProjectBy(searchTerm))
   }
 };
 
@@ -41,7 +42,8 @@ type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispa
 class ProjectDetailsPage extends React.Component<PropsType, never> {
 
   public handleSearchChange = (event: any) => {
-    this.props.searchBy(event.target.value)
+    console.log(event.target.value)
+    this.props.searchProjectBy(event.target.value)
   }
 
   public render() {
@@ -60,7 +62,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
       <div className="page project-details">
         <FilterBarProjectDetails searchChange={this.handleSearchChange}/>
         <FileList
-          files={this.props.project.files}
+          files={this.props.project.files} searchTerm={this.props.searchTerm}
         />
       </div>
     )

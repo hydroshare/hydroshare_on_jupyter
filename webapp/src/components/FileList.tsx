@@ -16,15 +16,21 @@ const HUMAN_READABLE_FILE_SIZES = [
 ];
 
 interface IPropsInterface {
-  files: IFileOrFolder[]
+  files: IFileOrFolder[],
+  searchTerm: string,
 }
 
 export default class FileList extends React.Component<IPropsInterface, never> {
+
+  constructor(props: IPropsInterface) {
+    super(props)
+  }
 
   public render() {
     if (!this.props.files) {
       return null;
     }
+    console.log(this.props.searchTerm)
 
     return (
       <table className="FileList">
@@ -44,16 +50,19 @@ export default class FileList extends React.Component<IPropsInterface, never> {
     let elements: React.ReactElement[] = [];
     contents.forEach(fileOrFolder => {
       const spacers = this.generateSpacers(level);
-      elements.push(
-        <tr>
-          <td className="name">{spacers}{fileOrFolder.name}</td>
-          <td className="type">{fileOrFolder.type}</td>
-          <td className="size">{this.getFormattedSizeString(fileOrFolder.size)}</td>
-        </tr>
-      );
-      if (fileOrFolder.contents) {
-        elements = elements.concat(this.buildDirectoryTree(fileOrFolder.contents, level+1));
+      if (fileOrFolder.name.toLowerCase().includes(this.props.searchTerm.toLowerCase()) || fileOrFolder.contents) {
+        elements.push(
+          <tr>
+            <td className="name">{spacers}{fileOrFolder.name}</td>
+            <td className="type">{fileOrFolder.type}</td>
+            <td className="size">{this.getFormattedSizeString(fileOrFolder.size)}</td>
+          </tr>
+        );
       }
+        if (fileOrFolder.contents) {
+          elements = elements.concat(this.buildDirectoryTree(fileOrFolder.contents, level+1));
+        }
+      
     });
     return elements;
   };

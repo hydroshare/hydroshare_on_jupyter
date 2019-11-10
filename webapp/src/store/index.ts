@@ -14,7 +14,7 @@ import {
 import {
   projectsPageReducer,
   mainPageReducer,
-  projectsReducer,
+  projectDetailsPageReducer,
   userReducer,
 } from './reducer';
 import {
@@ -30,7 +30,7 @@ const store = createStore<IRootState, any, any, any>(
     combineReducers({
         projectPage: projectsPageReducer,
         mainPage: mainPageReducer,
-        projects: projectsReducer,
+        projects: projectDetailsPageReducer,
         router: connectRouter(history),
         user: userReducer,
     }),
