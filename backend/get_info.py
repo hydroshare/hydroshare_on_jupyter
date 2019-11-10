@@ -1,9 +1,12 @@
 """
-# TODO
-# - get hs resource
-# - get files
-# - get metadata
-# - get user info
+TODO
+- get hs resource
+- get files
+- get metadata
+- get user info
+
+Get Name, Author, last updated, resource (rename, delete, publish, locate)
+NOTE: Need access to private resources
 
 CURRENT:
 - get hs resource (with files) with resource id
@@ -31,7 +34,7 @@ if not os.path.exists(output_folder):
     os.makedirs(output_folder)
     print("Made {} folder for new resources".format(output_folder))
 
-def get_hs_resource(resource_id, output_folder, unzip=False):
+def get_hs_resource(resource_id, output_folder, unzip=True):
     # Get actual resource
     if not os.path.exists('{}/{}'.format(output_folder, resource_id)):
         print("getting hs resource")
@@ -42,10 +45,11 @@ def get_hs_resource(resource_id, output_folder, unzip=False):
 def get_files_in_directory_with_metadata():
     # uses HS API to retrieve metadata -- different than existing app
 
-    files = glob.glob('hs_resources/*/*/data/resourcemetadata.xml')
+    files = glob.glob('{}/*/*/data/resourcemetadata.xml'.format(output_folder))
+    pprint(files)
+    data = {}
 
     # TODO: Get ltime and size
-    first_resource = True
     for f in files:
         # get ID and metadata
         resource_id = f.split('/')[1]
@@ -57,15 +61,8 @@ def get_files_in_directory_with_metadata():
         JH_resource_link = '<a href="{}" target="_blank">{}</a>'.format(cdir, resource_metadata['resource_title'])
         resource_metadata['JH_resource_link'] = JH_resource_link
 
-        # Made metadata dataframe if first resource
-        if first_resource:
-            first_resource = False
-            data = {}
-            for key in resource_metadata.keys():
-                data[key] = [resource_metadata[key]]
-        else:
-            for key in resource_metadata.keys():
-                data[key].append(resource_metadata[key])
+        for key in resource_metadata.keys():
+            data[key] = [resource_metadata[key]]
 
     metadata_df = pd.DataFrame.from_dict(data)
     metadata_df.set_index('resource_title')
