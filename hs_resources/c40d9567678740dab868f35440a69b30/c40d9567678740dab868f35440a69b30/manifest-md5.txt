@@ -1,0 +1,2 @@
+fc883a6de48c7156b8c3bb146e5edd2e    data/resourcemap.xml
+e864618d55fc8ecd28027544054d4154    data/resourcemetadata.xml
