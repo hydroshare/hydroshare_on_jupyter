@@ -21,7 +21,13 @@ export interface IRootState {
   mainPage: IMainPageState
   filter: IProjectsPageState
   projects: IProjectsState
+  projectDetailsPage: IProjectDetailsPageState
   user: IUserState
+}
+
+export interface IProjectDetailsPageState {
+  allSelected: boolean
+  selectedFilesAndFolders: Set<string>
 }
 
 export interface IProjectsPageState {
@@ -31,6 +37,7 @@ export interface IProjectsPageState {
 
 export interface IFileOrFolder {
   contents?: IFileOrFolder[] // If a folder, a list of its contents
+  dirPath: string // The path to the folder containing this file relative to the project root (must end with trailing /)
   lastModified?: Date
   name: string
   type: string

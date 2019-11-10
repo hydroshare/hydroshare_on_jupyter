@@ -1,11 +1,6 @@
-export enum AppActions {
-  VIEW_PROJECT = 'VIEW_PROJECT',
-  CLOSE_PROJECT = 'CLOSE_PROJECT',
-}
-
-export enum FilterBarActions {
-  TOGGLE_SELECT_STATUS_ALL = 'TOGGLE_SELECT_STATUS_ALL',
-  TOGGLE_SELECT_STATUS_ONE = 'TOGGLE_SELECT_STATUS_ONE',
+export enum ProjectDetailsPageActions {
+  TOGGLE_IS_SELECTED_ALL = 'ProjectDetailsPageActions/TOGGLE_IS_SELECTED_ALL',
+  TOGGLE_IS_SELECTED_ONE = 'ProjectDetailsPageActions/TOGGLE_IS_SELECTED_ONE',
   SORT_BY_NAME = 'SORT_BY_NAME',
 }
 

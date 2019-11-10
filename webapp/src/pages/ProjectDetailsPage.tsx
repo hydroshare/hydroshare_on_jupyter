@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { useParams } from 'react-router-dom'
+
 
 import * as ProjectDetailsPageActions from '../store/actions/ProjectDetailsPage';
 
@@ -9,30 +9,31 @@ import FilterBar from '../components/FilterBar';
 import FileList from '../components/FileList';
 
 import {
-  AllActionTypes, IFileOrFolder,
+  AllActionTypes,
+  IFileOrFolder,
+  IJupyterProject,
   IRootState,
 } from '../store/types';
 
-const mapStateToProps = ({ projects }: IRootState) => {
-
-  // This try...catch is necessary because otherwise connected-react-router will crash the page on navigate back
+// @ts-ignore the "error" that router does not exist on IRootState
+const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) => {
+  // Extract the project ID from the URL
+  const regexMatch = router.location.pathname.split('/').pop().match(/^\w+/);
   let projectId;
-  try {
-    // @ts-ignore
-    projectId = useParams().projectId;
-  } catch {
-    return null;
+  if (regexMatch) {
+    projectId = regexMatch.pop();
   }
   return {
-    // @ts-ignore
     project: projects.allProjects[projectId],
+    allSelected: projectDetailsPage.allSelected,
+    selectedFilesAndFolders: projectDetailsPage.selectedFilesAndFolders,
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
-    allSelected: () => dispatch(ProjectDetailsPageActions.toggleAllSelected()),
-    toggleOneSelected: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleFileOrFolderSelected(item)),
+    toggleSelectedAll: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAll(project)),
+    toggleSelectedOne: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOne(item)),
   }
 };
 
@@ -52,12 +53,18 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
       );
     }
 
+    const toggleAllSelected = () => this.props.toggleSelectedAll(this.props.project);
+
     return (
       <div className="page project-details">
-        <FilterBar />
+        <FilterBar
+          allSelected={this.props.allSelected}
+          toggleAllSelected={toggleAllSelected}
+        />
         <FileList
           files={this.props.project.files}
-          onFileOrFolderSelected={this.props.toggleOneSelected}
+          onFileOrFolderSelected={this.props.toggleSelectedOne}
+          selectedFilesAndFolders={this.props.selectedFilesAndFolders}
         />
       </div>
     )

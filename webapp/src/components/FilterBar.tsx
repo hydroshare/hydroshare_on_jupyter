@@ -10,7 +10,12 @@ import { Col } from 'reactstrap';
 
 import '../styles/FilterBar.css';
 
-export default class FilterBar extends React.Component {
+interface IPropTypes {
+  allSelected: boolean
+  toggleAllSelected: () => any
+}
+
+export default class FilterBar extends React.Component<IPropTypes, never> {
   // TODO: Keep the input state in the Redux store so that it's preserved if the user navigates to view the
   // resource details/contents and then comes back to the previous page (?)
 
@@ -47,6 +52,8 @@ export default class FilterBar extends React.Component {
                             id={`select-all-checkbox`}
                             className='selectAll-checkbox'
                             label={`Select All`}
+                            checked={this.props.allSelected}
+                            onChange={this.props.toggleAllSelected}
                         />
                     </Col>
                     <Col className="filterForm-searchBox" md="6">

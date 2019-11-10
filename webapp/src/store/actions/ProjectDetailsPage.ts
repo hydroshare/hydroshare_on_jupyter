@@ -1,13 +1,14 @@
 import { action } from 'typesafe-actions';
-import { FilterBarActions } from './action-names';
+import { ProjectDetailsPageActions } from './action-names';
 import {
     IFileOrFolder,
+    IJupyterProject,
 } from '../types';
 
-export function toggleAllSelected() {
-    return action(FilterBarActions.TOGGLE_SELECT_STATUS_ALL);
+export function toggleIsSelectedAll(project: IJupyterProject) {
+    return action(ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL, project);
 }
 
-export function toggleFileOrFolderSelected(fileOrFolder: IFileOrFolder) {
-    return action(FilterBarActions.TOGGLE_SELECT_STATUS_ONE, fileOrFolder);
+export function toggleIsSelectedOne(fileOrFolder: IFileOrFolder) {
+    return action(ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE, fileOrFolder);
 }

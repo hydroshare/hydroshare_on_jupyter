@@ -1,19 +1,25 @@
+import { ProjectDetailsPageActions } from './actions/action-names';
 import {
-  FilterBarActions,
-} from './actions/action-names';
-import {
-  IProjectsPageState,
+  AllActionTypes,
+  IFileOrFolder,
   IMainPageState,
+  IProjectDetailsPageState,
+  IProjectsPageState,
   IProjectsState,
   IUserState,
   MainPageActionTypes,
   ProjectsActionTypes,
-  UserActionTypes, AllActionTypes,
+  UserActionTypes,
 } from './types';
 
 const initProjectsPageState: IProjectsPageState = {
   allSelected: false,
   sortBy: 'Name'
+};
+
+const initProjectDetailsPageState: IProjectDetailsPageState = {
+  allSelected: false,
+  selectedFilesAndFolders: new Set(),
 };
 
 const initMainPageState: IMainPageState = {
@@ -25,6 +31,7 @@ const initProjectsState: IProjectsState = {
     'test': {
       files: [
         {
+          dirPath: '/',
           name: 'My glorious notebook',
           size: 73949942858,
           type: 'ipynb',
@@ -32,16 +39,19 @@ const initProjectsState: IProjectsState = {
         {
           contents: [
             {
+              dirPath: '/contents/',
               name: 'Wonderful data',
               size: 30124234233,
               type: 'csv',
             },
             {
+              dirPath: '/contents',
               name: 'More wonderful data',
               size: 552434233,
               type: 'csv',
             },
             {
+              dirPath: '/contents',
               name: 'Garbage data',
               size: 10029939402,
               type: 'csv',
@@ -49,16 +59,19 @@ const initProjectsState: IProjectsState = {
             {
               contents: [
                 {
+                  dirPath: '/contents/Old Data',
                   name: 'Stubby',
                   size: 29934423,
                   type: 'csv',
                 },
               ],
+              dirPath: '/contents/',
               name: 'Old data',
               size: 399393,
               type: 'folder',
             },
           ],
+          dirPath: '/',
           name: 'Data',
           size: 392393,
           type: 'folder',
@@ -98,10 +111,38 @@ export function mainPageReducer(state: IMainPageState = initMainPageState, actio
   }
 }
 
+export function projectsDetailsPageReducer(state: IProjectDetailsPageState = initProjectDetailsPageState, action: AllActionTypes): IProjectDetailsPageState {
+  let selectedFilesAndFolders: Set<string>;
+  switch (action.type) {
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL:
+      selectedFilesAndFolders = new Set(state.selectedFilesAndFolders);
+      const doMakeSelected = !state.allSelected;
+      action.payload.files.forEach(projectFileOrFolder => {
+        selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, projectFileOrFolder, doMakeSelected);
+      });
+      return {
+        ...state,
+        allSelected: doMakeSelected,
+        selectedFilesAndFolders,
+      };
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE:
+      selectedFilesAndFolders = new Set(state.selectedFilesAndFolders);
+      const fileOrFolder = action.payload;
+      const itemWasSelected = selectedFilesAndFolders.has(fileOrFolder.dirPath + fileOrFolder.name);
+      selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, action.payload, !itemWasSelected);
+      console.log(selectedFilesAndFolders);
+      return {
+        ...state,
+        allSelected: false,
+        selectedFilesAndFolders,
+      };
+    default:
+      return state;
+  }
+}
+
 export function projectsPageReducer(state: IProjectsPageState = initProjectsPageState, action: AllActionTypes): IProjectsPageState {
   switch (action.type) {
-    case FilterBarActions.TOGGLE_SELECT_STATUS_ALL:
-      return {...state, allSelected: !state.allSelected};
     default:
       return state;
   }
@@ -120,4 +161,20 @@ export function userReducer(state: IUserState = initUserState, action: UserActio
     default:
       return state;
   }
+}
+
+function recursivelySetSelectedState(selections: Set<string>, item: IFileOrFolder, makeSelected: boolean): Set<string> {
+  const itemPath = item.dirPath + item.name;
+  if (makeSelected) {
+    selections.add(itemPath);
+  } else {
+    selections.delete(itemPath);
+  }
+  // Check if this is a folder with child files and/or folders
+  if (item.contents) {
+    item.contents.forEach(childItem => {
+      selections = recursivelySetSelectedState(selections, childItem, makeSelected);
+    });
+  }
+  return selections;
 }

@@ -7,6 +7,7 @@ export default class ProjectsPage extends React.Component {
   public render() {
     return (
       <div className="page projects">
+        // @ts-ignore
         <FilterBar />
         <ResourceList />
       </div>
