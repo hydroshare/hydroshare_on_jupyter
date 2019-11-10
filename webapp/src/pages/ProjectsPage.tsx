@@ -43,7 +43,7 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
       <div className="page projects">
         // @ts-ignore
         <FilterBar searchChange={this.handleSearchChange}/>
-        <ResourceList viewProject={this.handleViewProject}/>
+        <ResourceList viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm}/>
       </div>
     )
   }

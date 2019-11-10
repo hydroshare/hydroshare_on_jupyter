@@ -19,14 +19,20 @@ interface IPropsInterface {
   files: IFileOrFolder[]
   onFileOrFolderSelected: (arg0: IFileOrFolder, arg1: boolean) => AllActionTypes
   selectedFilesAndFolders: Set<string>
+  searchTerm: string,
 }
 
 export default class FileList extends React.Component<IPropsInterface, never> {
+
+  constructor(props: IPropsInterface) {
+    super(props)
+  }
 
   public render() {
     if (!this.props.files) {
       return null;
     }
+    console.log(this.props.searchTerm)
 
     return (
       <table className="FileList">
@@ -61,6 +67,7 @@ export default class FileList extends React.Component<IPropsInterface, never> {
       if (fileOrFolder.contents) {
         elements = elements.concat(this.buildDirectoryTree(fileOrFolder.contents, level+1));
       }
+      
     });
     return elements;
   };

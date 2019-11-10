@@ -8,7 +8,7 @@ import * as ProjectDetailsPageActions from '../store/actions/ProjectDetailsPage'
 import FilterBarProjectDetails from '../components/FilterBarProjectDetails';
 import FileList from '../components/FileList';
 
-import * as projectPageActions from '../store/actions/projectPage';
+import * as projectDetailsPageActions from '../store/actions/projectDetailsPage';
 
 import {
   AllActionTypes,
@@ -29,6 +29,7 @@ const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) =
     project: projects.allProjects[projectId],
     allSelected: projectDetailsPage.allSelected,
     selectedFilesAndFolders: projectDetailsPage.selectedFilesAndFolders,
+    searchTerm: projects.searchTerm
   };
 };
 
@@ -36,7 +37,7 @@ const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
     toggleSelectedAll: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAll(project)),
     toggleSelectedOne: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOne(item)),
-    searchBy: (searchTerm: string) => dispatch(projectPageActions.searchBy(searchTerm))
+    searchProjectBy: (searchTerm: string) => dispatch(projectDetailsPageActions.searchProjectBy(searchTerm))
   }
 };
 
@@ -45,7 +46,8 @@ type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispa
 class ProjectDetailsPage extends React.Component<PropsType, never> {
 
   public handleSearchChange = (event: any) => {
-    this.props.searchBy(event.target.value)
+    console.log(event.target.value)
+    this.props.searchProjectBy(event.target.value)
   }
 
   public render() {
@@ -70,6 +72,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
           files={this.props.project.files}
           onFileOrFolderSelected={this.props.toggleSelectedOne}
           selectedFilesAndFolders={this.props.selectedFilesAndFolders}
+          searchTerm={this.props.searchTerm}
         />
       </div>
     )

@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
 import { Form} from 'react-bootstrap';
 import ContextMenu from 'react-context-menu';
 
@@ -8,31 +6,19 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/ResourceList.css';
 
 import {
-  AllActionTypes,
   IJupyterProject,
-  IRootState,
 } from '../store/types';
 
-const mapStateToProps = ({ projects, projectPage }: IRootState) => {
-  return {
-    projectsList: Object.values(projects.allProjects),
-    searchTerm: projectPage.searchTerm,
-  };
-};
-
-const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
-  return {
-  }
-};
 
 interface IResourceListProps {
   viewProject: any
+  searchTerm: string
+  projects: IJupyterProject[]
 }
 
-type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & IResourceListProps;
-class ResourceList extends React.Component<ReduxType, never> {
+export default class ResourceList extends React.Component<IResourceListProps, never> {
 
-    constructor(props: ReduxType) {
+    constructor(props: IResourceListProps) {
       super(props);
     }
   
@@ -58,11 +44,11 @@ class ResourceList extends React.Component<ReduxType, never> {
   }*/
 
   public render() {
-    const { projectsList, searchTerm } = this.props;
+    const { projects, searchTerm } = this.props;
     console.log(searchTerm)
     return (
         <div className='resourcesParent'>
-            {projectsList.map((project: IJupyterProject, i: number) => {
+            {projects.map((project: IJupyterProject, i: number) => {
               const {
                 name,
                 hydroShareResource,
@@ -95,8 +81,3 @@ class ResourceList extends React.Component<ReduxType, never> {
     );
   }
 }
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ResourceList);

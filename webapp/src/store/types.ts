@@ -5,9 +5,11 @@ import * as projectsActions from './actions/projects';
 import * as projectDetailsPageActions from './actions/ProjectDetailsPage';
 import * as userActions from './actions/user';
 import * as projectPageActions from './actions/projectPage';
+import * as projectDetailsPageActions from './actions/projectDetailsPage';
 
 export type MainPageActionTypes = ActionType<typeof mainPageActions>;
 export type ProjectPageActionTypes = ActionType<typeof projectPageActions>;
+export type ProjectDetailsPageActionTypes = ActionType<typeof projectDetailsPageActions>;
 export type ProjectsActionTypes = ActionType<typeof projectsActions>;
 export type ProjectDetailsPageActions = ActionType<typeof projectDetailsPageActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
@@ -17,7 +19,7 @@ export type AllActionTypes = (
   | UserActionTypes
   | ProjectsActionTypes
   | ProjectPageActionTypes
-  | ProjectDetailsPageActions
+  | ProjectDetailsPageActionTypes
 );
 
 
@@ -66,6 +68,7 @@ export interface IProjectsState {
   allProjects: {
     [projectId: string]: IJupyterProject
   }
+  searchTerm: string,
 }
 
 export interface IUserState {
