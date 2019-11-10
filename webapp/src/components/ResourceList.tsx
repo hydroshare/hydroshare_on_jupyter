@@ -1,48 +1,28 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
 import { Form} from 'react-bootstrap';
 import ContextMenu from 'react-context-menu';
-// import { FaFileMedical, FaRegFolder, FaRegFolderOpen, FaSearch, FaTrashAlt } from "react-icons/fa";
-// import { Col } from 'reactstrap';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/ResourceList.css';
 
-import * as AppActions from '../store/actions/App';
 import {
-  AllActionTypes,
-  IJupyterProject,
-  IRootState,
+  IJupyterProject, SortByOptions,
 } from '../store/types';
 
-const mapStateToProps = ({ projects }: IRootState) => {
-  return {
-    projectsList: Object.values(projects.allProjects),
-  };
-};
 
-const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
-  return {
-    viewProject: (project: IJupyterProject) => dispatch(AppActions.viewProject(project))
-  }
-};
+interface IResourceListProps {
+  viewProject: any
+  searchTerm: string
+  projects: IJupyterProject[]
+  sortBy: SortByOptions
+}
 
-type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
+export default class ResourceList extends React.Component<IResourceListProps, never> {
 
-
-class ResourceList extends React.Component<ReduxType, never> {
-  // TODO: Keep the input state in the Redux store so that it's preserved if the user navigates to view the
-  // resource details/contents and then comes back to the previous page (?)
-
-  /*public onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({inputText: e.target.value});
-  }
-
-  public onAddClick = () => {
-    this.props.addItem(this.state.inputText);
-    this.setState({inputText: ''});
-  }*/
+    constructor(props: IResourceListProps) {
+      super(props);
+    }
+  
     public deleteClick =() => {
         console.log("Send message to backend to delete")
     }
@@ -65,11 +45,18 @@ class ResourceList extends React.Component<ReduxType, never> {
   }*/
 
   public render() {
-    const { projectsList } = this.props;
+    const { projects, searchTerm, sortBy } = this.props;
+    console.log(searchTerm)
+    switch (sortBy) {
+      case SortByOptions.Name:
+        projects.sort((a, b) => (a.name > b.name) ? 1 : -1)
+      default:
+        break;
+    }
 
     return (
         <div className='resourcesParent'>
-            {projectsList.map((project: IJupyterProject, i: number) => {
+            {projects.map((project: IJupyterProject, i: number) => {
               const {
                 name,
                 hydroShareResource,
@@ -79,27 +66,26 @@ class ResourceList extends React.Component<ReduxType, never> {
                 hydroShareInfoElems.push(<div className='resource-status'>{hydroShareResource.status}</div>);
               }
               const viewProject = () => this.props.viewProject(project);
-              return (
-                <div key={i} className='resourcesLine' id={i+'-menu'} onClick={viewProject}>
-                  <Form className='checkbox-form'>
-                    <Form.Check
-                      type='checkbox'
-                      id={`default-checkbox`}
-                    />
-                  </Form>
-                  <div className='resource-name'>{name}</div>
-                  {/*<div className='resource-author'>{resource.author}</div>*/}
-                  {/*<div className='resource-lastModified'>{project.lastModified}</div>*/}
-                  {hydroShareInfoElems}
-                  <ContextMenu contextId={i+'-menu'} items={[{label: 'Rename'}, {label: 'Delete'}, {label: 'Publish to Hydroshare'}, , {label: 'Locate in Hydroshare'}]} />
-                   </div>)
+              
+              if (name.toLowerCase().includes(searchTerm.toLowerCase())) {
+                return (
+                  <div key={i} className='resourcesLine' id={i+'-menu'} onClick={viewProject}>
+                    <Form className='checkbox-form'>
+                      <Form.Check
+                        type='checkbox'
+                        id={`default-checkbox`}
+                      />
+                    </Form>
+                    <div className='resource-name'>{name}</div>
+                    {/*<div className='resource-author'>{resource.author}</div>*/}
+                    {/*<div className='resource-lastModified'>{project.lastModified}</div>*/}
+                    {hydroShareInfoElems}
+                    <ContextMenu contextId={i+'-menu'} items={[{label: 'Rename'}, {label: 'Delete'}, {label: 'Publish to Hydroshare'}, , {label: 'Locate in Hydroshare'}]} />
+                    </div>)
+              }
+              return;
             })}
         </div>
     );
   }
 }
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ResourceList);

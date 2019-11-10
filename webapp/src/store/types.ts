@@ -2,24 +2,29 @@ import {ActionType} from 'typesafe-actions';
 
 import * as mainPageActions from './actions/App';
 import * as projectsActions from './actions/projects';
-import * as projectDetailsPageActions from './actions/ProjectDetailsPage';
 import * as userActions from './actions/user';
+import * as projectPageActions from './actions/projectPage';
+import * as projectDetailsPageActions from './actions/ProjectDetailsPage';
 
 export type MainPageActionTypes = ActionType<typeof mainPageActions>;
+export type ProjectPageActionTypes = ActionType<typeof projectPageActions>;
+export type ProjectDetailsPageActionTypes = ActionType<typeof projectDetailsPageActions>;
 export type ProjectsActionTypes = ActionType<typeof projectsActions>;
 export type ProjectDetailsPageActions = ActionType<typeof projectDetailsPageActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
 
 export type AllActionTypes = (
-  ProjectDetailsPageActions
-  | MainPageActionTypes
+  MainPageActionTypes
   | UserActionTypes
+  | ProjectsActionTypes
+  | ProjectPageActionTypes
+  | ProjectDetailsPageActionTypes
 );
 
 
 export interface IRootState {
   mainPage: IMainPageState
-  filter: IProjectsPageState
+  projectPage: IProjectsPageState
   projects: IProjectsState
   projectDetailsPage: IProjectDetailsPageState
   user: IUserState
@@ -28,11 +33,13 @@ export interface IRootState {
 export interface IProjectDetailsPageState {
   allSelected: boolean
   selectedFilesAndFolders: Set<string>
+  searchTerm: string
 }
 
 export interface IProjectsPageState {
   allSelected: boolean
-  sortBy: string
+  sortBy: SortByOptions
+  searchTerm: string
 }
 
 export interface IFileOrFolder {
@@ -61,6 +68,7 @@ export interface IProjectsState {
   allProjects: {
     [projectId: string]: IJupyterProject
   }
+  searchTerm: string,
 }
 
 export interface IUserState {
@@ -73,3 +81,9 @@ export interface IHydroShareResourceInfo {
   lastModified: string,
   status: string,
 }
+
+export enum SortByOptions {
+  Name = 'NAME',
+  Date = 'DATE',
+  Type = 'TYPE',
+} 

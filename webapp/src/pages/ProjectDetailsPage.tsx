@@ -5,8 +5,10 @@ import { connect } from 'react-redux';
 
 import * as ProjectDetailsPageActions from '../store/actions/ProjectDetailsPage';
 
-import FilterBar from '../components/FilterBar';
+import FilterBarProjectDetails from '../components/FilterBarProjectDetails';
 import FileList from '../components/FileList';
+
+import * as projectDetailsPageActions from '../store/actions/ProjectDetailsPage';
 
 import {
   AllActionTypes,
@@ -27,6 +29,7 @@ const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) =
     project: projects.allProjects[projectId],
     allSelected: projectDetailsPage.allSelected,
     selectedFilesAndFolders: projectDetailsPage.selectedFilesAndFolders,
+    searchTerm: projects.searchTerm
   };
 };
 
@@ -34,12 +37,18 @@ const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
     toggleSelectedAll: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAll(project)),
     toggleSelectedOne: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOne(item)),
+    searchProjectBy: (searchTerm: string) => dispatch(projectDetailsPageActions.searchProjectBy(searchTerm))
   }
 };
 
 type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 class ProjectDetailsPage extends React.Component<PropsType, never> {
+
+  public handleSearchChange = (event: any) => {
+    console.log(event.target.value)
+    this.props.searchProjectBy(event.target.value)
+  }
 
   public render() {
     if (!this.props.project) {
@@ -57,14 +66,13 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
 
     return (
       <div className="page project-details">
-        <FilterBar
-          allSelected={this.props.allSelected}
-          toggleAllSelected={toggleAllSelected}
-        />
+        <FilterBarProjectDetails allSelected={this.props.allSelected}
+          toggleAllSelected={toggleAllSelected} searchChange={this.handleSearchChange}/>
         <FileList
           files={this.props.project.files}
           onFileOrFolderSelected={this.props.toggleSelectedOne}
           selectedFilesAndFolders={this.props.selectedFilesAndFolders}
+          searchTerm={this.props.searchTerm}
         />
       </div>
     )
