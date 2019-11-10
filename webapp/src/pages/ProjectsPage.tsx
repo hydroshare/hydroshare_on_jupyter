@@ -16,6 +16,7 @@ const mapStateToProps = ({ projects, projectPage }: IRootState) => {
   return {
     projectsList: Object.values(projects.allProjects),
     searchTerm: projectPage.searchTerm,
+    sortBy: projectPage.sortBy,
   };
 };
 
@@ -43,7 +44,7 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
       <div className="page projects">
         // @ts-ignore
         <FilterBar searchChange={this.handleSearchChange}/>
-        <ResourceList viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm}/>
+        <ResourceList viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortBy={this.props.sortBy}/>
       </div>
     )
   }

@@ -1,4 +1,4 @@
-import { ProjectDetailsPageActions } from './actions/action-names';
+import { ProjectDetailsPageActions, ProjectsActions } from './actions/action-names';
 import {
   AllActionTypes,
   IFileOrFolder,
@@ -10,11 +10,12 @@ import {
   MainPageActionTypes,
   ProjectsActionTypes,
   UserActionTypes,
+  SortByOptions,
 } from './types';
 
 const initProjectsPageState: IProjectsPageState = {
   allSelected: false,
-  sortBy: 'Name'
+  sortBy: SortByOptions.Name,
   searchTerm: '',
 };
 
@@ -120,7 +121,7 @@ export function projectsDetailsPageReducer(state: IProjectDetailsPageState = ini
     case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL:
       selectedFilesAndFolders = new Set(state.selectedFilesAndFolders);
       const doMakeSelected = !state.allSelected;
-      action.payload.files.forEach(projectFileOrFolder => {
+      action.payload.files.forEach((projectFileOrFolder: IFileOrFolder) => {
         selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, projectFileOrFolder, doMakeSelected);
       });
       return {
@@ -139,6 +140,8 @@ export function projectsDetailsPageReducer(state: IProjectDetailsPageState = ini
         allSelected: false,
         selectedFilesAndFolders,
       };
+    case ProjectDetailsPageActions.SEARCH_PROJECT_BY:
+        return {...state, searchTerm: action.payload};
     default:
       return state;
   }
@@ -146,25 +149,15 @@ export function projectsDetailsPageReducer(state: IProjectDetailsPageState = ini
 
 export function projectsPageReducer(state: IProjectsPageState = initProjectsPageState, action: AllActionTypes): IProjectsPageState {
   switch (action.type) {
-    case FilterBarActions.SELECT_ALL:
-      return {...state, selectAll: !state.selectAll};
-    case FilterBarActions.SEARCH_BY:
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL:
+      return {...state, allSelected: !state.allSelected};
+    case ProjectDetailsPageActions.SEARCH_BY:
       return {...state, searchTerm: action.payload};
     default:
       return state;
   }
 }
 
-export function projectDetailsPageReducer(state: IProjectsState, action: AllActionTypes): IProjectsState {
-  switch (action.type) {
-    case FilterBarActions.SEARCH_PROJECT_BY:
-      return {...state, searchTerm: action.payload};
-    case ProjectsActions.SET_PROJECTS:
-        return state;
-    default:
-      return state;
-  }
-}
 
 export function projectsReducer(state: IProjectsState = initProjectsState, action: ProjectsActionTypes): IProjectsState {
   switch (action.type) {

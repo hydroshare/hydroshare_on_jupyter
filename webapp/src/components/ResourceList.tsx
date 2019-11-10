@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/ResourceList.css';
 
 import {
-  IJupyterProject,
+  IJupyterProject, SortByOptions,
 } from '../store/types';
 
 
@@ -14,6 +14,7 @@ interface IResourceListProps {
   viewProject: any
   searchTerm: string
   projects: IJupyterProject[]
+  sortBy: SortByOptions
 }
 
 export default class ResourceList extends React.Component<IResourceListProps, never> {
@@ -44,8 +45,15 @@ export default class ResourceList extends React.Component<IResourceListProps, ne
   }*/
 
   public render() {
-    const { projects, searchTerm } = this.props;
+    const { projects, searchTerm, sortBy } = this.props;
     console.log(searchTerm)
+    switch (sortBy) {
+      case SortByOptions.Name:
+        projects.sort((a, b) => (a.name > b.name) ? 1 : -1)
+      default:
+        break;
+    }
+
     return (
         <div className='resourcesParent'>
             {projects.map((project: IJupyterProject, i: number) => {

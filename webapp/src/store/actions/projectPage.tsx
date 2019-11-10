@@ -1,11 +1,12 @@
 import { action } from 'typesafe-actions';
-import { FilterBarActions } from '../actions/action-names';
+import { ProjectDetailsPageActions } from '../actions/action-names';
+import { SortByOptions } from '../types'
 
 export function searchBy(searchTerm: string) {
-    return action(FilterBarActions.SEARCH_BY, searchTerm);
+    return action(ProjectDetailsPageActions.SEARCH_BY, searchTerm);
   }
 
-export function selectAll() {
-    return action(FilterBarActions.SELECT_ALL);
+export function sortBy(sortTerm: SortByOptions) {
+    return action(ProjectDetailsPageActions.SORT_BY_NAME, sortTerm);
 }
   

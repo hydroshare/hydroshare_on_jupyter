@@ -12,3 +12,7 @@ export function toggleIsSelectedAll(project: IJupyterProject) {
 export function toggleIsSelectedOne(fileOrFolder: IFileOrFolder) {
     return action(ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE, fileOrFolder);
 }
+
+export function searchProjectBy(searchTerm: string) {
+    return action(ProjectDetailsPageActions.SEARCH_PROJECT_BY, searchTerm);
+  }

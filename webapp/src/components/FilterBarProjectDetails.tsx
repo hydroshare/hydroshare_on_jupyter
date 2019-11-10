@@ -11,7 +11,9 @@ import { Col } from 'reactstrap';
 import '../styles/FilterBarProjectDetails.css';
 
 interface IFilterBarProjectDetailsProps {
-  searchChange: any
+    allSelected: boolean
+    toggleAllSelected: () => any
+    searchChange: any
 }
 
 export default class FilterBarProjectDetails extends React.Component<IFilterBarProjectDetailsProps, never> {
@@ -46,6 +48,8 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
                             id={`select-all-checkbox`}
                             className='selectAll-checkbox'
                             label={`Select All`}
+                            checked={this.props.allSelected}
+                            onChange={this.props.toggleAllSelected}
                         />
                     </Col>
                     <Col className="filterForm-searchBox" md="8">

@@ -36,8 +36,8 @@ export default class FilterBar extends React.Component<IPropTypes, never> {
         console.log("Send message to backend to create new resource")
     }
 
-    public handleSortByChange = (e: any) => {
-        console.log("Sort by" + e.value)
+    public handleSortByChange =(e: any) => {
+        console.log("Sort by " + e)
     }
 
 
@@ -63,9 +63,9 @@ export default class FilterBar extends React.Component<IPropTypes, never> {
                     </Col>
                 </Form.Row>
             </Form>
-            <DropdownButton id="dropdown-basic-button" className="filter-sortBy" variant="info" onClick={this.handleSortByChange} title="Sort by">
-                <Dropdown.Item href="#/action-1">Name</Dropdown.Item>
-                <Dropdown.Item href="#/action-2">Date created</Dropdown.Item>
+            <DropdownButton id="dropdown-basic-button" className="filter-sortBy" variant="info"  title="Sort by">
+                <Dropdown.Item href="#/action-1" eventKey="Name" onSelect={this.handleSortByChange}>Name</Dropdown.Item>
+                <Dropdown.Item href="#/action-2" eventKey="Last modified" onSelect={this.handleSortByChange}>Last Modified</Dropdown.Item>
                 <Dropdown.Item href="#/action-3">Date updated</Dropdown.Item>
             </DropdownButton>
             <Button className="folder-open" variant="outline-success"><FaRegFolderOpen/></Button>

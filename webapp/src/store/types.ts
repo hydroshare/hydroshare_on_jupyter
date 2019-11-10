@@ -2,10 +2,9 @@ import {ActionType} from 'typesafe-actions';
 
 import * as mainPageActions from './actions/App';
 import * as projectsActions from './actions/projects';
-import * as projectDetailsPageActions from './actions/ProjectDetailsPage';
 import * as userActions from './actions/user';
 import * as projectPageActions from './actions/projectPage';
-import * as projectDetailsPageActions from './actions/projectDetailsPage';
+import * as projectDetailsPageActions from './actions/ProjectDetailsPage';
 
 export type MainPageActionTypes = ActionType<typeof mainPageActions>;
 export type ProjectPageActionTypes = ActionType<typeof projectPageActions>;
@@ -34,11 +33,12 @@ export interface IRootState {
 export interface IProjectDetailsPageState {
   allSelected: boolean
   selectedFilesAndFolders: Set<string>
+  searchTerm: string
 }
 
 export interface IProjectsPageState {
   allSelected: boolean
-  sortBy: string
+  sortBy: SortByOptions
   searchTerm: string
 }
 
@@ -81,3 +81,9 @@ export interface IHydroShareResourceInfo {
   lastModified: string,
   status: string,
 }
+
+export enum SortByOptions {
+  Name = 'NAME',
+  Date = 'DATE',
+  Type = 'TYPE',
+} 
