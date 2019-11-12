@@ -38,7 +38,7 @@ export interface IProjectDetailsPageState {
 
 export interface IProjectsPageState {
   allSelected: boolean
-  sortBy: SortByOptions
+  sortBy?: SortByOptions
   searchTerm: string
 }
 
@@ -85,5 +85,6 @@ export interface IHydroShareResourceInfo {
 export enum SortByOptions {
   Name = 'NAME',
   Date = 'DATE',
-  Type = 'TYPE',
+  Status = 'STATUS',
+  Author = 'AUTHOR'
 } 

@@ -14,6 +14,7 @@ interface IPropTypes {
   allSelected: boolean
   toggleAllSelected: () => any
   searchChange: () => any
+  sortBy: (sortBy: string) => any
 }
 
 export default class FilterBar extends React.Component<IPropTypes, never> {
@@ -37,7 +38,7 @@ export default class FilterBar extends React.Component<IPropTypes, never> {
     }
 
     public handleSortByChange =(e: any) => {
-        console.log("Sort by " + e)
+      this.props.sortBy(e)
     }
 
 
@@ -64,9 +65,10 @@ export default class FilterBar extends React.Component<IPropTypes, never> {
                 </Form.Row>
             </Form>
             <DropdownButton id="dropdown-basic-button" className="filter-sortBy" variant="info"  title="Sort by">
-                <Dropdown.Item href="#/action-1" eventKey="Name" onSelect={this.handleSortByChange}>Name</Dropdown.Item>
-                <Dropdown.Item href="#/action-2" eventKey="Last modified" onSelect={this.handleSortByChange}>Last Modified</Dropdown.Item>
-                <Dropdown.Item href="#/action-3">Date updated</Dropdown.Item>
+                <Dropdown.Item href="#/action-1" eventKey="NAME" onSelect={this.handleSortByChange}>Name</Dropdown.Item>
+                <Dropdown.Item href="#/action-2" eventKey="DATE" onSelect={this.handleSortByChange}>Last Modified</Dropdown.Item>
+                <Dropdown.Item href="#/action-2" eventKey="AUTHOR" onSelect={this.handleSortByChange}>Author</Dropdown.Item>
+                <Dropdown.Item href="#/action-2" eventKey="STATUS" onSelect={this.handleSortByChange}>Status</Dropdown.Item>
             </DropdownButton>
             <Button className="folder-open" variant="outline-success"><FaRegFolderOpen/></Button>
             <Button className="folder" variant="outline-success"><FaRegFolder/></Button>
