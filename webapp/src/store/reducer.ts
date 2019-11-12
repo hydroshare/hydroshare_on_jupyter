@@ -10,12 +10,10 @@ import {
   MainPageActionTypes,
   ProjectsActionTypes,
   UserActionTypes,
-  SortByOptions,
 } from './types';
 
 const initProjectsPageState: IProjectsPageState = {
   allSelected: false,
-  sortBy: SortByOptions.Name,
   searchTerm: '',
 };
 
@@ -153,6 +151,8 @@ export function projectsPageReducer(state: IProjectsPageState = initProjectsPage
       return {...state, allSelected: !state.allSelected};
     case ProjectDetailsPageActions.SEARCH_BY:
       return {...state, searchTerm: action.payload};
+    case ProjectDetailsPageActions.SORT_BY_NAME:
+      return {...state, sortBy: action.payload};
     default:
       return state;
   }

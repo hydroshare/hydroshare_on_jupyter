@@ -10,20 +10,22 @@ import {
   AllActionTypes,
   IJupyterProject,
   IRootState,
+  SortByOptions,
 } from '../store/types';
 
 const mapStateToProps = ({ projects, projectPage }: IRootState) => {
   return {
     projectsList: Object.values(projects.allProjects),
     searchTerm: projectPage.searchTerm,
-    sortBy: projectPage.sortBy,
+    sortByTerm: projectPage.sortBy,
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
     viewProject: (project: IJupyterProject) => dispatch(AppActions.viewProject(project)),
-    searchBy: (searchTerm: string) => dispatch(projectPageActions.searchBy(searchTerm))
+    searchBy: (searchTerm: string) => dispatch(projectPageActions.searchBy(searchTerm)),
+    sortBy: (sortByTerm: SortByOptions) => dispatch(projectPageActions.sortBy(sortByTerm))
   }
 };
 
@@ -43,8 +45,8 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
     return (
       <div className="page projects">
         // @ts-ignore
-        <FilterBar searchChange={this.handleSearchChange}/>
-        <ResourceList viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortBy={this.props.sortBy}/>
+        <FilterBar searchChange={this.handleSearchChange} sortBy={this.props.sortBy}/>
+        <ResourceList viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
       </div>
     )
   }
