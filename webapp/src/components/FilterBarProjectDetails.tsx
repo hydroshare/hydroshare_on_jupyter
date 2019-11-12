@@ -13,6 +13,7 @@ import '../styles/FilterBarProjectDetails.css';
 interface IFilterBarProjectDetailsProps {
     allSelected: boolean
     toggleAllSelected: () => any
+    sortBy: (sortBy: string) => any
     searchChange: any
 }
 
@@ -30,8 +31,8 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
         console.log("Send message to backend to create new resource")
     }
 
-    public handleSortByChange = (e: any) => {
-        console.log("Sort by" + e.value)
+    public handleSortByChange =(e: any) => {
+        this.props.sortBy(e)
     }
 
 
@@ -57,10 +58,10 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
                     </Col>
                 </Form.Row>
             </Form>
-            <DropdownButton id="dropdown-basic-button" className="filter-sortBy" variant="info" onClick={this.handleSortByChange} title="Sort by">
-                <Dropdown.Item href="#/action-1">Name</Dropdown.Item>
-                <Dropdown.Item href="#/action-2">Date created</Dropdown.Item>
-                <Dropdown.Item href="#/action-3">Date updated</Dropdown.Item>
+            <DropdownButton id="dropdown-basic-button" className="filter-sortBy" variant="info"  title="Sort by">
+                <Dropdown.Item href="#/action-1" eventKey="NAME" onSelect={this.handleSortByChange}>Name</Dropdown.Item>
+                <Dropdown.Item href="#/action-2" eventKey="DATE" onSelect={this.handleSortByChange}>Last Modified</Dropdown.Item>
+                <Dropdown.Item href="#/action-2" eventKey="TYPE" onSelect={this.handleSortByChange}>File Type</Dropdown.Item>
             </DropdownButton>
             <Button className="folder-open" variant="outline-success"><FaRegFolderOpen/></Button>
             <Button className="folder" variant="outline-success"><FaRegFolder/></Button>

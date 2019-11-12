@@ -41,7 +41,6 @@ export default class ResourceList extends React.Component<IResourceListProps, ne
 
   public render() {
     const { projects, searchTerm, sortByTerm } = this.props;
-    console.log(searchTerm)
     switch (sortByTerm) {
       case SortByOptions.Name:
         projects.sort((a, b) => (a.name > b.name) ? 1 : -1)

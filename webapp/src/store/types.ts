@@ -34,6 +34,7 @@ export interface IProjectDetailsPageState {
   allSelected: boolean
   selectedFilesAndFolders: Set<string>
   searchTerm: string
+  sortBy?: SortByOptions
 }
 
 export interface IProjectsPageState {
@@ -86,5 +87,6 @@ export enum SortByOptions {
   Name = 'NAME',
   Date = 'DATE',
   Status = 'STATUS',
-  Author = 'AUTHOR'
+  Author = 'AUTHOR',
+  Type = 'TYPE'
 } 
