@@ -72,6 +72,20 @@ const initProjectsState: IProjectsState = {
               size: 399393,
               type: 'folder',
             },
+            {
+              contents: [
+                {
+                  dirPath: '/contents/Final data',
+                  name: 'Shucks',
+                  size: 234230492,
+                  type: 'csv',
+                },
+              ],
+              dirPath: '/contents/',
+              name: 'Final data',
+              size: 40000,
+              type: 'folder',
+            },
           ],
           dirPath: '/',
           name: 'Data',
@@ -140,6 +154,8 @@ export function projectsDetailsPageReducer(state: IProjectDetailsPageState = ini
       };
     case ProjectDetailsPageActions.SEARCH_PROJECT_BY:
         return {...state, searchTerm: action.payload};
+    case ProjectDetailsPageActions.SORT_BY_NAME:
+      return {...state, sortBy: action.payload};
     default:
       return state;
   }

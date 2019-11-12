@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   AllActionTypes,
   IFileOrFolder,
+  SortByOptions,
 } from '../store/types';
 import '../styles/FileList.css';
 
@@ -20,6 +21,7 @@ interface IPropsInterface {
   onFileOrFolderSelected: (arg0: IFileOrFolder, arg1: boolean) => AllActionTypes
   selectedFilesAndFolders: Set<string>
   searchTerm: string,
+  sortBy: SortByOptions | undefined,
 }
 
 export default class FileList extends React.Component<IPropsInterface, never> {
@@ -29,10 +31,12 @@ export default class FileList extends React.Component<IPropsInterface, never> {
   }
 
   public render() {
-    if (!this.props.files) {
+    const { files, searchTerm } = this.props;
+    if (!files) {
       return null;
     }
-    console.log(this.props.searchTerm)
+
+    console.log(searchTerm)
 
     return (
       <table className="FileList">
@@ -43,13 +47,34 @@ export default class FileList extends React.Component<IPropsInterface, never> {
         <td>Size</td>
         </thead>
         <tbody>
-        {this.buildDirectoryTree(this.props.files)}
+        {this.buildDirectoryTree(files)}
         </tbody>
       </table>
     )
   }
 
   private buildDirectoryTree = (contents: IFileOrFolder[], level=0): React.ReactElement[] => {
+    switch (this.props.sortBy) {
+      case SortByOptions.Name:
+        contents.sort((a, b) => (a.name > b.name) ? 1 : -1)
+      case SortByOptions.Date:
+        contents.sort((a, b) => {
+          const dateA = a.lastModified ? a.lastModified : ''
+          const dateB = b.lastModified ? b.lastModified : ''
+    
+          if (dateA < dateB) {
+            return -1;
+          } else if (dateA > dateB) {
+              return 1;
+          } else {
+              return 0;
+          }
+        })
+      case SortByOptions.Type:
+        contents.sort((a, b) => (a.type > b.type) ? 1 : -1)
+      default:
+        break;
+    }
     let elements: React.ReactElement[] = [];
     contents.forEach(fileOrFolder => {
       const spacers = this.generateSpacers(level);

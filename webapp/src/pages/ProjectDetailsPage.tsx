@@ -15,6 +15,7 @@ import {
   IFileOrFolder,
   IJupyterProject,
   IRootState,
+  SortByOptions,
 } from '../store/types';
 
 // @ts-ignore the "error" that router does not exist on IRootState
@@ -29,7 +30,8 @@ const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) =
     project: projects.allProjects[projectId],
     allSelected: projectDetailsPage.allSelected,
     selectedFilesAndFolders: projectDetailsPage.selectedFilesAndFolders,
-    searchTerm: projects.searchTerm
+    searchTerm: projectDetailsPage.searchTerm,
+    sortByTerm: projectDetailsPage.sortBy
   };
 };
 
@@ -37,7 +39,8 @@ const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
     toggleSelectedAll: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAll(project)),
     toggleSelectedOne: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOne(item)),
-    searchProjectBy: (searchTerm: string) => dispatch(projectDetailsPageActions.searchProjectBy(searchTerm))
+    searchProjectBy: (searchTerm: string) => dispatch(projectDetailsPageActions.searchProjectBy(searchTerm)),
+    sortBy: (sortByTerm: SortByOptions) => dispatch(projectDetailsPageActions.sortBy(sortByTerm))
   }
 };
 
@@ -46,7 +49,6 @@ type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispa
 class ProjectDetailsPage extends React.Component<PropsType, never> {
 
   public handleSearchChange = (event: any) => {
-    console.log(event.target.value)
     this.props.searchProjectBy(event.target.value)
   }
 
@@ -67,12 +69,13 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
     return (
       <div className="page project-details">
         <FilterBarProjectDetails allSelected={this.props.allSelected}
-          toggleAllSelected={toggleAllSelected} searchChange={this.handleSearchChange}/>
+          toggleAllSelected={toggleAllSelected} searchChange={this.handleSearchChange} sortBy={this.props.sortBy}/>
         <FileList
           files={this.props.project.files}
           onFileOrFolderSelected={this.props.toggleSelectedOne}
           selectedFilesAndFolders={this.props.selectedFilesAndFolders}
           searchTerm={this.props.searchTerm}
+          sortBy={this.props.sortByTerm}
         />
       </div>
     )
