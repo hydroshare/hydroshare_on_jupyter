@@ -10,4 +10,5 @@ export enum ProjectDetailsPageActions {
 
 export enum ProjectsActions {
   SET_PROJECTS = 'SET_PROJECTS',
+  NEW_PROJECT = 'NEW_PROJECT',
 }

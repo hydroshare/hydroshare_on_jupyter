@@ -240,6 +240,8 @@ export function projectsPageReducer(state: IProjectsPageState = initProjectsPage
       return {...state, searchTerm: action.payload};
     case ProjectDetailsPageActions.SORT_BY_NAME:
       return {...state, sortBy: action.payload};
+    case ProjectsActions.NEW_PROJECT:
+        return state;
     default:
       return state;
   }

@@ -9,3 +9,4 @@ export function setProjects(projects: IJupyterProject[]) {
   return action(ProjectsActions.SET_PROJECTS, projects);
 }
 
+

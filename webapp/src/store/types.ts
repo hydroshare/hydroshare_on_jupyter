@@ -93,3 +93,8 @@ export enum SortByOptions {
   Author = 'AUTHOR',
   Type = 'TYPE'
 } 
+
+export interface ICreateNewResource {
+  name: string,
+  privacy: string
+}
