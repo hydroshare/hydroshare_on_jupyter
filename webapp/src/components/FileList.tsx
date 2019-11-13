@@ -66,6 +66,7 @@ export default class FileList extends React.Component<IPropsInterface, never> {
     switch (this.props.sortBy) {
       case SortByOptions.Name:
         contents.sort((a, b) => (a.name > b.name) ? 1 : -1)
+        break;
       case SortByOptions.Date:
         contents.sort((a, b) => {
           const dateA = a.lastModified ? a.lastModified : ''
@@ -79,8 +80,10 @@ export default class FileList extends React.Component<IPropsInterface, never> {
               return 0;
           }
         })
+        break;
       case SortByOptions.Type:
         contents.sort((a, b) => (a.type > b.type) ? 1 : -1)
+        break;
       default:
         break;
     }
