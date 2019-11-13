@@ -1,8 +1,6 @@
 import socket
 from .hs_server import start_server
 
-HOST = '127.0.0.1'
-PORT = 1025
 
 def _jupyter_server_extension_paths():
     return [{
