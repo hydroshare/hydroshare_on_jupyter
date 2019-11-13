@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import { push } from 'connected-react-router';
 
+import '../styles/ProjectDetailsPage.css';
 
 import * as ProjectDetailsPageActions from '../store/actions/ProjectDetailsPage';
 
@@ -16,6 +18,7 @@ import {
   IJupyterProject,
   IRootState,
 } from '../store/types';
+import ProjectInfo from '../components/ProjectInfo';
 
 // @ts-ignore the "error" that router does not exist on IRootState
 const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) => {
@@ -37,7 +40,8 @@ const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
     toggleSelectedAll: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAll(project)),
     toggleSelectedOne: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOne(item)),
-    searchProjectBy: (searchTerm: string) => dispatch(projectDetailsPageActions.searchProjectBy(searchTerm))
+    searchProjectBy: (searchTerm: string) => dispatch(projectDetailsPageActions.searchProjectBy(searchTerm)),
+    goBackToProjects: () => dispatch(push('/')),
   }
 };
 
@@ -66,6 +70,8 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
 
     return (
       <div className="page project-details">
+        <a className="go-back" onClick={this.props.goBackToProjects}>&lt; Back to projects</a>
+        <ProjectInfo project={this.props.project} />
         <FilterBarProjectDetails allSelected={this.props.allSelected}
           toggleAllSelected={toggleAllSelected} searchChange={this.handleSearchChange}/>
         <FileList
