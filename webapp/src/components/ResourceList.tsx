@@ -44,6 +44,7 @@ export default class ResourceList extends React.Component<IResourceListProps, ne
     switch (sortByTerm) {
       case SortByOptions.Name:
         projects.sort((a, b) => (a.name > b.name) ? 1 : -1)
+        break;
       case SortByOptions.Date:
         projects.sort((a, b) => {
           const dateA = a.hydroShareResource ? a.hydroShareResource.lastModified : ''
@@ -57,6 +58,7 @@ export default class ResourceList extends React.Component<IResourceListProps, ne
               return 0;
           }
         })
+        break;
       case SortByOptions.Author:
         projects.sort((a, b) => {
           const authorA = a.hydroShareResource ? a.hydroShareResource.author : ''
@@ -70,6 +72,7 @@ export default class ResourceList extends React.Component<IResourceListProps, ne
               return 0;
           }
         })
+        break;
       case SortByOptions.Status:
         projects.sort((a, b) => {
           const statusA = a.hydroShareResource ? a.hydroShareResource.status : ''
@@ -83,6 +86,7 @@ export default class ResourceList extends React.Component<IResourceListProps, ne
               return 0;
           }
         })
+        break;
       default:
         break;
     }
