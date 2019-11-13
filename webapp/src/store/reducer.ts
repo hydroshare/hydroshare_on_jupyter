@@ -20,8 +20,10 @@ const initProjectsPageState: IProjectsPageState = {
 };
 
 const initProjectDetailsPageState: IProjectDetailsPageState = {
-  allSelected: false,
-  selectedFilesAndFolders: new Set(),
+  allJupyterSelected: false,
+  allHydroShareSelected: false,
+  selectedLocalFilesAndFolders: new Set(),
+  selectedHydroShareFilesAndFolders: new Set(),
   searchTerm: '',
 };
 
@@ -86,6 +88,40 @@ const initProjectsState: IProjectsState = {
         id: 'Test',
         lastModified: 'May 5',
         status: 'Published',
+        files: [
+          {
+            dirPath: '/',
+            name: 'My glorious notebook',
+            size: 73949942858,
+            type: 'ipynb',
+          },
+          {
+            contents: [
+              {
+                dirPath: '/contents/',
+                name: 'Wonderful data',
+                size: 30124234233,
+                type: 'csv',
+              },
+              {
+                dirPath: '/contents',
+                name: 'More wonderful data',
+                size: 552434233,
+                type: 'csv',
+              },
+              {
+                dirPath: '/contents',
+                name: 'Garbage data',
+                size: 10029939402,
+                type: 'csv',
+              },
+            ],
+            dirPath: '/',
+            name: 'Data',
+            size: 392393,
+            type: 'folder',
+          },
+        ],
       },
       id: 'test',
       name: 'Testing'
@@ -93,8 +129,16 @@ const initProjectsState: IProjectsState = {
     vickyTest: {
       files: [],
       hydroShareResource: {
-        id: 'vickyTest',
         author: 'Vicky McDermott',
+        files: [
+          {
+            dirPath: '/',
+            name: 'Vicky\'s glorious notebook',
+            size: 73949942858,
+            type: 'ipynb',
+          },
+        ],
+        id: 'vickyTest',
         lastModified: 'Sep 13',
         status: 'Modified',
       },
@@ -116,29 +160,39 @@ export function mainPageReducer(state: IMainPageState = initMainPageState, actio
 }
 
 export function projectsDetailsPageReducer(state: IProjectDetailsPageState = initProjectDetailsPageState, action: AllActionTypes): IProjectDetailsPageState {
-  let selectedFilesAndFolders: Set<string>;
+  let doMakeSelected;
   switch (action.type) {
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL:
-      selectedFilesAndFolders = new Set(state.selectedFilesAndFolders);
-      const doMakeSelected = !state.allSelected;
-      action.payload.files.forEach((projectFileOrFolder: IFileOrFolder) => {
-        selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, projectFileOrFolder, doMakeSelected);
-      });
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER:
+      doMakeSelected = !state.allJupyterSelected;
       return {
         ...state,
-        allSelected: doMakeSelected,
-        selectedFilesAndFolders,
+        allJupyterSelected: doMakeSelected,
+        selectedLocalFilesAndFolders: toggleAllFilesOrFoldersSelected(action.payload.files, doMakeSelected),
       };
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE:
-      selectedFilesAndFolders = new Set(state.selectedFilesAndFolders);
-      const fileOrFolder = action.payload;
-      const itemWasSelected = selectedFilesAndFolders.has(fileOrFolder.dirPath + fileOrFolder.name);
-      selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, action.payload, !itemWasSelected);
-      console.log(selectedFilesAndFolders);
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_HYDROSHARE:
+      doMakeSelected = !state.allHydroShareSelected;
+      const {
+        hydroShareResource,
+      } = action.payload;
+      if (!hydroShareResource) { // Should never be the case
+        return state;
+      }
       return {
         ...state,
-        allSelected: false,
-        selectedFilesAndFolders,
+        allHydroShareSelected: doMakeSelected,
+        selectedHydroShareFilesAndFolders: toggleAllFilesOrFoldersSelected(hydroShareResource.files, doMakeSelected),
+      };
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE_JUPYTER:
+      return {
+        ...state,
+        allJupyterSelected: false,
+        selectedLocalFilesAndFolders: toggleFileOrFolderSelected(action.payload, state.selectedLocalFilesAndFolders),
+      };
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE_HYDROSHARE:
+      return {
+        ...state,
+        allHydroShareSelected: false,
+        selectedHydroShareFilesAndFolders: toggleFileOrFolderSelected(action.payload, state.selectedHydroShareFilesAndFolders),
       };
     case ProjectDetailsPageActions.SEARCH_PROJECT_BY:
         return {...state, searchTerm: action.payload};
@@ -147,9 +201,26 @@ export function projectsDetailsPageReducer(state: IProjectDetailsPageState = ini
   }
 }
 
+function toggleAllFilesOrFoldersSelected(files: IFileOrFolder[], doMakeSelected: boolean): Set<string> {
+  if (!doMakeSelected) {
+    return new Set();
+  }
+  let selectedFilesAndFolders: Set<string> = new Set();
+  files.forEach((projectFileOrFolder: IFileOrFolder) => {
+    selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, projectFileOrFolder, doMakeSelected);
+  });
+  return selectedFilesAndFolders;
+}
+
+function toggleFileOrFolderSelected(toggledItem: IFileOrFolder, selectedFilesAndFolders: Set<string>): Set<string> {
+  selectedFilesAndFolders = new Set(selectedFilesAndFolders);
+  const itemWasSelected = selectedFilesAndFolders.has(toggledItem.dirPath + toggledItem.name);
+  return recursivelySetSelectedState(selectedFilesAndFolders, toggledItem, !itemWasSelected);
+}
+
 export function projectsPageReducer(state: IProjectsPageState = initProjectsPageState, action: AllActionTypes): IProjectsPageState {
   switch (action.type) {
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL:
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER:
       return {...state, allSelected: !state.allSelected};
     case ProjectDetailsPageActions.SEARCH_BY:
       return {...state, searchTerm: action.payload};

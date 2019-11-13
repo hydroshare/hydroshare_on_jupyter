@@ -22,3 +22,7 @@
 .FileList td:not(:first-child) {
   border-left: 1px solid #dedede;
 }
+
+.FileList td.select {
+  text-align: center;
+}
