@@ -12,13 +12,24 @@ import tornado.options
 
 class GetResourceHandler(tornado.web.RequestHandler):
     def get(self):
-        # data = get_files_in_directory_with_metadata()
-        data = {'hello':'world'}
+        data = "metadata for one resource"
         self.write(data)
         
+# Post: Update resource info to make public
+
+# Get: List of user resources in HS
+class ListOfUserResourcesHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write("This is a list of user resources")
+
+# Get contents of resource
+class ResourceContentsHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write("These are the contents of the resource (names and link to resource)")
+
 class UserInfoHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write("Create new project")
+        self.write("User info")
 
 class NewProjectHandler(tornado.web.RequestHandler):
     def get(self):
@@ -40,6 +51,9 @@ class HydroShareGUI(tornado.web.Application):
 application = HydroShareGUI([
     (r"/", GetResourceHandler),
     (r"/new", NewProjectHandler),
+    (r"/listofuserresources", ListOfUserResourcesHandler)
+    (r"/resourcecontents", ResourceContentsHandler)
+    (r"/userinfo", UserInfoHandler)
 ])
 
 def start_server():
