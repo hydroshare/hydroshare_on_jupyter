@@ -213,3 +213,7 @@ if __name__ == '__main__':
     # test_socket()
 
 #bbc2bcea4db14f6cbde009a43c8a97a1
+"""
+import os
+os.environ['JUPYTER_DOWNLOADS']
+"""
