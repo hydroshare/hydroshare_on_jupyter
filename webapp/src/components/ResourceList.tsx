@@ -14,7 +14,7 @@ interface IResourceListProps {
   viewProject: any
   searchTerm: string
   projects: IJupyterProject[]
-  sortBy: SortByOptions
+  sortByTerm: SortByOptions | undefined
 }
 
 export default class ResourceList extends React.Component<IResourceListProps, never> {
@@ -38,18 +38,51 @@ export default class ResourceList extends React.Component<IResourceListProps, ne
     public goToFiles = (e: any) => {
       console.log("go to file")
     }
-  /*public createResourcesList = () => {
-    for resource in this.props.resources {
-
-    }
-  }*/
 
   public render() {
-    const { projects, searchTerm, sortBy } = this.props;
-    console.log(searchTerm)
-    switch (sortBy) {
+    const { projects, searchTerm, sortByTerm } = this.props;
+    switch (sortByTerm) {
       case SortByOptions.Name:
         projects.sort((a, b) => (a.name > b.name) ? 1 : -1)
+      case SortByOptions.Date:
+        projects.sort((a, b) => {
+          const dateA = a.hydroShareResource ? a.hydroShareResource.lastModified : ''
+          const dateB = b.hydroShareResource ? b.hydroShareResource.lastModified : ''
+    
+          if (dateA < dateB) {
+            return -1;
+          } else if (dateA > dateB) {
+              return 1;
+          } else {
+              return 0;
+          }
+        })
+      case SortByOptions.Author:
+        projects.sort((a, b) => {
+          const authorA = a.hydroShareResource ? a.hydroShareResource.author : ''
+          const authorB = b.hydroShareResource ? b.hydroShareResource.author : ''
+    
+          if (authorA < authorB) {
+            return -1;
+          } else if (authorA > authorB) {
+              return 1;
+          } else {
+              return 0;
+          }
+        })
+      case SortByOptions.Status:
+        projects.sort((a, b) => {
+          const statusA = a.hydroShareResource ? a.hydroShareResource.status : ''
+          const statusB = b.hydroShareResource ? b.hydroShareResource.status : ''
+    
+          if (statusA < statusB) {
+            return -1;
+          } else if (statusA > statusB) {
+              return 1;
+          } else {
+              return 0;
+          }
+        })
       default:
         break;
     }

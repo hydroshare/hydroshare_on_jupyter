@@ -196,6 +196,7 @@ def get_list_of_user_resources():
     print(resources)
     print("Resources obtained")
     resource1 = resources.__next__()
+    print(type(resource1))
     print("Have resource1")
     # print(resources.__next__())
     # for resource in resources:

@@ -10,12 +10,10 @@ import {
   MainPageActionTypes,
   ProjectsActionTypes,
   UserActionTypes,
-  SortByOptions,
 } from './types';
 
 const initProjectsPageState: IProjectsPageState = {
   allSelected: false,
-  sortBy: SortByOptions.Name,
   searchTerm: '',
 };
 
@@ -74,6 +72,20 @@ const initProjectsState: IProjectsState = {
               dirPath: '/contents/',
               name: 'Old data',
               size: 399393,
+              type: 'folder',
+            },
+            {
+              contents: [
+                {
+                  dirPath: '/contents/Final data',
+                  name: 'Shucks',
+                  size: 234230492,
+                  type: 'csv',
+                },
+              ],
+              dirPath: '/contents/',
+              name: 'Final data',
+              size: 40000,
               type: 'folder',
             },
           ],
@@ -196,6 +208,8 @@ export function projectsDetailsPageReducer(state: IProjectDetailsPageState = ini
       };
     case ProjectDetailsPageActions.SEARCH_PROJECT_BY:
         return {...state, searchTerm: action.payload};
+    case ProjectDetailsPageActions.SORT_BY_NAME:
+      return {...state, sortBy: action.payload};
     default:
       return state;
   }
@@ -224,6 +238,8 @@ export function projectsPageReducer(state: IProjectsPageState = initProjectsPage
       return {...state, allSelected: !state.allSelected};
     case ProjectDetailsPageActions.SEARCH_BY:
       return {...state, searchTerm: action.payload};
+    case ProjectDetailsPageActions.SORT_BY_NAME:
+      return {...state, sortBy: action.payload};
     default:
       return state;
   }

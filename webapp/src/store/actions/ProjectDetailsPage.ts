@@ -3,6 +3,7 @@ import { ProjectDetailsPageActions } from './action-names';
 import {
     IFileOrFolder,
     IJupyterProject,
+    SortByOptions,
 } from '../types';
 
 export function toggleIsSelectedAllLocal(project: IJupyterProject) {
@@ -24,3 +25,7 @@ export function toggleIsSelectedOneHydroShare(fileOrFolder: IFileOrFolder) {
 export function searchProjectBy(searchTerm: string) {
     return action(ProjectDetailsPageActions.SEARCH_PROJECT_BY, searchTerm);
   }
+
+export function sortBy(sortTerm: SortByOptions) {
+    return action(ProjectDetailsPageActions.SORT_BY_NAME, sortTerm);
+}
