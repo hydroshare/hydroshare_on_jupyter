@@ -127,8 +127,7 @@ def get_metadata(resource_id):
     return(resource_md)
 
 def get_user_info():
-    # username
-    pass
+    return hs.getUserInfo()
 
 def test_socket():
     pass
@@ -159,10 +158,18 @@ def create_resource_in_HS():
 
 def make_resource_public_in_HS(resource_id):
     hs.setAccessRules(resource_id, public=True)
-    return
 
 def delete_resource_in_HS(resource_id):
     hs.deleteResource(resource_id)
+
+def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
+
+    options = {
+                 "folder": resource_folder_path,
+                 "files": local_file_path
+              }
+    result = hs.resource(resource_id).files(options)
+    return result
 
 def rename_resource_in_HS():
     pass
@@ -189,22 +196,16 @@ def locate_resource_in_JH():
 """Others"""
 def get_list_of_user_resources():
     print("Getting resources")
-    resources = hs.resources()
-    print(resources)
+    resources = hs.resources(owner=username)
     print("Resources obtained")
-    resource1 = resources.__next__()
-    print(type(resource1))
-    print("Have resource1")
-    # print(resources.__next__())
-    # for resource in resources:
-    #     print("printing resource")
-    #     print(resource)
-    # pprint(resources)
-    return
+    for r in resources:
+        print(r)
+
+    return resources
 
 if __name__ == '__main__':
     # get_metadata(test_resource_id)
-    # get_hs_resource(test_resource_id, output_folder, unzip=True)
+    get_hs_resource(test_resource_id, output_folder, unzip=True)
     # get_files_in_directory_with_metadata()
     # create_resource_in_HS()
     get_list_of_user_resources()
