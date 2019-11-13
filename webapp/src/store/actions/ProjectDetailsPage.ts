@@ -5,12 +5,20 @@ import {
     IJupyterProject,
 } from '../types';
 
-export function toggleIsSelectedAll(project: IJupyterProject) {
-    return action(ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL, project);
+export function toggleIsSelectedAllLocal(project: IJupyterProject) {
+    return action(ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER, project);
 }
 
-export function toggleIsSelectedOne(fileOrFolder: IFileOrFolder) {
-    return action(ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE, fileOrFolder);
+export function toggleIsSelectedAllHydroShare(project: IJupyterProject) {
+    return action(ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_HYDROSHARE, project);
+}
+
+export function toggleIsSelectedOneLocal(fileOrFolder: IFileOrFolder) {
+    return action(ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE_JUPYTER, fileOrFolder);
+}
+
+export function toggleIsSelectedOneHydroShare(fileOrFolder: IFileOrFolder) {
+    return action(ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE_HYDROSHARE, fileOrFolder);
 }
 
 export function searchProjectBy(searchTerm: string) {

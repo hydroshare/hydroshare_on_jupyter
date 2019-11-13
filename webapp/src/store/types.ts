@@ -31,8 +31,10 @@ export interface IRootState {
 }
 
 export interface IProjectDetailsPageState {
-  allSelected: boolean
-  selectedFilesAndFolders: Set<string>
+  allJupyterSelected: boolean
+  allHydroShareSelected: boolean
+  selectedLocalFilesAndFolders: Set<string>
+  selectedHydroShareFilesAndFolders: Set<string>
   searchTerm: string
 }
 
@@ -77,9 +79,10 @@ export interface IUserState {
 
 export interface IHydroShareResourceInfo {
   id: string
-  author: string,
-  lastModified: string,
-  status: string,
+  author: string
+  files: IFileOrFolder[]
+  lastModified: string
+  status: string
 }
 
 export enum SortByOptions {
