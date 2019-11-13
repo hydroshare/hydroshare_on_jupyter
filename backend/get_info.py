@@ -55,6 +55,7 @@ auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
 
 test_resource_id = 'c40d9567678740dab868f35440a69b30'
+# test_resource_id = 'c0cdec34c3f84839b1ba2120bc3de211'
 
 output_folder = 'hs_resources'
 if not os.path.exists(output_folder):
@@ -192,25 +193,24 @@ def locate_resource_in_JH():
 """Others"""
 def get_list_of_user_resources():
     print("Getting resources")
-    resources = hs.resources()
+    resources = hs.resources(user=username)
     print(resources)
     print("Resources obtained")
-    resource1 = resources.__next__()
-    print(type(resource1))
-    print("Have resource1")
+    # resource1 = resources.__next__()
+    # print(type(resource1))
+    # print("Have resource1")
     # print(resources.__next__())
-    # for resource in resources:
-    #     print("printing resource")
-    #     print(resource)
-    # pprint(resources)
+    new_resources = list(resources)
+    print("Length of resources:")
+    print(len(new_resources))
     return
 
 if __name__ == '__main__':
-    # get_metadata(test_resource_id)
+    get_metadata(test_resource_id)
     # get_hs_resource(test_resource_id, output_folder, unzip=True)
     # get_files_in_directory_with_metadata()
     # create_resource_in_HS()
-    get_list_of_user_resources()
+    # get_list_of_user_resources()
     # get_user_info()
     # test_socket()
 
