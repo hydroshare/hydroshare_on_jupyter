@@ -3,7 +3,7 @@ import {
   IJupyterProject,
 } from '../store/types';
 
-import '../styles/ProjectInfo.css';
+import '../styles/css/ProjectInfo.css';
 
 export interface IPropTypes {
   project: IJupyterProject

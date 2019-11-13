@@ -8,7 +8,7 @@ import {
 import { FaFileMedical, FaRegFolder, FaRegFolderOpen, FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
-import '../styles/FilterBar.css';
+import '../styles/css/FilterBar.css';
 import NewProjectModal from './NewProjectModal';
 import { ICreateNewResource } from '../store/types';
 

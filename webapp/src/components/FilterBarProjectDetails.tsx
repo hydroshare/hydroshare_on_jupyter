@@ -8,7 +8,7 @@ import {
 import { FaFileMedical, FaRegFolder, FaRegFolderOpen, FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
-import '../styles/FilterBarProjectDetails.css';
+import '../styles/css/FilterBarProjectDetails.css';
 
 interface IFilterBarProjectDetailsProps {
     allSelected: boolean

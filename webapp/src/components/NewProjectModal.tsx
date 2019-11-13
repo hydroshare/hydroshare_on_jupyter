@@ -6,7 +6,7 @@ import {
 import Modal from 'react-bootstrap/Modal';
 import { ICreateNewResource } from '../store/types';
 
-import '../styles/NewProjectModal.css';
+import '../styles/css/NewProjectModal.css';
 
 interface INewProjectModalProps {
     show: boolean

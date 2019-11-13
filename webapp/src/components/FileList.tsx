@@ -5,7 +5,7 @@ import {
   IFileOrFolder,
   SortByOptions,
 } from '../store/types';
-import '../styles/FileList.css';
+import '../styles/css/FileList.css';
 
 const HUMAN_READABLE_FILE_SIZES = [
   'B',
