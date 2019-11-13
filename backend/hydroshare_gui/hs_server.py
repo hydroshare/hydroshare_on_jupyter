@@ -18,7 +18,7 @@ class GetResourceHandler(tornado.web.RequestHandler):
     def get(self):
         data = "metadata for one resource"
         self.write(data)
-        
+
 # Post: Update resource info to make public
 
 # Get: List of user resources in HS
@@ -31,9 +31,18 @@ class ResourceContentsHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("These are the contents of the resource (names and link to resource)")
 
+
 class UserInfoHandler(tornado.web.RequestHandler):
+
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
     def get(self):
-        self.write("User info")
+        data = get_user_info()
+        self.write(data)
+
 
 class NewProjectHandler(tornado.web.RequestHandler):
     def get(self):
@@ -55,9 +64,9 @@ class HydroShareGUI(tornado.web.Application):
 application = HydroShareGUI([
     (r"/", GetResourceHandler),
     (r"/new", NewProjectHandler),
-    (r"/listofuserresources", ListOfUserResourcesHandler)
-    (r"/resourcecontents", ResourceContentsHandler)
-    (r"/userinfo", UserInfoHandler)
+    (r"/listofuserresources", ListOfUserResourcesHandler),
+    (r"/resourcecontents", ResourceContentsHandler),
+    (r"/user", UserInfoHandler),
 ])
 
 def start_server():
