@@ -1,0 +1,20 @@
+.go-back {
+  font-size: 0.9em;
+  margin-bottom: 1em;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.file-lists.split .FileList {
+  width: 50%;
+  float: left;
+}
+
+.file-lists.split .FileList:first-child {
+  border-right: 2px solid #dedede;
+}
+
+.file-lists {
+  border: 2px solid #dedede;
+  overflow: auto;
+}
