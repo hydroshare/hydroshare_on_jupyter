@@ -53,6 +53,7 @@ auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
 
 test_resource_id = 'c40d9567678740dab868f35440a69b30'
+# test_resource_id = 'c0cdec34c3f84839b1ba2120bc3de211'
 
 output_folder = 'hs_resources'
 if not os.path.exists(output_folder):
