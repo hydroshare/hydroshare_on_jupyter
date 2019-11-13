@@ -201,12 +201,6 @@ def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
 def rename_resource_in_HS():
     pass
 
-# This will be terrible without an ID
-def locate_resource_in_HS():
-    # with ID: easy
-    # without ID: hard
-    pass
-
 """IN JUPYTERHUB"""
 def create_resource_in_JH():
     pass
@@ -240,7 +234,3 @@ if __name__ == '__main__':
     # test_socket()
 
 #bbc2bcea4db14f6cbde009a43c8a97a1
-"""
-import os
-os.environ['JUPYTER_DOWNLOADS']
-"""
