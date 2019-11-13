@@ -3,14 +3,14 @@
 
 import signal
 import logging
-from get_info import get_files_in_directory_with_metadata
+from get_info import get_files_in_directory_with_metadata, get_user_info
 
 import tornado.ioloop
 import tornado.web
 import tornado.options
 
 # get user information
-# get list of resources 
+# get list of resources
 # list of contents for those resources
 
 
