@@ -1,28 +1,18 @@
 .FileList {
-  width: 100%;
-}
+  width: 100%; }
 
 .FileList .spacer {
   display: inline-block;
-  width: 1em;
-}
+  width: 1em; }
 
 .FileList thead {
-  font-weight: bold;
-}
+  font-weight: bold; }
 
 .FileList td {
-  padding: 0.3em;
-}
+  padding: 0.3em; }
 
 .FileList tr td {
-  border-top: 1px solid #dedede;
-}
+  border-top: 1px solid #dedede; }
 
 .FileList td:not(:first-child) {
-  border-left: 1px solid #dedede;
-}
-
-.FileList td.select {
-  text-align: center;
-}
+  border-left: 1px solid #dedede; }

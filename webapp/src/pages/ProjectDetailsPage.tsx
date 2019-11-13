@@ -17,6 +17,7 @@ import {
   IFileOrFolder,
   IJupyterProject,
   IRootState,
+  SortByOptions,
 } from '../store/types';
 import ProjectInfo from '../components/ProjectInfo';
 
@@ -34,7 +35,8 @@ const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) =
     allHydroShareSelected: projectDetailsPage.allHydroShareSelected,
     selectedLocalFilesAndFolders: projectDetailsPage.selectedLocalFilesAndFolders,
     selectedHydroShareFilesAndFolders: projectDetailsPage.selectedHydroShareFilesAndFolders,
-    searchTerm: projects.searchTerm
+    searchTerm: projectDetailsPage.searchTerm,
+    sortByTerm: projectDetailsPage.sortBy
   };
 };
 
@@ -45,6 +47,7 @@ const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
     toggleSelectedOneLocal: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOneLocal(item)),
     toggleSelectedOneHydroShare: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOneHydroShare(item)),
     searchProjectBy: (searchTerm: string) => dispatch(projectDetailsPageActions.searchProjectBy(searchTerm)),
+    sortBy: (sortByTerm: SortByOptions) => dispatch(projectDetailsPageActions.sortBy(sortByTerm)),
     goBackToProjects: () => dispatch(push('/')),
   }
 };
@@ -54,7 +57,6 @@ type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispa
 class ProjectDetailsPage extends React.Component<PropsType, never> {
 
   public handleSearchChange = (event: any) => {
-    console.log(event.target.value)
     this.props.searchProjectBy(event.target.value)
   }
 
@@ -82,7 +84,8 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
             files={hydroShareResource.files}
             onFileOrFolderSelected={this.props.toggleSelectedOneHydroShare}
             selectedFilesAndFolders={this.props.selectedHydroShareFilesAndFolders}
-            searchTerm={''}
+            searchTerm={this.props.searchTerm}
+            sortBy={this.props.sortByTerm}
             toggleAllSelected={toggleAllHydroShareSelected}
         />
     ) : null;
@@ -94,7 +97,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
         <a className="go-back" onClick={this.props.goBackToProjects}>&lt; Back to projects</a>
         <ProjectInfo project={this.props.project} />
         <FilterBarProjectDetails allSelected={this.props.allJupyterSelected}
-          toggleAllSelected={toggleAllLocalSelected} searchChange={this.handleSearchChange}/>
+          toggleAllSelected={toggleAllLocalSelected} searchChange={this.handleSearchChange} sortBy={this.props.sortBy}/>
         <div className={fileListContainerClasses}>
           <FileList
             allSelected={this.props.allJupyterSelected}
@@ -102,6 +105,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
             files={this.props.project.files}
             onFileOrFolderSelected={this.props.toggleSelectedOneLocal}
             selectedFilesAndFolders={this.props.selectedLocalFilesAndFolders}
+            sortBy={this.props.sortByTerm}
             searchTerm={this.props.searchTerm}
           />
           {hydroShareFiles}
