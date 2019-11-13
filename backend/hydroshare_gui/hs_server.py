@@ -18,7 +18,6 @@ class GetResourceHandler(tornado.web.RequestHandler):
     def get(self):
         data = "metadata for one resource"
         self.write(data)
-<<<<<<< HEAD
         
 # Post: Update resource info to make public
 
@@ -31,8 +30,6 @@ class ListOfUserResourcesHandler(tornado.web.RequestHandler):
 class ResourceContentsHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("These are the contents of the resource (names and link to resource)")
-=======
->>>>>>> 289bd8bcccd7a9af7265fd43063535595a81e304
 
 class UserInfoHandler(tornado.web.RequestHandler):
     def get(self):
