@@ -11,6 +11,7 @@ import {
   IJupyterProject,
   IRootState,
   SortByOptions,
+  ICreateNewResource,
 } from '../store/types';
 
 const mapStateToProps = ({ projects, projectPage }: IRootState) => {
@@ -25,7 +26,8 @@ const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
     viewProject: (project: IJupyterProject) => dispatch(AppActions.viewProject(project)),
     searchBy: (searchTerm: string) => dispatch(projectPageActions.searchBy(searchTerm)),
-    sortBy: (sortByTerm: SortByOptions) => dispatch(projectPageActions.sortBy(sortByTerm))
+    sortBy: (sortByTerm: SortByOptions) => dispatch(projectPageActions.sortBy(sortByTerm)),
+    newProject: (newResource: ICreateNewResource) => dispatch(projectPageActions.createNewResource(newResource))
   }
 };
 
@@ -45,7 +47,7 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
     return (
       <div className="page projects">
         // @ts-ignore
-        <FilterBar searchChange={this.handleSearchChange} sortBy={this.props.sortBy}/>
+        <FilterBar searchChange={this.handleSearchChange} sortBy={this.props.sortBy} newProject={this.props.newProject}/>
         <ResourceList viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
       </div>
     )
