@@ -40,7 +40,8 @@
   padding-top: 3px;
   margin-top: 6px; }
 
-.new-resource-button {
+.new-folder-button {
+  margin-left: auto;
   margin-right: 12px;
   height: 36px;
   margin-top: 6px;
