@@ -18,6 +18,12 @@ class GetResourceHandler(tornado.web.RequestHandler):
 class NewProjectHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("Create new project")
+        
+    def post(self):
+        abstract = self.get_argument('abstract')
+        title = self.get_argument('title')
+        keywords = self.get_argument('keywords')
+        metadata = self.get_argument('metadata')
 
 class HydroShareGUI(tornado.web.Application):
     is_closing = False
