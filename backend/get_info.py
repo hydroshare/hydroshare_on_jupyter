@@ -164,7 +164,7 @@ def delete_resource_in_HS(resource_id):
     hs.deleteResource(resource_id)
 
 def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
-
+    #first delete file from resource if needed ??
     options = {
                  "folder": resource_folder_path,
                  "files": local_file_path
@@ -200,7 +200,7 @@ def get_list_of_user_resources():
     resources = hs.resources(owner=username)
     print("Resources obtained")
     for r in resources:
-        print(r)
+        print(r["resource_id"])
 
     return resources
 
