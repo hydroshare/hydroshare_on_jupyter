@@ -21,8 +21,8 @@
     "reactstrap": "^8.1.1"
   },
   "scripts": {
-    "build:css": "node-sass src/styles/ -o src/styles/ ",
-    "watch:css": "yarn run build:css && node-sass src/styles/ -o src/styles/ -w -r",
+    "build:css": "node-sass src/styles/ -o src/styles/css/ ",
+    "watch:css": "yarn run build:css && node-sass src/styles/ -o src/styles/css/ -w -r",
     "start:js": "react-scripts-ts start",
     "start": "npm-run-all -p watch:css start:js",
     "build:js": "react-scripts-ts build",

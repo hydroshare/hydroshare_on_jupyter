@@ -3,7 +3,7 @@ import { Form} from 'react-bootstrap';
 import ContextMenu from 'react-context-menu';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../styles/ResourceList.css';
+import '../styles/css/ResourceList.css';
 
 import {
   IJupyterProject, SortByOptions,
