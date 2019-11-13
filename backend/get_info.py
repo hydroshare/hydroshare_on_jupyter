@@ -11,9 +11,7 @@ NOTE: Need access to private resources
 CURRENT:
 - get hs resource (with files) with resource id
 - get metadata with resource id
-"""
 
-"""
 POSSIBILITIES WITH HS API:
 
 get_resource_map_xml
@@ -72,8 +70,7 @@ def get_hs_resource(resource_id, output_folder, unzip=True):
 def get_files_in_directory_with_metadata():
     # uses HS API to retrieve metadata -- different than existing app
 
-    files = glob.glob('{}/*/*/data/resourcemetadata.xml'.format(output_folder))
-    # pprint(files)
+    files = glob.glob('hs_resources/*/*/data/resourcemetadata.xml')
     data = {}
 
     # TODO: Get ltime and size
@@ -141,7 +138,7 @@ def test_socket():
 def create_resource_in_HS():
     # Creates a private resource for user
     """
-    TODO: 
+    TODO:
     - Check if resource exists (API will just create a duplicate!)
     - Check if public
     """
@@ -153,11 +150,11 @@ def create_resource_in_HS():
     fpath = '../hs_resources/{}/{}/readme.txt'.format(test_resource_id, test_resource_id)
     metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"John Smith"}}, {"creator":{"name":"Lisa Miller"}}]'
     extra_metadata = '{"key-1": "value-1", "key-2": "value-2"}'
-    
+
     print("Creating resource")
     resource_id = hs.createResource(rtype, title, resource_file=fpath, keywords=keywords, abstract=abstract, metadata=metadata, extra_metadata=extra_metadata)
     print(resource_id)
-    
+
     return
 
 def make_resource_public_in_HS(resource_id):

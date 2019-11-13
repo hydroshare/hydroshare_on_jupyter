@@ -9,6 +9,10 @@ import tornado.ioloop
 import tornado.web
 import tornado.options
 
+# get user information
+# get list of resources 
+# list of contents for those resources
+
 
 class GetResourceHandler(tornado.web.RequestHandler):
     def get(self):
