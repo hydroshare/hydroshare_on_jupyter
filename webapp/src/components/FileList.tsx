@@ -7,6 +7,8 @@ import {
 } from '../store/types';
 import '../styles/css/FileList.css';
 
+import { FaRegFolder, FaFileCsv, FaFileCode} from "react-icons/fa";
+
 const HUMAN_READABLE_FILE_SIZES = [
   'B',
   'KB',
@@ -105,10 +107,26 @@ export default class FileList extends React.Component<IPropsInterface, never> {
         const itemPath = fileOrFolder.dirPath + fileOrFolder.name;
         const isSelected = this.props.selectedFilesAndFolders.has(itemPath);
         const onSelectedToggled = (e: React.ChangeEvent<HTMLInputElement>) => this.props.onFileOrFolderSelected(fileOrFolder, e.target.checked);
+
+        let fileIcon;
+        switch(fileOrFolder.type) {
+          case 'folder':
+            fileIcon = <FaRegFolder/>
+            break;
+          case 'csv':
+            fileIcon = <FaFileCsv/>
+            break;
+          case 'ipynb':
+            fileIcon = <FaFileCode/>
+            break;
+          default:
+            break;
+        }
+
         elements.push(
           <tr>
             <td className="select"><input className="selectOne-checkbox" type="checkbox" checked={isSelected} onChange={onSelectedToggled} /></td>
-            <td className="name">{spacers}{fileOrFolder.name}</td>
+            <td className="name">{spacers}{fileIcon}  {fileOrFolder.name}</td>
             <td className="type">{fileOrFolder.type}</td>
             <td className="size">{this.getFormattedSizeString(fileOrFolder.size)}</td>
         </tr>

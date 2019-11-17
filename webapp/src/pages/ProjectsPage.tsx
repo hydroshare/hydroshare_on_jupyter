@@ -38,6 +38,7 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
   public handleSearchChange = (event: any) => {
     this.props.searchBy(event.target.value)
   }
+   
 
   public handleViewProject = (project: IJupyterProject) => {
     this.props.viewProject(project);
@@ -46,7 +47,6 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
   public render() {
     return (
       <div className="page projects">
-        // @ts-ignore
         <FilterBar searchChange={this.handleSearchChange} sortBy={this.props.sortBy} newProject={this.props.newProject}/>
         <ResourceList viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
       </div>

@@ -3,7 +3,7 @@ import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 
-import '../styles/ProjectDetailsPage.css';
+import '../styles/css/ProjectDetailsPage.css';
 
 import * as ProjectDetailsPageActions from '../store/actions/ProjectDetailsPage';
 
