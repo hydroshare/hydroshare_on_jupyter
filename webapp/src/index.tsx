@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/App.css';
+import './styles/css/App.css';
 
 import { ConnectedRouter } from 'connected-react-router';
 import {
