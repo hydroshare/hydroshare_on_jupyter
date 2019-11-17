@@ -9,6 +9,8 @@ import '../styles/css/FileList.css';
 
 import { FaRegFolder, FaFileCsv, FaFileCode} from "react-icons/fa";
 
+import MaterialTable from 'material-table';
+
 const HUMAN_READABLE_FILE_SIZES = [
   'B',
   'KB',
@@ -28,22 +30,123 @@ interface IPropsInterface {
   toggleAllSelected: () => AllActionTypes
 }
 
-export default class FileList extends React.Component<IPropsInterface, never> {
+interface IFlatFile {
+  name: string,
+  size: number,
+  type: string,
+  dirPath: string,
+  id: string,
+  parentId?: string,
+}
+
+interface IStateInterface {
+  data: IFlatFile[]
+}
+
+export default class FileList extends React.Component<IPropsInterface, IStateInterface> {
 
   constructor(props: IPropsInterface) {
     super(props)
+    this.state = {
+      data: this.flattenFiles(this.props.files)
+    }
+  }             
+  
+  public flattenFiles(files: IFileOrFolder[], parentID='', level=0): IFlatFile[] {
+    let flatFiles: IFlatFile[] = [];
+    let id = 1;
+    files.forEach(fileOrFolder => {
+      const idString = parentID === '' ? id.toString(): parentID + '-' + id.toString()
+      const spacers = this.generateSpaces(level);
+      flatFiles.push({
+        name: spacers+fileOrFolder.name,
+        size: fileOrFolder.size,
+        type: fileOrFolder.type,
+        dirPath: fileOrFolder.dirPath,
+        id: idString,
+        parentId: parentID !== '' ? parentID : undefined,
+      })
+      if (fileOrFolder.contents) {
+        flatFiles = flatFiles.concat(this.flattenFiles(fileOrFolder.contents, idString, level+1))
+      }
+      id++;
+    });
+    return flatFiles;
   }
 
   public render() {
-    const { files, searchTerm } = this.props;
+    const { files } = this.props;
     if (!files) {
       return null;
     }
 
-    console.log(searchTerm)
+    console.log(this.state.data)
 
     return (
-      <table className="FileList">
+      <MaterialTable
+        title="Simple Action Preview"
+        columns={[
+          { title: 'Name', field: 'name', cellStyle:{ whiteSpace: 'pre'} },
+          { title: 'Type', field: 'type' },
+          { title: 'Size', field: 'size', type: 'numeric' },
+        ]}
+        data={this.state.data}      
+        actions={[
+          {
+            icon: 'save',
+            tooltip: 'Save User',
+            onClick: (event, rowData) => alert("You saved " + rowData)
+          }
+        ]}
+        parentChildData={(row, rows) => rows.find(a => a.id === row.parentId)}
+        options={{
+          selection: true,
+          sorting: true,
+          search: true,
+        }}
+        /*editable={{
+          onRowAdd: newData =>
+            new Promise((resolve, reject) => {
+              setTimeout(() => {
+                {
+                  const data = this.state.data;
+                  data.push(newData);
+                  this.setState({ data }, () => resolve());
+                }
+                resolve()
+              }, 1000)
+            }),
+          onRowUpdate: (newData, oldData) =>
+            new Promise((resolve, reject) => {
+              setTimeout(() => {
+                {
+                  const data = this.state.data;
+                  if (oldData) {
+                    const index = data.indexOf(oldData);
+                    data[index] = newData;
+                  }
+                  this.setState({ data }, () => resolve());
+                }
+                resolve()
+              }, 1000)
+            }),
+          onRowDelete: oldData =>
+            new Promise((resolve, reject) => {
+              setTimeout(() => {
+                {
+                  const data = this.state.data;
+                  const index = data.indexOf(oldData);
+                  data.splice(index, 1);
+                  this.setState({ data }, () => resolve());
+                }
+                resolve()
+              }, 1000)
+            }),
+        }}*/
+
+      />
+
+      /*<table className="FileList">
         <thead>
         <td className="select">
           <input
@@ -60,7 +163,7 @@ export default class FileList extends React.Component<IPropsInterface, never> {
         <tbody>
         {this.buildDirectoryTree(files)}
         </tbody>
-      </table>
+      </table>*/
     )
   }
 
@@ -141,6 +244,14 @@ export default class FileList extends React.Component<IPropsInterface, never> {
       }
     });
     return [elements, relevantFileForSearch];
+  };
+
+  private generateSpaces = (count: number): string => {
+    let elems ='';
+    for (let i = 0; i < count; ++i) {
+      elems += '         ';
+    }
+    return elems;
   };
 
   private generateSpacers = (count: number): React.ReactElement[] => {
