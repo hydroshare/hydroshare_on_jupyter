@@ -81,9 +81,15 @@ def get_files_JH(resource_id):
         else:
             type = "folder"
             filename = file
-        files2.append({"name": filename, "type": type, "size": os.path.getsize(filepath)})
+        if type == "folder":
+            files2.append({"name": filename, "type": type, "size": os.path.getsize(filepath), "contents": get_recursive_folder_contents(filepath)})
+        else:
+            files2.append({"name": filename, "type": type, "size": os.path.getsize(filepath)})
     files_dict["Files"] = files2
     return files_dict
+
+def get_recursive_folder_contents(filepath):
+    return []
 
 def get_files_HS(resource_id):
     return hs.getResourceFileList(resource_id)
