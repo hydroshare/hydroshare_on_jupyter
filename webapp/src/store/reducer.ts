@@ -127,34 +127,6 @@ const initProjectsState: IProjectsState = {
                 size: 10029939402,
                 type: 'csv',
               },
-              {
-                contents: [
-                  {
-                    dirPath: '/contents/Old Data',
-                    name: 'Stubby',
-                    size: 29934423,
-                    type: 'csv',
-                  },
-                ],
-                dirPath: '/contents/',
-                name: 'Old data',
-                size: 399393,
-                type: 'folder',
-              },
-              {
-                contents: [
-                  {
-                    dirPath: '/contents/Final data',
-                    name: 'Shucks',
-                    size: 234230492,
-                    type: 'csv',
-                  },
-                ],
-                dirPath: '/contents/',
-                name: 'Final data',
-                size: 40000,
-                type: 'folder',
-              },
             ],
             dirPath: '/',
             name: 'Data',
