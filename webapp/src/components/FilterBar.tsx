@@ -13,9 +13,9 @@ import NewProjectModal from './NewProjectModal';
 import { ICreateNewResource } from '../store/types';
 
 interface IPropTypes {
-  allSelected: boolean
-  toggleAllSelected: () => any
-  searchChange: () => any
+  // allSelected: boolean
+  // toggleAllSelected: () => any
+  searchChange: (event: any) => void
   sortBy: (sortBy: string) => any
   newProject: (newResource: ICreateNewResource) => any
 }
@@ -62,8 +62,8 @@ export default class FilterBar extends React.Component<IPropTypes, IStateTypes> 
                             id={`select-all-checkbox`}
                             className='selectAll-checkbox'
                             label={`Select All`}
-                            checked={this.props.allSelected}
-                            onChange={this.props.toggleAllSelected}
+                            // checked={this.props.allSelected}
+                            // onChange={this.props.toggleAllSelected}
                         />
                     </Col>
                     <Col className="filterForm-searchBox" md="8">

@@ -5,9 +5,10 @@
   cursor: pointer;
 }
 
-.file-lists.split .FileList {
+.file-lists.split .MuiPaper-root {
   width: 50%;
   float: left;
+  overflow: auto;
 }
 
 .file-lists.split .FileList:first-child {
@@ -17,4 +18,5 @@
 .file-lists {
   border: 2px solid #dedede;
   overflow: auto;
+  display:flex
 }
