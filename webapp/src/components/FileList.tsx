@@ -7,8 +7,6 @@ import {
 } from '../store/types';
 import '../styles/css/FileList.css';
 
-import { FaRegFolder, FaFileCsv, FaFileCode} from "react-icons/fa";
-
 import MaterialTable from 'material-table';
 
 const HUMAN_READABLE_FILE_SIZES = [
@@ -28,11 +26,12 @@ interface IPropsInterface {
   sortBy: SortByOptions | undefined,
   searchTerm: string
   toggleAllSelected: () => AllActionTypes
+  hydroshare: boolean,
 }
 
 interface IFlatFile {
   name: string,
-  size: number,
+  size: string,
   type: string,
   dirPath: string,
   id: string,
@@ -47,31 +46,59 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
 
   constructor(props: IPropsInterface) {
     super(props)
-    this.state = {
-      data: this.flattenFiles(this.props.files)
-    }
   }             
   
-  public flattenFiles(files: IFileOrFolder[], parentID='', level=0): IFlatFile[] {
+  public flattenFiles(files: IFileOrFolder[], parentID='', level=0, override=false): [IFlatFile[], boolean] {
     let flatFiles: IFlatFile[] = [];
     let id = 1;
+    let relevantFileForSearch = false
+
     files.forEach(fileOrFolder => {
+      let subElements;
+      let subFileForSearch;
       const idString = parentID === '' ? id.toString(): parentID + '-' + id.toString()
-      const spacers = this.generateSpaces(level);
-      flatFiles.push({
-        name: spacers+fileOrFolder.name,
-        size: fileOrFolder.size,
-        type: fileOrFolder.type,
-        dirPath: fileOrFolder.dirPath,
-        id: idString,
-        parentId: parentID !== '' ? parentID : undefined,
-      })
       if (fileOrFolder.contents) {
-        flatFiles = flatFiles.concat(this.flattenFiles(fileOrFolder.contents, idString, level+1))
+        const returnValue = this.flattenFiles(fileOrFolder.contents, idString, level+1)
+        subElements = returnValue[0]
+        subFileForSearch = returnValue[1]
+      }
+      const searchTermPresent = fileOrFolder.name.toLowerCase().includes(this.props.searchTerm.toLowerCase())
+      if (searchTermPresent || subFileForSearch || override) {
+        let fileIcon;
+        switch(fileOrFolder.type) {
+          case 'folder':
+            fileIcon = '📁'
+            break;
+          case 'csv':
+            fileIcon = '📄'
+            break;
+          case 'ipynb':
+            fileIcon = '💻'
+            break;
+          default:
+            break;
+        }
+        relevantFileForSearch = true
+        const spacers = this.generateSpaces(level);
+        flatFiles.push({
+          name: spacers+fileIcon+'  ' +fileOrFolder.name,
+          size: this.getFormattedSizeString(fileOrFolder.size),
+          type: fileOrFolder.type,
+          dirPath: fileOrFolder.dirPath,
+          id: idString,
+          parentId: parentID !== '' ? parentID : undefined,
+        })
+        if (fileOrFolder.contents) {
+          if (searchTermPresent || override) {
+            flatFiles = flatFiles.concat(this.flattenFiles(fileOrFolder.contents, idString, level+1, true)[0]);
+          } else if (subFileForSearch && subElements) {
+            flatFiles = flatFiles.concat(subElements)
+          }
+        }
       }
       id++;
     });
-    return flatFiles;
+    return [flatFiles, relevantFileForSearch];
   }
 
   public render() {
@@ -80,17 +107,17 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
       return null;
     }
 
-    console.log(this.state.data)
+    console.log(this.props.files)
 
     return (
       <MaterialTable
-        title="Simple Action Preview"
+        title={this.props.hydroshare ? "Hydroshare files" : "JupyterHub files"}
         columns={[
           { title: 'Name', field: 'name', cellStyle:{ whiteSpace: 'pre'} },
           { title: 'Type', field: 'type' },
           { title: 'Size', field: 'size', type: 'numeric' },
         ]}
-        data={this.state.data}      
+        data={this.flattenFiles(this.props.files)[0]}      
         actions={[
           {
             icon: 'save',
@@ -102,7 +129,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
         options={{
           selection: true,
           sorting: true,
-          search: true,
+          search: false,
         }}
         /*editable={{
           onRowAdd: newData =>
@@ -167,85 +194,6 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
     )
   }
 
-  private buildDirectoryTree = (contents: IFileOrFolder[], level=0, override = false): [React.ReactElement[], boolean] => {
-    switch (this.props.sortBy) {
-      case SortByOptions.Name:
-        contents.sort((a, b) => (a.name > b.name) ? 1 : -1)
-        break;
-      case SortByOptions.Date:
-        contents.sort((a, b) => {
-          const dateA = a.lastModified ? a.lastModified : ''
-          const dateB = b.lastModified ? b.lastModified : ''
-    
-          if (dateA < dateB) {
-            return -1;
-          } else if (dateA > dateB) {
-              return 1;
-          } else {
-              return 0;
-          }
-        })
-        break;
-      case SortByOptions.Type:
-        contents.sort((a, b) => (a.type > b.type) ? 1 : -1)
-        break;
-      default:
-        break;
-    }
-    let elements: React.ReactElement[] = [];
-    let relevantFileForSearch = false
-    contents.forEach(fileOrFolder => {
-      let subElements;
-      let subFileForSearch;
-      if (fileOrFolder.contents) {
-        const returnValue = this.buildDirectoryTree(fileOrFolder.contents, level+1)
-        subElements = returnValue[0]
-        subFileForSearch = returnValue[1]
-      }
-      const searchTermPresent = fileOrFolder.name.toLowerCase().includes(this.props.searchTerm.toLowerCase())
-      if (searchTermPresent || subFileForSearch || override) {
-        relevantFileForSearch = true
-      
-        const spacers = this.generateSpacers(level);
-        const itemPath = fileOrFolder.dirPath + fileOrFolder.name;
-        const isSelected = this.props.selectedFilesAndFolders.has(itemPath);
-        const onSelectedToggled = (e: React.ChangeEvent<HTMLInputElement>) => this.props.onFileOrFolderSelected(fileOrFolder, e.target.checked);
-
-        let fileIcon;
-        switch(fileOrFolder.type) {
-          case 'folder':
-            fileIcon = <FaRegFolder/>
-            break;
-          case 'csv':
-            fileIcon = <FaFileCsv/>
-            break;
-          case 'ipynb':
-            fileIcon = <FaFileCode/>
-            break;
-          default:
-            break;
-        }
-
-        elements.push(
-          <tr>
-            <td className="select"><input className="selectOne-checkbox" type="checkbox" checked={isSelected} onChange={onSelectedToggled} /></td>
-            <td className="name">{spacers}{fileIcon}  {fileOrFolder.name}</td>
-            <td className="type">{fileOrFolder.type}</td>
-            <td className="size">{this.getFormattedSizeString(fileOrFolder.size)}</td>
-        </tr>
-        );
-        if (fileOrFolder.contents) {
-          if (searchTermPresent || override) {
-            elements = elements.concat(this.buildDirectoryTree(fileOrFolder.contents, level+1, true)[0]);
-          } else if (subFileForSearch && subElements) {
-            elements = elements.concat(subElements)
-          }
-        }
-      }
-    });
-    return [elements, relevantFileForSearch];
-  };
-
   private generateSpaces = (count: number): string => {
     let elems ='';
     for (let i = 0; i < count; ++i) {
@@ -253,15 +201,6 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
     }
     return elems;
   };
-
-  private generateSpacers = (count: number): React.ReactElement[] => {
-    const elems: React.ReactElement[] = [];
-    for (let i = 0; i < count; ++i) {
-      elems.push(<span className="spacer" />);
-    }
-    return elems;
-  };
-
 
   // TODO: Write some unit tests
   private getFormattedSizeString = (sizeBytes: number): string => {
