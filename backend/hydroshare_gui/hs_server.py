@@ -3,7 +3,7 @@
 
 import signal
 import logging
-from get_info import get_files_in_directory_with_metadata, get_user_info
+# from get_info import get_files_in_directory_with_metadata, get_user_info
 
 import tornado.ioloop
 import tornado.web
@@ -30,7 +30,6 @@ class ListOfUserResourcesHandler(tornado.web.RequestHandler):
 class ResourceContentsHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("These are the contents of the resource (names and link to resource)")
-
 
 class UserInfoHandler(tornado.web.RequestHandler):
 
