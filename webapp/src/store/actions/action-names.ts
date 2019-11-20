@@ -12,3 +12,7 @@ export enum ProjectsActions {
   SET_PROJECTS = 'SET_PROJECTS',
   NEW_PROJECT = 'NEW_PROJECT',
 }
+
+export enum UserInfoActions {
+  SET_USER_INFO = 'UserInfoActions/SET_USER_INFO',
+}

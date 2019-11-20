@@ -1,23 +1,32 @@
 import * as React from 'react';
 import {connect} from 'react-redux';
-import { Dispatch } from 'redux';
 
 import {
-  AllActionTypes,
+  loadInitData,
+} from "../store/actions/App";
+import {
   IRootState
 } from '../store/types';
+import {
+  ThunkDispatch,
+} from "redux-thunk";
 
 const mapStateToProps = ({ user }: IRootState) => ({
   userName: user.name,
 });
 
-const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => ({
-
+const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => ({
+  loadInitData: () => dispatch(loadInitData()),
 });
 
 type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 class Header extends React.Component<ReduxType, never> {
+
+  public componentDidMount(): void {
+    // TODO: Move this somewhere better
+    this.props.loadInitData();
+  }
 
   public render() {
     return (
