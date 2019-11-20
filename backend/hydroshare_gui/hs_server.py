@@ -3,7 +3,7 @@
 
 import signal
 import logging
-# from get_info import get_files_in_directory_with_metadata, get_user_info
+from get_info import get_files_HS, get_files_JH, get_user_info, get_list_of_user_resources
 
 import tornado.ioloop
 import tornado.web
@@ -13,26 +13,24 @@ import tornado.options
 # get list of resources
 # list of contents for those resources
 
-
-class GetResourceHandler(tornado.web.RequestHandler):
+# Get: List of user resources in HS and JH
+# Post: Creates new HS resource, returns new resource ID
+class ResourcesHandler(tornado.web.RequestHandler):
     def get(self):
-        data = "metadata for one resource"
-        self.write(data)
+        self.write(get_list_of_user_resources())
 
-# Post: Update resource info to make public
+    def post(self):
+        pass
 
-# Get: List of user resources in HS
-class ListOfUserResourcesHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write("This is a list of user resources")
+class ResourcesFileHandlerHS(tornado.web.RequestHandler):
+    def get(self, res_id):
+        self.write(get_files_HS(res_id))
 
-# Get contents of resource
-class ResourceContentsHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write("These are the contents of the resource (names and link to resource)")
+class ResourcesFileHandlerJH(tornado.web.RequestHandler):
+    def get(self, res_id):
+        self.write(get_files_JH(res_id))
 
 class UserInfoHandler(tornado.web.RequestHandler):
-
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
@@ -42,10 +40,6 @@ class UserInfoHandler(tornado.web.RequestHandler):
         data = get_user_info()
         self.write(data)
 
-
-class NewProjectHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write("Create new project")
 
 class HydroShareGUI(tornado.web.Application):
     is_closing = False
@@ -61,11 +55,10 @@ class HydroShareGUI(tornado.web.Application):
 
 
 application = HydroShareGUI([
-    (r"/", GetResourceHandler),
-    (r"/new", NewProjectHandler),
-    (r"/listofuserresources", ListOfUserResourcesHandler),
-    (r"/resourcecontents", ResourceContentsHandler),
     (r"/user", UserInfoHandler),
+    (r"/resources", ResourcesHandler),
+    (r"/resources/([^/]+)/HSfiles", ResourcesFileHandlerHS),
+    (r"/resources/([^/]+)/localfiles", ResourcesFileHandlerJH)
 ])
 
 def start_server():

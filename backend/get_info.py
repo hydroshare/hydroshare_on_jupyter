@@ -67,7 +67,30 @@ def get_hs_resource(resource_id, output_folder, unzip=True):
     else:
         print("Resource already exists!")
 
-def get_files_in_directory_with_metadata():
+def get_files_JH(resource_id):
+    files_dict = {}
+    get_hs_resource(resource_id, output_folder)
+    files = glob.glob('{}/{}/{}/data/contents/*'.format(output_folder, resource_id, resource_id))
+    prefix = output_folder + "/" + resource_id + "/" + resource_id + "/data/contents/"
+    files2 = []
+    for filepath in files:
+        file = filepath[len(prefix):]
+        if file.rfind(".") != -1:
+            type = file[file.rfind(".")+1:]
+            filename = file[:file.rfind(".")]
+        else:
+            type = "folder"
+            filename = file
+        files2.append({"name": filename, "type": type, "size": os.path.getsize(filepath)})
+    files_dict["Files"] = files2
+    return files_dict
+
+def get_files_HS(resource_id):
+    return hs.getResourceFileList(resource_id)
+
+def get_metadata_of_all_files():
+    #TODO scrape from xml file instead of API call
+
     # uses HS API to retrieve metadata -- different than existing app
 
     files = glob.glob('{}/*/*/data/resourcemetadata.xml'.format(output_folder))
@@ -97,8 +120,9 @@ def get_files_in_directory_with_metadata():
         data = "There is no data"
     return data
 
-def get_metadata(resource_id):
+def get_metadata_one_file(resource_id):
     """
+    #TODO scrape from xml file instead of API call
     Get metadata for one resource. Contains:
         - abstract
         - authors
@@ -195,18 +219,20 @@ def get_list_of_user_resources():
 
 if __name__ == '__main__':
     # get_metadata(test_resource_id)
-    get_hs_resource(test_resource_id, output_folder, unzip=True)
-    # get_files_in_directory_with_metadata()
-    # create_resource_in_HS()
-    resources = get_list_of_user_resources()
-    for r in resources:
-        print(r["resource_id"])
-        get_hs_resource(r["resource_id"], output_folder, unzip=True)
-
-    print(r["resource_id"])
-    local_file = 'backend/tests/hs_resources/' + r["resource_id"] + '/' + r["resource_id"] + '/data/contents/Introduction_to_Coding.ipynb'
-    update_path = 'data/contents'
-    print(update_resource_in_HS(local_file, update_path, r["resource_id"]))
+    # get_hs_resource(test_resource_id, output_folder, unzip=True)
+    # # get_files_in_directory_with_metadata()
+    # # create_resource_in_HS()
+    # resources = get_list_of_user_resources()
+    # for r in resources:
+    #     print(r["resource_id"])
+    #     get_hs_resource(r["resource_id"], output_folder, unzip=True)
+    #
+    # print(r["resource_id"])
+    # local_file = 'backend/tests/hs_resources/' + r["resource_id"] + '/' + r["resource_id"] + '/data/contents/Introduction_to_Coding.ipynb'
+    # update_path = 'data/contents'
+    # print(update_resource_in_HS(local_file, update_path, r["resource_id"]))
+    for file in (get_files_HS("8b826c43f55043f583c85ae312a8894f")):
+        print(file)
     # get_user_info()
     # test_socket()
 
