@@ -37,32 +37,6 @@ set resource flags
 to set file metadata
 """
 
-"""
-POSSIBILITIES WITH HS API:
-
-get_resource_map_xml
-delete_file_from_resource
-get_file_from_hs_resource
-add_file_to_hs_resource
-contents of specific folder from resource
-create a folder for resource
-delete a folder for resource
-get science metadata xml_rdf for a resource
-get science metadata as json for a resource
-update science metadata for a resource
-update custom science meatadata for a resource
-move or rename a resource file
-zip a resource file or folder
-unzip a resource file or folder
-create a copy of resource
-create a new version of resource
-upload files to a specific resource folder
-create a referenced content file
-update a referenced content file
-set resource flags
-to set file metadata
-"""
-
 ### This works for public resources
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from pprint import pprint
@@ -80,7 +54,7 @@ hs = HydroShare(auth=auth)
 
 test_resource_id = 'c40d9567678740dab868f35440a69b30'
 
-output_folder = 'hs_resources'
+output_folder = 'backend/tests/hs_resources'
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
     print("Made {} folder for new resources".format(output_folder))
@@ -97,7 +71,6 @@ def get_files_in_directory_with_metadata():
     # uses HS API to retrieve metadata -- different than existing app
 
     files = glob.glob('{}/*/*/data/resourcemetadata.xml'.format(output_folder))
-    # pprint(files)
     data = {}
 
     # TODO: Get ltime and size
@@ -184,13 +157,11 @@ def create_resource_in_HS():
 
 def make_resource_public_in_HS(resource_id):
     hs.setAccessRules(resource_id, public=True)
-    return
 
 def delete_resource_in_HS(resource_id):
     hs.deleteResource(resource_id)
 
 def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
-    #first delete file from resource if needed ??
     options = {
                  "folder": resource_folder_path,
                  "files": local_file_path
@@ -219,8 +190,6 @@ def get_list_of_user_resources():
     print("Getting resources")
     resources = hs.resources(owner=username)
     print("Resources obtained")
-    for r in resources:
-        print(r["resource_id"])
 
     return resources
 
@@ -229,7 +198,15 @@ if __name__ == '__main__':
     get_hs_resource(test_resource_id, output_folder, unzip=True)
     # get_files_in_directory_with_metadata()
     # create_resource_in_HS()
-    get_list_of_user_resources()
+    resources = get_list_of_user_resources()
+    for r in resources:
+        print(r["resource_id"])
+        get_hs_resource(r["resource_id"], output_folder, unzip=True)
+
+    print(r["resource_id"])
+    local_file = 'backend/tests/hs_resources/' + r["resource_id"] + '/' + r["resource_id"] + '/data/contents/Introduction_to_Coding.ipynb'
+    update_path = 'data/contents'
+    print(update_resource_in_HS(local_file, update_path, r["resource_id"]))
     # get_user_info()
     # test_socket()
 
