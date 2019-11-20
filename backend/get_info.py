@@ -215,6 +215,11 @@ def get_list_of_user_resources():
     resources = hs.resources(owner=username)
     print("Resources obtained")
 
+    resources_list = []
+    for resource in resources:
+        resources_list.append(resource)
+    resources = {"Resources": resources_list}
+
     return resources
 
 if __name__ == '__main__':
