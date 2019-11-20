@@ -1,5 +1,4 @@
 import * as React from 'react';
-import FilterBar from '../components/FilterBar';
 import ResourceList from '../components/ResourceList';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -49,8 +48,7 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
       <div className="page projects">
         <h1>Welcome to CUAHSI JupyterHub!</h1>
         <p>Below is the list of resources you have saved in Hydroshare and/or JupyterHub.</p>
-        <FilterBar searchChange={this.handleSearchChange} sortBy={this.props.sortBy} newProject={this.props.newProject}/>
-        <ResourceList viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
+        <ResourceList newProject={this.props.newProject} viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
       </div>
     )
   }

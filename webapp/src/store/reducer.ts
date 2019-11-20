@@ -10,6 +10,7 @@ import {
   MainPageActionTypes,
   ProjectsActionTypes,
   UserActionTypes,
+  ResourceSource,
 } from './types';
 
 const initProjectsPageState: IProjectsPageState = {
@@ -100,6 +101,7 @@ const initProjectsState: IProjectsState = {
         id: 'Test',
         lastModified: 'May 5',
         status: 'Published',
+        source: [ResourceSource.Hydroshare, ResourceSource.JupyterHub],
         files: [
           {
             dirPath: '/',
@@ -153,6 +155,7 @@ const initProjectsState: IProjectsState = {
         id: 'vickyTest',
         lastModified: 'Sep 13',
         status: 'Modified',
+        source: [ResourceSource.JupyterHub]
       },
       id: 'vickyTest',
       name: 'Some cool data'
