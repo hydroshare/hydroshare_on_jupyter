@@ -1,26 +1,32 @@
 @import './colors.scss';
 
-.filterParent{
+.filterBarParent{
     width: 100%;
     margin: auto;
     height: 60px;
-    background-color: $light-blue;
+    background-color: $dark-blue;
     font-family: Futura,Trebuchet MS,Arial,sans-serif;
     padding: 5px;
     box-shadow: 1px 1px 2px 0px $medium-blue;
     display: flex;
 }
 
-.filterForm {
+.filterBarForm {
     margin: 6px;
     width:23em;
 }
 
-.filterForm-checkbox{
-    width:0px;
+.filterBarForm-checkbox .selectAll-checkbox{
+    margin-top: 6px;
 }
 
-.filterForm-searchBox{
+.filterBarForm-checkbox .selectAll-checkbox .form-check-label{
+    margin-left: 12px;
+    color: $light-blue-grey;
+    font-weight: bold;
+}
+
+.filterBarForm-searchBox{
     width:200px;
 }
 
@@ -39,7 +45,7 @@
     margin-top: 6px;
 }
 
-.filter-sortBy{
+.filterBar-sortBy{
     margin-top:6px;
 }
 
@@ -48,16 +54,6 @@
     height: 36px;
     padding-top: 3px;
     margin-top: 6px;
-}
-
-.new-resource-button {
-    margin-right: 12px;
-
-    height: 36px;
-    margin-top: 6px;
-    padding-top: 4px;
-
-    margin-bottom: 7px;
 }
 
 .selectAll-checkbox{

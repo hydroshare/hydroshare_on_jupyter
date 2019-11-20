@@ -122,6 +122,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
           {
             icon: 'save',
             tooltip: 'Save User',
+            position: 'row',
             onClick: (event, rowData) => alert("You saved " + rowData)
           }
         ]}
@@ -130,6 +131,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
           selection: true,
           sorting: true,
           search: false,
+          maxBodyHeight: 500
         }}
         /*editable={{
           onRowAdd: newData =>
