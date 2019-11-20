@@ -8,9 +8,13 @@ import {
 } from 'redux-thunk';
 
 import {
+    setProjects,
+} from './actions/projects';
+import {
     setUserInfo,
 } from './actions/user';
 import {
+    IResourcesData,
     IUserInfoData,
 } from './types';
 
@@ -40,4 +44,18 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
           console.error(e);
       }
   }
+}
+
+// TODO: Display an error message on failed request
+export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+      const response = await getFromBackend<IResourcesData>('/resources');
+      const {
+          data: {
+              resources,
+          },
+      } = response;
+
+      dispatch(setProjects(resources));
+    };
 }

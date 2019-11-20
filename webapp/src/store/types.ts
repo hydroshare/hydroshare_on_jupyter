@@ -91,6 +91,10 @@ export interface IUserInfoData {
   }
 }
 
+export interface IResourcesData {
+  resources: IJupyterProject[]
+}
+
 export interface IUserInfo {
   name: string
 }
@@ -115,7 +119,7 @@ export enum SortByOptions {
   Status = 'STATUS',
   Author = 'AUTHOR',
   Type = 'TYPE'
-} 
+}
 
 export interface ICreateNewResource {
   name: string,

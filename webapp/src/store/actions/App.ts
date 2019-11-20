@@ -6,6 +6,7 @@ import {
 } from "redux-thunk";
 
 import {
+  getResources,
   getUserInfo,
 } from '../async-actions';
 import {
@@ -14,6 +15,7 @@ import {
 
 export function loadInitData(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    dispatch(getResources());
     dispatch(getUserInfo());
   };
 }
