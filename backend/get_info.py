@@ -12,29 +12,6 @@ CURRENT:
 - get hs resource (with files) with resource id
 - get metadata with resource id
 
-POSSIBILITIES WITH HS API:
-
-get_resource_map_xml
-delete_file_from_resource
-get_file_from_hs_resource
-add_file_to_hs_resource
-contents of specific folder from resource
-create a folder for resource
-delete a folder for resource
-get science metadata xml_rdf for a resource
-get science metadata as json for a resource
-update science metadata for a resource
-update custom science meatadata for a resource
-move or rename a resource file
-zip a resource file or folder
-unzip a resource file or folder
-create a copy of resource
-create a new version of resource
-upload files to a specific resource folder
-create a referenced content file
-update a referenced content file
-set resource flags
-to set file metadata
 """
 
 ### This works for public resources
@@ -71,28 +48,50 @@ def get_files_JH(resource_id):
     files_dict = {}
     get_hs_resource(resource_id, output_folder)
     files = glob.glob('{}/{}/{}/data/contents/*'.format(output_folder, resource_id, resource_id))
-    prefix = output_folder + "/" + resource_id + "/" + resource_id + "/data/contents/"
+    prefix = output_folder + "/" + resource_id + "/" + resource_id + "/data/contents"
+    files2 = get_recursive_folder_contents(prefix)
+    files_dict["Files"] = files2
+    return files_dict
+
+def get_folder_size(folderpath):
+    total_size = 0
+    for path, dirs, files in os.walk(folderpath):
+        for f in files:
+            fp = os.path.join(path, f)
+            total_size += os.path.getsize(fp)
+    return total_size
+
+def get_recursive_folder_contents(folderpath):
+    # get all the files in the folder
+    files = glob.glob('{}/*'.format(folderpath))
+    # return empty list if the folder is empty
+    if len(files) == 0:
+        return []
     files2 = []
     for filepath in files:
-        file = filepath[len(prefix):]
-        if file.rfind(".") != -1:
+        # +1 is to account for / after folderpath before file name
+        file = filepath[len(folderpath)+1:]
+        if (len(get_recursive_folder_contents(filepath)) == 0 and
+                                                file.rfind(".") != -1):
             type = file[file.rfind(".")+1:]
             filename = file[:file.rfind(".")]
         else:
             type = "folder"
             filename = file
         if type == "folder":
-            files2.append({"name": filename, "type": type, "size": os.path.getsize(filepath), "contents": get_recursive_folder_contents(filepath)})
+            files2.append({"file_name": filename, "type": type, "size": get_folder_size(filepath), "contents": get_recursive_folder_contents(filepath)})
         else:
-            files2.append({"name": filename, "type": type, "size": os.path.getsize(filepath)})
-    files_dict["Files"] = files2
-    return files_dict
+            files2.append({"file_name": filename, "type": type, "size": os.path.getsize(filepath)})
+    return files2
 
-def get_recursive_folder_contents(filepath):
-    return []
-
+#TODO (vickymmcd): fix up formatting of returned list of HS files
 def get_files_HS(resource_id):
-    return hs.getResourceFileList(resource_id)
+    files_dict = {}
+    files_list = []
+    for file in hs.getResourceFileList(resource_id):
+        files_list.append(file)
+    files_dict["Files"] = files_list
+    return files_dict
 
 def get_metadata_of_all_files():
     #TODO scrape from xml file instead of API call
@@ -199,7 +198,19 @@ def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
     result = hs.resource(resource_id).files(options)
     return result
 
-def rename_resource_in_HS():
+def rename_resource_in_HS():    # files2 = []
+    # for filepath in files:
+    #     file = filepath[len(prefix):]
+    #     if file.rfind(".") != -1:
+    #         type = file[file.rfind(".")+1:]
+    #         filename = file[:file.rfind(".")]
+    #     else:
+    #         type = "folder"
+    #         filename = file
+    #     if type == "folder":
+    #         files2.append({"file_name": filename, "type": type, "size": os.path.getsize(filepath), "contents": get_recursive_folder_contents(filepath)})
+    #     else:
+    #         files2.append({"file_name": filename, "type": type, "size": os.path.getsize(filepath)})
     pass
 
 """IN JUPYTERHUB"""

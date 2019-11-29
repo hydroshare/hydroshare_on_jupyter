@@ -1,9 +1,19 @@
+'''
+This file sets up the hydroshare server for communicating with the
+hydroshare gui frontend.
+
+Author: 2019-20 CUAHSI Olin SCOPE Team
+Email: vickymmcd@gmail.com
+'''
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import signal
 import logging
-from get_info import get_files_HS, get_files_JH, get_user_info, get_list_of_user_resources
+from get_info import (get_files_HS,
+                      get_files_JH,
+                      get_user_info,
+                      get_list_of_user_resources)
 
 import tornado.ioloop
 import tornado.web
@@ -15,6 +25,10 @@ import tornado.options
 
 # Get: List of user resources in HS and JH
 # Post: Creates new HS resource, returns new resource ID
+
+''' Class that handles GETing a list of a user's resources & POSTing
+a new resource for that user
+'''
 class ResourcesHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(get_list_of_user_resources())
@@ -22,14 +36,26 @@ class ResourcesHandler(tornado.web.RequestHandler):
     def post(self):
         pass
 
+
+''' Class that handles GETing list of a files that are in a user's
+hydroshare instance of a resource
+'''
 class ResourcesFileHandlerHS(tornado.web.RequestHandler):
     def get(self, res_id):
         self.write(get_files_HS(res_id))
 
+
+''' Class that handles GETing list of a files that are in a user's
+jupyterhub instance of a resource
+'''
 class ResourcesFileHandlerJH(tornado.web.RequestHandler):
     def get(self, res_id):
         self.write(get_files_JH(res_id))
 
+
+''' Class that handles GETing user information on the currently logged
+in user including name, email, username, etc.
+'''
 class UserInfoHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
@@ -41,6 +67,8 @@ class UserInfoHandler(tornado.web.RequestHandler):
         self.write(data)
 
 
+''' Class for setting up the server & making sure it can exit cleanly
+'''
 class HydroShareGUI(tornado.web.Application):
     is_closing = False
 
@@ -54,14 +82,20 @@ class HydroShareGUI(tornado.web.Application):
             logging.info('exit success')
 
 
-application = HydroShareGUI([
-    (r"/user", UserInfoHandler),
-    (r"/resources", ResourcesHandler),
-    (r"/resources/([^/]+)/HSfiles", ResourcesFileHandlerHS),
-    (r"/resources/([^/]+)/localfiles", ResourcesFileHandlerJH)
-])
+''' Returns an instance of the server with the appropriate endpoints
+'''
+def make_app():
+    application = HydroShareGUI([
+        (r"/user", UserInfoHandler),
+        (r"/resources", ResourcesHandler),
+        (r"/resources/([^/]+)/HSfiles", ResourcesFileHandlerHS),
+        (r"/resources/([^/]+)/localfiles", ResourcesFileHandlerJH)
+    ])
+    return application
 
-def start_server():
+''' Starts running the server
+'''
+def start_server(application):
     tornado.options.parse_command_line()
     signal.signal(signal.SIGINT, application.signal_handler)
     application.listen(8080)
@@ -69,4 +103,5 @@ def start_server():
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == '__main__':
-    start_server()
+    application = make_app()
+    start_server(application)
