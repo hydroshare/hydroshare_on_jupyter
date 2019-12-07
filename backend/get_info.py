@@ -12,55 +12,6 @@ CURRENT:
 - get hs resource (with files) with resource id
 - get metadata with resource id
 
-POSSIBILITIES WITH HS API:
-
-get_resource_map_xml
-delete_file_from_resource
-get_file_from_hs_resource
-add_file_to_hs_resource
-contents of specific folder from resource
-create a folder for resource
-delete a folder for resource
-get science metadata xml_rdf for a resource
-get science metadata as json for a resource
-update science metadata for a resource
-update custom science meatadata for a resource
-move or rename a resource file
-zip a resource file or folder
-unzip a resource file or folder
-create a copy of resource
-create a new version of resource
-upload files to a specific resource folder
-create a referenced content file
-update a referenced content file
-set resource flags
-to set file metadata
-"""
-
-"""
-POSSIBILITIES WITH HS API:
-
-get_resource_map_xml
-delete_file_from_resource
-get_file_from_hs_resource
-add_file_to_hs_resource
-contents of specific folder from resource
-create a folder for resource
-delete a folder for resource
-get science metadata xml_rdf for a resource
-get science metadata as json for a resource
-update science metadata for a resource
-update custom science meatadata for a resource
-move or rename a resource file
-zip a resource file or folder
-unzip a resource file or folder
-create a copy of resource
-create a new version of resource
-upload files to a specific resource folder
-create a referenced content file
-update a referenced content file
-set resource flags
-to set file metadata
 """
 
 ### This works for public resources
@@ -80,7 +31,7 @@ hs = HydroShare(auth=auth)
 
 test_resource_id = 'c40d9567678740dab868f35440a69b30'
 
-output_folder = 'hs_resources'
+output_folder = 'backend/tests/hs_resources'
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
     print("Made {} folder for new resources".format(output_folder))
@@ -93,11 +44,61 @@ def get_hs_resource(resource_id, output_folder, unzip=True):
     else:
         print("Resource already exists!")
 
-def get_files_in_directory_with_metadata():
+def get_files_JH(resource_id):
+    files_dict = {}
+    get_hs_resource(resource_id, output_folder)
+    files = glob.glob('{}/{}/{}/data/contents/*'.format(output_folder, resource_id, resource_id))
+    prefix = output_folder + "/" + resource_id + "/" + resource_id + "/data/contents"
+    files2 = get_recursive_folder_contents(prefix)
+    files_dict["Files"] = files2
+    return files_dict
+
+def get_folder_size(folderpath):
+    total_size = 0
+    for path, dirs, files in os.walk(folderpath):
+        for f in files:
+            fp = os.path.join(path, f)
+            total_size += os.path.getsize(fp)
+    return total_size
+
+def get_recursive_folder_contents(folderpath):
+    # get all the files in the folder
+    files = glob.glob('{}/*'.format(folderpath))
+    # return empty list if the folder is empty
+    if len(files) == 0:
+        return []
+    files2 = []
+    for filepath in files:
+        # +1 is to account for / after folderpath before file name
+        file = filepath[len(folderpath)+1:]
+        if (len(get_recursive_folder_contents(filepath)) == 0 and
+                                                file.rfind(".") != -1):
+            type = file[file.rfind(".")+1:]
+            filename = file[:file.rfind(".")]
+        else:
+            type = "folder"
+            filename = file
+        if type == "folder":
+            files2.append({"file_name": filename, "type": type, "size": get_folder_size(filepath), "contents": get_recursive_folder_contents(filepath)})
+        else:
+            files2.append({"file_name": filename, "type": type, "size": os.path.getsize(filepath)})
+    return files2
+
+#TODO (vickymmcd): fix up formatting of returned list of HS files
+def get_files_HS(resource_id):
+    files_dict = {}
+    files_list = []
+    for file in hs.getResourceFileList(resource_id):
+        files_list.append(file)
+    files_dict["Files"] = files_list
+    return files_dict
+
+def get_metadata_of_all_files():
+    #TODO scrape from xml file instead of API call
+
     # uses HS API to retrieve metadata -- different than existing app
 
     files = glob.glob('{}/*/*/data/resourcemetadata.xml'.format(output_folder))
-    # pprint(files)
     data = {}
 
     # TODO: Get ltime and size
@@ -124,8 +125,9 @@ def get_files_in_directory_with_metadata():
         data = "There is no data"
     return data
 
-def get_metadata(resource_id):
+def get_metadata_one_file(resource_id):
     """
+    #TODO scrape from xml file instead of API call
     Get metadata for one resource. Contains:
         - abstract
         - authors
@@ -184,13 +186,11 @@ def create_resource_in_HS():
 
 def make_resource_public_in_HS(resource_id):
     hs.setAccessRules(resource_id, public=True)
-    return
 
 def delete_resource_in_HS(resource_id):
     hs.deleteResource(resource_id)
 
 def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
-    #first delete file from resource if needed ??
     options = {
                  "folder": resource_folder_path,
                  "files": local_file_path
@@ -198,13 +198,19 @@ def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
     result = hs.resource(resource_id).files(options)
     return result
 
-def rename_resource_in_HS():
-    pass
-
-# This will be terrible without an ID
-def locate_resource_in_HS():
-    # with ID: easy
-    # without ID: hard
+def rename_resource_in_HS():    # files2 = []
+    # for filepath in files:
+    #     file = filepath[len(prefix):]
+    #     if file.rfind(".") != -1:
+    #         type = file[file.rfind(".")+1:]
+    #         filename = file[:file.rfind(".")]
+    #     else:
+    #         type = "folder"
+    #         filename = file
+    #     if type == "folder":
+    #         files2.append({"file_name": filename, "type": type, "size": os.path.getsize(filepath), "contents": get_recursive_folder_contents(filepath)})
+    #     else:
+    #         files2.append({"file_name": filename, "type": type, "size": os.path.getsize(filepath)})
     pass
 
 """IN JUPYTERHUB"""
@@ -225,22 +231,31 @@ def get_list_of_user_resources():
     print("Getting resources")
     resources = hs.resources(owner=username)
     print("Resources obtained")
-    for r in resources:
-        print(r["resource_id"])
+
+    resources_list = []
+    for resource in resources:
+        resources_list.append(resource)
+    resources = {"Resources": resources_list}
 
     return resources
 
 if __name__ == '__main__':
     # get_metadata(test_resource_id)
-    get_hs_resource(test_resource_id, output_folder, unzip=True)
-    # get_files_in_directory_with_metadata()
-    # create_resource_in_HS()
-    get_list_of_user_resources()
+    # get_hs_resource(test_resource_id, output_folder, unzip=True)
+    # # get_files_in_directory_with_metadata()
+    # # create_resource_in_HS()
+    # resources = get_list_of_user_resources()
+    # for r in resources:
+    #     print(r["resource_id"])
+    #     get_hs_resource(r["resource_id"], output_folder, unzip=True)
+    #
+    # print(r["resource_id"])
+    # local_file = 'backend/tests/hs_resources/' + r["resource_id"] + '/' + r["resource_id"] + '/data/contents/Introduction_to_Coding.ipynb'
+    # update_path = 'data/contents'
+    # print(update_resource_in_HS(local_file, update_path, r["resource_id"]))
+    for file in (get_files_HS("8b826c43f55043f583c85ae312a8894f")):
+        print(file)
     # get_user_info()
     # test_socket()
 
 #bbc2bcea4db14f6cbde009a43c8a97a1
-"""
-import os
-os.environ['JUPYTER_DOWNLOADS']
-"""

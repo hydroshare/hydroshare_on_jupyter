@@ -1,4 +1,8 @@
-import { ProjectDetailsPageActions, ProjectsActions } from './actions/action-names';
+import {
+  ProjectDetailsPageActions,
+  ProjectsActions,
+  UserInfoActions,
+} from './actions/action-names';
 import {
   AllActionTypes,
   IFileOrFolder,
@@ -150,7 +154,7 @@ const initProjectsState: IProjectsState = {
 };
 
 const initUserState: IUserState = {
-  name: 'Kyle Combes',
+  name: '',
 };
 
 export function mainPageReducer(state: IMainPageState = initMainPageState, action: MainPageActionTypes): IMainPageState {
@@ -248,7 +252,8 @@ export function projectsReducer(state: IProjectsState = initProjectsState, actio
 
 export function userReducer(state: IUserState = initUserState, action: UserActionTypes): IUserState {
   switch (action.type) {
-    // TODO: Something useful
+    case UserInfoActions.SET_USER_INFO:
+      return {...state, ...action.payload};
     default:
       return state;
   }

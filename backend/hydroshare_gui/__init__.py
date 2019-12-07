@@ -1,5 +1,5 @@
 import socket
-from .hs_server import start_server
+from .hs_server import start_server, make_app
 
 
 def _jupyter_server_extension_paths():
@@ -11,4 +11,5 @@ def _jupyter_server_extension_paths():
 def load_jupyter_server_extension(nbapp):
     nbapp.log.info("CUAHSI module enabled!")
 
-    start_server()
+    app = make_app()
+    start_server(app)
