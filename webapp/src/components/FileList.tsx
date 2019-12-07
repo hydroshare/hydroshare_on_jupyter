@@ -159,71 +159,12 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
                 {!this.props.hydroshare && <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaRegFolder/> New Folder</Button>}
               </div>
             )}}
-          /*editable={{
-            onRowAdd: newData =>
-              new Promise((resolve, reject) => {
-                setTimeout(() => {
-                  {
-                    const data = this.state.data;
-                    data.push(newData);
-                    this.setState({ data }, () => resolve());
-                  }
-                  resolve()
-                }, 1000)
-              }),
-            onRowUpdate: (newData, oldData) =>
-              new Promise((resolve, reject) => {
-                setTimeout(() => {
-                  {
-                    const data = this.state.data;
-                    if (oldData) {
-                      const index = data.indexOf(oldData);
-                      data[index] = newData;
-                    }
-                    this.setState({ data }, () => resolve());
-                  }
-                  resolve()
-                }, 1000)
-              }),
-            onRowDelete: oldData =>
-              new Promise((resolve, reject) => {
-                setTimeout(() => {
-                  {
-                    const data = this.state.data;
-                    const index = data.indexOf(oldData);
-                    data.splice(index, 1);
-                    this.setState({ data }, () => resolve());
-                  }
-                  resolve()
-                }, 1000)
-              }),
-          }}*/
-
         />
         <OpenFileModal
                 show={this.state.showModal}
                 onHide={this.handleCloseModal}
               />
       </div>
-
-      /*<table className="FileList">
-        <thead>
-        <td className="select">
-          <input
-            className="select-all"
-            checked={this.props.allSelected}
-            onChange={this.props.toggleAllSelected}
-            type="checkbox"
-          />
-        </td>
-        <td>Name</td>
-        <td>Type</td>
-        <td>Size</td>
-        </thead>
-        <tbody>
-        {this.buildDirectoryTree(files)}
-        </tbody>
-      </table>*/
     )
   }
 

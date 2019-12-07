@@ -84,6 +84,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       } = project;
       if (hydroShareResource) {
         let loc = '';
+        let sourceNum = hydroShareResource.source.length
         hydroShareResource.source.map(location => {
           switch (location) {
             case ResourceSource.JupyterHub:
@@ -95,6 +96,10 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
             default:
               break;
           }
+          if (sourceNum !== 1) {
+            loc += '& '
+          }
+          sourceNum--;
         })
         console.log(name + ", " + hydroShareResource.id)
         tableList.push({
@@ -132,7 +137,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         columns={[
           { title: 'Name', field: 'Name'},
           { title: 'Status', field: 'Status'},
-          { title: 'Location', field: 'Location'}
+          { title: 'Project Location', field: 'Location'}
         ]}
         data={this.convertToTableStructure(projects)}      
         actions={[
@@ -150,7 +155,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           actionsColumnIndex: -1,
           maxBodyHeight: 500,
           headerStyle: {backgroundColor: '#ededed', fontSize: 16},
-          // searchFieldStyle: {color: '#ffffff'},
+          paging: false,
         }}
         components={{
           Toolbar: props => (
@@ -170,39 +175,3 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     );
   }
 }
-
-
-  /*  <div className='resourcesParent'>
-            {projects.map((project: IJupyterProject, i: number) => {
-              const {
-                name,
-                hydroShareResource,
-              } = project;
-              const hydroShareInfoElems = [];
-              if (hydroShareResource) {
-                hydroShareInfoElems.push(<div className='resource-status'>{hydroShareResource.status}</div>);
-                hydroShareResource.source.forEach(resourceSource =>
-                  hydroShareInfoElems.push(<div className='resource-source'><FaCentercode/></div>)
-                  )
-              }
-              const viewProject = () => this.props.viewProject(project);
-              
-              if (name.toLowerCase().includes(searchTerm.toLowerCase())) {
-                return (
-                  <div key={i} className='resourcesLine' id={i+'-menu'} onClick={viewProject}>
-                    <Form className='checkbox-form'>
-                      <Form.Check
-                        type='checkbox'
-                        id={`default-checkbox`}
-                      />
-                    </Form>
-                    <div className='resource-name'>{name}</div>
-                    {/*<div className='resource-author'>{resource.author}</div>}
-                    {/*<div className='resource-lastModified'>{project.lastModified}</div>}
-                    {hydroShareInfoElems}
-                    <ContextMenu contextId={i+'-menu'} items={[{label: 'Rename'}, {label: 'Delete'}, {label: 'Publish to Hydroshare'}, , {label: 'Locate in Hydroshare'}]} />
-                    </div>)
-              }
-              return;
-            })}
-        </div> */

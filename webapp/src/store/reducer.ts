@@ -141,7 +141,7 @@ const initProjectsState: IProjectsState = {
         id: 'vickyTest',
         lastModified: 'Sep 13',
         status: 'Modified',
-        source: [ResourceSource.JupyterHub]
+        source: [ResourceSource.Hydroshare]
       },
       id: 'vickyTest',
       name: 'Flow'
