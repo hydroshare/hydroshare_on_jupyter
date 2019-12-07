@@ -10,6 +10,7 @@ import {
   combineReducers,
   createStore,
 } from 'redux';
+import thunk from 'redux-thunk';
 
 import {
   projectsPageReducer,
@@ -40,6 +41,7 @@ const store = createStore<IRootState, any, any, any>(
     composeEnhancers(
       applyMiddleware(
         routerMiddleware(history),
+          thunk,
       ),
     ),
   );
