@@ -27,7 +27,7 @@ interface IResourceListProps {
   newProject: (newResource: ICreateNewResource) => any
 }
 
-interface ITableList {
+interface ITableResourceInfo {
   Name: string,
   Status: string,
   Id: string,
@@ -75,8 +75,8 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       this.setState({ showModal: false });
     }
 
-  public convertToTableStructure(projects: IJupyterProject[]): ITableList[] {
-    const tableList: ITableList[] = [];
+  public convertToTableStructure(projects: IJupyterProject[]): ITableResourceInfo[] {
+    const tableList: ITableResourceInfo[] = [];
     projects.map((project: IJupyterProject, i: number) => {
       const {
         name,
@@ -87,16 +87,16 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         hydroShareResource.source.map(location => {
           switch (location) {
             case ResourceSource.JupyterHub:
-              loc += 'JH  '
+              loc += 'JupyterHub  '
               break;
             case ResourceSource.Hydroshare:
-              loc += 'HS  '
+              loc += 'Hydroshare  '
               break;
             default:
               break;
           }
-        }
-          )
+        })
+        console.log(name + ", " + hydroShareResource.id)
         tableList.push({
           Name: name,
           Status: hydroShareResource.status,
@@ -108,13 +108,19 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     return tableList;
   }
 
-  /* public viewProject(project: ITableList | undefined) {
-    if (project){
-      this.props.projects.map((project:IJupyterProject)) => {
-        if project.id
-      }
-    }
-  } */
+  public viewProject(project: ITableResourceInfo | undefined) {
+    
+    if (project) {
+      this.props.projects.map((projectJH: IJupyterProject) => {
+        console.log("table: " + project.Id)
+        console.log("jh :" + projectJH.id)
+        if (project.Id === projectJH.id){
+          
+          this.props.viewProject(projectJH)
+        }
+      });
+    };
+  }
 
   public render() {
     const { projects} = this.props;
@@ -143,16 +149,17 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           search: true,
           actionsColumnIndex: -1,
           maxBodyHeight: 500,
-          headerStyle: {backgroundColor: '#d8dcde', fontSize: 20},
+          headerStyle: {backgroundColor: '#ededed', fontSize: 16},
+          // searchFieldStyle: {color: '#ffffff'},
         }}
         components={{
           Toolbar: props => (
-            <div className="Toolbar">
+            <div className="resource-toolbar">
               <MTableToolbar className="MTtoolbar" {...props} />
               <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaFileMedical/> New Project</Button>
             </div>
           )}}
-       // onRowClick={((evt, selectedRow) => this.viewProject({ selectedRow }))}
+        onRowClick={((evt, selectedRow) => this.viewProject( selectedRow ))}
       />
       <NewProjectModal
               show={this.state.showModal}

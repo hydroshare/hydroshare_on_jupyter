@@ -1,6 +1,6 @@
 @import './colors.scss';
 
-.resourcesParent{
+/*.resourcesParent{
     width: 100%;
     margin: auto;
     background-color: $light-blue-grey;
@@ -54,12 +54,13 @@
     min-width: 100px;
     width: 20%;
     margin-top: 2px;
-}
+}*/
 
-.Toolbar {
-    background-color: #b7ce63;
+.resource-toolbar {
+    background-color: $final-mid-blue;
     display:flex;
     justify-content: space-between;
+    // color: white;
 }
 
 .new-resource-button {
@@ -69,6 +70,7 @@
     padding-top: 4px;
     margin-bottom: 7px;
     float: right;
+    width: 11em;
 }
 
 .MuiToolbar-root {
