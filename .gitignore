@@ -21,6 +21,7 @@ __pycache__/*
 backend/login.py
 backend/hs_resources/
 backend/hydroshare_gui/__pycache__/*
+webapp/src/styles/css/*
 
 npm-debug.log*
 yarn-debug.log*

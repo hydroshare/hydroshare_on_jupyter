@@ -1,5 +1,4 @@
 import * as React from 'react';
-import FilterBar from '../components/FilterBar';
 import ResourceList from '../components/ResourceList';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -10,20 +9,24 @@ import {
   AllActionTypes,
   IJupyterProject,
   IRootState,
+  SortByOptions,
+  ICreateNewResource,
 } from '../store/types';
 
 const mapStateToProps = ({ projects, projectPage }: IRootState) => {
   return {
     projectsList: Object.values(projects.allProjects),
     searchTerm: projectPage.searchTerm,
-    sortBy: projectPage.sortBy,
+    sortByTerm: projectPage.sortBy,
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
   return {
     viewProject: (project: IJupyterProject) => dispatch(AppActions.viewProject(project)),
-    searchBy: (searchTerm: string) => dispatch(projectPageActions.searchBy(searchTerm))
+    searchBy: (searchTerm: string) => dispatch(projectPageActions.searchBy(searchTerm)),
+    sortBy: (sortByTerm: SortByOptions) => dispatch(projectPageActions.sortBy(sortByTerm)),
+    newProject: (newResource: ICreateNewResource) => dispatch(projectPageActions.createNewResource(newResource))
   }
 };
 
@@ -34,6 +37,7 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
   public handleSearchChange = (event: any) => {
     this.props.searchBy(event.target.value)
   }
+   
 
   public handleViewProject = (project: IJupyterProject) => {
     this.props.viewProject(project);
@@ -42,9 +46,9 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
   public render() {
     return (
       <div className="page projects">
-        // @ts-ignore
-        <FilterBar searchChange={this.handleSearchChange}/>
-        <ResourceList viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortBy={this.props.sortBy}/>
+        <h1>Welcome to CUAHSI JupyterHub!</h1>
+        <p>Below is the list of resources you have saved in Hydroshare and/or JupyterHub.</p>
+        <ResourceList newProject={this.props.newProject} viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
       </div>
     )
   }

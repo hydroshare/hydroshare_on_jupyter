@@ -1,9 +1,11 @@
-.resourcesParent{
+@import './colors.scss';
+
+/*.resourcesParent{
     width: 100%;
     margin: auto;
-    background-color: #edf7f6;
+    background-color: $light-blue-grey;
     font-family: Futura,Trebuchet MS,Arial,sans-serif;
-    box-shadow: 1px 1px 2px 0px #64b2cd;
+    box-shadow: 1px 1px 2px 0px $medium-blue;
     display: flex;
     flex-direction:column;
     padding-top:3px;
@@ -11,12 +13,13 @@
 }
 
 .resourcesLine{
-    height: 30px;
     margin: 3px;
     margin-left: 9px;
+    padding-top: 0.5em;
+    padding-bottom:0.5em;
     display: flex;
     border-width: 0px 0px 1px 0px;
-    border-color:#64b2cd;
+    border-color: $blue-grey;
     border-style: solid;
     margin-right: 9px;
     cursor: pointer;
@@ -51,4 +54,25 @@
     min-width: 100px;
     width: 20%;
     margin-top: 2px;
+}*/
+
+.resource-toolbar {
+    background-color: $final-mid-blue;
+    display:flex;
+    justify-content: space-between;
+    // color: white;
+}
+
+.new-resource-button {
+    margin-right: 12px;
+    height: 36px;
+    margin-top: 12px;
+    padding-top: 4px;
+    margin-bottom: 7px;
+    float: right;
+    width: 11em;
+}
+
+.MuiToolbar-root {
+    width: 60%;
 }

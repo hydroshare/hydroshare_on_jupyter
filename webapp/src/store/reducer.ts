@@ -10,18 +10,19 @@ import {
   MainPageActionTypes,
   ProjectsActionTypes,
   UserActionTypes,
-  SortByOptions,
+  ResourceSource,
 } from './types';
 
 const initProjectsPageState: IProjectsPageState = {
   allSelected: false,
-  sortBy: SortByOptions.Name,
   searchTerm: '',
 };
 
 const initProjectDetailsPageState: IProjectDetailsPageState = {
-  allSelected: false,
-  selectedFilesAndFolders: new Set(),
+  allJupyterSelected: false,
+  allHydroShareSelected: false,
+  selectedLocalFilesAndFolders: new Set(),
+  selectedHydroShareFilesAndFolders: new Set(),
   searchTerm: '',
 };
 
@@ -36,7 +37,7 @@ const initProjectsState: IProjectsState = {
       files: [
         {
           dirPath: '/',
-          name: 'My glorious notebook',
+          name: 'Watershed',
           size: 73949942858,
           type: 'ipynb',
         },
@@ -44,33 +45,39 @@ const initProjectsState: IProjectsState = {
           contents: [
             {
               dirPath: '/contents/',
-              name: 'Wonderful data',
+              name: 'CA Water Depth',
               size: 30124234233,
               type: 'csv',
             },
             {
               dirPath: '/contents',
-              name: 'More wonderful data',
+              name: 'WA Water Depth',
               size: 552434233,
               type: 'csv',
             },
             {
               dirPath: '/contents',
-              name: 'Garbage data',
+              name: 'OH Water Depth',
               size: 10029939402,
               type: 'csv',
             },
             {
               contents: [
                 {
-                  dirPath: '/contents/Old Data',
-                  name: 'Stubby',
+                  dirPath: '/contents/Utah',
+                  name: 'Water Depth',
                   size: 29934423,
+                  type: 'csv',
+                },
+                {
+                  dirPath: '/contents/Utah',
+                  name: 'Water Flow',
+                  size: 10034423,
                   type: 'csv',
                 },
               ],
               dirPath: '/contents/',
-              name: 'Old data',
+              name: 'Utah',
               size: 399393,
               type: 'folder',
             },
@@ -83,23 +90,61 @@ const initProjectsState: IProjectsState = {
       ],
       hydroShareResource: {
         author: 'Kyle Combes',
-        id: 'Test',
+        id: 'test',
         lastModified: 'May 5',
         status: 'Published',
+        source: [ResourceSource.Hydroshare, ResourceSource.JupyterHub],
+        files: [
+          {
+            dirPath: '/',
+            name: 'Watershed',
+            size: 73949942858,
+            type: 'ipynb',
+          },
+          {
+            contents: [
+              {
+                dirPath: '/contents/',
+                name: 'CA Water Depth',
+                size: 30124234233,
+                type: 'csv',
+              },
+              {
+                dirPath: '/contents',
+                name: 'WA Water Depth',
+                size: 552434233,
+                type: 'csv',
+              },
+            ],
+            dirPath: '/',
+            name: 'Data',
+            size: 392393,
+            type: 'folder',
+          },
+        ],
       },
       id: 'test',
-      name: 'Testing'
+      name: 'Watershed Model'
     },
     vickyTest: {
       files: [],
       hydroShareResource: {
-        id: 'vickyTest',
         author: 'Vicky McDermott',
+        files: [
+          {
+            dirPath: '/',
+            name: 'playingAround',
+            size: 73949942858,
+            type: 'ipynb',
+          },
+        ],
+        id: 'vickyTest',
         lastModified: 'Sep 13',
         status: 'Modified',
+        source: [ResourceSource.Hydroshare]
       },
       id: 'vickyTest',
-      name: 'Some cool data'
+      name: 'Flow'
     }
   }
 };
@@ -116,43 +161,76 @@ export function mainPageReducer(state: IMainPageState = initMainPageState, actio
 }
 
 export function projectsDetailsPageReducer(state: IProjectDetailsPageState = initProjectDetailsPageState, action: AllActionTypes): IProjectDetailsPageState {
-  let selectedFilesAndFolders: Set<string>;
+  let doMakeSelected;
   switch (action.type) {
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL:
-      selectedFilesAndFolders = new Set(state.selectedFilesAndFolders);
-      const doMakeSelected = !state.allSelected;
-      action.payload.files.forEach((projectFileOrFolder: IFileOrFolder) => {
-        selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, projectFileOrFolder, doMakeSelected);
-      });
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER:
+      doMakeSelected = !state.allJupyterSelected;
       return {
         ...state,
-        allSelected: doMakeSelected,
-        selectedFilesAndFolders,
+        allJupyterSelected: doMakeSelected,
+        selectedLocalFilesAndFolders: toggleAllFilesOrFoldersSelected(action.payload.files, doMakeSelected),
       };
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE:
-      selectedFilesAndFolders = new Set(state.selectedFilesAndFolders);
-      const fileOrFolder = action.payload;
-      const itemWasSelected = selectedFilesAndFolders.has(fileOrFolder.dirPath + fileOrFolder.name);
-      selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, action.payload, !itemWasSelected);
-      console.log(selectedFilesAndFolders);
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_HYDROSHARE:
+      doMakeSelected = !state.allHydroShareSelected;
+      const {
+        hydroShareResource,
+      } = action.payload;
+      if (!hydroShareResource) { // Should never be the case
+        return state;
+      }
       return {
         ...state,
-        allSelected: false,
-        selectedFilesAndFolders,
+        allHydroShareSelected: doMakeSelected,
+        selectedHydroShareFilesAndFolders: toggleAllFilesOrFoldersSelected(hydroShareResource.files, doMakeSelected),
+      };
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE_JUPYTER:
+      return {
+        ...state,
+        allJupyterSelected: false,
+        selectedLocalFilesAndFolders: toggleFileOrFolderSelected(action.payload, state.selectedLocalFilesAndFolders),
+      };
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE_HYDROSHARE:
+      return {
+        ...state,
+        allHydroShareSelected: false,
+        selectedHydroShareFilesAndFolders: toggleFileOrFolderSelected(action.payload, state.selectedHydroShareFilesAndFolders),
       };
     case ProjectDetailsPageActions.SEARCH_PROJECT_BY:
         return {...state, searchTerm: action.payload};
+    case ProjectDetailsPageActions.SORT_BY_NAME:
+      return {...state, sortBy: action.payload};
     default:
       return state;
   }
 }
 
+function toggleAllFilesOrFoldersSelected(files: IFileOrFolder[], doMakeSelected: boolean): Set<string> {
+  if (!doMakeSelected) {
+    return new Set();
+  }
+  let selectedFilesAndFolders: Set<string> = new Set();
+  files.forEach((projectFileOrFolder: IFileOrFolder) => {
+    selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, projectFileOrFolder, doMakeSelected);
+  });
+  return selectedFilesAndFolders;
+}
+
+function toggleFileOrFolderSelected(toggledItem: IFileOrFolder, selectedFilesAndFolders: Set<string>): Set<string> {
+  selectedFilesAndFolders = new Set(selectedFilesAndFolders);
+  const itemWasSelected = selectedFilesAndFolders.has(toggledItem.dirPath + toggledItem.name);
+  return recursivelySetSelectedState(selectedFilesAndFolders, toggledItem, !itemWasSelected);
+}
+
 export function projectsPageReducer(state: IProjectsPageState = initProjectsPageState, action: AllActionTypes): IProjectsPageState {
   switch (action.type) {
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL:
+    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER:
       return {...state, allSelected: !state.allSelected};
     case ProjectDetailsPageActions.SEARCH_BY:
       return {...state, searchTerm: action.payload};
+    case ProjectDetailsPageActions.SORT_BY_NAME:
+      return {...state, sortBy: action.payload};
+    case ProjectsActions.NEW_PROJECT:
+        return state;
     default:
       return state;
   }
