@@ -1,9 +1,11 @@
 import * as React from 'react';
 import {
   Button,
+  Dropdown,
+  DropdownButton,
   Form,
 } from 'react-bootstrap';
-import { FaRegFolder, FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
 import '../styles/css/FilterBarProjectDetails.css';
@@ -44,7 +46,10 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
                         </Col>
                     </Form.Row>
                 </Form>
-                <Button className="new-folder-button" variant="outline-light" onClick={this.createNewResource}><FaRegFolder/>Sync</Button>
+                <DropdownButton id="dropdown-variants-Success" className="filterBar-sync" variant="info"  title="Synchronize">
+                    <Dropdown.Item href="#/action-1" eventKey="NAME" onSelect={this.handleSortByChange}>JupyterHub to Hydroshare</Dropdown.Item>
+                    <Dropdown.Item href="#/action-2" eventKey="DATE" onSelect={this.handleSortByChange}>Hydroshare to JupyterHub</Dropdown.Item>
+                </DropdownButton>                
                 <Button className="delete-button" variant="danger" onClick={this.deleteClick}><FaTrashAlt /></Button>
             </div>
         );
