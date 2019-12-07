@@ -1,9 +1,19 @@
+'''
+This file sets up the hydroshare server for communicating with the
+hydroshare gui frontend.
+
+Author: 2019-20 CUAHSI Olin SCOPE Team
+Email: vickymmcd@gmail.com
+'''
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import signal
 import logging
-from get_info import get_files_in_directory_with_metadata, get_user_info
+from get_info import (get_files_HS,
+                      get_files_JH,
+                      get_user_info,
+                      get_list_of_user_resources)
 
 import tornado.ioloop
 import tornado.web
@@ -13,35 +23,52 @@ import tornado.options
 # get list of resources
 # list of contents for those resources
 
+# Get: List of user resources in HS and JH
+# Post: Creates new HS resource, returns new resource ID
 
-class GetResourceHandler(tornado.web.RequestHandler):
+''' Class that handles GETing a list of a user's resources & POSTing
+a new resource for that user
+'''
+class ResourcesHandler(tornado.web.RequestHandler):
     def get(self):
-        data = "metadata for one resource"
-        self.write(data)
-<<<<<<< HEAD
-        
-# Post: Update resource info to make public
+        self.write(get_list_of_user_resources())
 
-# Get: List of user resources in HS
-class ListOfUserResourcesHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write("This is a list of user resources")
+    def post(self):
+        pass
 
-# Get contents of resource
-class ResourceContentsHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write("These are the contents of the resource (names and link to resource)")
-=======
->>>>>>> 289bd8bcccd7a9af7265fd43063535595a81e304
 
+''' Class that handles GETing list of a files that are in a user's
+hydroshare instance of a resource
+'''
+class ResourcesFileHandlerHS(tornado.web.RequestHandler):
+    def get(self, res_id):
+        self.write(get_files_HS(res_id))
+
+
+''' Class that handles GETing list of a files that are in a user's
+jupyterhub instance of a resource
+'''
+class ResourcesFileHandlerJH(tornado.web.RequestHandler):
+    def get(self, res_id):
+        self.write(get_files_JH(res_id))
+
+
+''' Class that handles GETing user information on the currently logged
+in user including name, email, username, etc.
+'''
 class UserInfoHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write("User info")
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
-class NewProjectHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write("Create new project")
+        data = get_user_info()
+        self.write(data)
 
+
+''' Class for setting up the server & making sure it can exit cleanly
+'''
 class HydroShareGUI(tornado.web.Application):
     is_closing = False
 
@@ -55,15 +82,20 @@ class HydroShareGUI(tornado.web.Application):
             logging.info('exit success')
 
 
-application = HydroShareGUI([
-    (r"/", GetResourceHandler),
-    (r"/new", NewProjectHandler),
-    (r"/listofuserresources", ListOfUserResourcesHandler)
-    (r"/resourcecontents", ResourceContentsHandler)
-    (r"/userinfo", UserInfoHandler)
-])
+''' Returns an instance of the server with the appropriate endpoints
+'''
+def make_app():
+    application = HydroShareGUI([
+        (r"/user", UserInfoHandler),
+        (r"/resources", ResourcesHandler),
+        (r"/resources/([^/]+)/HSfiles", ResourcesFileHandlerHS),
+        (r"/resources/([^/]+)/localfiles", ResourcesFileHandlerJH)
+    ])
+    return application
 
-def start_server():
+''' Starts running the server
+'''
+def start_server(application):
     tornado.options.parse_command_line()
     signal.signal(signal.SIGINT, application.signal_handler)
     application.listen(8080)
@@ -71,4 +103,5 @@ def start_server():
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == '__main__':
-    start_server()
+    application = make_app()
+    start_server(application)

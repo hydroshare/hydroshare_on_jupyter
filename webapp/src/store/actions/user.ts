@@ -1,6 +1,12 @@
 import { action } from 'typesafe-actions';
 
-export function setUserName(name: string) {
-  // TODO: Use proper action type
-  return action('NAME', name);
+import {
+    UserInfoActions,
+} from './action-names';
+import {
+  IUserInfo,
+} from '../types';
+
+export function setUserInfo(userInfo: IUserInfo) {
+  return action(UserInfoActions.SET_USER_INFO, userInfo);
 }
