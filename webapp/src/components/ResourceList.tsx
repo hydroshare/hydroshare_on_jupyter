@@ -91,7 +91,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
               loc += 'JupyterHub  '
               break;
             case ResourceSource.Hydroshare:
-              loc += 'Hydroshare  '
+              loc += 'HydroShare  '
               break;
             default:
               break;
