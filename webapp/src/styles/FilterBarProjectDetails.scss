@@ -4,7 +4,7 @@
     width: 100%;
     margin: auto;
     height: 60px;
-    background-color: $light-blue;
+    background-color: $final-dark-blue;
     font-family: Futura,Trebuchet MS,Arial,sans-serif;
     padding: 5px;
     box-shadow: 1px 1px 2px 0px $medium-blue;
@@ -39,8 +39,12 @@
     margin-top: 6px;
 }
 
-.filter-sortBy{
-    margin-top:6px;
+.filterBar-sync{
+    margin-left: auto;
+    margin-right: 12px;
+    height: 36px;
+    margin-top: 6px;
+    margin-bottom: 7px;
 }
 
 .delete-button{

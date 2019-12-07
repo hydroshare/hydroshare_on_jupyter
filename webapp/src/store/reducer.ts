@@ -10,6 +10,7 @@ import {
   MainPageActionTypes,
   ProjectsActionTypes,
   UserActionTypes,
+  ResourceSource,
 } from './types';
 
 const initProjectsPageState: IProjectsPageState = {
@@ -36,7 +37,7 @@ const initProjectsState: IProjectsState = {
       files: [
         {
           dirPath: '/',
-          name: 'My glorious notebook',
+          name: 'Watershed',
           size: 73949942858,
           type: 'ipynb',
         },
@@ -44,48 +45,40 @@ const initProjectsState: IProjectsState = {
           contents: [
             {
               dirPath: '/contents/',
-              name: 'Wonderful data',
+              name: 'CA Water Depth',
               size: 30124234233,
               type: 'csv',
             },
             {
               dirPath: '/contents',
-              name: 'More wonderful data',
+              name: 'WA Water Depth',
               size: 552434233,
               type: 'csv',
             },
             {
               dirPath: '/contents',
-              name: 'Garbage data',
+              name: 'OH Water Depth',
               size: 10029939402,
               type: 'csv',
             },
             {
               contents: [
                 {
-                  dirPath: '/contents/Old Data',
-                  name: 'Stubby',
+                  dirPath: '/contents/Utah',
+                  name: 'Water Depth',
                   size: 29934423,
                   type: 'csv',
                 },
-              ],
-              dirPath: '/contents/',
-              name: 'Old data',
-              size: 399393,
-              type: 'folder',
-            },
-            {
-              contents: [
                 {
-                  dirPath: '/contents/Final data',
-                  name: 'Shucks',
-                  size: 234230492,
+                  dirPath: '/contents/Utah',
+                  name: 'Water Flow',
+                  size: 10034423,
                   type: 'csv',
                 },
               ],
               dirPath: '/contents/',
-              name: 'Final data',
-              size: 40000,
+              name: 'Utah',
+              size: 399393,
               type: 'folder',
             },
           ],
@@ -97,13 +90,14 @@ const initProjectsState: IProjectsState = {
       ],
       hydroShareResource: {
         author: 'Kyle Combes',
-        id: 'Test',
+        id: 'test',
         lastModified: 'May 5',
         status: 'Published',
+        source: [ResourceSource.Hydroshare, ResourceSource.JupyterHub],
         files: [
           {
             dirPath: '/',
-            name: 'My glorious notebook',
+            name: 'Watershed',
             size: 73949942858,
             type: 'ipynb',
           },
@@ -111,20 +105,14 @@ const initProjectsState: IProjectsState = {
             contents: [
               {
                 dirPath: '/contents/',
-                name: 'Wonderful data',
+                name: 'CA Water Depth',
                 size: 30124234233,
                 type: 'csv',
               },
               {
                 dirPath: '/contents',
-                name: 'More wonderful data',
+                name: 'WA Water Depth',
                 size: 552434233,
-                type: 'csv',
-              },
-              {
-                dirPath: '/contents',
-                name: 'Garbage data',
-                size: 10029939402,
                 type: 'csv',
               },
             ],
@@ -136,7 +124,7 @@ const initProjectsState: IProjectsState = {
         ],
       },
       id: 'test',
-      name: 'Testing'
+      name: 'Watershed Model'
     },
     vickyTest: {
       files: [],
@@ -145,7 +133,7 @@ const initProjectsState: IProjectsState = {
         files: [
           {
             dirPath: '/',
-            name: 'Vicky\'s glorious notebook',
+            name: 'playingAround',
             size: 73949942858,
             type: 'ipynb',
           },
@@ -153,9 +141,10 @@ const initProjectsState: IProjectsState = {
         id: 'vickyTest',
         lastModified: 'Sep 13',
         status: 'Modified',
+        source: [ResourceSource.Hydroshare]
       },
       id: 'vickyTest',
-      name: 'Some cool data'
+      name: 'Flow'
     }
   }
 };

@@ -1,24 +1,27 @@
+@import './colors.scss';
+
 .FileList {
   width: 100%;
-}
 
-.FileList .spacer {
-  display: inline-block;
-  width: 1em;
-}
 
-.FileList thead {
-  font-weight: bold;
-}
+  .spacer {
+    display: inline-block;
+    width: 1em;
+  }
 
-.FileList td {
-  padding: 0.3em;
-}
+  thead {
+    font-weight: bold;
+  }
 
-.FileList tr td {
-  border-top: 1px solid #dedede;
-}
+  td {
+    padding: 0.3em;
+  }
 
-.FileList td:not(:first-child) {
-  border-left: 1px solid #dedede;
+  .Toolbar{
+    background-color: $final-mid-blue;
+    display:flex;
+    justify-content: space-between;
+    color: white;
+  }
+
 }

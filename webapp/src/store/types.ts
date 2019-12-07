@@ -84,6 +84,12 @@ export interface IHydroShareResourceInfo {
   files: IFileOrFolder[]
   lastModified: string
   status: string
+  source: ResourceSource[]
+}
+
+export enum ResourceSource {
+  JupyterHub = 'JUPYTER',
+  Hydroshare = 'HYDROSHARE'
 }
 
 export enum SortByOptions {
