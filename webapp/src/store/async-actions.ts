@@ -1,17 +1,61 @@
-import { Dispatch } from 'redux';
+import axios, { AxiosResponse } from 'axios';
 import {
-    AllActionTypes,
+    AnyAction,
+} from 'redux';
+import {
+  ThunkAction,
+  ThunkDispatch,
+} from 'redux-thunk';
+
+import {
+    setProjects,
+} from './actions/projects';
+import {
+    setUserInfo,
+} from './actions/user';
+import {
+    IResourcesData,
+    IUserInfoData,
 } from './types';
 
-function sleep(timeout: number) {
-    return new Promise((resolve) => setTimeout(() => resolve(), timeout));
+// TODO: Remove this hardcoding
+const BACKEND_URL = '//localhost:8080';
+
+function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
+    return axios.get<T>(BACKEND_URL + endpoint);
 }
 
-export async function addItemAsync(dispatch: Dispatch<AllActionTypes>, item: string) {
-    // dispatch(actions.setLoading(true));
+export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+      try {
+          const response = await getFromBackend<IUserInfoData>('/user');
+          const {
+              data: {
+                  first_name,
+                  last_name,
+              }
+          } = response;
+          const userInfo = {
+              name: first_name + ' ' + last_name,
+          };
+          dispatch(setUserInfo(userInfo));
+      } catch (e) {
+          // TODO: Display an error message
+          console.error(e);
+      }
+  }
+}
 
-    await sleep(1000);
+// TODO: Display an error message on failed request
+export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+      const response = await getFromBackend<IResourcesData>('/resources');
+      const {
+          data: {
+              resources,
+          },
+      } = response;
 
-    // dispatch(actions.addItemToList(item));
-    // dispatch(actions.setLoading(false));
+      dispatch(setProjects(resources));
+    };
 }
