@@ -137,7 +137,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         columns={[
           { title: 'Name', field: 'Name'},
           { title: 'Status', field: 'Status'},
-          { title: 'Project Location', field: 'Location'}
+          { title: 'Resource Location', field: 'Location'}
         ]}
         data={this.convertToTableStructure(projects)}      
         actions={[
@@ -161,7 +161,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           Toolbar: props => (
             <div className="resource-toolbar">
               <MTableToolbar className="MTtoolbar" {...props} />
-              <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaFileMedical/> New Project</Button>
+              <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaFileMedical/> New Resource</Button>
             </div>
           )}}
         onRowClick={((evt, selectedRow) => this.viewProject( selectedRow ))}
