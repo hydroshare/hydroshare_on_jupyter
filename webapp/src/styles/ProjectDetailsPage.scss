@@ -1,0 +1,22 @@
+.go-back {
+  font-size: 0.9em;
+  margin-bottom: 1em;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.file-lists.split .MuiPaper-root {
+  width: 100%;
+  float: left;
+  overflow: auto;
+}
+
+.file-lists.split .FileList:first-child {
+  border-right: 2px solid #dedede;
+}
+
+.file-lists {
+  border: 2px solid #dedede;
+  overflow: auto;
+  display:flex
+}

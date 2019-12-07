@@ -31,14 +31,17 @@ export interface IRootState {
 }
 
 export interface IProjectDetailsPageState {
-  allSelected: boolean
-  selectedFilesAndFolders: Set<string>
+  allJupyterSelected: boolean
+  allHydroShareSelected: boolean
+  selectedLocalFilesAndFolders: Set<string>
+  selectedHydroShareFilesAndFolders: Set<string>
   searchTerm: string
+  sortBy?: SortByOptions
 }
 
 export interface IProjectsPageState {
   allSelected: boolean
-  sortBy: SortByOptions
+  sortBy?: SortByOptions
   searchTerm: string
 }
 
@@ -77,13 +80,27 @@ export interface IUserState {
 
 export interface IHydroShareResourceInfo {
   id: string
-  author: string,
-  lastModified: string,
-  status: string,
+  author: string
+  files: IFileOrFolder[]
+  lastModified: string
+  status: string
+  source: ResourceSource[]
+}
+
+export enum ResourceSource {
+  JupyterHub = 'JUPYTER',
+  Hydroshare = 'HYDROSHARE'
 }
 
 export enum SortByOptions {
   Name = 'NAME',
   Date = 'DATE',
-  Type = 'TYPE',
+  Status = 'STATUS',
+  Author = 'AUTHOR',
+  Type = 'TYPE'
 } 
+
+export interface ICreateNewResource {
+  name: string,
+  privacy: string
+}
