@@ -133,7 +133,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
     return (
       <div className='FileList'>
         <MaterialTable
-          title={this.props.hydroshare ? "Hydroshare files" : "JupyterHub files"}
+          title={this.props.hydroshare ? "HydroShare files" : "JupyterHub files"}
           columns={[
             { title: 'Name', field: 'name', cellStyle:{ whiteSpace: 'pre'} },
             { title: 'Type', field: 'type' },
