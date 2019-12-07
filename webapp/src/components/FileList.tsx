@@ -7,7 +7,15 @@ import {
 } from '../store/types';
 import '../styles/css/FileList.css';
 
-import MaterialTable from 'material-table';
+import {
+  Button
+} from 'react-bootstrap';
+
+import OpenFileModal from './OpenFileModal';
+
+import { FaFileMedical, FaRegFolder} from "react-icons/fa";
+
+import MaterialTable, {MTableToolbar} from 'material-table';
 
 const HUMAN_READABLE_FILE_SIZES = [
   'B',
@@ -39,13 +47,18 @@ interface IFlatFile {
 }
 
 interface IStateInterface {
-  data: IFlatFile[]
+  showModal: boolean
 }
 
 export default class FileList extends React.Component<IPropsInterface, IStateInterface> {
 
   constructor(props: IPropsInterface) {
     super(props)
+    this.state = {
+      showModal: false
+    };
+    this.handleOpenModal = this.handleOpenModal.bind(this);
+    this.handleCloseModal = this.handleCloseModal.bind(this);
   }             
   
   public flattenFiles(files: IFileOrFolder[], parentID='', level=0, override=false): [IFlatFile[], boolean] {
@@ -101,6 +114,14 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
     return [flatFiles, relevantFileForSearch];
   }
 
+  public handleOpenModal () {
+    this.setState({ showModal: true });
+  }
+
+  public handleCloseModal () {
+    this.setState({ showModal: false });
+  }
+
   public render() {
     const { files } = this.props;
     if (!files) {
@@ -110,70 +131,80 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
     console.log(this.props.files)
 
     return (
-      <MaterialTable
-        title={this.props.hydroshare ? "Hydroshare files" : "JupyterHub files"}
-        columns={[
-          { title: 'Name', field: 'name', cellStyle:{ whiteSpace: 'pre'} },
-          { title: 'Type', field: 'type' },
-          { title: 'Size', field: 'size', type: 'numeric' },
-        ]}
-        data={this.flattenFiles(this.props.files)[0]}      
-        actions={[
-          {
-            icon: 'save',
-            tooltip: 'Save User',
-            position: 'row',
-            onClick: (event, rowData) => alert("You saved " + rowData)
-          }
-        ]}
-        parentChildData={(row, rows) => rows.find(a => a.id === row.parentId)}
-        options={{
-          selection: true,
-          sorting: true,
-          search: false,
-          maxBodyHeight: 500
-        }}
-        /*editable={{
-          onRowAdd: newData =>
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                {
-                  const data = this.state.data;
-                  data.push(newData);
-                  this.setState({ data }, () => resolve());
-                }
-                resolve()
-              }, 1000)
-            }),
-          onRowUpdate: (newData, oldData) =>
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                {
-                  const data = this.state.data;
-                  if (oldData) {
-                    const index = data.indexOf(oldData);
-                    data[index] = newData;
+      <div className='FileList'>
+        <MaterialTable
+          title={this.props.hydroshare ? "Hydroshare files" : "JupyterHub files"}
+          columns={[
+            { title: 'Name', field: 'name', cellStyle:{ whiteSpace: 'pre'} },
+            { title: 'Type', field: 'type' },
+            { title: 'Size', field: 'size', type: 'numeric' },
+          ]}
+          data={this.flattenFiles(this.props.files)[0]}      
+          parentChildData={(row, rows) => rows.find(a => a.id === row.parentId)}
+          options={{
+            selection: true,
+            sorting: true,
+            search: false,
+            maxBodyHeight: 500,
+            headerStyle: {backgroundColor: '#ededed', fontSize: 16},
+            searchFieldStyle: {color: '#ffffff'},
+            paging: false,
+          }}
+          onRowClick={((evt, selectedRow) => this.setState( {showModal: true} ))}
+          components={{
+            Toolbar: props => (
+              <div className="Toolbar">
+                <MTableToolbar className="MTtoolbar" {...props} />
+                {!this.props.hydroshare && <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaFileMedical/> New File</Button>}
+                {!this.props.hydroshare && <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaRegFolder/> New Folder</Button>}
+              </div>
+            )}}
+          /*editable={{
+            onRowAdd: newData =>
+              new Promise((resolve, reject) => {
+                setTimeout(() => {
+                  {
+                    const data = this.state.data;
+                    data.push(newData);
+                    this.setState({ data }, () => resolve());
                   }
-                  this.setState({ data }, () => resolve());
-                }
-                resolve()
-              }, 1000)
-            }),
-          onRowDelete: oldData =>
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                {
-                  const data = this.state.data;
-                  const index = data.indexOf(oldData);
-                  data.splice(index, 1);
-                  this.setState({ data }, () => resolve());
-                }
-                resolve()
-              }, 1000)
-            }),
-        }}*/
+                  resolve()
+                }, 1000)
+              }),
+            onRowUpdate: (newData, oldData) =>
+              new Promise((resolve, reject) => {
+                setTimeout(() => {
+                  {
+                    const data = this.state.data;
+                    if (oldData) {
+                      const index = data.indexOf(oldData);
+                      data[index] = newData;
+                    }
+                    this.setState({ data }, () => resolve());
+                  }
+                  resolve()
+                }, 1000)
+              }),
+            onRowDelete: oldData =>
+              new Promise((resolve, reject) => {
+                setTimeout(() => {
+                  {
+                    const data = this.state.data;
+                    const index = data.indexOf(oldData);
+                    data.splice(index, 1);
+                    this.setState({ data }, () => resolve());
+                  }
+                  resolve()
+                }, 1000)
+              }),
+          }}*/
 
-      />
+        />
+        <OpenFileModal
+                show={this.state.showModal}
+                onHide={this.handleCloseModal}
+              />
+      </div>
 
       /*<table className="FileList">
         <thead>

@@ -1,8 +1,6 @@
 import * as React from 'react';
 import {
   Button,
-  Dropdown,
-  DropdownButton,
   Form,
 } from 'react-bootstrap';
 import { FaRegFolder, FaTrashAlt } from "react-icons/fa";
@@ -41,27 +39,12 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
             <div className='filterParent'>
                 <Form className='filterForm'>
                     <Form.Row>
-                        <Col className="filterForm-checkbox" md="4">
-                            <Form.Check
-                                type={'checkbox'}
-                                id={`select-all-checkbox`}
-                                className='selectAll-checkbox'
-                                label={`Select All`}
-                                checked={this.props.allSelected}
-                                onChange={this.props.toggleAllSelected}
-                            />
-                        </Col>
                         <Col className="filterForm-searchBox" md="8">
                             <Form.Control onChange={this.props.searchChange} placeholder="Search" />
                         </Col>
                     </Form.Row>
                 </Form>
-                <DropdownButton id="dropdown-basic-button" className="filter-sortBy" variant="info"  title="Sort by">
-                    <Dropdown.Item href="#/action-1" eventKey="NAME" onSelect={this.handleSortByChange}>Name</Dropdown.Item>
-                    <Dropdown.Item href="#/action-2" eventKey="DATE" onSelect={this.handleSortByChange}>Last Modified</Dropdown.Item>
-                    <Dropdown.Item href="#/action-2" eventKey="TYPE" onSelect={this.handleSortByChange}>File Type</Dropdown.Item>
-                </DropdownButton>
-                <Button className="new-folder-button" variant="outline-success" onClick={this.createNewResource}><FaRegFolder/> New folder</Button>
+                <Button className="new-folder-button" variant="outline-light" onClick={this.createNewResource}><FaRegFolder/>Sync</Button>
                 <Button className="delete-button" variant="danger" onClick={this.deleteClick}><FaTrashAlt /></Button>
             </div>
         );
