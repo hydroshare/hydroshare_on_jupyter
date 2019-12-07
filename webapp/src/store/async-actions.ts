@@ -1,17 +1,43 @@
-import { Dispatch } from 'redux';
+import axios, { AxiosResponse } from 'axios';
 import {
-    AllActionTypes,
+    AnyAction,
+} from 'redux';
+import {
+  ThunkAction,
+  ThunkDispatch,
+} from 'redux-thunk';
+
+import {
+    setUserInfo,
+} from './actions/user';
+import {
+    IUserInfoData,
 } from './types';
 
-function sleep(timeout: number) {
-    return new Promise((resolve) => setTimeout(() => resolve(), timeout));
+// TODO: Remove this hardcoding
+const BACKEND_URL = '//localhost:8080';
+
+function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
+    return axios.get<T>(BACKEND_URL + endpoint);
 }
 
-export async function addItemAsync(dispatch: Dispatch<AllActionTypes>, item: string) {
-    // dispatch(actions.setLoading(true));
-
-    await sleep(1000);
-
-    // dispatch(actions.addItemToList(item));
-    // dispatch(actions.setLoading(false));
+export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+      try {
+          const response = await getFromBackend<IUserInfoData>('/user');
+          const {
+              data: {
+                  first_name,
+                  last_name,
+              }
+          } = response;
+          const userInfo = {
+              name: first_name + ' ' + last_name,
+          };
+          dispatch(setUserInfo(userInfo));
+      } catch (e) {
+          // TODO: Display an error message
+          console.error(e);
+      }
+  }
 }

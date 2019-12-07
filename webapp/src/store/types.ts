@@ -78,6 +78,23 @@ export interface IUserState {
   name: string
 }
 
+export interface IUserInfoData {
+  email: string
+  first_name: string
+  id: number
+  last_name: string
+  organization: string
+  title: string
+  username: string
+  zip: {
+    fire: string
+  }
+}
+
+export interface IUserInfo {
+  name: string
+}
+
 export interface IHydroShareResourceInfo {
   id: string
   author: string
