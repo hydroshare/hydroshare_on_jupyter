@@ -240,6 +240,8 @@ def get_list_of_user_resources():
     for resource_info in hs_resources:
         local_copy_exists = resource_info['resource_id'] in local_resources
         resources_list.append({
+            'id': resource_info['resource_id'],
+            'title': resource_info['resource_title'],
             'localCopyExists': local_copy_exists,
             'hydroShareResource': resource_info,
         })

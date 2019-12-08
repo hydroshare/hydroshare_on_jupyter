@@ -15,7 +15,7 @@ import {
 
 const mapStateToProps = ({ projects, projectPage }: IRootState) => {
   return {
-    projectsList: Object.values(projects.allProjects),
+    projects: projects.allProjects,
     searchTerm: projectPage.searchTerm,
     sortByTerm: projectPage.sortBy,
   };
@@ -48,7 +48,7 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
       <div className="page projects">
         <h1>Welcome to CUAHSI JupyterHub!</h1>
         <p>Below is the list of resources you have saved in HydroShare and/or JupyterHub.</p>
-        <ResourceList newProject={this.props.newProject} viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
+        <ResourceList newProject={this.props.newProject} viewProject={this.handleViewProject} projects={this.props.projects} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
       </div>
     )
   }

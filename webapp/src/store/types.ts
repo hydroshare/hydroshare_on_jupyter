@@ -58,7 +58,7 @@ export interface IJupyterProject {
   id: string
   localCopyExists: boolean
   files: IFileOrFolder[]
-  name: string
+  title: string
   readmeMarkdown?: string
   hydroShareResource: IHydroShareResourceInfo
 }
