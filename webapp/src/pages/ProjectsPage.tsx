@@ -47,7 +47,7 @@ class ProjectsPage extends React.Component<ReduxType, never>  {
     return (
       <div className="page projects">
         <h1>Welcome to CUAHSI JupyterHub!</h1>
-        <p>Below is the list of resources you have saved in Hydroshare and/or JupyterHub.</p>
+        <p>Below is the list of resources you have saved in HydroShare and/or JupyterHub.</p>
         <ResourceList newProject={this.props.newProject} viewProject={this.handleViewProject} projects={this.props.projectsList} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
       </div>
     )
