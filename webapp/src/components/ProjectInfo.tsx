@@ -20,7 +20,7 @@ export default class ProjectInfo extends React.Component<IPropTypes, never> {
     return (
       <div className="ProjectInfo">
         <h1>{name}</h1>
-        <a href={hydroShareUrl} title="Locate in HydroShare" target="_blank">Locate in HydroShare</a>
+        <a className="locate-in-hs" href={hydroShareUrl} title="Locate in HydroShare" target="_blank">Locate in HydroShare</a>
       </div>
     )
   }
