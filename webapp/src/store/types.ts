@@ -56,10 +56,11 @@ export interface IFileOrFolder {
 
 export interface IJupyterProject {
   id: string
+  localCopyExists: boolean
   files: IFileOrFolder[]
   name: string
   readmeMarkdown?: string
-  hydroShareResource?: IHydroShareResourceInfo
+  hydroShareResource: IHydroShareResourceInfo
 }
 
 export interface IMainPageState {
@@ -100,18 +101,25 @@ export interface IUserInfo {
 }
 
 export interface IHydroShareResourceInfo {
-  id: string
-  abstract: string
+  resource_id: string
   author: string
   files: IFileOrFolder[]
-  lastModified: string
+  date_last_updated: string
   status: string
-  source: ResourceSource[]
-}
-
-export enum ResourceSource {
-  JupyterHub = 'JUPYTER',
-  Hydroshare = 'HYDROSHARE'
+  resource_type: string
+  resource_title: string
+  abstract?: string
+  authors: string[]
+  doi?: string
+  date_created: string
+  public: boolean
+  discoverable: boolean
+  shareable: boolean
+  immutable: boolean
+  published: boolean
+  bag_url: string
+  science_metadata_url: string
+  resource_url: string
 }
 
 export enum SortByOptions {

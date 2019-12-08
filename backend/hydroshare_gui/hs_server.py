@@ -30,8 +30,18 @@ import tornado.options
 a new resource for that user
 '''
 class ResourcesHandler(tornado.web.RequestHandler):
+
+    # TODO: Remove this (security hazard)
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
     def get(self):
-        self.write(get_list_of_user_resources())
+        # TODO: Probably do some request error handling here
+        raw_resources = get_list_of_user_resources()['Resources']
+        formatted_resources = [{'hydroShareResource': res} for res in raw_resources]
+        self.write({'resources': formatted_resources})
 
     def post(self):
         pass
@@ -41,6 +51,13 @@ class ResourcesHandler(tornado.web.RequestHandler):
 hydroshare instance of a resource
 '''
 class ResourcesFileHandlerHS(tornado.web.RequestHandler):
+
+    # TODO: Remove this (security hazard)
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
     def get(self, res_id):
         self.write(get_files_HS(res_id))
 
@@ -49,6 +66,13 @@ class ResourcesFileHandlerHS(tornado.web.RequestHandler):
 jupyterhub instance of a resource
 '''
 class ResourcesFileHandlerJH(tornado.web.RequestHandler):
+
+    # TODO: Remove this (security hazard)
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
     def get(self, res_id):
         self.write(get_files_JH(res_id))
 
@@ -57,6 +81,8 @@ class ResourcesFileHandlerJH(tornado.web.RequestHandler):
 in user including name, email, username, etc.
 '''
 class UserInfoHandler(tornado.web.RequestHandler):
+
+    # TODO: Remove this (security hazard)
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
