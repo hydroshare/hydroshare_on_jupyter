@@ -23,7 +23,9 @@ import MaterialTable, {MTableToolbar} from 'material-table';
 interface IResourceListProps {
   viewProject: any
   searchTerm: string
-  projects: IJupyterProject[]
+  projects: {
+      [projectId: string]: IJupyterProject
+  }
   sortByTerm: SortByOptions | undefined
   newProject: (newResource: ICreateNewResource) => any
 }
@@ -76,9 +78,9 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       this.setState({ showModal: false });
     }
 
-  public convertToTableStructure(projects: IJupyterProject[]): ITableResourceInfo[] {
+  public convertToTableStructure(projects: {[projectId: string]: IJupyterProject}): ITableResourceInfo[] {
     const tableList: ITableResourceInfo[] = [];
-    projects.map(({ localCopyExists, hydroShareResource }: IJupyterProject, i: number) => {
+    Object.values(projects).map(({ localCopyExists, hydroShareResource }: IJupyterProject, i: number) => {
         const locations = ['HydroShare'];
         if (localCopyExists) {
             locations.push('Local');
@@ -101,17 +103,12 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
   }
 
   public viewProject(project: ITableResourceInfo | undefined) {
-    
     if (project) {
-      this.props.projects.map((projectJH: IJupyterProject) => {
-        console.log("table: " + project.Id)
-        console.log("jh :" + projectJH.id)
-        if (project.Id === projectJH.id){
-          
-          this.props.viewProject(projectJH)
-        }
-      });
-    };
+        const p = this.props.projects[project.Id];
+        console.log(p);
+
+      this.props.viewProject(p);
+    }
   }
 
   public render() {
