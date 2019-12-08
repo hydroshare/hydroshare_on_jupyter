@@ -1,11 +1,34 @@
 @import 'colors';
 
 .ProjectInfo {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2em;
+  margin-bottom: 1em;
+
+  .title {
+    margin-bottom: 0.5em;
+  }
+
+  .resource-meta-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .resource-info {
+
+    .info-header {
+      font-size: 0.9em;
+    }
+
+    .info-wrapping {
+      display: flex;
+      flex-wrap: wrap;
+
+      div:not(:last-child) {
+        margin-right: 2em;
+      }
+    }
+  }
 
   .locate-in-hs {
     background-color: $medium-blue;

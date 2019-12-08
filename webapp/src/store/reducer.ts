@@ -94,8 +94,9 @@ const initProjectsState: IProjectsState = {
       ],
       hydroShareResource: {
         author: 'Kyle Combes',
+        abstract: 'Precipitation data and a model of local rivers in Needham, MA.',
         id: 'test',
-        lastModified: 'May 5',
+        lastModified: 'May 5, 2019',
         status: 'Published',
         source: [ResourceSource.Hydroshare, ResourceSource.JupyterHub],
         files: [
@@ -128,12 +129,13 @@ const initProjectsState: IProjectsState = {
         ],
       },
       id: 'test',
-      name: 'Watershed Model'
+      name: 'Precipitation and River Flows in Needham, MA'
     },
     vickyTest: {
       files: [],
       hydroShareResource: {
         author: 'Vicky McDermott',
+        abstract: 'Some testing data',
         files: [
           {
             dirPath: '/',
@@ -143,12 +145,12 @@ const initProjectsState: IProjectsState = {
           },
         ],
         id: 'vickyTest',
-        lastModified: 'Sep 13',
+        lastModified: 'Sep 13, 2019',
         status: 'Modified',
         source: [ResourceSource.Hydroshare]
       },
       id: 'vickyTest',
-      name: 'Flow'
+      name: 'Snow melt forecasting in Waltham, MA'
     }
   }
 };
