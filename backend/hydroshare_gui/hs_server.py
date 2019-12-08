@@ -39,9 +39,8 @@ class ResourcesHandler(tornado.web.RequestHandler):
 
     def get(self):
         # TODO: Probably do some request error handling here
-        raw_resources = get_list_of_user_resources()['Resources']
-        formatted_resources = [{'hydroShareResource': res} for res in raw_resources]
-        self.write({'resources': formatted_resources})
+        resources = get_list_of_user_resources()
+        self.write({'resources': resources})
 
     def post(self):
         pass

@@ -226,18 +226,25 @@ def delete_resource_in_JH():
 def locate_resource_in_JH():
     pass
 
+def get_local_resources():
+    metadata_files = glob.glob(os.path.join(output_folder, '*'))
+    # TODO: Use a filesystem-independent way of this
+    return {file_path.split('/')[-1] for file_path in metadata_files}
+
 """Others"""
 def get_list_of_user_resources():
-    print("Getting resources")
-    resources = hs.resources(owner=username)
-    print("Resources obtained")
+    hs_resources = hs.resources(owner=username)
+    local_resources = get_local_resources()
 
     resources_list = []
-    for resource in resources:
-        resources_list.append(resource)
-    resources = {"Resources": resources_list}
+    for resource_info in hs_resources:
+        local_copy_exists = resource_info['resource_id'] in local_resources
+        resources_list.append({
+            'localCopyExists': local_copy_exists,
+            'hydroShareResource': resource_info,
+        })
 
-    return resources
+    return resources_list
 
 if __name__ == '__main__':
     # get_metadata(test_resource_id)
