@@ -101,6 +101,7 @@ export interface IUserInfo {
 
 export interface IHydroShareResourceInfo {
   id: string
+  abstract: string
   author: string
   files: IFileOrFolder[]
   lastModified: string

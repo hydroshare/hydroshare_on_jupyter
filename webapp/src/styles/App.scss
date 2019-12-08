@@ -18,6 +18,16 @@ body,
   @import 'Header.css';
 }
 
+h1,
+.h1 {
+  font-size: 2rem;
+}
+
+h2,
+.h2 {
+  font-size: 1.4rem;
+}
+
 .page {
   width: 100%;
   max-width: 1140px;

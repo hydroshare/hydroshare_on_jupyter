@@ -15,12 +15,34 @@ export default class ProjectInfo extends React.Component<IPropTypes, never> {
     const {
       id,
       name,
+      hydroShareResource,
     } = this.props.project;
     const hydroShareUrl = `https://www.hydroshare.org/resource/${id}/`;
+    const hsResourceMeta = hydroShareResource ? (
+        <div className="resource-info">
+            <div className="info-wrapping">
+                <div className="info-group">
+                    <span className="info-header">Author</span>
+                    <p>{hydroShareResource.author}</p>
+                </div>
+                <div className="info-group">
+                    <span className="info-header">Last Modified</span>
+                    <p>{hydroShareResource?.lastModified}</p>
+                </div>
+            </div>
+            <div className="info-group">
+                <span className="info-header">Abstract</span>
+                <p>{hydroShareResource.abstract}</p>
+            </div>
+        </div>
+    ) : null;
     return (
       <div className="ProjectInfo">
-        <h1>{name}</h1>
-        <a className="locate-in-hs" href={hydroShareUrl} title="Locate in HydroShare" target="_blank">Locate in HydroShare</a>
+        <h1 className="title">{name}</h1>
+        <div className="resource-meta-container">
+          {hsResourceMeta}
+          <a className="btn btn-info" href={hydroShareUrl} title="Open the page for this resource in HydroShare" target="_blank">Locate in HydroShare</a>
+        </div>
       </div>
     )
   }
