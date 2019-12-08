@@ -1,3 +1,16 @@
+@import 'colors';
+
 .ProjectInfo {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2em;
+
+  .locate-in-hs {
+    background-color: $medium-blue;
+    border-radius: 0.25em;
+    color: white;
+    padding: 0.375rem 0.75rem;
+  }
 }
