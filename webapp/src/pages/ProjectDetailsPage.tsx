@@ -87,7 +87,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
             searchTerm={this.props.searchTerm}
             sortBy={this.props.sortByTerm}
             toggleAllSelected={toggleAllHydroShareSelected}
-            hydroshare={true}
+            hydroShare={true}
         />
     ) : null;
 
@@ -100,7 +100,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
         <FilterBarProjectDetails allSelected={this.props.allJupyterSelected}
           toggleAllSelected={toggleAllLocalSelected} searchChange={this.handleSearchChange} sortBy={this.props.sortBy}/>
         <div className={fileListContainerClasses}>
-          {<FileList
+          <FileList
             allSelected={this.props.allJupyterSelected}
             toggleAllSelected={toggleAllLocalSelected}
             files={this.props.project.files}
@@ -108,8 +108,8 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
             selectedFilesAndFolders={this.props.selectedLocalFilesAndFolders}
             sortBy={this.props.sortByTerm}
             searchTerm={this.props.searchTerm}
-            hydroshare={false}
-          />}
+            hydroShare={false}
+          />
           {hydroShareFiles}
         </div>
       </div>
