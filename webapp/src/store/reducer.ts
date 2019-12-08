@@ -14,7 +14,6 @@ import {
   MainPageActionTypes,
   ProjectsActionTypes,
   UserActionTypes,
-  ResourceSource,
 } from './types';
 
 const initProjectsPageState: IProjectsPageState = {
@@ -36,123 +35,7 @@ const initMainPageState: IMainPageState = {
 
 const initProjectsState: IProjectsState = {
   searchTerm: '',
-  allProjects: {
-    'test': {
-      files: [
-        {
-          dirPath: '/',
-          name: 'Watershed',
-          size: 73949942858,
-          type: 'ipynb',
-        },
-        {
-          contents: [
-            {
-              dirPath: '/contents/',
-              name: 'CA Water Depth',
-              size: 30124234233,
-              type: 'csv',
-            },
-            {
-              dirPath: '/contents',
-              name: 'WA Water Depth',
-              size: 552434233,
-              type: 'csv',
-            },
-            {
-              dirPath: '/contents',
-              name: 'OH Water Depth',
-              size: 10029939402,
-              type: 'csv',
-            },
-            {
-              contents: [
-                {
-                  dirPath: '/contents/Utah',
-                  name: 'Water Depth',
-                  size: 29934423,
-                  type: 'csv',
-                },
-                {
-                  dirPath: '/contents/Utah',
-                  name: 'Water Flow',
-                  size: 10034423,
-                  type: 'csv',
-                },
-              ],
-              dirPath: '/contents/',
-              name: 'Utah',
-              size: 399393,
-              type: 'folder',
-            },
-          ],
-          dirPath: '/',
-          name: 'Data',
-          size: 392393,
-          type: 'folder',
-        },
-      ],
-      hydroShareResource: {
-        author: 'Kyle Combes',
-        abstract: 'Precipitation data and a model of local rivers in Needham, MA.',
-        id: 'test',
-        lastModified: 'May 5, 2019',
-        status: 'Published',
-        source: [ResourceSource.Hydroshare, ResourceSource.JupyterHub],
-        files: [
-          {
-            dirPath: '/',
-            name: 'Watershed',
-            size: 73949942858,
-            type: 'ipynb',
-          },
-          {
-            contents: [
-              {
-                dirPath: '/contents/',
-                name: 'CA Water Depth',
-                size: 30124234233,
-                type: 'csv',
-              },
-              {
-                dirPath: '/contents',
-                name: 'WA Water Depth',
-                size: 552434233,
-                type: 'csv',
-              },
-            ],
-            dirPath: '/',
-            name: 'Data',
-            size: 392393,
-            type: 'folder',
-          },
-        ],
-      },
-      id: 'test',
-      name: 'Precipitation and River Flows in Needham, MA'
-    },
-    vickyTest: {
-      files: [],
-      hydroShareResource: {
-        author: 'Vicky McDermott',
-        abstract: 'Some testing data',
-        files: [
-          {
-            dirPath: '/',
-            name: 'playingAround',
-            size: 73949942858,
-            type: 'ipynb',
-          },
-        ],
-        id: 'vickyTest',
-        lastModified: 'Sep 13, 2019',
-        status: 'Modified',
-        source: [ResourceSource.Hydroshare]
-      },
-      id: 'vickyTest',
-      name: 'Snow melt forecasting in Waltham, MA'
-    }
-  }
+  allProjects: {},
 };
 
 const initUserState: IUserState = {
@@ -246,7 +129,9 @@ export function projectsPageReducer(state: IProjectsPageState = initProjectsPage
 export function projectsReducer(state: IProjectsState = initProjectsState, action: ProjectsActionTypes): IProjectsState {
   switch (action.type) {
     case ProjectsActions.SET_PROJECTS:
-      return state;
+      const allProjects = {};
+      action.payload.forEach(project => allProjects[project.hydroShareResource.resource_id] = project);
+      return {...state, allProjects };
     default:
       return state;
   }

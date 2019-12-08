@@ -5,7 +5,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/css/ResourceList.css';
 
 import {
-  IJupyterProject, SortByOptions,
+  IJupyterProject,
+  SortByOptions,
 } from '../store/types';
 
 import {
@@ -13,7 +14,7 @@ import {
 } from 'react-bootstrap';
 
 import NewProjectModal from './NewProjectModal';
-import { ICreateNewResource, ResourceSource } from '../store/types';
+import { ICreateNewResource } from '../store/types';
 
 import { FaFileMedical} from "react-icons/fa";
 
@@ -77,38 +78,24 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
 
   public convertToTableStructure(projects: IJupyterProject[]): ITableResourceInfo[] {
     const tableList: ITableResourceInfo[] = [];
-    projects.map((project: IJupyterProject, i: number) => {
-      const {
-        name,
-        hydroShareResource,
-      } = project;
-      if (hydroShareResource) {
-        let loc = '';
-        let sourceNum = hydroShareResource.source.length
-        hydroShareResource.source.map(location => {
-          switch (location) {
-            case ResourceSource.JupyterHub:
-              loc += 'JupyterHub  '
-              break;
-            case ResourceSource.Hydroshare:
-              loc += 'HydroShare  '
-              break;
-            default:
-              break;
-          }
-          if (sourceNum !== 1) {
-            loc += '& '
-          }
-          sourceNum--;
-        })
-        console.log(name + ", " + hydroShareResource.id)
+    projects.map(({ localCopyExists, hydroShareResource }: IJupyterProject, i: number) => {
+        const locations = ['HydroShare'];
+        if (localCopyExists) {
+            locations.push('Local');
+        }
+        let locationString;
+        if (locations.length > 1) {
+            const lastLocation = locations.splice(locations.length - 1, 1);
+            locationString = locations.join(', ') + ' & ' + lastLocation;
+        } else {
+            locationString = locations[0];
+        }
         tableList.push({
-          Name: name,
+          Name: hydroShareResource.resource_title,
           Status: hydroShareResource.status,
-          Location: loc,
-          Id: hydroShareResource.id,
+          Location: locationString,
+          Id: hydroShareResource.resource_id,
         })
-      }
     });
     return tableList;
   }
@@ -128,7 +115,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
   }
 
   public render() {
-    const { projects} = this.props;
+    const { projects } = this.props;
     // const viewProject = () => this.props.viewProject(project);
     return (
       <div>
