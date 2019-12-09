@@ -80,8 +80,14 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
 
   public convertToTableStructure(projects: {[projectId: string]: IJupyterProject}): ITableResourceInfo[] {
     const tableList: ITableResourceInfo[] = [];
-    Object.values(projects).map(({ localCopyExists, hydroShareResource }: IJupyterProject, i: number) => {
+    Object.values(projects).map((project: IJupyterProject, i: number) => {
         const locations = ['HydroShare'];
+        const {
+          id,
+          hydroShareResource,
+          localCopyExists,
+          title,
+        } = project;
         if (localCopyExists) {
             locations.push('Local');
         }
@@ -93,10 +99,10 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
             locationString = locations[0];
         }
         tableList.push({
-          Name: hydroShareResource.resource_title,
+          Name: title,
           Status: hydroShareResource.status,
           Location: locationString,
-          Id: hydroShareResource.resource_id,
+          Id: id,
         })
     });
     return tableList;
@@ -104,10 +110,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
 
   public viewProject(project: ITableResourceInfo | undefined) {
     if (project) {
-        const p = this.props.projects[project.Id];
-        console.log(p);
-
-      this.props.viewProject(p);
+      this.props.viewProject(this.props.projects[project.Id]);
     }
   }
 
