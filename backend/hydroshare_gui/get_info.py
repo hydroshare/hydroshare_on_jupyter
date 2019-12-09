@@ -20,6 +20,7 @@ from pprint import pprint
 from login import username, password
 import os
 import glob
+from metadata_parser import MetadataParser
 from collections import OrderedDict
 import pandas as pd
 # os.chdir(os.path.expanduser('a path')) # will change working directory
@@ -227,26 +228,46 @@ def locate_resource_in_JH():
     pass
 
 def get_local_resources():
-    metadata_files = glob.glob(os.path.join(output_folder, '*'))
+    resource_folders = glob.glob(os.path.join(output_folder, '*'))
     # TODO: Use a filesystem-independent way of this
-    return {file_path.split('/')[-1] for file_path in metadata_files}
+    mp_by_res_id = {}
+    for folder_path in resource_folders:
+        res_id = folder_path.split('/')[-1]
+        metadata_file_Path = os.path.join(folder_path, res_id, 'data', 'resourcemetadata.xml')
+        mp = MetadataParser(metadata_file_Path)
+        mp_by_res_id[res_id] = mp
+
+    return mp_by_res_id
 
 """Others"""
 def get_list_of_user_resources():
-    hs_resources = hs.resources(owner=username)
+    resources = {}
+
+    # Get the user's resources from HydroShare
+    user_hs_resources = hs.resources(owner=username)
+    for res in user_hs_resources:
+        res_id = res['resource_id']
+        resources[res_id] = {
+            'id': res_id,
+            'title': res['resource_title'],
+            'hydroShareResource': res,
+        }
+
+    # Get the resources copied to the local filesystem
     local_resources = get_local_resources()
+    for res_id, res_metadata in local_resources.items():
+        if res_id in resources:
+            # TODO: Add local files
+            resources[res_id]['localCopyExists'] = True
+        else:
+            resources[res_id] = {
+                'id': res_id,
+                'title': res_metadata.get_title(),
+                'hydroShareResource': res_metadata.spoof_hs_api_response(),
+                'localCopyExists': True,
+            }
 
-    resources_list = []
-    for resource_info in hs_resources:
-        local_copy_exists = resource_info['resource_id'] in local_resources
-        resources_list.append({
-            'id': resource_info['resource_id'],
-            'title': resource_info['resource_title'],
-            'localCopyExists': local_copy_exists,
-            'hydroShareResource': resource_info,
-        })
-
-    return resources_list
+    return list(resources.values())
 
 if __name__ == '__main__':
     # get_metadata(test_resource_id)
