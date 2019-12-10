@@ -51,7 +51,7 @@ export interface IFileOrFolder {
   lastModified?: Date
   name: string
   type: string
-  size: number
+  sizeBytes: number
 }
 
 export interface IJupyterProject {
@@ -94,6 +94,10 @@ export interface IUserInfoData {
 
 export interface IResourcesData {
   resources: IJupyterProject[]
+}
+
+export interface IResourceFilesData {
+  files: IFileOrFolder[]
 }
 
 export interface IUserInfo {

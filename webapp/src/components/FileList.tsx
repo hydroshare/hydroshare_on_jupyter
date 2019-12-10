@@ -82,20 +82,21 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
           case 'folder':
             fileIcon = '📁'
             break;
-          case 'csv':
+          // case 'csv':
+          default:
             fileIcon = '📄'
             break;
-          case 'ipynb':
-            fileIcon = '💻'
-            break;
-          default:
-            break;
+          // case 'ipynb':
+          //   fileIcon = '💻'
+          //   break;
+          // default:
+          //   break;
         }
         relevantFileForSearch = true
         const spacers = this.generateSpaces(level);
         flatFiles.push({
-          name: spacers+fileIcon+'  ' +fileOrFolder.name,
-          size: this.getFormattedSizeString(fileOrFolder.size),
+          name: spacers+(fileIcon ? fileIcon : '')+'  ' +fileOrFolder.name,
+          size: this.getFormattedSizeString(fileOrFolder.sizeBytes),
           type: fileOrFolder.type,
           dirPath: fileOrFolder.dirPath,
           id: idString,

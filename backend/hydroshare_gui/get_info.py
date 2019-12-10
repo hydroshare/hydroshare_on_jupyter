@@ -46,13 +46,11 @@ def get_hs_resource(resource_id, output_folder, unzip=True):
         print("Resource already exists!")
 
 def get_files_JH(resource_id):
-    files_dict = {}
     get_hs_resource(resource_id, output_folder)
-    files = glob.glob('{}/{}/{}/data/contents/*'.format(output_folder, resource_id, resource_id))
+    # files = glob.glob('{}/{}/{}/data/contents/*'.format(output_folder, resource_id, resource_id))
     prefix = output_folder + "/" + resource_id + "/" + resource_id + "/data/contents"
     files2 = get_recursive_folder_contents(prefix)
-    files_dict["Files"] = files2
-    return files_dict
+    return files2
 
 def get_folder_size(folderpath):
     total_size = 0
@@ -74,25 +72,31 @@ def get_recursive_folder_contents(folderpath):
         file = filepath[len(folderpath)+1:]
         if (len(get_recursive_folder_contents(filepath)) == 0 and
                                                 file.rfind(".") != -1):
-            type = file[file.rfind(".")+1:]
+            file_type = file[file.rfind(".")+1:]
             filename = file[:file.rfind(".")]
         else:
-            type = "folder"
+            file_type = "folder"
             filename = file
-        if type == "folder":
-            files2.append({"file_name": filename, "type": type, "size": get_folder_size(filepath), "contents": get_recursive_folder_contents(filepath)})
+        if file_type == "folder":
+            files2.append({
+                "contents": get_recursive_folder_contents(filepath),
+                "dirPath": folderpath,
+                "name": filename,
+                "sizeBytes": get_folder_size(filepath),
+                "type": file_type,
+            })
         else:
-            files2.append({"file_name": filename, "type": type, "size": os.path.getsize(filepath)})
+            files2.append({
+                "dirPath": folderpath,
+                "name": filename,
+                "sizeBytes": os.path.getsize(filepath),
+                "type": file_type,
+            })
     return files2
 
 #TODO (vickymmcd): fix up formatting of returned list of HS files
 def get_files_HS(resource_id):
-    files_dict = {}
-    files_list = []
-    for file in hs.getResourceFileList(resource_id):
-        files_list.append(file)
-    files_dict["Files"] = files_list
-    return files_dict
+    return list(hs.getResourceFileList(resource_id))
 
 def get_metadata_of_all_files():
     #TODO scrape from xml file instead of API call
