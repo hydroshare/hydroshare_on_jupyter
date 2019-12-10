@@ -32,7 +32,7 @@ interface IResourceListProps {
 
 interface ITableResourceInfo {
   Name: string,
-  Status: string,
+  // Status: string,
   Id: string,
   Location: string,
 }
@@ -84,12 +84,12 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         const locations = ['HydroShare'];
         const {
           id,
-          hydroShareResource,
+          // hydroShareResource,
           localCopyExists,
           title,
         } = project;
         if (localCopyExists) {
-            locations.push('Local');
+            locations.push('JupyterHub');
         }
         let locationString;
         if (locations.length > 1) {
@@ -100,7 +100,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         }
         tableList.push({
           Name: title,
-          Status: hydroShareResource.status,
+          // Status: hydroShareResource.status,
           Location: locationString,
           Id: id,
         })
@@ -123,7 +123,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         title={"Resources"}
         columns={[
           { title: 'Name', field: 'Name'},
-          { title: 'Status', field: 'Status'},
+          // { title: 'Status', field: 'Status'},
           { title: 'Resource Location', field: 'Location'}
         ]}
         data={this.convertToTableStructure(projects)}      
