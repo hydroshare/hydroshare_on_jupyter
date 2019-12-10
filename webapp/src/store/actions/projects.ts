@@ -16,3 +16,10 @@ export function setProjectLocalFiles(resourceId: string, files: IFileOrFolder[])
     files,
   });
 }
+
+export function setProjectHydroShareFiles(resourceId: string, files: IFileOrFolder[]) {
+  return action(ProjectsActions.SET_PROJECT_HYDROSHARE_FILES, {
+    resourceId,
+    files,
+  });
+}

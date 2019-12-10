@@ -4,6 +4,7 @@ import {
 } from './action-names';
 import {
     getResourceLocalFiles,
+    getResourceHydroShareFiles,
 } from '../async-actions';
 import {
     IFileOrFolder,
@@ -21,8 +22,10 @@ export function getFilesIfNeeded(project: IJupyterProject): ThunkAction<Promise<
         if (project && !project.files) {
             dispatch(getResourceLocalFiles(project.id));
         }
+        if (project && project.hydroShareResource && !project.hydroShareResource.files) {
+            dispatch(getResourceHydroShareFiles(project.id));
+        }
     };
-    // return action(ProjectsActions.GET_PROJECT_LOCAL_FILES_IF_NEEDED, project);
 }
 
 export function toggleIsSelectedAllLocal(project: IJupyterProject) {
