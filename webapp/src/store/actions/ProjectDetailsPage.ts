@@ -1,10 +1,29 @@
 import { action } from 'typesafe-actions';
-import { ProjectDetailsPageActions } from './action-names';
+import {
+  ProjectDetailsPageActions,
+} from './action-names';
+import {
+    getResourceLocalFiles,
+} from '../async-actions';
 import {
     IFileOrFolder,
     IJupyterProject,
     SortByOptions,
 } from '../types';
+import { AnyAction } from 'redux';
+import {
+    ThunkAction,
+    ThunkDispatch,
+} from "redux-thunk";
+
+export function getFilesIfNeeded(project: IJupyterProject): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+        if (project && !project.files) {
+            dispatch(getResourceLocalFiles(project.id));
+        }
+    };
+    // return action(ProjectsActions.GET_PROJECT_LOCAL_FILES_IF_NEEDED, project);
+}
 
 export function toggleIsSelectedAllLocal(project: IJupyterProject) {
     return action(ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER, project);

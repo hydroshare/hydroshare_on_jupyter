@@ -132,6 +132,21 @@ export function projectsReducer(state: IProjectsState = initProjectsState, actio
       const allProjects = {};
       action.payload.forEach(project => allProjects[project.hydroShareResource.resource_id] = project);
       return {...state, allProjects };
+    case ProjectsActions.SET_PROJECT_LOCAL_FILES:
+      const {
+        resourceId,
+        files,
+      } = action.payload;
+      return {
+        ...state,
+        allProjects: {
+          ...state.allProjects,
+          [resourceId]: {
+            ...state.allProjects[resourceId],
+            files,
+          },
+        },
+      };
     default:
       return state;
   }
