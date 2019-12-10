@@ -46,7 +46,7 @@ class TestHSServer(AsyncHTTPTestCase):
     '''
     @gen_test
     def test_localfiles(self):
-        response = self.fetch(r"/resources/8b826c43f55043f583c85ae312a8894f/localfiles")
+        response = self.fetch(r"/resources/8b826c43f55043f583c85ae312a8894f/local-files")
         self.assertEqual(response.code, 200)
         # make sure the string "Files" is in the response
         res = 'Files'
@@ -57,7 +57,7 @@ class TestHSServer(AsyncHTTPTestCase):
     '''
     @gen_test
     def test_HSfiles(self):
-        response = self.fetch(r"/resources/8b826c43f55043f583c85ae312a8894f/HSfiles")
+        response = self.fetch(r"/resources/8b826c43f55043f583c85ae312a8894f/hs-files")
         self.assertEqual(response.code, 200)
         # make sure the string "Files" is in the response
         res = 'Files'
