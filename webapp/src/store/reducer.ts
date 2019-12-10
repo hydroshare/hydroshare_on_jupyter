@@ -147,6 +147,24 @@ export function projectsReducer(state: IProjectsState = initProjectsState, actio
           },
         },
       };
+    case ProjectsActions.SET_PROJECT_HYDROSHARE_FILES:
+      const {
+        resourceId: resId,
+        files: f,
+      } = action.payload;
+      return {
+        ...state,
+        allProjects: {
+          ...state.allProjects,
+          [resId]: {
+            ...state.allProjects[resId],
+            hydroShareResource: {
+              ...state.allProjects[resId].hydroShareResource,
+              files: f,
+            },
+          },
+        },
+      };
     default:
       return state;
   }

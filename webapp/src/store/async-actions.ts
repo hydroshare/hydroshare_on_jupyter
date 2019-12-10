@@ -9,6 +9,7 @@ import {
 
 import {
   setProjectLocalFiles,
+  setProjectHydroShareFiles,
   setProjects,
 } from './actions/projects';
 import {
@@ -72,5 +73,18 @@ export function getResourceLocalFiles(resourceId: string) {
     } = response;
 
     dispatch(setProjectLocalFiles(resourceId, files));
+  };
+}
+
+export function getResourceHydroShareFiles(resourceId: string) {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/hs-files`);
+    const {
+      data: {
+        files,
+      },
+    } = response;
+
+    dispatch(setProjectHydroShareFiles(resourceId, files));
   };
 }
