@@ -1,3 +1,5 @@
+import * as moment from 'moment';
+
 import {
   ProjectDetailsPageActions,
   ProjectsActions,
@@ -130,7 +132,12 @@ export function projectsReducer(state: IProjectsState = initProjectsState, actio
   switch (action.type) {
     case ProjectsActions.SET_PROJECTS:
       const allProjects = {};
-      action.payload.forEach(project => allProjects[project.hydroShareResource.resource_id] = project);
+      action.payload.forEach(project => {
+        if (project.hydroShareResource) {
+          project.hydroShareResource.date_last_updated = moment(project.hydroShareResource.date_last_updated);
+        }
+        allProjects[project.hydroShareResource.resource_id] = project;
+      });
       return {...state, allProjects };
     case ProjectsActions.SET_PROJECT_LOCAL_FILES:
       const {
@@ -143,7 +150,7 @@ export function projectsReducer(state: IProjectsState = initProjectsState, actio
           ...state.allProjects,
           [resourceId]: {
             ...state.allProjects[resourceId],
-            files,
+            files: recursivelyConvertDatesToMoment(files),
           },
         },
       };
@@ -152,6 +159,7 @@ export function projectsReducer(state: IProjectsState = initProjectsState, actio
         resourceId: resId,
         files: f,
       } = action.payload;
+
       return {
         ...state,
         allProjects: {
@@ -160,7 +168,7 @@ export function projectsReducer(state: IProjectsState = initProjectsState, actio
             ...state.allProjects[resId],
             hydroShareResource: {
               ...state.allProjects[resId].hydroShareResource,
-              files: f,
+              files: recursivelyConvertDatesToMoment(f),
             },
           },
         },
@@ -168,6 +176,13 @@ export function projectsReducer(state: IProjectsState = initProjectsState, actio
     default:
       return state;
   }
+}
+
+function recursivelyConvertDatesToMoment(files: IFileOrFolder[]) {
+  return files.map(fileOrFolder => {
+    fileOrFolder.lastModified = moment(fileOrFolder.lastModified);
+    return fileOrFolder;
+  });
 }
 
 export function userReducer(state: IUserState = initUserState, action: UserActionTypes): IUserState {
