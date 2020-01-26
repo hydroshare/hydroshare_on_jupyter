@@ -21,5 +21,9 @@
 
 .file-lists {
   overflow: auto;
-  display: flex
+  display: flex;
+
+  & > div:first-child {
+    border-right: 4px solid #dedede;
+  }
 }

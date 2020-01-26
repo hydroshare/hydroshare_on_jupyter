@@ -1,3 +1,4 @@
+import { RouterState } from 'connected-react-router';
 import * as moment from 'moment';
 import {ActionType} from 'typesafe-actions';
 
@@ -28,6 +29,7 @@ export interface IRootState {
   projectPage: IProjectsPageState
   projects: IProjectsState
   projectDetailsPage: IProjectDetailsPageState
+  router: RouterState
   user: IUserState
 }
 
