@@ -120,7 +120,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     return (
       <div>
       <MaterialTable
-        title={"Resources"}
+        title={"My Resources"}
         columns={[
           { title: 'Name', field: 'Name'},
           // { title: 'Status', field: 'Status'},

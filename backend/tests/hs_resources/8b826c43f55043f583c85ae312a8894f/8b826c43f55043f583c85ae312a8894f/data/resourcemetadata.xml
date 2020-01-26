@@ -1,10 +1,10 @@
 <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:hsterms="http://hydroshare.org/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs1="http://www.w3.org/2000/01/rdf-schema#">
   <rdf:Description rdf:about="http://www.hydroshare.org/resource/8b826c43f55043f583c85ae312a8894f">
-    <dc:title>North Whitehall</dc:title>
+    <dc:title>North Whitehall riverbed permeability analysis</dc:title>
     <dc:type rdf:resource="http://www.hydroshare.org/terms/CompositeResource"/>
     <dc:description>
       <rdf:Description>
-        <dcterms:abstract>North Whitehall</dcterms:abstract>
+        <dcterms:abstract>An in-depth analysis of the riverbed permeability in North Whitehall, NC.</dcterms:abstract>
       </rdf:Description>
     </dc:description>
     <dc:creator>

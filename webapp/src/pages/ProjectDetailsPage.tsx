@@ -20,9 +20,9 @@ import {
 import ProjectInfo from '../components/ProjectInfo';
 import { ThunkDispatch } from "redux-thunk";
 
-// @ts-ignore the "error" that router does not exist on IRootState
 const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) => {
   // Extract the project ID from the URL
+  // @ts-ignore object possibly undefined
   const regexMatch = router.location.pathname.split('/').pop().match(/^\w+/);
   let projectId;
   if (regexMatch) {
@@ -99,7 +99,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
 
     return (
       <div className="page project-details">
-        <a className="go-back" onClick={this.props.goBackToProjects}>&lt; Back to projects</a>
+        {/*<a className="go-back" onClick={this.props.goBackToProjects}>&lt; Back to projects</a>*/}
         <ProjectInfo project={this.props.project} />
         <FilterBarProjectDetails allSelected={this.props.allJupyterSelected}
           toggleAllSelected={toggleAllLocalSelected} searchChange={this.handleSearchChange} sortBy={this.props.sortBy}/>
