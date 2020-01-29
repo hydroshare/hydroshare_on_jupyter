@@ -279,6 +279,13 @@ def get_list_of_user_resources():
 
     return list(resources.values())
 
+
+def get_folder_last_modified_time(id):
+    # This is where we can get folder last modified time
+    metadata = hs.getScienceMetadata(id)
+    # TODO: extract modified time from metadata
+    return
+
 if __name__ == '__main__':
     # get_metadata(test_resource_id)
     # get_hs_resource(test_resource_id, output_folder, unzip=True)
@@ -293,8 +300,8 @@ if __name__ == '__main__':
     # local_file = 'backend/tests/hs_resources/' + r["resource_id"] + '/' + r["resource_id"] + '/data/contents/Introduction_to_Coding.ipynb'
     # update_path = 'data/contents'
     # print(update_resource_in_HS(local_file, update_path, r["resource_id"]))
-    for file in (get_files_HS("8b826c43f55043f583c85ae312a8894f")):
-        print(file)
+    # for file in (get_files_HS("8b826c43f55043f583c85ae312a8894f")):
+    #     print(file)
     # get_user_info()
     # test_socket()
 
