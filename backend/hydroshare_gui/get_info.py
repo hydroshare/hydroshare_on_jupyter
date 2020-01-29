@@ -37,6 +37,10 @@ if not os.path.exists(output_folder):
     os.makedirs(output_folder)
     print("Made {} folder for new resources".format(output_folder))
 
+def get_user_credentials():
+    
+    return
+
 def get_hs_resource(resource_id, output_folder, unzip=True):
     # Get actual resource
     if not os.path.exists('{}/{}'.format(output_folder, resource_id)):
