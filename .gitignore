@@ -24,6 +24,7 @@ backend/hydroshare_gui/backend/tests/hs_resources
 backend/hs_resources/
 backend/hydroshare_gui/__pycache__/*
 webapp/src/styles/css/*
+backend/hydroshare_gui/local_hs_resources
 
 npm-debug.log*
 yarn-debug.log*
