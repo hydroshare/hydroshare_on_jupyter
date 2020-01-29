@@ -30,8 +30,17 @@ import tornado.options
 a new resource for that user
 '''
 class ResourcesHandler(tornado.web.RequestHandler):
+
+    # TODO: Remove this (security hazard)
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
     def get(self):
-        self.write(get_list_of_user_resources())
+        # TODO: Probably do some request error handling here
+        resources = get_list_of_user_resources()
+        self.write({'resources': resources})
 
     def post(self):
         pass
@@ -41,22 +50,50 @@ class ResourcesHandler(tornado.web.RequestHandler):
 hydroshare instance of a resource
 '''
 class ResourcesFileHandlerHS(tornado.web.RequestHandler):
+
+    # TODO: Remove this (security hazard)
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
     def get(self, res_id):
-        self.write(get_files_HS(res_id))
+        # TODO: Get folder info
+        hs_files = get_files_HS(res_id)
+        res = []
+        for f in hs_files:
+            name = '.'.join(f['file_name'].split('.')[:-1])
+            res.append({
+                'name': name,
+                'sizeBytes': f['size'],
+                'type': f['logical_file_type'],
+            })
+        self.write({'files': res})
 
 
 ''' Class that handles GETing list of a files that are in a user's
 jupyterhub instance of a resource
 '''
 class ResourcesFileHandlerJH(tornado.web.RequestHandler):
+
+    # TODO: Remove this (security hazard)
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
     def get(self, res_id):
-        self.write(get_files_JH(res_id))
+        self.write({
+            'files': get_files_JH(res_id),
+        })
 
 
 ''' Class that handles GETing user information on the currently logged
 in user including name, email, username, etc.
 '''
 class UserInfoHandler(tornado.web.RequestHandler):
+
+    # TODO: Remove this (security hazard)
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
@@ -82,16 +119,14 @@ class HydroShareGUI(tornado.web.Application):
             logging.info('exit success')
 
 
-''' Returns an instance of the server with the appropriate endpoints
-'''
 def make_app():
-    application = HydroShareGUI([
+    """Returns an instance of the server with the appropriate endpoints"""
+    return HydroShareGUI([
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesHandler),
-        (r"/resources/([^/]+)/HSfiles", ResourcesFileHandlerHS),
-        (r"/resources/([^/]+)/localfiles", ResourcesFileHandlerJH)
+        (r"/resources/([^/]+)/hs-files", ResourcesFileHandlerHS),
+        (r"/resources/([^/]+)/local-files", ResourcesFileHandlerJH)
     ])
-    return application
 
 ''' Starts running the server
 '''

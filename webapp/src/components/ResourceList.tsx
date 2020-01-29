@@ -5,7 +5,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/css/ResourceList.css';
 
 import {
-  IJupyterProject, SortByOptions,
+  IJupyterProject,
+  SortByOptions,
 } from '../store/types';
 
 import {
@@ -13,7 +14,7 @@ import {
 } from 'react-bootstrap';
 
 import NewProjectModal from './NewProjectModal';
-import { ICreateNewResource, ResourceSource } from '../store/types';
+import { ICreateNewResource } from '../store/types';
 
 import { FaFileMedical} from "react-icons/fa";
 
@@ -22,14 +23,16 @@ import MaterialTable, {MTableToolbar} from 'material-table';
 interface IResourceListProps {
   viewProject: any
   searchTerm: string
-  projects: IJupyterProject[]
+  projects: {
+      [projectId: string]: IJupyterProject
+  }
   sortByTerm: SortByOptions | undefined
   newProject: (newResource: ICreateNewResource) => any
 }
 
 interface ITableResourceInfo {
   Name: string,
-  Status: string,
+  // Status: string,
   Id: string,
   Location: string,
 }
@@ -75,68 +78,52 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       this.setState({ showModal: false });
     }
 
-  public convertToTableStructure(projects: IJupyterProject[]): ITableResourceInfo[] {
+  public convertToTableStructure(projects: {[projectId: string]: IJupyterProject}): ITableResourceInfo[] {
     const tableList: ITableResourceInfo[] = [];
-    projects.map((project: IJupyterProject, i: number) => {
-      const {
-        name,
-        hydroShareResource,
-      } = project;
-      if (hydroShareResource) {
-        let loc = '';
-        let sourceNum = hydroShareResource.source.length
-        hydroShareResource.source.map(location => {
-          switch (location) {
-            case ResourceSource.JupyterHub:
-              loc += 'JupyterHub  '
-              break;
-            case ResourceSource.Hydroshare:
-              loc += 'HydroShare  '
-              break;
-            default:
-              break;
-          }
-          if (sourceNum !== 1) {
-            loc += '& '
-          }
-          sourceNum--;
-        })
-        console.log(name + ", " + hydroShareResource.id)
+    Object.values(projects).map((project: IJupyterProject, i: number) => {
+        const locations = ['HydroShare'];
+        const {
+          id,
+          // hydroShareResource,
+          localCopyExists,
+          title,
+        } = project;
+        if (localCopyExists) {
+            locations.push('JupyterHub');
+        }
+        let locationString;
+        if (locations.length > 1) {
+            const lastLocation = locations.splice(locations.length - 1, 1);
+            locationString = locations.join(', ') + ' & ' + lastLocation;
+        } else {
+            locationString = locations[0];
+        }
         tableList.push({
-          Name: name,
-          Status: hydroShareResource.status,
-          Location: loc,
-          Id: hydroShareResource.id,
+          Name: title,
+          // Status: hydroShareResource.status,
+          Location: locationString,
+          Id: id,
         })
-      }
     });
     return tableList;
   }
 
   public viewProject(project: ITableResourceInfo | undefined) {
-    
     if (project) {
-      this.props.projects.map((projectJH: IJupyterProject) => {
-        console.log("table: " + project.Id)
-        console.log("jh :" + projectJH.id)
-        if (project.Id === projectJH.id){
-          
-          this.props.viewProject(projectJH)
-        }
-      });
-    };
+      this.props.viewProject(this.props.projects[project.Id]);
+    }
   }
 
   public render() {
-    const { projects} = this.props;
+    const { projects } = this.props;
     // const viewProject = () => this.props.viewProject(project);
     return (
       <div>
       <MaterialTable
-        title={"Resources"}
+        title={"My Resources"}
         columns={[
           { title: 'Name', field: 'Name'},
-          { title: 'Status', field: 'Status'},
+          // { title: 'Status', field: 'Status'},
           { title: 'Resource Location', field: 'Location'}
         ]}
         data={this.convertToTableStructure(projects)}      

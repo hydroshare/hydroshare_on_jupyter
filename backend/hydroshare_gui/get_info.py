@@ -20,6 +20,7 @@ from pprint import pprint
 from login import username, password
 import os
 import glob
+from metadata_parser import MetadataParser
 from collections import OrderedDict
 import pandas as pd
 # os.chdir(os.path.expanduser('a path')) # will change working directory
@@ -45,13 +46,11 @@ def get_hs_resource(resource_id, output_folder, unzip=True):
         print("Resource already exists!")
 
 def get_files_JH(resource_id):
-    files_dict = {}
     get_hs_resource(resource_id, output_folder)
-    files = glob.glob('{}/{}/{}/data/contents/*'.format(output_folder, resource_id, resource_id))
+    # files = glob.glob('{}/{}/{}/data/contents/*'.format(output_folder, resource_id, resource_id))
     prefix = output_folder + "/" + resource_id + "/" + resource_id + "/data/contents"
     files2 = get_recursive_folder_contents(prefix)
-    files_dict["Files"] = files2
-    return files_dict
+    return files2
 
 def get_folder_size(folderpath):
     total_size = 0
@@ -73,25 +72,31 @@ def get_recursive_folder_contents(folderpath):
         file = filepath[len(folderpath)+1:]
         if (len(get_recursive_folder_contents(filepath)) == 0 and
                                                 file.rfind(".") != -1):
-            type = file[file.rfind(".")+1:]
+            file_type = file[file.rfind(".")+1:]
             filename = file[:file.rfind(".")]
         else:
-            type = "folder"
+            file_type = "folder"
             filename = file
-        if type == "folder":
-            files2.append({"file_name": filename, "type": type, "size": get_folder_size(filepath), "contents": get_recursive_folder_contents(filepath)})
+        if file_type == "folder":
+            files2.append({
+                "contents": get_recursive_folder_contents(filepath),
+                "dirPath": folderpath,
+                "name": filename,
+                "sizeBytes": get_folder_size(filepath),
+                "type": file_type,
+            })
         else:
-            files2.append({"file_name": filename, "type": type, "size": os.path.getsize(filepath)})
+            files2.append({
+                "dirPath": folderpath,
+                "name": filename,
+                "sizeBytes": os.path.getsize(filepath),
+                "type": file_type,
+            })
     return files2
 
 #TODO (vickymmcd): fix up formatting of returned list of HS files
 def get_files_HS(resource_id):
-    files_dict = {}
-    files_list = []
-    for file in hs.getResourceFileList(resource_id):
-        files_list.append(file)
-    files_dict["Files"] = files_list
-    return files_dict
+    return list(hs.getResourceFileList(resource_id))
 
 def get_metadata_of_all_files():
     #TODO scrape from xml file instead of API call
@@ -226,18 +231,47 @@ def delete_resource_in_JH():
 def locate_resource_in_JH():
     pass
 
+def get_local_resources():
+    resource_folders = glob.glob(os.path.join(output_folder, '*'))
+    # TODO: Use a filesystem-independent way of this
+    mp_by_res_id = {}
+    for folder_path in resource_folders:
+        res_id = folder_path.split('/')[-1]
+        metadata_file_Path = os.path.join(folder_path, res_id, 'data', 'resourcemetadata.xml')
+        mp = MetadataParser(metadata_file_Path)
+        mp_by_res_id[res_id] = mp
+
+    return mp_by_res_id
+
 """Others"""
 def get_list_of_user_resources():
-    print("Getting resources")
-    resources = hs.resources(owner=username)
-    print("Resources obtained")
+    resources = {}
 
-    resources_list = []
-    for resource in resources:
-        resources_list.append(resource)
-    resources = {"Resources": resources_list}
+    # Get the user's resources from HydroShare
+    user_hs_resources = hs.resources(owner=username)
+    for res in user_hs_resources:
+        res_id = res['resource_id']
+        resources[res_id] = {
+            'id': res_id,
+            'title': res['resource_title'],
+            'hydroShareResource': res,
+        }
 
-    return resources
+    # Get the resources copied to the local filesystem
+    local_resources = get_local_resources()
+    for res_id, res_metadata in local_resources.items():
+        if res_id in resources:
+            # TODO: Add local files
+            resources[res_id]['localCopyExists'] = True
+        else:
+            resources[res_id] = {
+                'id': res_id,
+                'title': res_metadata.get_title(),
+                'hydroShareResource': res_metadata.spoof_hs_api_response(),
+                'localCopyExists': True,
+            }
+
+    return list(resources.values())
 
 if __name__ == '__main__':
     # get_metadata(test_resource_id)

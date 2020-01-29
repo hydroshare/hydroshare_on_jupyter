@@ -1,13 +1,12 @@
 @import './colors.scss';
 
-.filterParent{
+.filterParent {
     width: 100%;
-    margin: auto;
-    height: 60px;
+    border-top-left-radius: 0.25em;
+    border-top-right-radius: 0.25em;
     background-color: $final-dark-blue;
-    font-family: Futura,Trebuchet MS,Arial,sans-serif;
-    padding: 5px;
-    box-shadow: 1px 1px 2px 0px $medium-blue;
+    font-family: Montserrat, sans-serif;
+    padding: 0.5em;
     display: flex;
 }
 
@@ -17,11 +16,11 @@
 }
 
 .filterForm-checkbox{
-    width:0px;
+    width: 0;
 }
 
 .filterForm-searchBox{
-    width:200px;
+    width: 200px;
 }
 
 .folder-open {
@@ -40,11 +39,8 @@
 }
 
 .filterBar-sync{
-    margin-left: auto;
-    margin-right: 12px;
     height: 36px;
-    margin-top: 6px;
-    margin-bottom: 7px;
+    margin: 6px 12px 7px auto;
 }
 
 .delete-button{
@@ -55,14 +51,9 @@
 }
 
 .new-folder-button {
-    margin-left: auto;
-    margin-right: 12px;
-
     height: 36px;
-    margin-top: 6px;
     padding-top: 4px;
-
-    margin-bottom: 7px;
+    margin: 6px 12px 7px auto;
 }
 
 .selectAll-checkbox{
