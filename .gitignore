@@ -19,6 +19,8 @@ node_modules
 .env.production.local
 __pycache__/*
 backend/login.py
+backend/hydroshare_gui/login.py
+backend/hydroshare_gui/backend/tests/hs_resources
 backend/hs_resources/
 backend/hydroshare_gui/__pycache__/*
 webapp/src/styles/css/*
