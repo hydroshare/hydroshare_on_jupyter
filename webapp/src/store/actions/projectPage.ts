@@ -1,5 +1,5 @@
 import { action } from 'typesafe-actions';
-import { ProjectDetailsPageActions, ProjectsActions } from '../actions/action-names';
+import { ProjectDetailsPageActions, ProjectsActions } from './action-names';
 import { SortByOptions, ICreateNewResource, } from '../types'
 
 export function searchBy(searchTerm: string) {
