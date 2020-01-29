@@ -44,6 +44,7 @@ def get_user_credentials():
 def get_hs_resource(resource_id, output_folder, unzip=True):
     # Get actual resource
     if not os.path.exists('{}/{}'.format(output_folder, resource_id)):
+
         print("getting hs resource")
         hs.getResource(resource_id, destination=output_folder, unzip=unzip)
     else:
@@ -78,20 +79,24 @@ def get_recursive_folder_contents(folderpath):
                                                 file.rfind(".") != -1):
             file_type = file[file.rfind(".")+1:]
             filename = file[:file.rfind(".")]
-        else:
+        elif os.path.isfile(filepath):
+            file_type = "file"
+            filename = file
+        elif os.path.isdir(filepath):
             file_type = "folder"
+            filename = file
+        else:
+            file_type = "unknown"
             filename = file
         if file_type == "folder":
             files2.append({
-                "contents": get_recursive_folder_contents(filepath),
-                "dirPath": folderpath,
                 "name": filename,
                 "sizeBytes": get_folder_size(filepath),
                 "type": file_type,
+                "contents": get_recursive_folder_contents(filepath),
             })
         else:
             files2.append({
-                "dirPath": folderpath,
                 "name": filename,
                 "sizeBytes": os.path.getsize(filepath),
                 "type": file_type,
@@ -100,6 +105,7 @@ def get_recursive_folder_contents(folderpath):
 
 #TODO (vickymmcd): fix up formatting of returned list of HS files
 def get_files_HS(resource_id):
+    print(hs.resource(resource_id).files.all())
     return list(hs.getResourceFileList(resource_id))
 
 def get_metadata_of_all_files():
