@@ -25,21 +25,19 @@ from collections import OrderedDict
 import pandas as pd
 # os.chdir(os.path.expanduser('a path')) # will change working directory
 
-
-# auth - Future: get this info'
+# auth - TODO: get user credentials from hydroshare
 auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
 
 test_resource_id = 'c40d9567678740dab868f35440a69b30'
 
-output_folder = 'backend/tests/hs_resources'
-if not os.path.exists(output_folder):
+### Making directory for local hs resources
+get_info_path = os.path.dirname(os.path.realpath(__file__)) # Get path to this file's location
+# output_folder = 'backend/tests/hs_resources'
+output_folder = get_info_path + "/local_hs_resources"
+if not os.path.exists(output_folder): # Make directory if it doesn't exist
     os.makedirs(output_folder)
     print("Made {} folder for new resources".format(output_folder))
-
-def get_user_credentials():
-    # TODO: Understand how this works
-    return
 
 def get_hs_resource(resource_id, output_folder, unzip=True):
     # Get actual resource
@@ -189,7 +187,7 @@ def create_resource_in_HS():
     title = 'Where does this go?'
     keywords = ('my keyword 1', 'my keyword 2')
     rtype = 'GenericResource'
-    fpath = '../hs_resources/{}/{}/readme.txt'.format(test_resource_id, test_resource_id)
+    fpath = output_folder + '/{}/{}/readme.txt'.format(test_resource_id, test_resource_id)
     metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"John Smith"}}, {"creator":{"name":"Lisa Miller"}}]'
     extra_metadata = '{"key-1": "value-1", "key-2": "value-2"}'
 
@@ -290,6 +288,10 @@ def get_folder_last_modified_time(id):
     # TODO: extract modified time from metadata
     return
 
+def do_nothing():
+    print("I'm doing nothing")
+    return
+
 if __name__ == '__main__':
     # get_metadata(test_resource_id)
     # get_hs_resource(test_resource_id, output_folder, unzip=True)
@@ -308,5 +310,6 @@ if __name__ == '__main__':
     #     print(file)
     # get_user_info()
     # test_socket()
+    do_nothing()
 
 #bbc2bcea4db14f6cbde009a43c8a97a1
