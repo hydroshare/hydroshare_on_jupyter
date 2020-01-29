@@ -24,12 +24,17 @@ const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) =
   // Extract the project ID from the URL
   // @ts-ignore object possibly undefined
   const regexMatch = router.location.pathname.split('/').pop().match(/^\w+/);
-  let projectId;
+  let projectForPage;
   if (regexMatch) {
-    projectId = regexMatch.pop();
+    const projectId = regexMatch.pop();
+    if (projectId) {
+      projectForPage = projects.allProjects[projectId]
+    } else {
+      return;
+    }
   }
   return {
-    project: projects.allProjects[projectId],
+    project: projectForPage,
     allJupyterSelected: projectDetailsPage.allJupyterSelected,
     allHydroShareSelected: projectDetailsPage.allHydroShareSelected,
     selectedLocalFilesAndFolders: projectDetailsPage.selectedLocalFilesAndFolders,
@@ -57,7 +62,9 @@ type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispa
 class ProjectDetailsPage extends React.Component<PropsType, never> {
 
   public componentDidMount = (): void => {
-    this.props.getFilesIfNeeded(this.props.project);
+    if (this.props.project) {
+      this.props.getFilesIfNeeded(this.props.project);
+    }
   };
 
   public handleSearchChange = (event: any) => {
@@ -76,8 +83,9 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
       );
     }
 
-    const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(this.props.project);
-    const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(this.props.project);
+    const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(this.props.project!);
+    const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(this.props.project!);
+    
 
     const {
       hydroShareResource,
