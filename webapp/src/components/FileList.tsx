@@ -34,7 +34,7 @@ interface IPropsInterface {
   sortBy: SortByOptions | undefined,
   searchTerm: string
   toggleAllSelected: () => AllActionTypes
-  hydroshare: boolean,
+  hydroShare: boolean,
 }
 
 interface IFlatFile {
@@ -82,20 +82,21 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
           case 'folder':
             fileIcon = '📁'
             break;
-          case 'csv':
+          // case 'csv':
+          default:
             fileIcon = '📄'
             break;
-          case 'ipynb':
-            fileIcon = '💻'
-            break;
-          default:
-            break;
+          // case 'ipynb':
+          //   fileIcon = '💻'
+          //   break;
+          // default:
+          //   break;
         }
         relevantFileForSearch = true
         const spacers = this.generateSpaces(level);
         flatFiles.push({
-          name: spacers+fileIcon+'  ' +fileOrFolder.name,
-          size: this.getFormattedSizeString(fileOrFolder.size),
+          name: spacers+(fileIcon ? fileIcon : '')+'  ' +fileOrFolder.name,
+          size: this.getFormattedSizeString(fileOrFolder.sizeBytes),
           type: fileOrFolder.type,
           dirPath: fileOrFolder.dirPath,
           id: idString,
@@ -133,7 +134,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
     return (
       <div className='FileList'>
         <MaterialTable
-          title={this.props.hydroshare ? "HydroShare files" : "JupyterHub files"}
+          title={this.props.hydroShare ? "HydroShare files" : "JupyterHub files"}
           columns={[
             { title: 'Name', field: 'name', cellStyle:{ whiteSpace: 'pre'} },
             { title: 'Type', field: 'type' },
@@ -155,8 +156,8 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
             Toolbar: props => (
               <div className="Toolbar">
                 <MTableToolbar className="MTtoolbar" {...props} />
-                {!this.props.hydroshare && <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaFileMedical/> New File</Button>}
-                {!this.props.hydroshare && <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaRegFolder/> New Folder</Button>}
+                {!this.props.hydroShare && <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaFileMedical/> New File</Button>}
+                {!this.props.hydroShare && <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaRegFolder/> New Folder</Button>}
               </div>
             )}}
         />

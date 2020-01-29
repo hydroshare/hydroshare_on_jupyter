@@ -8,14 +8,17 @@ import {
 } from 'redux-thunk';
 
 import {
-    setProjects,
+  setProjectLocalFiles,
+  setProjectHydroShareFiles,
+  setProjects,
 } from './actions/projects';
 import {
     setUserInfo,
 } from './actions/user';
 import {
-    IResourcesData,
-    IUserInfoData,
+  IResourceFilesData,
+  IResourcesData,
+  IUserInfoData,
 } from './types';
 
 // TODO: Remove this hardcoding
@@ -58,4 +61,30 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
 
       dispatch(setProjects(resources));
     };
+}
+
+export function getResourceLocalFiles(resourceId: string) {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/local-files`);
+    const {
+      data: {
+        files,
+      },
+    } = response;
+
+    dispatch(setProjectLocalFiles(resourceId, files));
+  };
+}
+
+export function getResourceHydroShareFiles(resourceId: string) {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/hs-files`);
+    const {
+      data: {
+        files,
+      },
+    } = response;
+
+    dispatch(setProjectHydroShareFiles(resourceId, files));
+  };
 }

@@ -9,8 +9,10 @@ export enum ProjectDetailsPageActions {
 }
 
 export enum ProjectsActions {
-  SET_PROJECTS = 'SET_PROJECTS',
-  NEW_PROJECT = 'NEW_PROJECT',
+  SET_PROJECTS = 'ProjectsActions/SET_PROJECTS',
+  SET_PROJECT_LOCAL_FILES = 'ProjectsActions/SET_PROJECT_LOCAL_FILES',
+  SET_PROJECT_HYDROSHARE_FILES = 'ProjectsActions/SET_PROJECT_HYDROSHARE_FILES',
+  NEW_PROJECT = 'ProjectsActions/NEW_PROJECT',
 }
 
 export enum UserInfoActions {

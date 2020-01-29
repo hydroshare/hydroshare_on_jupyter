@@ -1,3 +1,0 @@
-ce25e9aa7eb9b247843e827bf551a4fa    data/resourcemap.xml
-857e0db3fbff1305019b18b8851deb67    data/resourcemetadata.xml
-81e3cd2268ac996fef9b4fa575f20d6e    data/contents/myfile.txt

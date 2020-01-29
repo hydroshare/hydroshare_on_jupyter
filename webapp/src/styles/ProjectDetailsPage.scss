@@ -11,12 +11,19 @@
   overflow: auto;
 }
 
-.file-lists.split .FileList:first-child {
+.MuiTableRow-head .MuiTableCell-head {
+  line-height: 1.2rem;
+}
+
+.file-lists.split .FileList:first-child .MuiTableRow-head > th:last-child {
   border-right: 2px solid #dedede;
 }
 
 .file-lists {
-  border: 2px solid #dedede;
   overflow: auto;
-  display:flex
+  display: flex;
+
+  & > div:first-child {
+    border-right: 4px solid #dedede;
+  }
 }

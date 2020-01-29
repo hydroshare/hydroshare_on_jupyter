@@ -1,3 +1,5 @@
+import { RouterState } from 'connected-react-router';
+import * as moment from 'moment';
 import {ActionType} from 'typesafe-actions';
 
 import * as mainPageActions from './actions/App';
@@ -27,6 +29,7 @@ export interface IRootState {
   projectPage: IProjectsPageState
   projects: IProjectsState
   projectDetailsPage: IProjectDetailsPageState
+  router: RouterState
   user: IUserState
 }
 
@@ -48,18 +51,19 @@ export interface IProjectsPageState {
 export interface IFileOrFolder {
   contents?: IFileOrFolder[] // If a folder, a list of its contents
   dirPath: string // The path to the folder containing this file relative to the project root (must end with trailing /)
-  lastModified?: Date
+  lastModified?: moment.Moment
   name: string
   type: string
-  size: number
+  sizeBytes: number
 }
 
 export interface IJupyterProject {
   id: string
+  localCopyExists: boolean
   files: IFileOrFolder[]
-  name: string
+  title: string
   readmeMarkdown?: string
-  hydroShareResource?: IHydroShareResourceInfo
+  hydroShareResource: IHydroShareResourceInfo
 }
 
 export interface IMainPageState {
@@ -95,22 +99,34 @@ export interface IResourcesData {
   resources: IJupyterProject[]
 }
 
+export interface IResourceFilesData {
+  files: IFileOrFolder[]
+}
+
 export interface IUserInfo {
   name: string
 }
 
 export interface IHydroShareResourceInfo {
-  id: string
+  resource_id: string
   author: string
   files: IFileOrFolder[]
-  lastModified: string
+  date_last_updated: moment.Moment
   status: string
-  source: ResourceSource[]
-}
-
-export enum ResourceSource {
-  JupyterHub = 'JUPYTER',
-  Hydroshare = 'HYDROSHARE'
+  resource_type: string
+  resource_title: string
+  abstract?: string
+  authors: string[]
+  doi?: string
+  date_created: string
+  public: boolean
+  discoverable: boolean
+  shareable: boolean
+  immutable: boolean
+  published: boolean
+  bag_url: string
+  science_metadata_url: string
+  resource_url: string
 }
 
 export enum SortByOptions {

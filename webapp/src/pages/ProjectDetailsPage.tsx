@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 
@@ -13,17 +12,17 @@ import FileList from '../components/FileList';
 import * as projectDetailsPageActions from '../store/actions/ProjectDetailsPage';
 
 import {
-  AllActionTypes,
   IFileOrFolder,
   IJupyterProject,
   IRootState,
   SortByOptions,
 } from '../store/types';
 import ProjectInfo from '../components/ProjectInfo';
+import { ThunkDispatch } from "redux-thunk";
 
-// @ts-ignore the "error" that router does not exist on IRootState
 const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) => {
   // Extract the project ID from the URL
+  // @ts-ignore object possibly undefined
   const regexMatch = router.location.pathname.split('/').pop().match(/^\w+/);
   let projectId;
   if (regexMatch) {
@@ -40,8 +39,9 @@ const mapStateToProps = ({ projects, projectDetailsPage, router }: IRootState) =
   };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
+    getFilesIfNeeded: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.getFilesIfNeeded(project)),
     toggleSelectedAllLocal: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAllLocal(project)),
     toggleSelectedAllHydroShare: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAllHydroShare(project)),
     toggleSelectedOneLocal: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOneLocal(item)),
@@ -55,6 +55,10 @@ const mapDispatchToProps = (dispatch: Dispatch<AllActionTypes>) => {
 type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 class ProjectDetailsPage extends React.Component<PropsType, never> {
+
+  public componentDidMount = (): void => {
+    this.props.getFilesIfNeeded(this.props.project);
+  };
 
   public handleSearchChange = (event: any) => {
     this.props.searchProjectBy(event.target.value)
@@ -87,7 +91,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
             searchTerm={this.props.searchTerm}
             sortBy={this.props.sortByTerm}
             toggleAllSelected={toggleAllHydroShareSelected}
-            hydroshare={true}
+            hydroShare={true}
         />
     ) : null;
 
@@ -95,12 +99,12 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
 
     return (
       <div className="page project-details">
-        <a className="go-back" onClick={this.props.goBackToProjects}>&lt; Back to projects</a>
+        {/*<a className="go-back" onClick={this.props.goBackToProjects}>&lt; Back to projects</a>*/}
         <ProjectInfo project={this.props.project} />
         <FilterBarProjectDetails allSelected={this.props.allJupyterSelected}
           toggleAllSelected={toggleAllLocalSelected} searchChange={this.handleSearchChange} sortBy={this.props.sortBy}/>
         <div className={fileListContainerClasses}>
-          {<FileList
+          <FileList
             allSelected={this.props.allJupyterSelected}
             toggleAllSelected={toggleAllLocalSelected}
             files={this.props.project.files}
@@ -108,8 +112,8 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
             selectedFilesAndFolders={this.props.selectedLocalFilesAndFolders}
             sortBy={this.props.sortByTerm}
             searchTerm={this.props.searchTerm}
-            hydroshare={false}
-          />}
+            hydroShare={false}
+          />
           {hydroShareFiles}
         </div>
       </div>

@@ -1,3 +1,5 @@
+import * as moment from 'moment';
+
 import {
   ProjectDetailsPageActions,
   ProjectsActions,
@@ -14,7 +16,6 @@ import {
   MainPageActionTypes,
   ProjectsActionTypes,
   UserActionTypes,
-  ResourceSource,
 } from './types';
 
 const initProjectsPageState: IProjectsPageState = {
@@ -36,121 +37,7 @@ const initMainPageState: IMainPageState = {
 
 const initProjectsState: IProjectsState = {
   searchTerm: '',
-  allProjects: {
-    'test': {
-      files: [
-        {
-          dirPath: '/',
-          name: 'Watershed',
-          size: 73949942858,
-          type: 'ipynb',
-        },
-        {
-          contents: [
-            {
-              dirPath: '/contents/',
-              name: 'CA Water Depth',
-              size: 30124234233,
-              type: 'csv',
-            },
-            {
-              dirPath: '/contents',
-              name: 'WA Water Depth',
-              size: 552434233,
-              type: 'csv',
-            },
-            {
-              dirPath: '/contents',
-              name: 'OH Water Depth',
-              size: 10029939402,
-              type: 'csv',
-            },
-            {
-              contents: [
-                {
-                  dirPath: '/contents/Utah',
-                  name: 'Water Depth',
-                  size: 29934423,
-                  type: 'csv',
-                },
-                {
-                  dirPath: '/contents/Utah',
-                  name: 'Water Flow',
-                  size: 10034423,
-                  type: 'csv',
-                },
-              ],
-              dirPath: '/contents/',
-              name: 'Utah',
-              size: 399393,
-              type: 'folder',
-            },
-          ],
-          dirPath: '/',
-          name: 'Data',
-          size: 392393,
-          type: 'folder',
-        },
-      ],
-      hydroShareResource: {
-        author: 'Kyle Combes',
-        id: 'test',
-        lastModified: 'May 5',
-        status: 'Published',
-        source: [ResourceSource.Hydroshare, ResourceSource.JupyterHub],
-        files: [
-          {
-            dirPath: '/',
-            name: 'Watershed',
-            size: 73949942858,
-            type: 'ipynb',
-          },
-          {
-            contents: [
-              {
-                dirPath: '/contents/',
-                name: 'CA Water Depth',
-                size: 30124234233,
-                type: 'csv',
-              },
-              {
-                dirPath: '/contents',
-                name: 'WA Water Depth',
-                size: 552434233,
-                type: 'csv',
-              },
-            ],
-            dirPath: '/',
-            name: 'Data',
-            size: 392393,
-            type: 'folder',
-          },
-        ],
-      },
-      id: 'test',
-      name: 'Watershed Model'
-    },
-    vickyTest: {
-      files: [],
-      hydroShareResource: {
-        author: 'Vicky McDermott',
-        files: [
-          {
-            dirPath: '/',
-            name: 'playingAround',
-            size: 73949942858,
-            type: 'ipynb',
-          },
-        ],
-        id: 'vickyTest',
-        lastModified: 'Sep 13',
-        status: 'Modified',
-        source: [ResourceSource.Hydroshare]
-      },
-      id: 'vickyTest',
-      name: 'Flow'
-    }
-  }
+  allProjects: {},
 };
 
 const initUserState: IUserState = {
@@ -244,10 +131,58 @@ export function projectsPageReducer(state: IProjectsPageState = initProjectsPage
 export function projectsReducer(state: IProjectsState = initProjectsState, action: ProjectsActionTypes): IProjectsState {
   switch (action.type) {
     case ProjectsActions.SET_PROJECTS:
-      return state;
+      const allProjects = {};
+      action.payload.forEach(project => {
+        if (project.hydroShareResource) {
+          project.hydroShareResource.date_last_updated = moment(project.hydroShareResource.date_last_updated);
+        }
+        allProjects[project.hydroShareResource.resource_id] = project;
+      });
+      return {...state, allProjects };
+    case ProjectsActions.SET_PROJECT_LOCAL_FILES:
+      const {
+        resourceId,
+        files,
+      } = action.payload;
+      return {
+        ...state,
+        allProjects: {
+          ...state.allProjects,
+          [resourceId]: {
+            ...state.allProjects[resourceId],
+            files: recursivelyConvertDatesToMoment(files),
+          },
+        },
+      };
+    case ProjectsActions.SET_PROJECT_HYDROSHARE_FILES:
+      const {
+        resourceId: resId,
+        files: f,
+      } = action.payload;
+
+      return {
+        ...state,
+        allProjects: {
+          ...state.allProjects,
+          [resId]: {
+            ...state.allProjects[resId],
+            hydroShareResource: {
+              ...state.allProjects[resId].hydroShareResource,
+              files: recursivelyConvertDatesToMoment(f),
+            },
+          },
+        },
+      };
     default:
       return state;
   }
+}
+
+function recursivelyConvertDatesToMoment(files: IFileOrFolder[]) {
+  return files.map(fileOrFolder => {
+    fileOrFolder.lastModified = moment(fileOrFolder.lastModified);
+    return fileOrFolder;
+  });
 }
 
 export function userReducer(state: IUserState = initUserState, action: UserActionTypes): IUserState {

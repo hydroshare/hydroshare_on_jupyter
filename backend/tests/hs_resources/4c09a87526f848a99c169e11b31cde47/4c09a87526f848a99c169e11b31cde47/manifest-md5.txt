@@ -1,7 +1,0 @@
-057136b2ad7028b81a91185319672dba    data/resourcemap.xml
-c8ddf78350d0bc0ad6b20ca5259aed72    data/resourcemetadata.xml
-d551771344bfaf2ac8283bcf02c9ddba    data/contents/Introduction_to_Coding1.ipynb
-43a0d4e104109276591d95b6833dddc1    data/contents/Introduction_to_Coding.ipynb
-92182e129242784031941e683e5e7aca    data/contents/README
-a59ec506a9b5fa415b8ea5576bb9c53b    data/contents/README.md
-b0856f47670661c6a8c78cdc6f78c8cc    data/contents/Second_File.ipynb
