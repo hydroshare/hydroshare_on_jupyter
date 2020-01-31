@@ -20,6 +20,7 @@ from pprint import pprint
 from login import username, password
 import os
 import glob
+import json
 from metadata_parser import MetadataParser
 from collections import OrderedDict
 import pandas as pd
@@ -103,7 +104,31 @@ def get_recursive_folder_contents(folderpath):
 
 #TODO (vickymmcd): fix up formatting of returned list of HS files
 def get_files_HS(resource_id):
-    print(hs.resource(resource_id).files.all())
+    # get the file information for all files in the resource in json
+    array = hs.resource(resource_id).files.all().json()
+    url_prefix = 'http://www.hydroshare.org/resource/' + resource_id + '/data/contents'
+    folders_dict = {}
+    # get the needed info for each file
+    for file_info in array["results"]:
+        filepath = file_info["url"][len(url_prefix):]
+        if filepath.rfind("/") == -1 and filepath.rfind(".") != -1:
+            file_type = filepath[filepath.rfind(".")+1:]
+            filename = filepath[:filepath.rfind(".")]
+        elif filepath.rfind("/") == -1:
+            file_type = "file"
+            filename = filepath
+        else:
+            nested_files.append(file_info)
+            folders = filepath.split("/")
+            for x in range(0, len(folders)-1):
+                folder = folders[x]
+                if (x, folder) not in folders_dict:
+                    folders_dict[(x, folder)] = []
+                folders_dict[(x, folder)].append((x+1, folders[x+1]))
+        for key, val in folders_dict.items():
+            if key[0] == 0:
+                # do the thing            
+        print(file_info)
     return list(hs.getResourceFileList(resource_id))
 
 def get_metadata_of_all_files():
