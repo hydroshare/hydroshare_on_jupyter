@@ -127,7 +127,10 @@ def get_files_HS(resource_id):
                 folders_dict[(x, folder)].append((x+1, folders[x+1]))
         for key, val in folders_dict.items():
             if key[0] == 0:
-                # do the thing            
+                for v in val:
+                    while v in folders_dict:
+                        v = folders_dict[v]
+                # do the thing
         print(file_info)
     return list(hs.getResourceFileList(resource_id))
 
