@@ -57,6 +57,8 @@ def get_files_JH(resource_id):
     return files2
 
 def get_folder_size(folderpath):
+    """ Gets the size of the contents of a folder stored locally
+    """
     total_size = 0
     for path, dirs, files in os.walk(folderpath):
         for f in files:
@@ -65,6 +67,8 @@ def get_folder_size(folderpath):
     return total_size
 
 def get_recursive_folder_contents(folderpath):
+    """Uses recursion to get & properly nest contents of folders stored locally
+    """
     # get all the files in the folder
     files = glob.glob('{}/*'.format(folderpath))
     # return empty list if the folder is empty
@@ -74,7 +78,8 @@ def get_recursive_folder_contents(folderpath):
     for filepath in files:
         # +1 is to account for / after folderpath before file name
         file = filepath[len(folderpath)+1:]
-        if (len(get_recursive_folder_contents(filepath)) == 0 and
+        folder_contents = get_recursive_folder_contents(filepath)
+        if (len(folder_contents) == 0 and
                                                 file.rfind(".") != -1):
             file_type = file[file.rfind(".")+1:]
             filename = file[:file.rfind(".")]
@@ -92,7 +97,7 @@ def get_recursive_folder_contents(folderpath):
                 "name": filename,
                 "sizeBytes": get_folder_size(filepath),
                 "type": file_type,
-                "contents": get_recursive_folder_contents(filepath),
+                "contents": folder_contents,
             })
         else:
             files2.append({
@@ -102,18 +107,21 @@ def get_recursive_folder_contents(folderpath):
             })
     return files2
 
-#TODO (vickymmcd): fix up formatting of returned list of HS files
 def get_files_HS(resource_id):
-    # get the file information for all files in the resource in json
+    # get the file information for all files in the HS resource in json
     array = hs.resource(resource_id).files.all().json()
+    # figure out what the url prefix to the filepath is
     url_prefix = 'http://www.hydroshare.org/resource/' + resource_id + '/data/contents'
     folders_dict = {}
     folders_final = []
     nested_files = {}
     # get the needed info for each file
     for file_info in array["results"]:
+        # extract filepath from url
         filepath = file_info["url"][len(url_prefix)+1:]
+        # get proper definition formatting of file if it is a file
         file_definition_hs = get_file_definition_hs(filepath, file_info["size"])
+        # if it is a folder, build up contents
         if not file_definition_hs:
             nested_files[filepath + "/"] = file_info
             folders = filepath.split("/")
@@ -121,26 +129,31 @@ def get_files_HS(resource_id):
             for x in range(0, len(folders)-1):
                 folder = folders[x]
                 currpath = currpath + folder + "/"
+                # build up dictionary of folder -> what is in it
                 if (x, folder, currpath) not in folders_dict:
                     folders_dict[(x, folder, currpath)] = []
                 folders_dict[(x, folder, currpath)].append((x+1, folders[x+1], currpath + folders[x+1] + "/"))
+        # if it is just a file, add it to the final list
         else:
             folders_final.append(file_definition_hs)
+
+    # go through folders dictionary & build up the nested structure
     i = 0
     for key, val in folders_dict.items():
         if key[0] == 0:
             folder_size, folder_contents = populate_folders_hs(val, folders_dict, nested_files)
             folders_final.append({
                 "name": key[1],
-                "sizeBytes": folder_size, #TODO figure out how to get folder size HS
+                "sizeBytes": folder_size,
                 "type": "folder",
                 "contents": folder_contents,
             })
 
-    print(folders_final)
     return folders_final
 
 def get_file_definition_hs(filepath, size):
+    """Gets file definition formatting for returning HS files, given path & size
+    """
     if filepath.rfind("/") == -1 and filepath.rfind(".") != -1:
         file_type = filepath[filepath.rfind(".")+1:]
         filename = filepath[:filepath.rfind(".")]
@@ -159,6 +172,8 @@ def get_file_definition_hs(filepath, size):
         return False
 
 def populate_folders_hs(val, folders_dict, nested_files):
+    """Recursively build up nested folder structure for HS files
+    """
     contents = []
     folder_size = 0
     for v in val:
