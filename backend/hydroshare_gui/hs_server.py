@@ -60,15 +60,7 @@ class ResourcesFileHandlerHS(tornado.web.RequestHandler):
     def get(self, res_id):
         # TODO: Get folder info
         hs_files = get_files_HS(res_id)
-        res = []
-        for f in hs_files:
-            name = '.'.join(f['file_name'].split('.')[:-1])
-            res.append({
-                'name': name,
-                'sizeBytes': f['size'],
-                'type': f['logical_file_type'],
-            })
-        self.write({'files': res})
+        self.write({'files': get_files_HS(res_id)})
 
 
 ''' Class that handles GETing list of a files that are in a user's

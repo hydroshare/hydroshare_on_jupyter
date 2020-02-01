@@ -108,31 +108,74 @@ def get_files_HS(resource_id):
     array = hs.resource(resource_id).files.all().json()
     url_prefix = 'http://www.hydroshare.org/resource/' + resource_id + '/data/contents'
     folders_dict = {}
+    folders_final = []
+    nested_files = {}
     # get the needed info for each file
     for file_info in array["results"]:
-        filepath = file_info["url"][len(url_prefix):]
-        if filepath.rfind("/") == -1 and filepath.rfind(".") != -1:
-            file_type = filepath[filepath.rfind(".")+1:]
-            filename = filepath[:filepath.rfind(".")]
-        elif filepath.rfind("/") == -1:
-            file_type = "file"
-            filename = filepath
-        else:
-            nested_files.append(file_info)
+        filepath = file_info["url"][len(url_prefix)+1:]
+        file_definition_hs = get_file_definition_hs(filepath, file_info["size"])
+        if not file_definition_hs:
+            nested_files[filepath + "/"] = file_info
             folders = filepath.split("/")
+            currpath = ""
             for x in range(0, len(folders)-1):
                 folder = folders[x]
-                if (x, folder) not in folders_dict:
-                    folders_dict[(x, folder)] = []
-                folders_dict[(x, folder)].append((x+1, folders[x+1]))
-        for key, val in folders_dict.items():
-            if key[0] == 0:
-                for v in val:
-                    while v in folders_dict:
-                        v = folders_dict[v]
-                # do the thing
-        print(file_info)
-    return list(hs.getResourceFileList(resource_id))
+                currpath = currpath + folder + "/"
+                if (x, folder, currpath) not in folders_dict:
+                    folders_dict[(x, folder, currpath)] = []
+                folders_dict[(x, folder, currpath)].append((x+1, folders[x+1], currpath + folders[x+1] + "/"))
+        else:
+            folders_final.append(file_definition_hs)
+    i = 0
+    for key, val in folders_dict.items():
+        if key[0] == 0:
+            folder_size, folder_contents = populate_folders_hs(val, folders_dict, nested_files)
+            folders_final.append({
+                "name": key[1],
+                "sizeBytes": folder_size, #TODO figure out how to get folder size HS
+                "type": "folder",
+                "contents": folder_contents,
+            })
+
+    print(folders_final)
+    return folders_final
+
+def get_file_definition_hs(filepath, size):
+    if filepath.rfind("/") == -1 and filepath.rfind(".") != -1:
+        file_type = filepath[filepath.rfind(".")+1:]
+        filename = filepath[:filepath.rfind(".")]
+        return ({
+            "name": filename,
+            "sizeBytes": size,
+            "type": file_type,
+        })
+    elif filepath.rfind("/") == -1:
+        return ({
+            "name": filepath,
+            "sizeBytes": size,
+            "type": "file",
+        })
+    else:
+        return False
+
+def populate_folders_hs(val, folders_dict, nested_files):
+    contents = []
+    folder_size = 0
+    for v in val:
+        if v in folders_dict:
+            subfolder_size, subfolder_contents = populate_folders_hs(folders_dict[v], folders_dict, nested_files)
+            folder_size += subfolder_size
+            contents.append({
+                "name" : v[1],
+                "sizeBytes" : subfolder_size,
+                "type" : "folder",
+                "contents" : subfolder_contents,
+            })
+        else:
+            contents.append(get_file_definition_hs(v[1], nested_files[v[2]]["size"]))
+            folder_size += nested_files[v[2]]["size"]
+
+    return folder_size, contents
 
 def get_metadata_of_all_files():
     #TODO scrape from xml file instead of API call
