@@ -9,3 +9,19 @@ React allows us to make components (kind of like classes) that can be called at 
 The `pages` folder contains the code to render both of the pages. These pages call components. `pages/ProjectsPage.tsx` defines the page that displays the list of resources. `pages/ProjectDetailsPage.tsx` defines the page that displays the files in a specific resource.
 
 We are using React-Redux to manage the state of our application. The way this works is explained in [this blog post](https://medium.com/javascript-in-plain-english/the-only-introduction-to-redux-and-react-redux-youll-ever-need-8ce5da9e53c6). A basic understanding on this is important to understand how information is communicated between the backend and the frontend. The `store` folder contains all of the actions and reducers.
+
+A Typescript component has a state and props. [This blog post](https://codeburst.io/react-state-vs-props-explained-51beebd73b21) explains the difference between the two.
+
+
+## Components
+
+Below is a quick description of each file and the components they define:
+
+ - `FileList.tsx` displays the list of files in a resource. Converts the way the files are received from the backend into elements for the material table library (it's a 3rd party library that has a specific format for displaying items in a table. We're reconsidering using this library, just fyi)
+ - `FilterBar.tsx` old file that contains search bar for resource page. Not currently in use
+ - `FilterBarProjectDetails.tsx` filter bar for list page
+ - `Header.tsx` header bar for page. Contains the image of CUAHSI logo as well as "welcome, x user"
+ - `NewProjectModal.tsx` modal that pops up to create a new project
+ - `OpenFileModal.tsx` placeholder modal for opening files. Made this for AGU, will be changed so don't bother reviewing this.
+ - `ProjectInfo.tsx` displays information about resource (author, last modified, abstract)
+ - `ResourceList.tsx` displays list of resources
