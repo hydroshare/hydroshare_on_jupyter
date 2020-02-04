@@ -39,6 +39,8 @@ if not os.path.exists(output_folder): # Make directory if it doesn't exist
     os.makedirs(output_folder)
     print("Made {} folder for new resources".format(output_folder))
 
+"""FUNCTIONS USED BY HS_SERVER"""
+
 def get_hs_resource(resource_id, output_folder, unzip=True):
     # Get actual resource
     if not os.path.exists('{}/{}'.format(output_folder, resource_id)):
@@ -54,6 +56,45 @@ def get_files_JH(resource_id):
     prefix = output_folder + "/" + resource_id + "/" + resource_id + "/data/contents"
     files2 = get_recursive_folder_contents(prefix)
     return files2
+
+def get_user_info():
+    return hs.getUserInfo()
+
+def get_list_of_user_resources():
+    resources = {}
+
+    # Get the user's resources from HydroShare
+    user_hs_resources = hs.resources(owner=username)
+    for res in user_hs_resources:
+        res_id = res['resource_id']
+        resources[res_id] = {
+            'id': res_id,
+            'title': res['resource_title'],
+            'hydroShareResource': res,
+        }
+
+    # Get the resources copied to the local filesystem
+    local_resources = get_local_resources()
+    for res_id, res_metadata in local_resources.items():
+        if res_id in resources:
+            # TODO: Add local files
+            resources[res_id]['localCopyExists'] = True
+        else:
+            resources[res_id] = {
+                'id': res_id,
+                'title': res_metadata.get_title(),
+                'hydroShareResource': res_metadata.spoof_hs_api_response(),
+                'localCopyExists': True,
+            }
+
+    return list(resources.values())
+
+"""HELPER FUNCTIONS"""
+
+#TODO (vickymmcd): fix up formatting of returned list of HS files
+def get_files_HS(resource_id):
+    print(hs.resource(resource_id).files.all())
+    return list(hs.getResourceFileList(resource_id))
 
 def get_folder_size(folderpath):
     total_size = 0
@@ -100,11 +141,6 @@ def get_recursive_folder_contents(folderpath):
                 "type": file_type,
             })
     return files2
-
-#TODO (vickymmcd): fix up formatting of returned list of HS files
-def get_files_HS(resource_id):
-    print(hs.resource(resource_id).files.all())
-    return list(hs.getResourceFileList(resource_id))
 
 def get_metadata_of_all_files():
     #TODO scrape from xml file instead of API call
@@ -167,9 +203,6 @@ def get_metadata_one_file(resource_id):
     print(resource_md['resource_title'])
     pprint(resource_md)
     return(resource_md)
-
-def get_user_info():
-    return hs.getUserInfo()
 
 def test_socket():
     pass
@@ -252,34 +285,7 @@ def get_local_resources():
     return mp_by_res_id
 
 """Others"""
-def get_list_of_user_resources():
-    resources = {}
 
-    # Get the user's resources from HydroShare
-    user_hs_resources = hs.resources(owner=username)
-    for res in user_hs_resources:
-        res_id = res['resource_id']
-        resources[res_id] = {
-            'id': res_id,
-            'title': res['resource_title'],
-            'hydroShareResource': res,
-        }
-
-    # Get the resources copied to the local filesystem
-    local_resources = get_local_resources()
-    for res_id, res_metadata in local_resources.items():
-        if res_id in resources:
-            # TODO: Add local files
-            resources[res_id]['localCopyExists'] = True
-        else:
-            resources[res_id] = {
-                'id': res_id,
-                'title': res_metadata.get_title(),
-                'hydroShareResource': res_metadata.spoof_hs_api_response(),
-                'localCopyExists': True,
-            }
-
-    return list(resources.values())
 
 
 def get_folder_last_modified_time(id):
@@ -306,8 +312,8 @@ if __name__ == '__main__':
     # local_file = 'backend/tests/hs_resources/' + r["resource_id"] + '/' + r["resource_id"] + '/data/contents/Introduction_to_Coding.ipynb'
     # update_path = 'data/contents'
     # print(update_resource_in_HS(local_file, update_path, r["resource_id"]))
-    # for file in (get_files_HS("8b826c43f55043f583c85ae312a8894f")):
-    #     print(file)
+    for file in (get_files_HS("8b826c43f55043f583c85ae312a8894f")):
+        print(file)
     # get_user_info()
     # test_socket()
     do_nothing()
