@@ -1,3 +1,4 @@
+// potato (vicky): can we add a header comment to this file, esp if it is a 3rd party library we should prob credit them somewhere
 import * as React from 'react';
 
 import {
@@ -59,8 +60,8 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
     };
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-  }             
-  
+  }
+
   public flattenFiles(files: IFileOrFolder[], parentID='', level=0, override=false): [IFlatFile[], boolean] {
     let flatFiles: IFlatFile[] = [];
     let id = 1;
@@ -140,7 +141,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
             { title: 'Type', field: 'type' },
             { title: 'Size', field: 'size', type: 'numeric' },
           ]}
-          data={this.flattenFiles(this.props.files)[0]}      
+          data={this.flattenFiles(this.props.files)[0]}
           parentChildData={(row, rows) => rows.find(a => a.id === row.parentId)}
           options={{
             selection: true,

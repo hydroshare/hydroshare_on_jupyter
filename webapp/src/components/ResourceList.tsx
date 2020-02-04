@@ -53,7 +53,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       this.handleOpenModal = this.handleOpenModal.bind(this);
       this.handleCloseModal = this.handleCloseModal.bind(this);
     }
-  
+
     public deleteClick =() => {
         console.log("Send message to backend to delete")
     }
@@ -66,6 +66,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         console.log("Sort by" + e.value)
     }
 
+    // potato (vicky): does this just open the resource in the view where you can see the files it contains?
     public goToFiles = (e: any) => {
       console.log("go to file")
     }
@@ -73,7 +74,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     public handleOpenModal () {
       this.setState({ showModal: true });
     }
-  
+
     public handleCloseModal () {
       this.setState({ showModal: false });
     }
@@ -126,7 +127,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           // { title: 'Status', field: 'Status'},
           { title: 'Resource Location', field: 'Location'}
         ]}
-        data={this.convertToTableStructure(projects)}      
+        data={this.convertToTableStructure(projects)}
         actions={[
           {
             icon: 'delete',

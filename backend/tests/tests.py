@@ -1,3 +1,5 @@
+# potato (vicky): seems like test_server.py does most of the things we want -
+# maybe we can remove this file?
 from get_info import get_hs_resource, get_files, get_metadata, get_user_info
 
 
