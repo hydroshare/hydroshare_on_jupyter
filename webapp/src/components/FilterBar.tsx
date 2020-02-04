@@ -32,7 +32,8 @@ export default class FilterBar extends React.Component<IPropTypes, IStateTypes> 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
   }
-
+  // potato (vicky): this seems like you intend to do more than just search in this file - what exactly is it's goal?
+  // again, a header comment in the file would probably be helpful
   public deleteClick =() => {
     console.log("Send message to backend to delete")
   }

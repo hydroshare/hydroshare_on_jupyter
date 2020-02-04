@@ -8,6 +8,7 @@ from hydroshare_gui.hs_server import make_app
 from tornado.testing import AsyncHTTPTestCase, gen_test
 import unittest
 
+# potato (vicky): is this fine?
 # weird thing I had to do get rid of "loop already running error"
 # see https://github.com/spyder-ide/spyder/issues/7096
 import nest_asyncio

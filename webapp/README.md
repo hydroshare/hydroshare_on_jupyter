@@ -1,3 +1,5 @@
+[//]: # (potato (vicky): whose readme is this? do we want it?)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

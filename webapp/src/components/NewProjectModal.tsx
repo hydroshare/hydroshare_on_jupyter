@@ -26,7 +26,8 @@ export default class NewProjectModal extends React.Component<INewProjectModalPro
         formValidated: false,
       }
     }
-  
+
+    // potato (vicky): it seems like you have a lot of files with these same 3 functions - why?
     public deleteClick =() => {
         console.log("Send message to backend to delete")
     }
@@ -54,6 +55,7 @@ export default class NewProjectModal extends React.Component<INewProjectModalPro
 
     public render() {
 
+        // potato (vicky): is it true you can't rename a project once it is created?
         return (
             <Modal
                 {...this.props}

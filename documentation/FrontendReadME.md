@@ -2,7 +2,7 @@
 
 We are writing the frontend in `Typescript` which adds typing to javascript.
 
-`Index.tsx` is what gets run when the app starts up. It contains calls to the components that build up the webpage. 
+`Index.tsx` is what gets run when the app starts up. It contains calls to the components that build up the webpage.
 
 React allows us to make components (kind of like classes) that can be called at any point to insert a pre-built piece of html/css/javascript into the webpage. These components are in the `components` folder.
 
@@ -22,6 +22,7 @@ Below is a quick description of each file and the components they define:
  - `FilterBarProjectDetails.tsx` filter bar for list page
  - `Header.tsx` header bar for page. Contains the image of CUAHSI logo as well as "welcome, x user"
  - `NewProjectModal.tsx` modal that pops up to create a new project
+ [//]: # (potato (vicky): can we get things like replacing openfilemodal in as tasks in asana? I didn't know this was a thing)
  - `OpenFileModal.tsx` placeholder modal for opening files. Made this for AGU, will be changed so don't bother reviewing this.
  - `ProjectInfo.tsx` displays information about resource (author, last modified, abstract)
  - `ResourceList.tsx` displays list of resources

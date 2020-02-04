@@ -22,11 +22,13 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
     constructor(props: IFilterBarProjectDetailsProps) {
       super(props);
     }
-  
+
     public deleteClick =() => {
         console.log("Send message to backend to delete")
     }
 
+    // potato (vicky): project details seems to imply that this is for specifics of a chosen resource/project
+    // why can you also create a new resource within it?
     public createNewResource =() => {
         console.log("Send message to backend to create new resource")
     }
@@ -49,7 +51,7 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
                 <DropdownButton id="dropdown-variants-Success" className="filterBar-sync" variant="info"  title="Synchronize">
                     <Dropdown.Item href="#/action-1" eventKey="NAME" onSelect={this.handleSortByChange}>JupyterHub to HydroShare</Dropdown.Item>
                     <Dropdown.Item href="#/action-2" eventKey="DATE" onSelect={this.handleSortByChange}>HydroShare to JupyterHub</Dropdown.Item>
-                </DropdownButton>                
+                </DropdownButton>
                 <Button className="delete-button" variant="danger" onClick={this.deleteClick}><FaTrashAlt /></Button>
             </div>
         );

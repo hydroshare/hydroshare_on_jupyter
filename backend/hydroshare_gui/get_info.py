@@ -1,4 +1,10 @@
+# potato (vicky): in general, this file is extremely long, can we think about breaking it up at all
+# maybe HS functions go in one file, JH in another?
 """
+potato (vicky): let's get this header updated - I think it is mostly outdated at this point
+also instead of listing things like this here we can write the function definitions and just pass
+them until we have them fully implemented & make tasks in asana to fill them in
+
 TODO
 - get hs resource
 - get files
@@ -24,8 +30,10 @@ import json
 from metadata_parser import MetadataParser
 from collections import OrderedDict
 import pandas as pd
+# potato (vicky): can we make path stuff more relative instead of things like hard changing working directory
 # os.chdir(os.path.expanduser('a path')) # will change working directory
 
+# potato (vicky): do we really want all this code to live outside of any main function or anything? can we clean it a bit?
 # auth - TODO: get user credentials from hydroshare
 auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
@@ -41,6 +49,7 @@ if not os.path.exists(output_folder): # Make directory if it doesn't exist
     print("Made {} folder for new resources".format(output_folder))
 
 def get_hs_resource(resource_id, output_folder, unzip=True):
+    # potato (vicky): add docstring
     # Get actual resource
     if not os.path.exists('{}/{}'.format(output_folder, resource_id)):
 
@@ -50,6 +59,8 @@ def get_hs_resource(resource_id, output_folder, unzip=True):
         print("Resource already exists!")
 
 def get_files_JH(resource_id):
+    # potato (vicky): add docstring
+
     get_hs_resource(resource_id, output_folder)
     # files = glob.glob('{}/{}/{}/data/contents/*'.format(output_folder, resource_id, resource_id))
     prefix = output_folder + "/" + resource_id + "/" + resource_id + "/data/contents"
@@ -108,6 +119,8 @@ def get_recursive_folder_contents(folderpath):
     return files2
 
 def get_files_HS(resource_id):
+    # potato (vicky): add docstring
+
     # get the file information for all files in the HS resource in json
     array = hs.resource(resource_id).files.all().json()
     # figure out what the url prefix to the filepath is
@@ -192,6 +205,7 @@ def populate_folders_hs(val, folders_dict, nested_files):
 
     return folder_size, contents
 
+# potato (vicky): do we need/want this function?
 def get_metadata_of_all_files():
     #TODO scrape from xml file instead of API call
 
@@ -224,6 +238,7 @@ def get_metadata_of_all_files():
         data = "There is no data"
     return data
 
+# potato (vicky): same as above, what do we use metadata for?
 def get_metadata_one_file(resource_id):
     """
     #TODO scrape from xml file instead of API call
@@ -257,6 +272,7 @@ def get_metadata_one_file(resource_id):
 def get_user_info():
     return hs.getUserInfo()
 
+# potato (vicky): should this be in tests?
 def test_socket():
     pass
 
@@ -297,6 +313,7 @@ def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
     result = hs.resource(resource_id).files(options)
     return result
 
+# potato (vicky): why all commented out?
 def rename_resource_in_HS():    # files2 = []
     # for filepath in files:
     #     file = filepath[len(prefix):]
@@ -374,6 +391,7 @@ def get_folder_last_modified_time(id):
     # TODO: extract modified time from metadata
     return
 
+# potato (vicky): uhh, what?
 def do_nothing():
     print("I'm doing nothing")
     return
