@@ -30,10 +30,10 @@ import tornado.options
 a new resource for that user
 '''
 class ResourcesHandler(tornado.web.RequestHandler):
-
+    """Gets list of user's hydroshare resources (through get_info)"""
     # TODO: Remove this (security hazard)
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Origin", "*") # TODO change the * for security
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
