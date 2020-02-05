@@ -22,18 +22,6 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
     constructor(props: IFilterBarProjectDetailsProps) {
       super(props);
     }
-    
-    // potato (emily): this is code that was copied over from FilterBar.tsx so it's left over. should be deleted
-    public deleteClick =() => {
-        console.log("Send message to backend to delete")
-    }
-
-    // potato (vicky): project details seems to imply that this is for specifics of a chosen resource/project
-    // why can you also create a new resource within it?
-    // potato (emily): this is code that was copied over from FilterBar.tsx so it's left over. should be deleted
-    public createNewResource =() => {
-        console.log("Send message to backend to create new resource")
-    }
 
     public handleSortByChange =(e: any) => {
         this.props.sortBy(e)

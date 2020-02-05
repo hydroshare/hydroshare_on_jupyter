@@ -27,8 +27,7 @@ export default class NewProjectModal extends React.Component<INewProjectModalPro
       }
     }
 
-    // potato (vicky): it seems like you have a lot of files with these same 3 functions - why?
-    // potato (emily): a lot of copying and pasting *angel face emoji*...needs to be cleaned up
+    // TODO (emily): remove some deletes somewhere
     public deleteClick =() => {
         console.log("Send message to backend to delete")
     }
@@ -56,8 +55,7 @@ export default class NewProjectModal extends React.Component<INewProjectModalPro
 
     public render() {
 
-        // potato (vicky): is it true you can't rename a project once it is created?
-        // potato (emily): I remember we said that this was true last semester, we should probably double check with Tony
+        // TODO (emily): change note if we can actually rename stuff
         return (
             <Modal
                 {...this.props}

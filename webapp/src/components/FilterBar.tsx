@@ -1,5 +1,5 @@
-// potato charlie: if this isn't in use, we should delete it
-// potato (emily): it might come back into use if we switch up the UI design again
+// TODO (emily): decide if you are using this file
+// TODO (emily): header comment!
 
 import * as React from 'react';
 import {
@@ -35,8 +35,7 @@ export default class FilterBar extends React.Component<IPropTypes, IStateTypes> 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
   }
-  // potato (vicky): this seems like you intend to do more than just search in this file - what exactly is it's goal?
-  // again, a header comment in the file would probably be helpful
+
   public deleteClick =() => {
     console.log("Send message to backend to delete")
   }

@@ -66,7 +66,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         console.log("Sort by" + e.value)
     }
 
-    // potato (vicky): does this just open the resource in the view where you can see the files it contains?
+    // TODO (Emily): figure out what this file is doing
     public goToFiles = (e: any) => {
       console.log("go to file")
     }
