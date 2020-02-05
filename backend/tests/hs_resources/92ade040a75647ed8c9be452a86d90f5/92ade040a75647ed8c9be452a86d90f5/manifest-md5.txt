@@ -1,4 +1,0 @@
-53969cb5167af527bed72d7ac7399437    data/resourcemap.xml
-a6d9ddb750156bbea3126d5df997f815    data/resourcemetadata.xml
-fd2fa68708c0185f634ca22fade35975    data/contents/Index.ipynb
-d41d8cd98f00b204e9800998ecf8427e    data/contents/README.md

@@ -1,11 +1,11 @@
 import * as React from 'react';
 import {
-  Button,
+  // Button,
   Dropdown,
   DropdownButton,
   Form,
 } from 'react-bootstrap';
-import { FaTrashAlt } from "react-icons/fa";
+// import { FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
 import '../styles/css/FilterBarProjectDetails.css';
@@ -42,7 +42,7 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
                     <Dropdown.Item href="#/action-1" eventKey="NAME" onSelect={this.handleSortByChange}>JupyterHub to HydroShare</Dropdown.Item>
                     <Dropdown.Item href="#/action-2" eventKey="DATE" onSelect={this.handleSortByChange}>HydroShare to JupyterHub</Dropdown.Item>
                 </DropdownButton>
-                <Button className="delete-button" variant="danger" onClick={this.deleteClick}><FaTrashAlt /></Button>
+                {/* /<Button className="delete-button" variant="danger" onClick={this.deleteClick}><FaTrashAlt /></Button> */}
             </div>
         );
     }
