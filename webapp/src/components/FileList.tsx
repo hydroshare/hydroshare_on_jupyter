@@ -78,10 +78,12 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
       }
       const searchTermPresent = fileOrFolder.name.toLowerCase().includes(this.props.searchTerm.toLowerCase())
       if (searchTermPresent || subFileForSearch || override) {
+        // potato (charlie): not really sure what's up here, but at this point it doesn't seem like a switch 
+        // statment is necessary. Don't know if that even matters though.
         let fileIcon;
         switch(fileOrFolder.type) {
           case 'folder':
-            fileIcon = '📁'
+            fileIcon = '📁' // potato (charlie): OMG you can just put icons in code like this?
             break;
           // case 'csv':
           default:
