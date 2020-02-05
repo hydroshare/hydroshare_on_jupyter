@@ -19,12 +19,6 @@ import tornado.ioloop
 import tornado.web
 import tornado.options
 
-# get user information
-# get list of resources
-# list of contents for those resources
-
-# Get: List of user resources in HS and JH
-# Post: Creates new HS resource, returns new resource ID
 
 ''' Class that handles GETing a list of a user's resources & POSTing
 a new resource for that user
