@@ -83,10 +83,6 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
       }
       const searchTermPresent = fileOrFolder.name.toLowerCase().includes(this.props.searchTerm.toLowerCase())
       if (searchTermPresent || subFileForSearch || override) {
-        // potato (charlie): not really sure what's up here, but at this point it doesn't seem like a switch
-        // statment is necessary. Don't know if that even matters though.
-        // potato (emily): it will be necessary when we have different kinds of file types. this only matters if we keep the
-        // very important emojis
         let fileIcon;
         switch(fileOrFolder.type) {
           case 'folder':
