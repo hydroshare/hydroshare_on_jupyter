@@ -1,12 +1,12 @@
-# potato (vicky): in general, this file is extremely long, can we think about breaking it up at all
-# maybe HS functions go in one file, JH in another?
-# potato (kyle) Yeah, I agree it should definitely be split up. The file should also be renamed.
-# potato (emily): +1
+# TODO (vicky): break up this file
+# We might want to place all file transferring functionality in one file
+# Make a file for resource metadata fetching functionality
+
+# TODO  (vicky): let's get this header updated - I think it is mostly outdated at this point
+# also instead of listing things like this here we can write the function definitions and just pass
+# them until we have them fully implemented & make tasks in asana to fill them in
 """
-potato (vicky): let's get this header updated - I think it is mostly outdated at this point
-also instead of listing things like this here we can write the function definitions and just pass
-them until we have them fully implemented & make tasks in asana to fill them in
-# potato (emily): +1
+
 
 TODO
 - get hs resource
@@ -33,30 +33,25 @@ import json
 from metadata_parser import MetadataParser
 from collections import OrderedDict
 import pandas as pd
-# potato (vicky): can we make path stuff more relative instead of things like hard changing working directory
-# os.chdir(os.path.expanduser('a path')) # will change working directory
 
-# potato (vicky): do we really want all this code to live outside of any main function or anything? can we clean it a bit?
-# auth - TODO: get user credentials from hydroshare
+# TODO (charlie): make this into a class & put this code in init
 auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
 
-# potato (kyle) Once we get copying working, we should remove all the test resources from the repo
+# TODO (vicky): Once create resource is working, remove this line
 test_resource_id = 'c40d9567678740dab868f35440a69b30'
 
-# potato (kyle) We might want to wrap this in a setup function/file
 ### Making directory for local hs resources
 get_info_path = os.path.dirname(os.path.realpath(__file__)) # Get path to this file's location
 # output_folder = 'backend/tests/hs_resources'
 output_folder = get_info_path + "/local_hs_resources"
 if not os.path.exists(output_folder): # Make directory if it doesn't exist
     os.makedirs(output_folder)
-    # potato (kyle) We might want to remove these print statements and replace them with a logging system
+    # TODO (vicky) set up logging system & remove prints
     print("Made {} folder for new resources".format(output_folder))
 
-# potato (Kyle) We might want to place all file transferring functionality in one file
 def get_hs_resource(resource_id, output_folder, unzip=True):
-    # potato (vicky): add docstring
+    # TODO (charlie): add docstring
     # Get actual resource
     if not os.path.exists('{}/{}'.format(output_folder, resource_id)):
 
@@ -66,7 +61,7 @@ def get_hs_resource(resource_id, output_folder, unzip=True):
         print("Resource already exists!")
 
 def get_files_JH(resource_id):
-    # potato (vicky): add docstring
+    # TODO (vicky): add docstring
 
     get_hs_resource(resource_id, output_folder)
     # files = glob.glob('{}/{}/{}/data/contents/*'.format(output_folder, resource_id, resource_id))
@@ -74,7 +69,6 @@ def get_files_JH(resource_id):
     files2 = get_recursive_folder_contents(prefix)
     return files2
 
-# potato (kyle) Maybe this could go in a file that's got other resource metadata fetching functionality?
 def get_folder_size(folderpath):
     """ Gets the size of the contents of a folder stored locally
     """
@@ -96,11 +90,10 @@ def get_recursive_folder_contents(folderpath):
     files2 = []
     for filepath in files:
         # +1 is to account for / after folderpath before file name
-        # potato (kyle) We might want to use pathlib here instead of doing string manipulations ourselves
+        # TODO (charlie): use pathlib instead of doing string manipulations
         file = filepath[len(folderpath)+1:]
         folder_contents = get_recursive_folder_contents(filepath)
-        # potato (kyle) Can we please have some comments here explaining what these conditionals are checking?
-        # potato (emily): +1
+        # TODO (vicky) add some comments here explaining what these conditionals are checking
         if (len(folder_contents) == 0 and
                                                 file.rfind(".") != -1):
             file_type = file[file.rfind(".")+1:]
@@ -129,17 +122,14 @@ def get_recursive_folder_contents(folderpath):
             })
     return files2
 
-# potato (kyle) Perhaps this could be called get_resource_files_from_HS
+# #TODO (vicky): rename to get_resource_files_from_HS
 def get_files_HS(resource_id):
-    # potato (vicky): add docstring
+    # TODO (vicky): add docstring
 
     # get the file information for all files in the HS resource in json
-    # potato (kyle) We might want to call this something more descriptive than "array"...
+    # TODO (vicky) rename array to be more descriptive
     array = hs.resource(resource_id).files.all().json()
     # figure out what the url prefix to the filepath is
-    # potato (kyle) We might want to declare the base URL as a constant at the top of the file, just so it's not buried
-    # down here (on the off chance it changes or there's another instance someone wants to use). Also, can we use https?
-    # potato (emily): +1
     url_prefix = 'http://www.hydroshare.org/resource/' + resource_id + '/data/contents'
     folders_dict = {}
     folders_final = []
@@ -147,8 +137,8 @@ def get_files_HS(resource_id):
     # get the needed info for each file
     for file_info in array["results"]:
         # extract filepath from url
-        # potato (kyle) This seems brittle. Is there another way we can do this? What if one url is http and the other
-        # is https?
+
+        # TODO (kyle/charlie): make this a regex to make it more robust
         filepath = file_info["url"][len(url_prefix)+1:]
         # get proper definition formatting of file if it is a file
         file_definition_hs = get_file_definition_hs(filepath, file_info["size"])
@@ -171,7 +161,7 @@ def get_files_HS(resource_id):
     # go through folders dictionary & build up the nested structure
     i = 0
     for key, val in folders_dict.items():
-        # potato (kyle) What is this checking? If it's a directory? (Comment?)
+        # TODO (vicky): add comment about what this is doing
         if key[0] == 0:
             folder_size, folder_contents = populate_folders_hs(val, folders_dict, nested_files)
             folders_final.append({
@@ -183,7 +173,7 @@ def get_files_HS(resource_id):
 
     return folders_final
 
-# potato (kyle) This should probably end is _HS, not _hs (like the other functions). Also, what's a file definition?
+# TODO (vicky) rename to get_file_metadata_HS
 def get_file_definition_hs(filepath, size):
     """Gets file definition formatting for returning HS files, given path & size
     """
@@ -204,7 +194,7 @@ def get_file_definition_hs(filepath, size):
     else:
         return False
 
-# potato (kyle) _HS
+# TODO (Vicky) rename to populate_folders_HS
 def populate_folders_hs(val, folders_dict, nested_files):
     """Recursively build up nested folder structure for HS files
     """
@@ -226,8 +216,7 @@ def populate_folders_hs(val, folders_dict, nested_files):
 
     return folder_size, contents
 
-# potato (vicky): do we need/want this function?
-# potato (kyle) If we do keep this function, can it not just call get_metadata_one_file repeatedly?
+# TODO (charlie): investigate whether we can delete
 def get_metadata_of_all_files():
     #TODO scrape from xml file instead of API call
 
@@ -260,11 +249,10 @@ def get_metadata_of_all_files():
         data = "There is no data"
     return data
 
-# potato (vicky): same as above, what do we use metadata for?
+# TODO (charlie): investigate whether we can delete, possibly use Kyle's MetadataParser class
 def get_metadata_one_file(resource_id):
     """
     #TODO scrape from xml file instead of API call
-    # potato (kyle) Check out the MetadataParser class I wrote a while ago
     Get metadata for one resource. Contains:
         - abstract
         - authors
@@ -295,12 +283,8 @@ def get_metadata_one_file(resource_id):
 def get_user_info():
     return hs.getUserInfo()
 
-# potato (vicky): should this be in tests?
-# potato (kyle) What is this for?
-def test_socket():
-    pass
-
 """IN HYDROSHARE"""
+# TODO (vicky): make this just create resource, not specific to HS
 def create_resource_in_HS():
     # Creates a private resource for user
     """
@@ -323,9 +307,7 @@ def create_resource_in_HS():
 
     return
 
-# potato (kyle) Could we just make this set_resource_public(resource_id, is_public) and handle both making it public
-# and making it private?
-# potato (emily): +1
+# TODO (charlie): rename and allow for setting to public or private
 def make_resource_public_in_HS(resource_id):
     hs.setAccessRules(resource_id, public=True)
 
@@ -340,7 +322,7 @@ def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
     result = hs.resource(resource_id).files(options)
     return result
 
-# potato (vicky): why all commented out?
+# TODO (charlie): investigate & make work, rename should be just one thing for JH & HS, flags
 def rename_resource_in_HS():    # files2 = []
     # for filepath in files:
     #     file = filepath[len(prefix):]
@@ -357,20 +339,14 @@ def rename_resource_in_HS():    # files2 = []
     pass
 
 """IN JUPYTERHUB"""
-def create_resource_in_JH():
-    pass
-
-def rename_resource_in_JH():
-    pass
-
 def delete_resource_in_JH():
     pass
 
 def locate_resource_in_JH():
     pass
 
-# potato (emily): Just for readability, could we rename this to get_local_JH_resources so that when it's called later
-# it's clear what exactly is local?
+# TODO (charlie): rename this to get_local_JH_resources so that when it's called later
+# it's clear what exactly is local
 def get_local_resources():
     resource_folders = glob.glob(os.path.join(output_folder, '*'))
     # TODO: Use a filesystem-independent way of this
@@ -420,30 +396,8 @@ def get_folder_last_modified_time(id):
     # TODO: extract modified time from metadata
     return
 
-# potato (vicky): uhh, what?
-def do_nothing():
-    print("I'm doing nothing")
-    return
 
-# potato (kyle) Perhaps we just want to delete all this (and do_nothing())?
 if __name__ == '__main__':
-    # get_metadata(test_resource_id)
-    # get_hs_resource(test_resource_id, output_folder, unzip=True)
-    # # get_files_in_directory_with_metadata()
-    # # create_resource_in_HS()
-    # resources = get_list_of_user_resources()
-    # for r in resources:
-    #     print(r["resource_id"])
-    #     get_hs_resource(r["resource_id"], output_folder, unzip=True)
-    #
-    # print(r["resource_id"])
-    # local_file = 'backend/tests/hs_resources/' + r["resource_id"] + '/' + r["resource_id"] + '/data/contents/Introduction_to_Coding.ipynb'
-    # update_path = 'data/contents'
-    # print(update_resource_in_HS(local_file, update_path, r["resource_id"]))
-    # for file in (get_files_HS("8b826c43f55043f583c85ae312a8894f")):
-    #     print(file)
-    # get_user_info()
-    # test_socket()
-    do_nothing()
+    pass
 
 #bbc2bcea4db14f6cbde009a43c8a97a1

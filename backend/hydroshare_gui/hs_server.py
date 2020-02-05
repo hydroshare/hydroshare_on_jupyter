@@ -31,12 +31,11 @@ a new resource for that user
 '''
 class ResourcesHandler(tornado.web.RequestHandler):
 
-    # potato (emily): Why is this a security hazard? (just curious)
-    # TODO: Remove this (security hazard)
+    # TODO: Remove this (security hazard), needed for frontend, make specific to our site
     def set_default_headers(self):
-        # potato (kyle) This could all be moved into a function called configure_cors(handler) and that could be
+        # TODO (vicky) move into a function called configure_cors(handler) and that could be
         # called in each handler (with configure_cors(self)).
-        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Origin", "*") # change from * (any server) to our specific url
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 

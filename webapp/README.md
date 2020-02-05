@@ -1,5 +1,4 @@
-[//]: # (potato (vicky): whose readme is this? do we want it?)
-[//]: # (potato (charlie): and if so, let's add some yarn resources to it, I'm getting errors)
+[//]: # (TODO (Emily)): add yarn install)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

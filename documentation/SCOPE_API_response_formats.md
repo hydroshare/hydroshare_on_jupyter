@@ -90,12 +90,12 @@ Example output:
 #/resources/<resource_id>/hsfiles
 GETs list of files that are in a user's HS instance of a resource with the given resource_id ({'files':res})
 Example output:
-[//]: # (potato (vicky): we should add the example output now that this one is working properly)
+[//]: # (TODO (vicky): we should add the example output now that this one is working properly)
 
 #/resources/<resource_id>/local-files
 GETs list of files that are in a user's JH isntance of a resource with the give resource_id ({'files':res})
 Example output:
-[//]: # (potato (vicky): does dirpath actually show that whole thing? I thought it only showed the path beyond contents.. which one do we want frontend people?)
+[//]: # (TODO (vicky): does dirpath actually show that whole thing? I thought it only showed the path beyond contents.. which one do we want frontend people?)
 
 ```
 {

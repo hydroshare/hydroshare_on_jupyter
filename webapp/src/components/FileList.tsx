@@ -1,7 +1,6 @@
-// potato (vicky): can we add a header comment to this file, esp if it is a 3rd party library we should prob credit them somewhere
-// potato (emily): we need to add comments and headers to all of these functions
+// TODO (emily/kyle): check naming, add comments, credit libraries, etc.
 
-// potato (emily): overall comment for frontend, we need to reevaluate our prop variables bc sometimes I think we may overcomplicate things
+// overall comment for frontend, we need to reevaluate our prop variables bc sometimes I think we may overcomplicate things
 // or be redundant. Maybe not, but I remember being in just "get it working mode" and not really trying to make it pretty
 import * as React from 'react';
 
@@ -31,7 +30,7 @@ const HUMAN_READABLE_FILE_SIZES = [
   'YB',
 ];
 
-// potato (emily): Really minor, we should be consistent with , or not
+// TODO (emily): get rid of commas
 interface IPropsInterface {
   allSelected: boolean
   files: IFileOrFolder[]
@@ -69,7 +68,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
 
   public flattenFiles(files: IFileOrFolder[], parentID='', level=0, override=false): [IFlatFile[], boolean] {
     let flatFiles: IFlatFile[] = [];
-    // potato (emily): more descriptive name than id
+    // TODO (emily): more descriptive name than id
     let id = 1;
     let relevantFileForSearch = false
 
@@ -84,9 +83,9 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
       }
       const searchTermPresent = fileOrFolder.name.toLowerCase().includes(this.props.searchTerm.toLowerCase())
       if (searchTermPresent || subFileForSearch || override) {
-        // potato (charlie): not really sure what's up here, but at this point it doesn't seem like a switch 
+        // potato (charlie): not really sure what's up here, but at this point it doesn't seem like a switch
         // statment is necessary. Don't know if that even matters though.
-        // potato (emily): it will be necessary when we have different kinds of file types. this only matters if we keep the 
+        // potato (emily): it will be necessary when we have different kinds of file types. this only matters if we keep the
         // very important emojis
         let fileIcon;
         switch(fileOrFolder.type) {
