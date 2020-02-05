@@ -1,10 +1,12 @@
 # potato (vicky): in general, this file is extremely long, can we think about breaking it up at all
 # maybe HS functions go in one file, JH in another?
 # potato (kyle) Yeah, I agree it should definitely be split up. The file should also be renamed.
+# potato (emily): +1
 """
 potato (vicky): let's get this header updated - I think it is mostly outdated at this point
 also instead of listing things like this here we can write the function definitions and just pass
 them until we have them fully implemented & make tasks in asana to fill them in
+# potato (emily): +1
 
 TODO
 - get hs resource
@@ -98,6 +100,7 @@ def get_recursive_folder_contents(folderpath):
         file = filepath[len(folderpath)+1:]
         folder_contents = get_recursive_folder_contents(filepath)
         # potato (kyle) Can we please have some comments here explaining what these conditionals are checking?
+        # potato (emily): +1
         if (len(folder_contents) == 0 and
                                                 file.rfind(".") != -1):
             file_type = file[file.rfind(".")+1:]
@@ -136,6 +139,7 @@ def get_files_HS(resource_id):
     # figure out what the url prefix to the filepath is
     # potato (kyle) We might want to declare the base URL as a constant at the top of the file, just so it's not buried
     # down here (on the off chance it changes or there's another instance someone wants to use). Also, can we use https?
+    # potato (emily): +1
     url_prefix = 'http://www.hydroshare.org/resource/' + resource_id + '/data/contents'
     folders_dict = {}
     folders_final = []
@@ -321,6 +325,7 @@ def create_resource_in_HS():
 
 # potato (kyle) Could we just make this set_resource_public(resource_id, is_public) and handle both making it public
 # and making it private?
+# potato (emily): +1
 def make_resource_public_in_HS(resource_id):
     hs.setAccessRules(resource_id, public=True)
 
@@ -364,6 +369,8 @@ def delete_resource_in_JH():
 def locate_resource_in_JH():
     pass
 
+# potato (emily): Just for readability, could we rename this to get_local_JH_resources so that when it's called later
+# it's clear what exactly is local?
 def get_local_resources():
     resource_folders = glob.glob(os.path.join(output_folder, '*'))
     # TODO: Use a filesystem-independent way of this

@@ -31,6 +31,7 @@ a new resource for that user
 '''
 class ResourcesHandler(tornado.web.RequestHandler):
 
+    # potato (emily): Why is this a security hazard? (just curious)
     # TODO: Remove this (security hazard)
     def set_default_headers(self):
         # potato (kyle) This could all be moved into a function called configure_cors(handler) and that could be
