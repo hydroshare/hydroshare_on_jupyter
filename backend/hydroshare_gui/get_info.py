@@ -1,5 +1,6 @@
 # potato (vicky): in general, this file is extremely long, can we think about breaking it up at all
 # maybe HS functions go in one file, JH in another?
+# potato (kyle) Yeah, I agree it should definitely be split up. The file should also be renamed.
 """
 potato (vicky): let's get this header updated - I think it is mostly outdated at this point
 also instead of listing things like this here we can write the function definitions and just pass
@@ -38,16 +39,20 @@ import pandas as pd
 auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
 
+# potato (kyle) Once we get copying working, we should remove all the test resources from the repo
 test_resource_id = 'c40d9567678740dab868f35440a69b30'
 
+# potato (kyle) We might want to wrap this in a setup function/file
 ### Making directory for local hs resources
 get_info_path = os.path.dirname(os.path.realpath(__file__)) # Get path to this file's location
 # output_folder = 'backend/tests/hs_resources'
 output_folder = get_info_path + "/local_hs_resources"
 if not os.path.exists(output_folder): # Make directory if it doesn't exist
     os.makedirs(output_folder)
+    # potato (kyle) We might want to remove these print statements and replace them with a logging system
     print("Made {} folder for new resources".format(output_folder))
 
+# potato (Kyle) We might want to place all file transferring functionality in one file
 def get_hs_resource(resource_id, output_folder, unzip=True):
     # potato (vicky): add docstring
     # Get actual resource
@@ -67,6 +72,7 @@ def get_files_JH(resource_id):
     files2 = get_recursive_folder_contents(prefix)
     return files2
 
+# potato (kyle) Maybe this could go in a file that's got other resource metadata fetching functionality?
 def get_folder_size(folderpath):
     """ Gets the size of the contents of a folder stored locally
     """
@@ -88,8 +94,10 @@ def get_recursive_folder_contents(folderpath):
     files2 = []
     for filepath in files:
         # +1 is to account for / after folderpath before file name
+        # potato (kyle) We might want to use pathlib here instead of doing string manipulations ourselves
         file = filepath[len(folderpath)+1:]
         folder_contents = get_recursive_folder_contents(filepath)
+        # potato (kyle) Can we please have some comments here explaining what these conditionals are checking?
         if (len(folder_contents) == 0 and
                                                 file.rfind(".") != -1):
             file_type = file[file.rfind(".")+1:]
@@ -118,12 +126,16 @@ def get_recursive_folder_contents(folderpath):
             })
     return files2
 
+# potato (kyle) Perhaps this could be called get_resource_files_from_HS
 def get_files_HS(resource_id):
     # potato (vicky): add docstring
 
     # get the file information for all files in the HS resource in json
+    # potato (kyle) We might want to call this something more descriptive than "array"...
     array = hs.resource(resource_id).files.all().json()
     # figure out what the url prefix to the filepath is
+    # potato (kyle) We might want to declare the base URL as a constant at the top of the file, just so it's not buried
+    # down here (on the off chance it changes or there's another instance someone wants to use). Also, can we use https?
     url_prefix = 'http://www.hydroshare.org/resource/' + resource_id + '/data/contents'
     folders_dict = {}
     folders_final = []
@@ -131,6 +143,8 @@ def get_files_HS(resource_id):
     # get the needed info for each file
     for file_info in array["results"]:
         # extract filepath from url
+        # potato (kyle) This seems brittle. Is there another way we can do this? What if one url is http and the other
+        # is https?
         filepath = file_info["url"][len(url_prefix)+1:]
         # get proper definition formatting of file if it is a file
         file_definition_hs = get_file_definition_hs(filepath, file_info["size"])
@@ -153,6 +167,7 @@ def get_files_HS(resource_id):
     # go through folders dictionary & build up the nested structure
     i = 0
     for key, val in folders_dict.items():
+        # potato (kyle) What is this checking? If it's a directory? (Comment?)
         if key[0] == 0:
             folder_size, folder_contents = populate_folders_hs(val, folders_dict, nested_files)
             folders_final.append({
@@ -164,6 +179,7 @@ def get_files_HS(resource_id):
 
     return folders_final
 
+# potato (kyle) This should probably end is _HS, not _hs (like the other functions). Also, what's a file definition?
 def get_file_definition_hs(filepath, size):
     """Gets file definition formatting for returning HS files, given path & size
     """
@@ -184,6 +200,7 @@ def get_file_definition_hs(filepath, size):
     else:
         return False
 
+# potato (kyle) _HS
 def populate_folders_hs(val, folders_dict, nested_files):
     """Recursively build up nested folder structure for HS files
     """
@@ -206,6 +223,7 @@ def populate_folders_hs(val, folders_dict, nested_files):
     return folder_size, contents
 
 # potato (vicky): do we need/want this function?
+# potato (kyle) If we do keep this function, can it not just call get_metadata_one_file repeatedly?
 def get_metadata_of_all_files():
     #TODO scrape from xml file instead of API call
 
@@ -242,6 +260,7 @@ def get_metadata_of_all_files():
 def get_metadata_one_file(resource_id):
     """
     #TODO scrape from xml file instead of API call
+    # potato (kyle) Check out the MetadataParser class I wrote a while ago
     Get metadata for one resource. Contains:
         - abstract
         - authors
@@ -273,6 +292,7 @@ def get_user_info():
     return hs.getUserInfo()
 
 # potato (vicky): should this be in tests?
+# potato (kyle) What is this for?
 def test_socket():
     pass
 
@@ -299,6 +319,8 @@ def create_resource_in_HS():
 
     return
 
+# potato (kyle) Could we just make this set_resource_public(resource_id, is_public) and handle both making it public
+# and making it private?
 def make_resource_public_in_HS(resource_id):
     hs.setAccessRules(resource_id, public=True)
 
@@ -396,6 +418,7 @@ def do_nothing():
     print("I'm doing nothing")
     return
 
+# potato (kyle) Perhaps we just want to delete all this (and do_nothing())?
 if __name__ == '__main__':
     # get_metadata(test_resource_id)
     # get_hs_resource(test_resource_id, output_folder, unzip=True)

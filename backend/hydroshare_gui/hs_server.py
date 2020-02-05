@@ -33,6 +33,8 @@ class ResourcesHandler(tornado.web.RequestHandler):
 
     # TODO: Remove this (security hazard)
     def set_default_headers(self):
+        # potato (kyle) This could all be moved into a function called configure_cors(handler) and that could be
+        # called in each handler (with configure_cors(self)).
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
