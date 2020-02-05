@@ -1,4 +1,5 @@
 // potato charlie: if this isn't in use, we should delete it
+// potato (emily): it might come back into use if we switch up the UI design again
 
 import * as React from 'react';
 import {
