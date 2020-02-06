@@ -9,6 +9,7 @@ Email: vickymmcd@gmail.com
 # -*- coding: utf-8 -*-
 
 import os
+import glob
 
 
 ''' Class that defines a Local Folder so we can access attributes of it.
