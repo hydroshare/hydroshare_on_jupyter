@@ -8,10 +8,8 @@ Email: vickymmcd@gmail.com
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from hs_restclient import HydroShare, HydroShareAuthBasic
 from local_folder import LocalFolder
 from remote_folder import RemoteFolder
-from login import username, password
 import os
 
 
@@ -26,9 +24,7 @@ class Resource:
         self.res_id = res_id
         self.resource_handler = resource_handler
         self.output_folder = self.resource_handler.output_folder
-        # authentication for using Hydroshare API
-        auth = HydroShareAuthBasic(username=username, password=password)
-        self.hs = HydroShare(auth=auth)
+        self.hs = self.resource_handler.hs
 
     def save_resource_locally(self, unzip=True):
         '''Saves the HS resource locally, if it does not already exist.
@@ -37,7 +33,7 @@ class Resource:
         if not os.path.exists('{}/{}'.format(self.output_folder, self.res_id)):
 
             print("getting hs resource")
-            hs.getResource(self.res_id, destination=self.output_folder, unzip=unzip)
+            self.hs.getResource(self.res_id, destination=self.output_folder, unzip=unzip)
         else:
             print("Resource already exists!")
 
@@ -60,7 +56,7 @@ class Resource:
         remote_folder = RemoteFolder()
         # get the file information for all files in the HS resource in json
         # TODO (vicky) rename array to be more descriptive
-        array = hs.resource(self.res_id).files.all().json()
+        array = self.hs.resource(self.res_id).files.all().json()
         # figure out what the url prefix to the filepath is
         url_prefix = 'http://www.hydroshare.org/resource/' + self.res_id + '/data/contents'
         folders_dict = {}
