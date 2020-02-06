@@ -10,6 +10,7 @@ Email: vickymmcd@gmail.com
 
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from local_folder import LocalFolder
+from remote_folder import RemoteFolder
 from login import username, password
 import os
 
@@ -33,10 +34,10 @@ class Resource:
         '''Saves the HS resource locally, if it does not already exist.
         '''
         # Get resource from HS if it doesn't already exist locally
-        if not os.path.exists('{}/{}'.format(self.output_folder, self.resource_id)):
+        if not os.path.exists('{}/{}'.format(self.output_folder, self.res_id)):
 
             print("getting hs resource")
-            hs.getResource(self.resource_id, destination=self.output_folder, unzip=unzip)
+            hs.getResource(self.res_id, destination=self.output_folder, unzip=unzip)
         else:
             print("Resource already exists!")
 
@@ -48,5 +49,58 @@ class Resource:
         self.save_resource_locally()
         path_prefix = self.output_folder + "/" + self.res_id + "/" + self.res_id + "/data/contents"
         local_folder = LocalFolder()
-        files = local_folder.get_recursive_folder_contents(path_prefix)
+        files = local_folder.get_contents_recursive(path_prefix)
         return files
+
+    def get_files_HS(self):
+        '''Gets metadata for all the files currently stored in the HS instance
+        of this resource.
+        '''
+
+        remote_folder = RemoteFolder()
+        # get the file information for all files in the HS resource in json
+        # TODO (vicky) rename array to be more descriptive
+        array = hs.resource(self.res_id).files.all().json()
+        # figure out what the url prefix to the filepath is
+        url_prefix = 'http://www.hydroshare.org/resource/' + self.res_id + '/data/contents'
+        folders_dict = {}
+        folders_final = []
+        nested_files = {}
+        # get the needed info for each file
+        for file_info in array["results"]:
+            # extract filepath from url
+
+            # TODO (kyle/charlie): make this a regex to make it more robust
+            filepath = file_info["url"][len(url_prefix)+1:]
+            # get proper definition formatting of file if it is a file
+            file_definition_hs = remote_folder.get_file_metadata(filepath, file_info["size"])
+            # if it is a folder, build up contents
+            if not file_definition_hs:
+                nested_files[filepath + "/"] = file_info
+                folders = filepath.split("/")
+                currpath = ""
+                for x in range(0, len(folders)-1):
+                    folder = folders[x]
+                    currpath = currpath + folder + "/"
+                    # build up dictionary of folder -> what is in it
+                    if (x, folder, currpath) not in folders_dict:
+                        folders_dict[(x, folder, currpath)] = []
+                    folders_dict[(x, folder, currpath)].append((x+1, folders[x+1], currpath + folders[x+1] + "/"))
+            # if it is just a file, add it to the final list
+            else:
+                folders_final.append(file_definition_hs)
+
+        # go through folders dictionary & build up the nested structure
+        i = 0
+        for key, val in folders_dict.items():
+            # TODO (vicky): add comment about what this is doing
+            if key[0] == 0:
+                folder_size, folder_contents = remote_folder.get_contents_recursive(val, folders_dict, nested_files)
+                folders_final.append({
+                    "name": key[1],
+                    "sizeBytes": folder_size,
+                    "type": "folder",
+                    "contents": folder_contents,
+                })
+
+        return folders_final
