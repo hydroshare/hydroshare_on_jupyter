@@ -1,6 +1,6 @@
 '''
 This file sets up the local folder class for getting the files stored within
-the folder and the size of that folder.
+the local jupyterhub folder and the size of that folder.
 
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Email: vickymmcd@gmail.com
