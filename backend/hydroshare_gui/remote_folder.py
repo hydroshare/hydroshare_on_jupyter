@@ -36,14 +36,14 @@ class RemoteFolder:
             return False
 
     # TODO (Vicky) rename to populate_folders_HS
-    def populate_folders_hs(self, val, folders_dict, nested_files):
+    def get_contents_recursive(self, val, folders_dict, nested_files):
         """Recursively build up nested folder structure for HS files
         """
         contents = []
         folder_size = 0
         for v in val:
             if v in folders_dict:
-                subfolder_size, subfolder_contents = populate_folders_hs(folders_dict[v], folders_dict, nested_files)
+                subfolder_size, subfolder_contents = self.get_contents_recursive(folders_dict[v], folders_dict, nested_files)
                 folder_size += subfolder_size
                 contents.append({
                     "name" : v[1],
@@ -52,7 +52,7 @@ class RemoteFolder:
                     "contents" : subfolder_contents,
                 })
             else:
-                contents.append(get_file_definition_hs(v[1], nested_files[v[2]]["size"]))
+                contents.append(self.get_file_metadata(v[1], nested_files[v[2]]["size"]))
                 folder_size += nested_files[v[2]]["size"]
 
         return folder_size, contents
