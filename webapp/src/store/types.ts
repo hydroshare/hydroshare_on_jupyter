@@ -12,7 +12,6 @@ export type MainPageActionTypes = ActionType<typeof mainPageActions>;
 export type ProjectPageActionTypes = ActionType<typeof projectPageActions>;
 export type ProjectDetailsPageActionTypes = ActionType<typeof projectDetailsPageActions>;
 export type ProjectsActionTypes = ActionType<typeof projectsActions>;
-export type ProjectDetailsPageActions = ActionType<typeof projectDetailsPageActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
 
 export type AllActionTypes = (
@@ -30,7 +29,7 @@ export interface IRootState {
   projects: IProjectsState
   projectDetailsPage: IProjectDetailsPageState
   router: RouterState
-  user: IUserState
+  user: IUserInfo | null
 }
 
 export interface IProjectDetailsPageState {
@@ -78,10 +77,6 @@ export interface IProjectsState {
   searchTerm: string,
 }
 
-export interface IUserState {
-  name: string
-}
-
 export interface IUserInfoData {
   email: string
   first_name: string
@@ -104,7 +99,12 @@ export interface IResourceFilesData {
 }
 
 export interface IUserInfo {
+  email: string
+  id: number
   name: string
+  organization: string
+  title: string
+  username: string
 }
 
 export interface IHydroShareResourceInfo {
