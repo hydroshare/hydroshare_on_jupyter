@@ -34,7 +34,7 @@ const HUMAN_READABLE_FILE_SIZES = [
 interface IPropsInterface {
   allSelected: boolean
   files: IFileOrFolder[]
-  onFileOrFolderSelected: (arg0: IFileOrFolder, arg1: boolean) => AllActionTypes
+  onFileOrFolderSelected?: (file: IFileOrFolder) => any
   selectedFilesAndFolders: Set<string>
   sortBy: SortByOptions | undefined,
   searchTerm: string
@@ -46,7 +46,7 @@ interface IFlatFile {
   name: string,
   size: string,
   type: string,
-  dirPath: string,
+  fileOrFolder: IFileOrFolder,
   id: string,
   parentId?: string,
 }
@@ -104,7 +104,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
           name: spacers+(fileIcon ? fileIcon : '')+'  ' +fileOrFolder.name,
           size: this.getFormattedSizeString(fileOrFolder.sizeBytes),
           type: fileOrFolder.type,
-          dirPath: fileOrFolder.dirPath,
+          fileOrFolder,
           id: idString,
           parentId: parentID !== '' ? parentID : undefined,
         })
@@ -118,6 +118,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
       }
       id++;
     });
+    // TODO @emily: It'd be easier to understand the return value if this were an object instead of an array
     return [flatFiles, relevantFileForSearch];
   }
 
@@ -128,6 +129,12 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
   public handleCloseModal () {
     this.setState({ showModal: false });
   }
+
+  public onRowClick = (evt: any, selectedRow: IFlatFile) => {
+    if (this.props.onFileOrFolderSelected) {
+      this.props.onFileOrFolderSelected(selectedRow.fileOrFolder);
+    }
+  };
 
   public render() {
     const { files } = this.props;
@@ -157,7 +164,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
             searchFieldStyle: {color: '#ffffff'},
             paging: false,
           }}
-          onRowClick={((evt, selectedRow) => this.setState( {showModal: true} ))}
+          onRowClick={this.onRowClick}
           components={{
             Toolbar: props => (
               <div className="Toolbar">

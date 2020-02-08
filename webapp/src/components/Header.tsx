@@ -11,9 +11,15 @@ import {
   ThunkDispatch,
 } from "redux-thunk";
 
-const mapStateToProps = ({ user }: IRootState) => ({
-  userName: user.name,
-});
+const mapStateToProps = ({ user }: IRootState) => {
+  if (user) {
+    return {
+      userName: user.name,
+    };
+  } else {
+    return {};
+  }
+};
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => ({
   loadInitData: () => dispatch(loadInitData()),

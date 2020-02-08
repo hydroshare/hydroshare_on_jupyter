@@ -12,7 +12,7 @@ import {
   IProjectDetailsPageState,
   IProjectsPageState,
   IProjectsState,
-  IUserState,
+  IUserInfo,
   MainPageActionTypes,
   ProjectsActionTypes,
   UserActionTypes,
@@ -38,10 +38,6 @@ const initMainPageState: IMainPageState = {
 const initProjectsState: IProjectsState = {
   searchTerm: '',
   allProjects: {},
-};
-
-const initUserState: IUserState = {
-  name: '',
 };
 
 export function mainPageReducer(state: IMainPageState = initMainPageState, action: MainPageActionTypes): IMainPageState {
@@ -185,11 +181,14 @@ function recursivelyConvertDatesToMoment(files: IFileOrFolder[]) {
   });
 }
 
-export function userReducer(state: IUserState = initUserState, action: UserActionTypes): IUserState {
+export function userReducer(state: IUserInfo, action: UserActionTypes): IUserInfo | null {
   switch (action.type) {
     case UserInfoActions.SET_USER_INFO:
       return {...state, ...action.payload};
     default:
+      if (state === undefined) {
+        return null;
+      }
       return state;
   }
 }

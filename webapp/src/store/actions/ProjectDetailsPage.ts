@@ -9,6 +9,7 @@ import {
 import {
     IFileOrFolder,
     IJupyterProject,
+    IRootState,
     SortByOptions,
 } from '../types';
 import { AnyAction } from 'redux';
@@ -24,6 +25,19 @@ export function getFilesIfNeeded(project: IJupyterProject): ThunkAction<Promise<
         }
         if (project && project.hydroShareResource && !project.hydroShareResource.files) {
             dispatch(getResourceHydroShareFiles(project.id));
+        }
+    };
+}
+
+export function openFileInJupyterHub(project: IJupyterProject, file: IFileOrFolder) {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
+        const state = getState();
+        if (state.user) {
+            const userName = state.user.username;
+            const projectId = project.id;
+            const filePath = `${file.name}.${file.type}`;
+            const url = `https://jupyter.cuahsi.org/user/${userName}/notebooks/notebooks/data/${projectId}/${projectId}/data/contents/${filePath}`;
+            window.open(url, '_blank');
         }
     };
 }

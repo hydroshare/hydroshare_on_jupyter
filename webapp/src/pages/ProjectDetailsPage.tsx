@@ -50,6 +50,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     toggleSelectedAllLocal: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAllLocal(project)),
     toggleSelectedAllHydroShare: (project: IJupyterProject) => dispatch(ProjectDetailsPageActions.toggleIsSelectedAllHydroShare(project)),
     toggleSelectedOneLocal: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOneLocal(item)),
+    openFile: (project: IJupyterProject, file: IFileOrFolder) => dispatch(ProjectDetailsPageActions.openFileInJupyterHub(project, file)),
     toggleSelectedOneHydroShare: (item: IFileOrFolder, isSelected: boolean) => dispatch(ProjectDetailsPageActions.toggleIsSelectedOneHydroShare(item)),
     searchProjectBy: (searchTerm: string) => dispatch(projectDetailsPageActions.searchProjectBy(searchTerm)),
     sortBy: (sortByTerm: SortByOptions) => dispatch(projectDetailsPageActions.sortBy(sortByTerm)),
@@ -90,11 +91,11 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
     const {
       hydroShareResource,
     } = this.props.project;
+    const openFile = (file: IFileOrFolder) => this.props.openFile(this.props.project!, file);
     const hydroShareFiles = hydroShareResource ? (
         <FileList
             allSelected={this.props.allHydroShareSelected}
             files={hydroShareResource.files}
-            onFileOrFolderSelected={this.props.toggleSelectedOneHydroShare}
             selectedFilesAndFolders={this.props.selectedHydroShareFilesAndFolders}
             searchTerm={this.props.searchTerm}
             sortBy={this.props.sortByTerm}
@@ -116,7 +117,7 @@ class ProjectDetailsPage extends React.Component<PropsType, never> {
             allSelected={this.props.allJupyterSelected}
             toggleAllSelected={toggleAllLocalSelected}
             files={this.props.project.files}
-            onFileOrFolderSelected={this.props.toggleSelectedOneLocal}
+            onFileOrFolderSelected={openFile}
             selectedFilesAndFolders={this.props.selectedLocalFilesAndFolders}
             sortBy={this.props.sortByTerm}
             searchTerm={this.props.searchTerm}
