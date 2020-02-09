@@ -14,6 +14,7 @@ class MetadataParser:
     def __init__(self, file_path):
         self.data = ElementTree.parse(file_path).getroot()
 
+    # TODO (charlie) check if these functions internally have error handling?
     def get_abstract(self):
         return self._get_elem_value('./rdf:Description/dc:description/rdf:Description/dcterms:abstract')
 

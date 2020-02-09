@@ -26,7 +26,8 @@ export default class NewProjectModal extends React.Component<INewProjectModalPro
         formValidated: false,
       }
     }
-  
+
+    // TODO (emily): remove some deletes somewhere
     public deleteClick =() => {
         console.log("Send message to backend to delete")
     }
@@ -54,6 +55,7 @@ export default class NewProjectModal extends React.Component<INewProjectModalPro
 
     public render() {
 
+        // TODO (emily): change note if we can actually rename stuff
         return (
             <Modal
                 {...this.props}

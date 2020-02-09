@@ -1,3 +1,6 @@
+// TODO (emily): decide if you are using this file
+// TODO (emily): header comment!
+
 import * as React from 'react';
 import {
   Button,

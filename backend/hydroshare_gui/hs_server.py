@@ -10,36 +10,33 @@ Email: vickymmcd@gmail.com
 
 import signal
 import logging
-from get_info import (get_files_HS,
-                      get_files_JH,
-                      get_user_info,
-                      get_list_of_user_resources)
+from resource import Resource
+from resource_handler import ResourceHandler
 
 import tornado.ioloop
 import tornado.web
 import tornado.options
 
-# get user information
-# get list of resources
-# list of contents for those resources
 
-# Get: List of user resources in HS and JH
-# Post: Creates new HS resource, returns new resource ID
+# Global resource handler variable
+resource_handler = ResourceHandler()
 
 ''' Class that handles GETing a list of a user's resources & POSTing
 a new resource for that user
 '''
 class ResourcesHandler(tornado.web.RequestHandler):
-    """Gets list of user's hydroshare resources (through get_info)"""
-    # TODO: Remove this (security hazard)
+
+    # TODO: Remove this (security hazard), needed for frontend, make specific to our site
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*") # TODO change the * for security
+        # TODO (vicky) move into a function called configure_cors(handler) and that could be
+        # called in each handler (with configure_cors(self)).
+        self.set_header("Access-Control-Allow-Origin", "*") # change from * (any server) to our specific url
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
     def get(self):
         # TODO: Probably do some request error handling here
-        resources = get_list_of_user_resources()
+        resources = resource_handler.get_list_of_user_resources()
         self.write({'resources': resources})
 
     def post(self):
@@ -59,16 +56,9 @@ class ResourcesFileHandlerHS(tornado.web.RequestHandler):
 
     def get(self, res_id):
         # TODO: Get folder info
-        hs_files = get_files_HS(res_id)
-        res = []
-        for f in hs_files:
-            name = '.'.join(f['file_name'].split('.')[:-1])
-            res.append({
-                'name': name,
-                'sizeBytes': f['size'],
-                'type': f['logical_file_type'],
-            })
-        self.write({'files': res})
+        resource = Resource(res_id, resource_handler)
+        hs_files = resource.get_files_HS()
+        self.write({'files': hs_files})
 
 
 ''' Class that handles GETing list of a files that are in a user's
@@ -83,9 +73,9 @@ class ResourcesFileHandlerJH(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
     def get(self, res_id):
-        self.write({
-            'files': get_files_JH(res_id),
-        })
+        resource = Resource(res_id, resource_handler)
+        jh_files = resource.get_files_JH()
+        self.write({'files': jh_files})
 
 
 ''' Class that handles GETing user information on the currently logged
@@ -100,7 +90,7 @@ class UserInfoHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
     def get(self):
-        data = get_user_info()
+        data = resource_handler.get_user_info()
         self.write(data)
 
 

@@ -1,3 +1,7 @@
+// TODO (emily/kyle): check naming, add comments, credit libraries, etc.
+
+// overall comment for frontend, we need to reevaluate our prop variables bc sometimes I think we may overcomplicate things
+// or be redundant. Maybe not, but I remember being in just "get it working mode" and not really trying to make it pretty
 import * as React from 'react';
 
 import {
@@ -26,10 +30,11 @@ const HUMAN_READABLE_FILE_SIZES = [
   'YB',
 ];
 
+// TODO (emily): get rid of commas
 interface IPropsInterface {
   allSelected: boolean
   files: IFileOrFolder[]
-  onFileOrFolderSelected: (arg0: IFileOrFolder, arg1: boolean) => AllActionTypes
+  onFileOrFolderSelected?: (file: IFileOrFolder) => any
   selectedFilesAndFolders: Set<string>
   sortBy: SortByOptions | undefined,
   searchTerm: string
@@ -41,7 +46,7 @@ interface IFlatFile {
   name: string,
   size: string,
   type: string,
-  dirPath: string,
+  fileOrFolder: IFileOrFolder,
   id: string,
   parentId?: string,
 }
@@ -59,10 +64,11 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
     };
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-  }             
-  
+  }
+
   public flattenFiles(files: IFileOrFolder[], parentID='', level=0, override=false): [IFlatFile[], boolean] {
     let flatFiles: IFlatFile[] = [];
+    // TODO (emily): more descriptive name than id
     let id = 1;
     let relevantFileForSearch = false
 
@@ -80,7 +86,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
         let fileIcon;
         switch(fileOrFolder.type) {
           case 'folder':
-            fileIcon = '📁'
+            fileIcon = '📁' // potato (charlie): OMG you can just put icons in code like this?
             break;
           // case 'csv':
           default:
@@ -98,7 +104,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
           name: spacers+(fileIcon ? fileIcon : '')+'  ' +fileOrFolder.name,
           size: this.getFormattedSizeString(fileOrFolder.sizeBytes),
           type: fileOrFolder.type,
-          dirPath: fileOrFolder.dirPath,
+          fileOrFolder,
           id: idString,
           parentId: parentID !== '' ? parentID : undefined,
         })
@@ -112,6 +118,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
       }
       id++;
     });
+    // TODO @emily: It'd be easier to understand the return value if this were an object instead of an array
     return [flatFiles, relevantFileForSearch];
   }
 
@@ -122,6 +129,12 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
   public handleCloseModal () {
     this.setState({ showModal: false });
   }
+
+  public onRowClick = (evt: any, selectedRow: IFlatFile) => {
+    if (this.props.onFileOrFolderSelected) {
+      this.props.onFileOrFolderSelected(selectedRow.fileOrFolder);
+    }
+  };
 
   public render() {
     const { files } = this.props;
@@ -140,7 +153,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
             { title: 'Type', field: 'type' },
             { title: 'Size', field: 'size', type: 'numeric' },
           ]}
-          data={this.flattenFiles(this.props.files)[0]}      
+          data={this.flattenFiles(this.props.files)[0]}
           parentChildData={(row, rows) => rows.find(a => a.id === row.parentId)}
           options={{
             selection: true,
@@ -151,7 +164,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
             searchFieldStyle: {color: '#ffffff'},
             paging: false,
           }}
-          onRowClick={((evt, selectedRow) => this.setState( {showModal: true} ))}
+          onRowClick={this.onRowClick}
           components={{
             Toolbar: props => (
               <div className="Toolbar">
