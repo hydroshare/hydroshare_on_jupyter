@@ -34,12 +34,22 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
           const response = await getFromBackend<IUserInfoData>('/user');
           const {
               data: {
+                  email,
+                  id,
                   first_name,
                   last_name,
+                  organization,
+                  title,
+                  username,
               }
           } = response;
           const userInfo = {
+              email,
+              id,
               name: first_name + ' ' + last_name,
+              organization,
+              title,
+              username,
           };
           dispatch(setUserInfo(userInfo));
       } catch (e) {

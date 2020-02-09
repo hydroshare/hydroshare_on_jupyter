@@ -1,4 +1,13 @@
+# TODO (vicky): break up this file
+# We might want to place all file transferring functionality in one file
+# Make a file for resource metadata fetching functionality
+
+# TODO  (vicky): let's get this header updated - I think it is mostly outdated at this point
+# also instead of listing things like this here we can write the function definitions and just pass
+# them until we have them fully implemented & make tasks in asana to fill them in
 """
+
+
 TODO
 - get hs resource
 - get files
@@ -20,15 +29,16 @@ from pprint import pprint
 from login import username, password
 import os
 import glob
+import json
 from metadata_parser import MetadataParser
 from collections import OrderedDict
 import pandas as pd
-# os.chdir(os.path.expanduser('a path')) # will change working directory
 
-# auth - TODO: get user credentials from hydroshare
+# TODO (charlie): make this into a class & put this code in init
 auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
 
+# TODO (vicky): Once create resource is working, remove this line
 test_resource_id = 'c40d9567678740dab868f35440a69b30'
 
 ### Making directory for local hs resources
@@ -37,111 +47,10 @@ get_info_path = os.path.dirname(os.path.realpath(__file__)) # Get path to this f
 output_folder = get_info_path + "/local_hs_resources"
 if not os.path.exists(output_folder): # Make directory if it doesn't exist
     os.makedirs(output_folder)
+    # TODO (vicky) set up logging system & remove prints
     print("Made {} folder for new resources".format(output_folder))
 
-"""FUNCTIONS USED BY HS_SERVER"""
-
-def get_hs_resource(resource_id, output_folder, unzip=True):
-    # Get actual resource
-    if not os.path.exists('{}/{}'.format(output_folder, resource_id)):
-
-        print("getting hs resource")
-        hs.getResource(resource_id, destination=output_folder, unzip=unzip)
-    else:
-        print("Resource already exists!")
-
-def get_files_JH(resource_id):
-    get_hs_resource(resource_id, output_folder)
-    # files = glob.glob('{}/{}/{}/data/contents/*'.format(output_folder, resource_id, resource_id))
-    prefix = output_folder + "/" + resource_id + "/" + resource_id + "/data/contents"
-    files2 = get_recursive_folder_contents(prefix)
-    return files2
-
-def get_user_info():
-    return hs.getUserInfo()
-
-def get_list_of_user_resources():
-    resources = {}
-
-    # Get the user's resources from HydroShare
-    user_hs_resources = hs.resources(owner=username)
-    for res in user_hs_resources:
-        res_id = res['resource_id']
-        resources[res_id] = {
-            'id': res_id,
-            'title': res['resource_title'],
-            'hydroShareResource': res,
-        }
-
-    # Get the resources copied to the local filesystem
-    local_resources = get_local_resources()
-    for res_id, res_metadata in local_resources.items():
-        if res_id in resources:
-            # TODO: Add local files
-            resources[res_id]['localCopyExists'] = True
-        else:
-            resources[res_id] = {
-                'id': res_id,
-                'title': res_metadata.get_title(),
-                'hydroShareResource': res_metadata.spoof_hs_api_response(),
-                'localCopyExists': True,
-            }
-
-    return list(resources.values())
-
-"""HELPER FUNCTIONS"""
-
-#TODO (vickymmcd): fix up formatting of returned list of HS files
-def get_files_HS(resource_id):
-    print(hs.resource(resource_id).files.all())
-    return list(hs.getResourceFileList(resource_id))
-
-def get_folder_size(folderpath):
-    total_size = 0
-    for path, dirs, files in os.walk(folderpath):
-        for f in files:
-            fp = os.path.join(path, f)
-            total_size += os.path.getsize(fp)
-    return total_size
-
-def get_recursive_folder_contents(folderpath):
-    # get all the files in the folder
-    files = glob.glob('{}/*'.format(folderpath))
-    # return empty list if the folder is empty
-    if len(files) == 0:
-        return []
-    files2 = []
-    for filepath in files:
-        # +1 is to account for / after folderpath before file name
-        file = filepath[len(folderpath)+1:]
-        if (len(get_recursive_folder_contents(filepath)) == 0 and
-                                                file.rfind(".") != -1):
-            file_type = file[file.rfind(".")+1:]
-            filename = file[:file.rfind(".")]
-        elif os.path.isfile(filepath):
-            file_type = "file"
-            filename = file
-        elif os.path.isdir(filepath):
-            file_type = "folder"
-            filename = file
-        else:
-            file_type = "unknown"
-            filename = file
-        if file_type == "folder":
-            files2.append({
-                "name": filename,
-                "sizeBytes": get_folder_size(filepath),
-                "type": file_type,
-                "contents": get_recursive_folder_contents(filepath),
-            })
-        else:
-            files2.append({
-                "name": filename,
-                "sizeBytes": os.path.getsize(filepath),
-                "type": file_type,
-            })
-    return files2
-
+# TODO (charlie): investigate whether we can delete
 def get_metadata_of_all_files():
     #TODO scrape from xml file instead of API call
 
@@ -174,6 +83,7 @@ def get_metadata_of_all_files():
         data = "There is no data"
     return data
 
+# TODO (charlie): investigate whether we can delete, possibly use Kyle's MetadataParser class
 def get_metadata_one_file(resource_id):
     """
     #TODO scrape from xml file instead of API call
@@ -204,10 +114,9 @@ def get_metadata_one_file(resource_id):
     pprint(resource_md)
     return(resource_md)
 
-def test_socket():
-    pass
 
 """IN HYDROSHARE"""
+# TODO (vicky): make this just create resource, not specific to HS
 def create_resource_in_HS():
     # Creates a private resource for user
     """
@@ -230,6 +139,7 @@ def create_resource_in_HS():
 
     return
 
+# TODO (charlie): rename and allow for setting to public or private
 def make_resource_public_in_HS(resource_id):
     hs.setAccessRules(resource_id, public=True)
 
@@ -244,6 +154,7 @@ def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
     result = hs.resource(resource_id).files(options)
     return result
 
+# TODO (charlie): investigate & make work, rename should be just one thing for JH & HS, flags
 def rename_resource_in_HS():    # files2 = []
     # for filepath in files:
     #     file = filepath[len(prefix):]
@@ -260,32 +171,11 @@ def rename_resource_in_HS():    # files2 = []
     pass
 
 """IN JUPYTERHUB"""
-def create_resource_in_JH():
-    pass
-
-def rename_resource_in_JH():
-    pass
-
 def delete_resource_in_JH():
     pass
 
 def locate_resource_in_JH():
     pass
-
-def get_local_resources():
-    resource_folders = glob.glob(os.path.join(output_folder, '*'))
-    # TODO: Use a filesystem-independent way of this
-    mp_by_res_id = {}
-    for folder_path in resource_folders:
-        res_id = folder_path.split('/')[-1]
-        metadata_file_Path = os.path.join(folder_path, res_id, 'data', 'resourcemetadata.xml')
-        mp = MetadataParser(metadata_file_Path)
-        mp_by_res_id[res_id] = mp
-
-    return mp_by_res_id
-
-"""Others"""
-
 
 
 def get_folder_last_modified_time(id):
@@ -294,28 +184,8 @@ def get_folder_last_modified_time(id):
     # TODO: extract modified time from metadata
     return
 
-def do_nothing():
-    print("I'm doing nothing")
-    return
 
 if __name__ == '__main__':
-    # get_metadata(test_resource_id)
-    # get_hs_resource(test_resource_id, output_folder, unzip=True)
-    # # get_files_in_directory_with_metadata()
-    # # create_resource_in_HS()
-    # resources = get_list_of_user_resources()
-    # for r in resources:
-    #     print(r["resource_id"])
-    #     get_hs_resource(r["resource_id"], output_folder, unzip=True)
-    #
-    # print(r["resource_id"])
-    # local_file = 'backend/tests/hs_resources/' + r["resource_id"] + '/' + r["resource_id"] + '/data/contents/Introduction_to_Coding.ipynb'
-    # update_path = 'data/contents'
-    # print(update_resource_in_HS(local_file, update_path, r["resource_id"]))
-    for file in (get_files_HS("8b826c43f55043f583c85ae312a8894f")):
-        print(file)
-    # get_user_info()
-    # test_socket()
-    do_nothing()
+    pass
 
 #bbc2bcea4db14f6cbde009a43c8a97a1

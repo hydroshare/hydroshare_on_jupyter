@@ -1,11 +1,11 @@
 import * as React from 'react';
 import {
-  Button,
+  // Button,
   Dropdown,
   DropdownButton,
   Form,
 } from 'react-bootstrap';
-import { FaTrashAlt } from "react-icons/fa";
+// import { FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
 import '../styles/css/FilterBarProjectDetails.css';
@@ -21,14 +21,6 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
 
     constructor(props: IFilterBarProjectDetailsProps) {
       super(props);
-    }
-  
-    public deleteClick =() => {
-        console.log("Send message to backend to delete")
-    }
-
-    public createNewResource =() => {
-        console.log("Send message to backend to create new resource")
     }
 
     public handleSortByChange =(e: any) => {
@@ -49,8 +41,8 @@ export default class FilterBarProjectDetails extends React.Component<IFilterBarP
                 <DropdownButton id="dropdown-variants-Success" className="filterBar-sync" variant="info"  title="Synchronize">
                     <Dropdown.Item href="#/action-1" eventKey="NAME" onSelect={this.handleSortByChange}>JupyterHub to HydroShare</Dropdown.Item>
                     <Dropdown.Item href="#/action-2" eventKey="DATE" onSelect={this.handleSortByChange}>HydroShare to JupyterHub</Dropdown.Item>
-                </DropdownButton>                
-                <Button className="delete-button" variant="danger" onClick={this.deleteClick}><FaTrashAlt /></Button>
+                </DropdownButton>
+                {/* /<Button className="delete-button" variant="danger" onClick={this.deleteClick}><FaTrashAlt /></Button> */}
             </div>
         );
     }
