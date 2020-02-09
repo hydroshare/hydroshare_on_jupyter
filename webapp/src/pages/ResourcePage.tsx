@@ -16,6 +16,7 @@ import {
   SortByOptions,
 } from '../store/types';
 import ResourceMetadataDisplay from '../components/ResourceMetadataDisplay';
+import FileManager from "../components/FileManager";
 
 const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
   // Extract the resource ID from the URL
@@ -122,6 +123,7 @@ class ResourcePage extends React.Component<PropsType, never> {
           />
           {hydroShareFiles}
         </div>
+        <FileManager />
       </div>
     )
   }
