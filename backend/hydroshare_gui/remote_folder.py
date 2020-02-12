@@ -13,7 +13,6 @@ Email: vickymmcd@gmail.com
 ''' Class that defines a Remote Folder so we can access attributes of it.
 '''
 class RemoteFolder:
-    # TODO (vicky) rename to get_file_metadata_HS
     def get_file_metadata(self, filepath, size):
         """Gets file definition formatting for returning HS files, given path
         & size. Returns false if the path is a folder & not a file.
@@ -35,7 +34,6 @@ class RemoteFolder:
         else:
             return False
 
-    # TODO (Vicky) rename to populate_folders_HS
     def get_contents_recursive(self, val, folders_dict, nested_files):
         """Recursively build up nested folder structure for HS files
         """

@@ -44,7 +44,6 @@ get_info_path = os.path.dirname(os.path.realpath(__file__)) # Get path to this f
 output_folder = get_info_path + "/local_hs_resources"
 if not os.path.exists(output_folder): # Make directory if it doesn't exist
     os.makedirs(output_folder)
-    # TODO (vicky) set up logging system & remove prints
     print("Made {} folder for new resources".format(output_folder))
 
 
