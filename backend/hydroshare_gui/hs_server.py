@@ -21,18 +21,21 @@ import tornado.options
 # Global resource handler variable
 resource_handler = ResourceHandler()
 
+''' Function that configures cors for a handler to allow our server to access it
+'''
+def configure_cors(handler):
+    self.set_header("Access-Control-Allow-Origin", "*") # TODO: change from * (any server) to our specific url
+    self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+    self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+
+
 ''' Class that handles GETing a list of a user's resources & POSTing
 a new resource for that user
 '''
 class ResourcesHandler(tornado.web.RequestHandler):
 
-    # TODO: Remove this (security hazard), needed for frontend, make specific to our site
     def set_default_headers(self):
-        # TODO (vicky) move into a function called configure_cors(handler) and that could be
-        # called in each handler (with configure_cors(self)).
-        self.set_header("Access-Control-Allow-Origin", "*") # change from * (any server) to our specific url
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        configure_cors(self)
 
     def get(self):
         # TODO: Probably do some request error handling here
@@ -48,11 +51,8 @@ hydroshare instance of a resource
 '''
 class ResourcesFileHandlerHS(tornado.web.RequestHandler):
 
-    # TODO: Remove this (security hazard)
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        configure_cors(self)
 
     def get(self, res_id):
         # TODO: Get folder info
@@ -66,11 +66,8 @@ jupyterhub instance of a resource
 '''
 class ResourcesFileHandlerJH(tornado.web.RequestHandler):
 
-    # TODO: Remove this (security hazard)
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        configure_cors(self)
 
     def get(self, res_id):
         resource = Resource(res_id, resource_handler)
@@ -83,11 +80,8 @@ in user including name, email, username, etc.
 '''
 class UserInfoHandler(tornado.web.RequestHandler):
 
-    # TODO: Remove this (security hazard)
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        configure_cors(self)
 
     def get(self):
         data = resource_handler.get_user_info()
