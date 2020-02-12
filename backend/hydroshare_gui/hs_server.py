@@ -10,7 +10,7 @@ Email: vickymmcd@gmail.com
 
 import signal
 import logging
-from resource import Resource
+from resource2 import Resource
 from resource_handler import ResourceHandler
 
 import tornado.ioloop
@@ -24,9 +24,9 @@ resource_handler = ResourceHandler()
 ''' Function that configures cors for a handler to allow our server to access it
 '''
 def configure_cors(handler):
-    self.set_header("Access-Control-Allow-Origin", "*") # TODO: change from * (any server) to our specific url
-    self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-    self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+    handler.set_header("Access-Control-Allow-Origin", "*") # TODO: change from * (any server) to our specific url
+    handler.set_header("Access-Control-Allow-Headers", "x-requested-with")
+    handler.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
 
 ''' Class that handles GETing a list of a user's resources & POSTing
