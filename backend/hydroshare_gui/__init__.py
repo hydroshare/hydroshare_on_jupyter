@@ -1,4 +1,13 @@
-# TODO (vicky): test this for jupyter extension stuff
+'''
+This file sets up the jupyter server extension to launch our backend
+server when jupyter is launched.
+
+Author: 2019-20 CUAHSI Olin SCOPE Team
+Email: vickymmcd@gmail.com
+'''
+#!/usr/bin/python
+# -*- coding: utf-8
+
 import socket
 from .hs_server import start_server, make_app
 
