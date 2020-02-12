@@ -1,10 +1,7 @@
-# TODO (vicky): break up this file
 # We might want to place all file transferring functionality in one file
 # Make a file for resource metadata fetching functionality
 
-# TODO  (vicky): let's get this header updated - I think it is mostly outdated at this point
-# also instead of listing things like this here we can write the function definitions and just pass
-# them until we have them fully implemented & make tasks in asana to fill them in
+# TODO  (charlie): DELETE THIS FILE
 """
 
 
@@ -38,7 +35,7 @@ import pandas as pd
 auth = HydroShareAuthBasic(username=username, password=password)
 hs = HydroShare(auth=auth)
 
-# TODO (vicky): Once create resource is working, remove this line
+# TODO (charlie): Once create resource is working, remove this line
 test_resource_id = 'c40d9567678740dab868f35440a69b30'
 
 ### Making directory for local hs resources
@@ -116,7 +113,6 @@ def get_metadata_one_file(resource_id):
 
 
 """IN HYDROSHARE"""
-# TODO (vicky): make this just create resource, not specific to HS
 def create_resource_in_HS():
     # Creates a private resource for user
     """
