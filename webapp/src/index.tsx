@@ -10,7 +10,6 @@ import {
   Route,
   Switch,
 } from 'react-router';
-import registerServiceWorker from './registerServiceWorker';
 import store, { history } from './store';
 
 import Header from './components/Header';
@@ -34,4 +33,3 @@ ReactDOM.render(
   </Provider>,
   document.getElementById('root') as HTMLElement
 );
-registerServiceWorker();

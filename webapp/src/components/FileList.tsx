@@ -10,7 +10,7 @@ import {
   SortByOptions,
 } from '../store/types';
 import '../styles/css/FileList.css';
-
+/*
 import {
   Button
 } from 'react-bootstrap';
@@ -20,7 +20,7 @@ import OpenFileModal from './OpenFileModal';
 import { FaFileMedical, FaRegFolder} from "react-icons/fa";
 
 import MaterialTable, {MTableToolbar} from 'material-table';
-
+*/
 const HUMAN_READABLE_FILE_SIZES = [
   'B',
   'KB',
@@ -144,6 +144,8 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
 
     console.log(this.props.files)
 
+    return null;
+/*
     return (
       <div className='FileList'>
         <MaterialTable
@@ -179,7 +181,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
                 onHide={this.handleCloseModal}
               />
       </div>
-    )
+    )*/
   }
 
   private generateSpaces = (count: number): string => {
