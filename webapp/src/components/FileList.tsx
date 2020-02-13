@@ -9,7 +9,7 @@ import {
   IFileOrFolder,
   SortByOptions,
 } from '../store/types';
-import '../styles/css/FileList.css';
+import '../styles/FileList.scss';
 /*
 import {
   Button

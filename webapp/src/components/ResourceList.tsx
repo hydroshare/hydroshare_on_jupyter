@@ -2,7 +2,7 @@ import * as React from 'react';
 // import ContextMenu from 'react-context-menu';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../styles/css/ResourceList.css';
+import '../styles/ResourceList.scss';
 
 import {
   IJupyterResource,

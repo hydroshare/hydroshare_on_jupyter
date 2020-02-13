@@ -12,6 +12,9 @@ import {
   Droppable,
   DroppableStateSnapshot,
 } from 'react-beautiful-dnd';
+import * as moment from "moment";
+
+import '../styles/FileManager.scss';
 
 import {
   IFileOrFolder,
@@ -36,7 +39,7 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
   ) : null;
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div>
+      <div className="FileManager">
         {hydroShareFilePane}
         {jupyterHubFilePane}
       </div>
@@ -52,6 +55,14 @@ interface IFilePaneProps {
 
 const getStyles = (snapshot: DroppableStateSnapshot | DraggableStateSnapshot, nestLevel: number = 0) => {
   return {};
+};
+
+const generateTableCell = (content: string | number | moment.Moment) => {
+  if (moment.isMoment(content)) {
+    return <span>{content.format('MMM D, YYYY')}</span>
+  } else {
+    return <span>{content}</span>;
+  }
 };
 
 const generateFolderElement = (folder: IFileOrFolder, index: number, idPrefix: string, nestLevel: number = 0) => {
@@ -98,7 +109,10 @@ const generateFileElement = (item: IFileOrFolder, index: number, idPrefix: strin
           {...provided.draggableProps}
           {...provided.dragHandleProps}
         >
-          {item.name}
+          {generateTableCell(item.name)}
+          {generateTableCell(item.type)}
+          {generateTableCell(getFormattedSizeString(item.sizeBytes))}
+          {generateTableCell(item.lastModified || 'Unknown')}
         </div>
       )}
     </Draggable>
@@ -115,8 +129,19 @@ const generateFileOrFolderElement = (item: IFileOrFolder, index: number, idPrefi
 
 const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
 
+  const onAllFilesCheckboxToggled = () => console.log("Checked!");
+
   return (
     <div className="FilePane">
+      <div className="FilePane-header">
+        <span>
+          <input type="checkbox" onChange={onAllFilesCheckboxToggled} />
+        </span>
+        <span>Name</span>
+        <span>Type</span>
+        <span>Size</span>
+        <span>Last Modified</span>
+      </div>
       <Droppable droppableId={props.droppableId}>
         {(provided, snapshot) => (
           <div
@@ -132,6 +157,23 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
       </Droppable>
     </div>
   );
+};
+
+const HUMAN_READABLE_FILE_SIZES = [
+  'B',
+  'KB',
+  'MB',
+  'GB',
+  'TB',
+  'YB',
+];
+
+// TODO: Write some unit tests
+const getFormattedSizeString = (sizeBytes: number): string => {
+  const log10 = Math.log10(sizeBytes);
+  const labelIndex = Math.floor(log10 / 3);
+  const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, log10));
+  return `${sizeInHumanReadableUnits}${HUMAN_READABLE_FILE_SIZES[labelIndex]}`;
 };
 
 export default FileManager;

@@ -125,7 +125,7 @@ class ResourcePage extends React.Component<PropsType, never> {
         </div>
         <FileManager
           hydroShareFilesAndFolders={hydroShareResource.files}
-          jupyterHubFilesAndFolders={this.props.project.files}
+          jupyterHubFilesAndFolders={this.props.resource.files}
         />
       </div>
     )
