@@ -19,6 +19,7 @@ import '../styles/FileManager.scss';
 import {
   IFileOrFolder,
 } from "../store/types";
+import {ReactElement} from "react";
 
 interface IFileManagerProps {
   hydroShareFilesAndFolders: IFileOrFolder[]
@@ -57,12 +58,18 @@ const getStyles = (snapshot: DroppableStateSnapshot | DraggableStateSnapshot, ne
   return {};
 };
 
-const generateTableCell = (content: string | number | moment.Moment) => {
+const generateTableCell = (content: ReactElement | string | number | moment.Moment) => {
   if (moment.isMoment(content)) {
     return <span>{content.format('MMM D, YYYY')}</span>
   } else {
     return <span>{content}</span>;
   }
+};
+
+const generateCheckBox = () => {
+  return (
+    <input type="checkbox" />
+  );
 };
 
 const generateFolderElement = (folder: IFileOrFolder, index: number, idPrefix: string, nestLevel: number = 0) => {
@@ -71,10 +78,16 @@ const generateFolderElement = (folder: IFileOrFolder, index: number, idPrefix: s
     <Draggable draggableId={itemFullPath} index={0} key={itemFullPath}>
         {(provided, snapshot) => (
           <div
+            className="table-row folder-element"
             ref={provided.innerRef}
             {...provided.draggableProps}
+            {...provided.dragHandleProps}
           >
-            {folder.name}
+            {generateTableCell(generateCheckBox())}
+            {generateTableCell(folder.name)}
+            {generateTableCell('folder')}
+            {generateTableCell(getFormattedSizeString(folder.sizeBytes))}
+            {generateTableCell(folder.lastModified || 'Unknown')}
           </div>
         )}
       </Draggable>
@@ -104,11 +117,12 @@ const generateFileElement = (item: IFileOrFolder, index: number, idPrefix: strin
     <Draggable draggableId={itemFullPath} index={index} key={itemFullPath}>
       {(provided, snapshot) => (
         <div
-          className="file-element"
+          className="table-row file-element"
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
         >
+          {generateTableCell(generateCheckBox())}
           {generateTableCell(item.name)}
           {generateTableCell(item.type)}
           {generateTableCell(getFormattedSizeString(item.sizeBytes))}
@@ -133,7 +147,7 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
 
   return (
     <div className="FilePane">
-      <div className="FilePane-header">
+      <div className="FilePane-header table-row">
         <span>
           <input type="checkbox" onChange={onAllFilesCheckboxToggled} />
         </span>
