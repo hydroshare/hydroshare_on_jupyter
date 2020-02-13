@@ -100,3 +100,12 @@ class Resource:
                 })
 
         return folders_final
+
+    def delete_file_from_JH(self, filepath):
+        path_prefix = self.output_folder + "/" + self.res_id + "/" + self.res_id + "/data/contents/"
+        local_folder = LocalFolder()
+        local_folder.delete_file(path_prefix+filepath)
+
+    def delete_file_from_HS(self,filepath):
+        remote_folder = RemoteFolder()
+        remote_folder.delete_file(self.res_id, filepath)
