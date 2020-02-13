@@ -16,10 +16,19 @@ from login import username, password
 '''
 class RemoteFolder:
 
+<<<<<<< refs/remotes/origin/dev:backend/remote_folder.py
     def __init__(self, hs):
         '''Authenticates Hydroshare & sets up class variables.
         '''
         self.hs = hs
+=======
+    def __init__(self):
+        '''Sets up authentication on hydroshare API.
+        '''
+        # authentication for using Hydroshare API
+        auth = HydroShareAuthBasic(username=username, password=password)
+        self.hs = HydroShare(auth=auth)
+>>>>>>> Delete files from JH and HS working:backend/hydroshare_gui/remote_folder.py
 
     def get_file_metadata(self, filepath, size):
         """Gets file definition formatting for returning HS files, given path
