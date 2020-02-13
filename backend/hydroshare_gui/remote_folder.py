@@ -23,6 +23,8 @@ class RemoteFolder:
         auth = HydroShareAuthBasic(username=username, password=password)
         self.hs = HydroShare(auth=auth)
 
+
+    # TODO (vicky) rename to get_file_metadata_HS
     def get_file_metadata(self, filepath, size):
         """Gets file definition formatting for returning HS files, given path
         & size. Returns false if the path is a folder & not a file.
