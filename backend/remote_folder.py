@@ -7,6 +7,8 @@ Email: vickymmcd@gmail.com
 '''
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from hs_restclient import HydroShare, HydroShareAuthBasic
+from login import username, password
 
 
 
@@ -71,3 +73,6 @@ class RemoteFolder:
                  "target_path": filepath + "/" + new_filename
                           }
         self.hs.resource(res_id).functions.move_or_rename(options)
+    def delete_file(self, res_id, filepath):
+        resource_id = self.hs.deleteResourceFile(res_id, filepath)
+

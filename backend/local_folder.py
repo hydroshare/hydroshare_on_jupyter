@@ -78,3 +78,6 @@ class LocalFolder:
                     "type": file_type,
                 })
         return files2
+
+    def delete_file(self, filepath):
+        os.remove(filepath)
