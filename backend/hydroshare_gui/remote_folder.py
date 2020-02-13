@@ -7,12 +7,23 @@ Email: vickymmcd@gmail.com
 '''
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from hs_restclient import HydroShare, HydroShareAuthBasic
+from login import username, password
 
 
 
 ''' Class that defines a Remote Folder so we can access attributes of it.
 '''
 class RemoteFolder:
+
+    def __init__(self):
+        '''Sets up authentication on hydroshare API.
+        '''
+        # authentication for using Hydroshare API
+        auth = HydroShareAuthBasic(username=username, password=password)
+        self.hs = HydroShare(auth=auth)
+
+
     # TODO (vicky) rename to get_file_metadata_HS
     def get_file_metadata(self, filepath, size):
         """Gets file definition formatting for returning HS files, given path
@@ -56,3 +67,7 @@ class RemoteFolder:
                 folder_size += nested_files[v[2]]["size"]
 
         return folder_size, contents
+
+    def delete_file(self, res_id, filepath):
+        resource_id = self.hs.deleteResourceFile(res_id, filepath)
+
