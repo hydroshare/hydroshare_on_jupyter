@@ -41,8 +41,8 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="FileManager">
-        {hydroShareFilePane}
         {jupyterHubFilePane}
+        {hydroShareFilePane}
       </div>
     </DragDropContext>
   );
@@ -58,11 +58,15 @@ const getStyles = (snapshot: DroppableStateSnapshot | DraggableStateSnapshot, ne
   return {};
 };
 
-const generateTableCell = (content: ReactElement | string | number | moment.Moment) => {
+const generateTableCell = (content: ReactElement | string | number | moment.Moment, nestLevel: number = 0) => {
+  const style = {
+    paddingLeft: `${nestLevel * 5}px`,
+  };
+  const tooltip = typeof content === 'string' ? content : undefined;
   if (moment.isMoment(content)) {
-    return <span>{content.format('MMM D, YYYY')}</span>
+    return <div title={tooltip}><span style={style}>{content.format('MMM D, YYYY')}</span></div>
   } else {
-    return <span>{content}</span>;
+    return <div title={tooltip}><span style={style}>{content}</span></div>;
   }
 };
 
@@ -79,12 +83,13 @@ const generateFolderElement = (folder: IFileOrFolder, index: number, idPrefix: s
         {(provided, snapshot) => (
           <div
             className="table-row folder-element"
+            style={getStyles(snapshot, nestLevel)}
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
           >
             {generateTableCell(generateCheckBox())}
-            {generateTableCell(folder.name)}
+            {generateTableCell(folder.name, nestLevel)}
             {generateTableCell('folder')}
             {generateTableCell(getFormattedSizeString(folder.sizeBytes))}
             {generateTableCell(folder.lastModified || 'Unknown')}
@@ -118,12 +123,13 @@ const generateFileElement = (item: IFileOrFolder, index: number, idPrefix: strin
       {(provided, snapshot) => (
         <div
           className="table-row file-element"
+          style={getStyles(snapshot, nestLevel)}
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
         >
           {generateTableCell(generateCheckBox())}
-          {generateTableCell(item.name)}
+          {generateTableCell(item.name, nestLevel)}
           {generateTableCell(item.type)}
           {generateTableCell(getFormattedSizeString(item.sizeBytes))}
           {generateTableCell(item.lastModified || 'Unknown')}

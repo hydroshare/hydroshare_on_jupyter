@@ -23,21 +23,23 @@
       font-size: 0.8em;
     }
 
-    .table-row:not(:last-child) {
+    .table-row {
       border-bottom: $border-style;
+      white-space: nowrap;
     }
 
     .FilePane-header > *,
-    .FilePane-files-container > .table-row > * {
+    .FilePane-files-container .table-row > * {
       display: inline-block;
-        padding: 0.5em $column-padding 0.2em;
-        &:first-child {
-          width: $column-width-checkbox;
-        }
-        &:not(:first-child) {
-          width: $column-width-other;
-          border-left: $border-style;
-        }
+      overflow: hidden;
+      padding: 0.5em $column-padding 0.2em;
+      &:first-child {
+        width: $column-width-checkbox;
+      }
+      &:not(:first-child) {
+        width: $column-width-other;
+        border-left: $border-style;
+      }
     }
   }
 }
