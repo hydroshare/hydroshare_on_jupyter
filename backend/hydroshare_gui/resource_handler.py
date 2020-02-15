@@ -11,6 +11,7 @@ Email: vickymmcd@gmail.com
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from metadata_parser import MetadataParser
 from login import username, password
+import logging
 import glob
 import os
 
@@ -34,8 +35,7 @@ class ResourceHandler:
         # Make directory if it doesn't exist
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
-            # TODO (vicky) set up logging system & remove prints
-            print("Made {} folder for new resources".format(self.output_folder))
+            logging.info("Made {} folder for new resources".format(self.output_folder))
 
     def get_user_info(self):
         '''Gets information about the user currently logged into HS

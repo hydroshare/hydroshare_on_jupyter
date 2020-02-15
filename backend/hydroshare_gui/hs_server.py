@@ -10,6 +10,7 @@ Email: vickymmcd@gmail.com
 
 import signal
 import logging
+import sys
 from resource2 import Resource
 from resource_handler import ResourceHandler
 
@@ -122,5 +123,16 @@ def start_server(application):
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == '__main__':
+    LEVELS = {'debug': logging.DEBUG,
+          'info': logging.INFO,
+          'warning': logging.WARNING,
+          'error': logging.ERROR,
+          'critical': logging.CRITICAL}
+
+    if len(sys.argv) > 1:
+        level_name = sys.argv[1]
+        level = LEVELS.get(level_name, logging.NOTSET)
+        logging.basicConfig(level=level)
+
     application = make_app()
     start_server(application)

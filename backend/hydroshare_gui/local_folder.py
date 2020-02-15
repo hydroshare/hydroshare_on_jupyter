@@ -40,20 +40,29 @@ class LocalFolder:
             # TODO (charlie): use pathlib instead of doing string manipulations
             file = filepath[len(folderpath)+1:]
             folder_contents = self.get_contents_recursive(filepath)
-            # TODO (vicky) add some comments here explaining what these conditionals are checking
+            
+            # if filepath is a file and not a folder (contents is empty
+            # and there is a .sometype), separate the file name from file type
+            # using the dot
             if (len(folder_contents) == 0 and
                                                     file.rfind(".") != -1):
                 file_type = file[file.rfind(".")+1:]
                 filename = file[:file.rfind(".")]
+            # doesn't have a .sometype, but is still a file according to os,
+            # call file type file & use whole filename
             elif os.path.isfile(filepath):
                 file_type = "file"
                 filename = file
+            # if os says it is a directory, set the type to be a folder
             elif os.path.isdir(filepath):
                 file_type = "folder"
                 filename = file
+            # if it isn't a file & isn't a folder, we aren't sure what it is
             else:
                 file_type = "unknown"
                 filename = file
+
+            # if it was a folder, we need to populate its list of contents
             if file_type == "folder":
                 files2.append({
                     "name": filename,
@@ -61,6 +70,7 @@ class LocalFolder:
                     "type": file_type,
                     "contents": folder_contents,
                 })
+            # otherwise we just get the relevant file information
             else:
                 files2.append({
                     "name": filename,
