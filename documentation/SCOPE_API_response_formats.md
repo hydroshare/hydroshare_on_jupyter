@@ -87,30 +87,17 @@ Example output:
 }
 ```
 
-#/resources/<resource_id>/hsfiles
+#/resources/<resource_id>/hs-files
 GETs list of files that are in a user's HS instance of a resource with the given resource_id ({'files':res})
 Example output:
-[//]: # (TODO (vicky): we should add the example output now that this one is working properly)
+```
+{"files": [{"name": "README", "sizeBytes": 16, "type": "md"}, {"name": "Introduction_to_Coding1", "sizeBytes": 545, "type": "ipynb"}, {"name": "Second_File", "sizeBytes": 658, "type": "ipynb"}, {"name": "Introduction_to_Coding", "sizeBytes": 11440, "type": "ipynb"}, {"name": "README", "sizeBytes": 199, "type": "file"}, {"name": "Test", "sizeBytes": 549020, "type": "folder", "contents": [{"name": "terrible_name", "sizeBytes": 10877, "type": "png"}, {"name": "10-SingleCycleCPU_1", "sizeBytes": 538143, "type": "pdf"}]}]}
+```
 
 #/resources/<resource_id>/local-files
 GETs list of files that are in a user's JH isntance of a resource with the give resource_id ({'files':res})
 Example output:
-[//]: # (TODO (vicky): does dirpath actually show that whole thing? I thought it only showed the path beyond contents.. which one do we want frontend people?)
 
 ```
-{
-    "files": [
-                {
-                    "dirPath": "backend/tests/hs_resources/<resource_id>/<resource_id>/data/contents",
-                    "name": "Index",
-                    "sizeBytes": 20365,
-                    "type": "ipynb"
-                },
-                {
-                    "dirPath": "backend/tests/hs_resources/<resource_id>/<resource_id>/data/contents",
-                    "name": "README",
-                    "sizeBytes": 0,
-                    "type": "md"}
-            ]
-}
+{"files": [{"name": "Introduction_to_Coding", "sizeBytes": 11440, "type": "ipynb"}, {"name": "Test", "sizeBytes": 549020, "type": "folder", "contents": [{"name": "terrible_name", "sizeBytes": 10877, "type": "png"}, {"name": "10-SingleCycleCPU_1", "sizeBytes": 538143, "type": "pdf"}]}, {"name": "Introduction_to_Coding1", "sizeBytes": 545, "type": "ipynb"}, {"name": "README", "sizeBytes": 199, "type": "file"}, {"name": "README", "sizeBytes": 16, "type": "md"}, {"name": "Second_File", "sizeBytes": 658, "type": "ipynb"}]}
 ```

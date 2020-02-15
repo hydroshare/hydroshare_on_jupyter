@@ -10,6 +10,7 @@ Email: vickymmcd@gmail.com
 
 from local_folder import LocalFolder
 from remote_folder import RemoteFolder
+import logging
 import os
 
 
@@ -32,10 +33,10 @@ class Resource:
         # Get resource from HS if it doesn't already exist locally
         if not os.path.exists('{}/{}'.format(self.output_folder, self.res_id)):
 
-            print("getting hs resource")
+            logging.info("getting hs resource")
             self.hs.getResource(self.res_id, destination=self.output_folder, unzip=unzip)
         else:
-            print("Resource already exists!")
+            logging.info("Resource already exists!")
 
     def get_files_JH(self):
         '''Gets metadata for all the files currently stored in the JH instance
@@ -55,15 +56,14 @@ class Resource:
 
         remote_folder = RemoteFolder()
         # get the file information for all files in the HS resource in json
-        # TODO (vicky) rename array to be more descriptive
-        array = self.hs.resource(self.res_id).files.all().json()
+        hs_resource_info = self.hs.resource(self.res_id).files.all().json()
         # figure out what the url prefix to the filepath is
         url_prefix = 'http://www.hydroshare.org/resource/' + self.res_id + '/data/contents'
         folders_dict = {}
         folders_final = []
         nested_files = {}
         # get the needed info for each file
-        for file_info in array["results"]:
+        for file_info in hs_resource_info["results"]:
             # extract filepath from url
 
             # TODO (kyle/charlie): make this a regex to make it more robust
@@ -89,7 +89,9 @@ class Resource:
         # go through folders dictionary & build up the nested structure
         i = 0
         for key, val in folders_dict.items():
-            # TODO (vicky): add comment about what this is doing
+            # we only want to make the initial call on folders at the top level,
+            # (level 0); folders at levels 1, 2, etc. will be built into the
+            # result by means of the recursive calls
             if key[0] == 0:
                 folder_size, folder_contents = remote_folder.get_contents_recursive(val, folders_dict, nested_files)
                 folders_final.append({
