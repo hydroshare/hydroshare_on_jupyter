@@ -11,6 +11,7 @@ Email: vickymmcd@gmail.com
 import signal
 import logging
 import sys
+import json
 from resource2 import Resource
 from resource_handler import ResourceHandler
 
@@ -60,6 +61,11 @@ class ResourcesFileHandlerHS(tornado.web.RequestHandler):
         resource = Resource(res_id, resource_handler)
         hs_files = resource.get_files_HS()
         self.write({'files': hs_files})
+
+    def put(self, res_id):
+        body = json.loads(self.request.body.decode("utf-8"))
+        resource = Resource(res_id, resource_handler)
+        resource.rename_file_HS(body["filepath"], body["old_filename"], body["new_filename"])
 
 
 ''' Class that handles GETing list of a files that are in a user's

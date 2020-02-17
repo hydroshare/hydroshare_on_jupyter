@@ -13,6 +13,12 @@ Email: vickymmcd@gmail.com
 ''' Class that defines a Remote Folder so we can access attributes of it.
 '''
 class RemoteFolder:
+
+    def __init__(self, hs):
+        '''Authenticates Hydroshare & sets up class variables.
+        '''
+        self.hs = hs
+
     def get_file_metadata(self, filepath, size):
         """Gets file definition formatting for returning HS files, given path
         & size. Returns false if the path is a folder & not a file.
@@ -54,3 +60,14 @@ class RemoteFolder:
                 folder_size += nested_files[v[2]]["size"]
 
         return folder_size, contents
+
+    def rename_file(self, res_id, filepath, old_filename, new_filename):
+        '''Renames the hydroshare version of the file from old_filename to
+        new_filename by using the HS API.
+        '''
+
+        options = {
+                 "source_path": filepath + "/" + old_filename,
+                 "target_path": filepath + "/" + new_filename
+                          }
+        self.hs.resource(res_id).functions.move_or_rename(options)

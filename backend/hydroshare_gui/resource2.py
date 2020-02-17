@@ -54,7 +54,7 @@ class Resource:
         of this resource.
         '''
 
-        remote_folder = RemoteFolder()
+        remote_folder = RemoteFolder(self.hs)
         # get the file information for all files in the HS resource in json
         hs_resource_info = self.hs.resource(self.res_id).files.all().json()
         # figure out what the url prefix to the filepath is
@@ -102,3 +102,11 @@ class Resource:
                 })
 
         return folders_final
+
+    def rename_file_HS(self, filepath, old_filename, new_filename):
+        '''Renames the hydroshare version of the file from old_filename to
+        new_filename.
+        '''
+
+        remote_folder = RemoteFolder(self.hs)
+        remote_folder.rename_file(self.res_id, filepath, old_filename, new_filename)
