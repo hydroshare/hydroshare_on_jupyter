@@ -16,19 +16,11 @@ from login import username, password
 '''
 class RemoteFolder:
 
-<<<<<<< refs/remotes/origin/dev:backend/remote_folder.py
-    def __init__(self, hs):
+    def __init__(self, hs, res_id):
         '''Authenticates Hydroshare & sets up class variables.
         '''
+        self.res_id = res_id
         self.hs = hs
-=======
-    def __init__(self):
-        '''Sets up authentication on hydroshare API.
-        '''
-        # authentication for using Hydroshare API
-        auth = HydroShareAuthBasic(username=username, password=password)
-        self.hs = HydroShare(auth=auth)
->>>>>>> Delete files from JH and HS working:backend/hydroshare_gui/remote_folder.py
 
     def get_file_metadata(self, filepath, size):
         """Gets file definition formatting for returning HS files, given path
@@ -82,6 +74,27 @@ class RemoteFolder:
                  "target_path": filepath + "/" + new_filename
                           }
         self.hs.resource(res_id).functions.move_or_rename(options)
-    def delete_file(self, res_id, filepath):
-        resource_id = self.hs.deleteResourceFile(res_id, filepath)
+
+    def delete_file(self, filepath):
+        resource_id = self.hs.deleteResourceFile(self.res_id, filepath)
+
+    def delete_folder(self, filepath):
+        response_json = self.hs.deleteResourceFolder(self.res_id, pathname=filepath)
+
+    def download_file_to_JH(self, HS_filepath, JH_filepath):
+        self.hs.getResourceFile(self.res_id, HS_filepath, destination=JH_filepath)
+
+    def upload_file_to_HS(self, JHfilepath, HSfilepath):
+        print("HS file path: " + HSfilepath)
+        print("JH file path: " + JHfilepath)
+
+        # make sure input files exist
+        if not os.path.exists(JHfilepath):
+            raise Exception(f'Could not find file: {f}')
+
+        self.hs.addResourceFile(self.res_id, JHfilepath, "data/contents/" + HSfilepath)
+        #self.hs.resource(self.res_id).functions.move_or_rename(options)
+
+    def create_folder(self, filepath):
+        self.hs.createResourceFolder(self.res_id, pathname=filepath)
 
