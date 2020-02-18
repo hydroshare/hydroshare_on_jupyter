@@ -31,6 +31,17 @@ def configure_cors(handler):
     handler.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
 
+''' Class that handles starting up the frontend for our web app
+'''
+class WebAppHandler(tornado.web.RequestHandler):
+
+    def set_default_headers(self):
+        configure_cors(self)
+
+    def get(self):
+        self.render('index.html')
+
+
 ''' Class that handles GETing a list of a user's resources & POSTing
 a new resource for that user
 '''
@@ -113,6 +124,7 @@ class HydroShareGUI(tornado.web.Application):
 def make_app():
     """Returns an instance of the server with the appropriate endpoints"""
     return HydroShareGUI([
+        (r"/", WebAppHandler),
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesHandler),
         (r"/resources/([^/]+)/hs-files", ResourcesFileHandlerHS),
