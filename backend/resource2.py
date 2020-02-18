@@ -47,7 +47,13 @@ class Resource:
         path_prefix = self.output_folder + "/" + self.res_id + "/" + self.res_id + "/data/contents"
         local_folder = LocalFolder()
         files = local_folder.get_contents_recursive(path_prefix)
-        return files
+        files_final = [({
+            "name": "/",
+            "sizeBytes": local_folder.get_size(path_prefix),
+            "type": "folder",
+            "contents": files,
+        })]
+        return files_final
 
     def get_files_HS(self):
         '''Gets metadata for all the files currently stored in the HS instance
@@ -101,7 +107,14 @@ class Resource:
                     "contents": folder_contents,
                 })
 
-        return folders_final
+        folders_with_root = [({
+            "name": "/",
+            "sizeBytes": 0,
+            "type": "folder",
+            "contents": folders_final,
+        })]
+
+        return folders_with_root
 
     def rename_file_HS(self, filepath, old_filename, new_filename):
         '''Renames the hydroshare version of the file from old_filename to
