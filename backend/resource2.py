@@ -107,9 +107,13 @@ class Resource:
                     "contents": folder_contents,
                 })
 
+        rootsize = 0
+        for f in folders_final:
+            rootsize += (f["sizeBytes"])
+
         folders_with_root = [({
             "name": "/",
-            "sizeBytes": 0,
+            "sizeBytes": rootsize,
             "type": "folder",
             "contents": folders_final,
         })]
