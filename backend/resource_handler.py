@@ -31,7 +31,7 @@ class ResourceHandler:
         self.hs = HydroShare(auth=auth)
         # Get path to this file's location
         current_path = os.path.dirname(os.path.realpath(__file__))
-        self.output_folder = current_path + "/local_hs_resources"
+        self.output_folder = current_path + "/hydroshare_gui/local_hs_resources"
         # Make directory if it doesn't exist
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
