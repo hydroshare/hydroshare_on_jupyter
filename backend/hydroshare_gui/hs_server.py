@@ -79,6 +79,15 @@ class ResourcesHandler(tornado.web.RequestHandler):
         or to publish it. You may be able to access the link though.
         """
         # TODO Handle post request?
+        metadata = {'abstract': '',
+        'title': '',
+        'keywords': (),
+        'rtype': 'GenericResource',
+        'fpath': '',
+        'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}]',
+        'extra_metadata': ''}
+        body = json.loads(self.request.body.decode('utf-8'))
+        metadata["title"] = body["title"]
         resource_id = resource_handler.create_HS_resource(metadata)
         self.write(resource_id)
         pass
