@@ -90,24 +90,26 @@ Example output:
 }
 ```
 
-POSTs to create new empty resource in Hydroshare
+POSTs to create new empty resource in Hydroshare  
+```
 Payload: {"title": "title_of_new_resource"}
+```
 
 # /resources/<resource_id>/hs-resources
-GETs list of files that are in a user's HS instance of a resource with the given resource_id ({'files':res})
+GETs list of files that are in a user's HS instance of a resource with the given resource_id ({'files':res})  
 Example output:
 ```
 {"files": [{"name": "README", "sizeBytes": 16, "type": "md"}, {"name": "Introduction_to_Coding1", "sizeBytes": 545, "type": "ipynb"}, {"name": "Second_File", "sizeBytes": 658, "type": "ipynb"}, {"name": "Introduction_to_Coding", "sizeBytes": 11440, "type": "ipynb"}, {"name": "README", "sizeBytes": 199, "type": "file"}, {"name": "Test", "sizeBytes": 549020, "type": "folder", "contents": [{"name": "terrible_name", "sizeBytes": 10877, "type": "png"}, {"name": "10-SingleCycleCPU_1", "sizeBytes": 538143, "type": "pdf"}]}]}
 ```
 
 # /resources/<resource_id>/hs-files
-DELETEs file from Hydroshare
+DELETEs file from Hydroshare  
 Frontend payload: 
 ```
 {"filepath": "filepath_to_file_to_delete"}
 ```
 
-PUTs either renames a file or overwrites JH file with HS one
+PUTs either renames a file or overwrites JH file with HS one  
 Frontend payload for renaming:
 ```
 {"request_type": "rename_file",
@@ -123,7 +125,7 @@ Frontend payload for syncing HS file to JH:
 ```
 
 # /resources/<resource_id>/local-resources
-GETs list of files that are in a user's JH isntance of a resource with the give resource_id ({'files':res})
+GETs list of files that are in a user's JH isntance of a resource with the give resource_id ({'files':res})  
 Example output:
 
 ```
@@ -131,13 +133,13 @@ Example output:
 ```
 
 # /resources/<resource_id>/local-files
-DELETEs file from JupyterHub
+DELETEs file from JupyterHub  
 Frontend payload: 
 ```
 {"filepath": "filepath_to_file_to_delete"}
 ```
 
-PUTs overwrites JH file with HS one
+PUTs overwrites JH file with HS one  
 Frontend payload for syncing HS file to JH:
 ```
 {"request_type": "overwrite_JH",
