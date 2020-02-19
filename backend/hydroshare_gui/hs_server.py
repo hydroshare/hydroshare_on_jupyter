@@ -28,11 +28,10 @@ def configure_cors(handler):
     self.set_header("Access-Control-Allow-Headers", "x-requested-with")
     self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
 
-
-''' Class that handles GETing a list of a user's resources & POSTing
-a new resource for that user
+''' Class that handles GETing new resource metadata & POSTing
+a new resource (by id) for that user
 '''
-class ResourcesHandler(tornado.web.RequestHandler):
+class CreateHSResourceHandler(tornado.web.RequestHandler):
 
     def set_default_headers(self):
         configure_cors(self)
@@ -43,6 +42,22 @@ class ResourcesHandler(tornado.web.RequestHandler):
         self.write({'resources': resources})
 
     def post(self):
+        pass
+
+''' Class that handles GETing a list of a user's resources & POSTing
+a new resource for that user
+'''
+class ResourcesHandler(tornado.web.RequestHandler):
+
+    def set_default_headers(self):
+        configure_cors(self)
+
+    def get(self):
+        pass
+
+    def post(self, metadata):
+        """Needs a dict of metadata"""
+        # TODO
         pass
 
 
