@@ -10,7 +10,9 @@ Email: vickymmcd@gmail.com
 
 import signal
 import logging
-from resource import Resource
+import sys
+import json
+from resource2 import Resource
 from resource_handler import ResourceHandler
 
 import tornado.ioloop
@@ -24,9 +26,20 @@ resource_handler = ResourceHandler()
 ''' Function that configures cors for a handler to allow our server to access it
 '''
 def configure_cors(handler):
-    self.set_header("Access-Control-Allow-Origin", "*") # TODO: change from * (any server) to our specific url
-    self.set_header("Access-Control-Allow-Headers", "x-requested-with")
-    self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+    handler.set_header("Access-Control-Allow-Origin", "*") # TODO: change from * (any server) to our specific url
+    handler.set_header("Access-Control-Allow-Headers", "x-requested-with")
+    handler.set_header('Access-Control-Allow-Methods', 'POST, PUT, GET, DELETE, OPTIONS')
+
+
+''' Class that handles starting up the frontend for our web app
+'''
+class WebAppHandler(tornado.web.RequestHandler):
+
+    def set_default_headers(self):
+        configure_cors(self)
+
+    def get(self):
+        self.render('index.html')
 
 ''' Class that handles GETing new resource metadata & POSTing
 a new resource (by id) for that user
@@ -64,7 +77,7 @@ class ResourcesHandler(tornado.web.RequestHandler):
 ''' Class that handles GETing list of a files that are in a user's
 hydroshare instance of a resource
 '''
-class ResourcesFileHandlerHS(tornado.web.RequestHandler):
+class ResourcesHandlerHS(tornado.web.RequestHandler):
 
     def set_default_headers(self):
         configure_cors(self)
@@ -76,10 +89,11 @@ class ResourcesFileHandlerHS(tornado.web.RequestHandler):
         self.write({'files': hs_files})
 
 
+
 ''' Class that handles GETing list of a files that are in a user's
 jupyterhub instance of a resource
 '''
-class ResourcesFileHandlerJH(tornado.web.RequestHandler):
+class ResourcesHandlerJH(tornado.web.RequestHandler):
 
     def set_default_headers(self):
         configure_cors(self)
@@ -88,6 +102,52 @@ class ResourcesFileHandlerJH(tornado.web.RequestHandler):
         resource = Resource(res_id, resource_handler)
         jh_files = resource.get_files_JH()
         self.write({'files': jh_files})
+
+
+''' Class that handles DELETEing file in JH
+'''
+class FileHandlerJH(tornado.web.RequestHandler):
+
+    def set_default_headers(self):
+        configure_cors(self)
+
+    def OPTIONS(self):
+        pass
+
+    def delete(self, res_id):
+        body = json.loads(self.request.body.decode('utf-8'))
+        resource = Resource(res_id, resource_handler)
+        resource.delete_file_or_folder_from_JH(body["filepath"])
+
+    def put(self,res_id):
+        body = json.loads(self.request.body.decode('utf-8'))
+        resource = Resource(res_id, resource_handler)
+        resource.overwrite_HS_with_file_from_JH(body["filepath"])
+
+
+''' Class that handles GETing list of a files that are in a user's
+hydroshare instance of a resource
+'''
+class FileHandlerHS(tornado.web.RequestHandler):
+
+    def set_default_headers(self):
+        configure_cors(self)
+
+    def OPTIONS(self):
+        pass
+
+    def delete(self, res_id):
+        body = json.loads(self.request.body.decode('utf-8'))
+        resource = Resource(res_id, resource_handler)
+        resource.delete_file_or_folder_from_HS(body["filepath"])
+    
+    def put(self,res_id):
+        body = json.loads(self.request.body.decode('utf-8'))
+        resource = Resource(res_id, resource_handler)
+        if body["request_type"] == "rename_file":
+            resource.rename_file_HS(body["filepath"], body["old_filename"], body["new_filename"])
+        elif body["request_type"] == "overwrite_JH":
+            resource.overwrite_JH_with_file_from_HS(body["filepath"])
 
 
 ''' Class that handles GETing user information on the currently logged
@@ -121,10 +181,13 @@ class HydroShareGUI(tornado.web.Application):
 def make_app():
     """Returns an instance of the server with the appropriate endpoints"""
     return HydroShareGUI([
+        (r"/", WebAppHandler),
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesHandler),
-        (r"/resources/([^/]+)/hs-files", ResourcesFileHandlerHS),
-        (r"/resources/([^/]+)/local-files", ResourcesFileHandlerJH)
+        (r"/resources/([^/]+)/hs-resources", ResourcesHandlerHS),
+        (r"/resources/([^/]+)/hs-files", FileHandlerHS),
+        (r"/resources/([^/]+)/local-resources", ResourcesHandlerJH),
+        (r"/resources/([^/]+)/local-files", FileHandlerJH)
     ])
 
 ''' Starts running the server
@@ -137,5 +200,16 @@ def start_server(application):
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == '__main__':
+    LEVELS = {'debug': logging.DEBUG,
+          'info': logging.INFO,
+          'warning': logging.WARNING,
+          'error': logging.ERROR,
+          'critical': logging.CRITICAL}
+
+    if len(sys.argv) > 1:
+        level_name = sys.argv[1]
+        level = LEVELS.get(level_name, logging.NOTSET)
+        logging.basicConfig(level=level)
+
     application = make_app()
     start_server(application)
