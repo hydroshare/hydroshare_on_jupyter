@@ -9,6 +9,7 @@ Email: vickymmcd@gmail.com
 # -*- coding: utf-8 -*-
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from login import username, password
+import os
 
 
 
@@ -69,25 +70,26 @@ class RemoteFolder:
         return folder_size, contents
 
     def delete_file(self, filepath):
+        """ deletes file in HS, if file is only item in directory, remove that parent directory"""
         resource_id = self.hs.deleteResourceFile(self.res_id, filepath)
 
     def delete_folder(self, filepath):
+        """ deletes folder in HS, if folder is only item in directory, remove that parent directory"""
         response_json = self.hs.deleteResourceFolder(self.res_id, pathname=filepath)
 
     def download_file_to_JH(self, HS_filepath, JH_filepath):
+        """ download HS file to JH"""
         self.hs.getResourceFile(self.res_id, HS_filepath, destination=JH_filepath)
 
     def upload_file_to_HS(self, JHfilepath, HSfilepath):
-        print("HS file path: " + HSfilepath)
-        print("JH file path: " + JHfilepath)
-
+        """ upload JH file to HS """
         # make sure input files exist
         if not os.path.exists(JHfilepath):
             raise Exception(f'Could not find file: {f}')
 
-        self.hs.addResourceFile(self.res_id, JHfilepath, "data/contents/" + HSfilepath)
-        #self.hs.resource(self.res_id).functions.move_or_rename(options)
+        self.hs.addResourceFile(self.res_id, JHfilepath, HSfilepath)
 
     def create_folder(self, filepath):
+        """ create folder in HS """
         self.hs.createResourceFolder(self.res_id, pathname=filepath)
 
