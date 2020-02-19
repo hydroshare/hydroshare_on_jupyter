@@ -24,10 +24,12 @@ class Resource:
         '''Authenticates Hydroshare & sets up class variables.
         '''
         self.res_id = res_id
-        self.remote_folder = RemoteFolder(self.res_id)
         self.resource_handler = resource_handler
         self.output_folder = self.resource_handler.output_folder
         self.hs = self.resource_handler.hs
+
+        self.remote_folder = RemoteFolder(self.hs, self.res_id)
+        
         self.path_prefix = self.output_folder + "/" + self.res_id + "/" + self.res_id + "/data/contents/"
         self.hs_files = self.get_files_upon_init_HS()
         
@@ -130,32 +132,31 @@ class Resource:
         '''Renames the hydroshare version of the file from old_filename to
         new_filename.
         '''
-
-        remote_folder = RemoteFolder(self.hs)
-        remote_folder.rename_file(self.res_id, filepath, old_filename, new_filename)
+        self.remote_folder.rename_file(filepath, old_filename, new_filename)
         return folders_final
 
     def delete_file_or_folder_from_JH(self, filepath):
         ''' deletes file or folder from JH '''
         local_folder = LocalFolder()
-
+        print(filepath)
         # if filepath does not contain file (ie: we want to delete folder)
         if "." not in filepath:
             local_folder.delete_folder(self.path_prefix+filepath)
 
             # check if after deleting this folder, the parent directory is empty
             # if so this will delete that parent directory
-            self.is_JH_folder_empty(self.path_prefix+filepath.split('/', 1)[0])
+            if "/" in filepath:
+                self.delete_JH_folder_if_empty(filepath.split('/', 1)[0])
         else:
             local_folder.delete_file(self.path_prefix+filepath)
 
             # check if after deleting this file, the parent directory is empty
             # if so this will delete that parent directory
-            self.is_JH_folder_empty(self.path_prefix+filepath.split('/', 1)[0])
+            if "/" in filepath:
+                self.delete_JH_folder_if_empty(filepath.rsplit('/', 1)[0])
 
     def delete_file_or_folder_from_HS(self,filepath):
         ''' deletes file or folder from HS '''
-
         # if file path does not contain file (ie: we want to delete folder)
         if "." not in filepath:
             self.remote_folder.delete_folder(filepath+"/")
@@ -163,8 +164,8 @@ class Resource:
             self.remote_folder.delete_file(filepath)
 
     def delete_JH_folder_if_empty(self, filepath):
-        if not os.listdir(filepath):
-            self.delete_file_or_folder_from_JH(self, filepath)
+        if not os.listdir(self.path_prefix + filepath):
+            self.delete_file_or_folder_from_JH(filepath)
 
     def delete_HS_folder_if_empty(self, filepath):
         splitPath = filepath.split('/')
