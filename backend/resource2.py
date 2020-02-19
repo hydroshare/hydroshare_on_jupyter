@@ -136,16 +136,27 @@ class Resource:
         return folders_final
 
     def delete_file_or_folder_from_JH(self, filepath):
+        ''' deletes file or folder from JH '''
         local_folder = LocalFolder()
 
+        # if filepath does not contain file (ie: we want to delete folder)
         if "." not in filepath:
             local_folder.delete_folder(self.path_prefix+filepath)
+
+            # check if after deleting this folder, the parent directory is empty
+            # if so this will delete that parent directory
             self.is_JH_folder_empty(self.path_prefix+filepath.split('/', 1)[0])
         else:
             local_folder.delete_file(self.path_prefix+filepath)
+
+            # check if after deleting this file, the parent directory is empty
+            # if so this will delete that parent directory
             self.is_JH_folder_empty(self.path_prefix+filepath.split('/', 1)[0])
 
     def delete_file_or_folder_from_HS(self,filepath):
+        ''' deletes file or folder from HS '''
+
+        # if file path does not contain file (ie: we want to delete folder)
         if "." not in filepath:
             self.remote_folder.delete_folder(filepath+"/")
         else:
@@ -171,18 +182,20 @@ class Resource:
     def is_file_in_JH(self, filepath):
         return path.exists(self.path_prefix+filepath)
 
-    def is_file_in_HS(self, filepath):
+    def is_file_in_HS(self, filepath, fileType):
         splitPath = filepath.split('/')
         parentDict = self.hs_files
         i = 0
+        print(parentDict)
         while i < len(splitPath):
+            print("Splitpath: " + splitPath[i] + "\n")
             j = 0
             while j < len(parentDict):
                 if parentDict[j]["name"] == splitPath[i]:
                     if parentDict[j]["type"] == "folder":
                         parentDict = parentDict[j]["contents"]
                         break
-                    else:
+                    elif parentDict[j]["type"] == fileType:
                         return True
                 j += 1
             i += 1
@@ -220,11 +233,12 @@ class Resource:
         self.remote_folder.download_file_to_JH(self.res_id, filepath, self.path_prefix)   
 
     def overwrite_HS_with_file_from_JH(self, filepath):
-        if self.is_file_in_HS(filepath):
+        pathWithoutType, fileType = filepath.split(".")
+        if self.is_file_in_HS(pathWithoutType, fileType):
             self.delete_file_or_folder_from_HS(filepath)
         elif "/" in filepath:
             folderPath = filepath.rsplit('/', 1)[0]
-            if self.is_folder_in_HS(folderPath):
+            if self.is_folder_in_HS(folderPath) == False:
                 self.remote_folder.create_folder(folderPath)
 
         self.remote_folder.upload_file_to_HS(self.path_prefix+filepath, filepath)  
