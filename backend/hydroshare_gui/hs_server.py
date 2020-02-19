@@ -56,7 +56,9 @@ class ResourcesHandler(tornado.web.RequestHandler):
         self.write({'resources': resources})
 
     def post(self):
-        """Needs a dict of metadata in format (this contains the required information.):
+        """Expects: body["resource title"] (string), body["creators"] (list of strings), body["privacy"] (string)
+        
+        Makes a dict of metadata in format (this contains the required information.):
         {'abstract': '',
         'title': '',
         'keywords': (),
@@ -75,20 +77,31 @@ class ResourcesHandler(tornado.web.RequestHandler):
         'extra_metadata': '{"key-1": "value-1", "key-2": "value-2"}'}
 
         ** NOTE: The required information in the first example above is only 
-        the bare minimum required to make a resource. It is not enough to make it public
-        or to publish it. You may be able to access the link though.
+        the bare minimum required to make a resource. It is NOT enough to make it public
+        or to publish it.
         """
-        # TODO Handle post request?
-        metadata = {'abstract': '',
-        'title': '',
-        'keywords': (),
-        'rtype': 'GenericResource',
-        'fpath': '',
-        'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}]',
-        'extra_metadata': ''}
+
         body = json.loads(self.request.body.decode('utf-8'))
-        metadata["title"] = body["title"]
+        # Need resource title and creators
+        resource_title = body["resource title"] # string
+        creators = body["creators"] # array of names (strings)
+
+        # Some silly string things for metadata['metadata']:
+        meta_metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}'
+        for creator in creators:
+            creator_string = ', {"creator":{"name":"'+creator+'"}}'
+            meta_metadata = meta_metadata + creator_string
+        meta_metadata = meta_metadata + ']'
+
+        metadata = {'abstract': '',
+                    'title': resource_title,
+                    'keywords': (),
+                    'rtype': 'GenericResource',
+                    'fpath': '',
+                    'metadata': meta_metadata,
+                    'extra_metadata': ''}
         resource_id = resource_handler.create_HS_resource(metadata)
+        # TODO: How to return the resource id?
         self.write(resource_id)
         pass
 
