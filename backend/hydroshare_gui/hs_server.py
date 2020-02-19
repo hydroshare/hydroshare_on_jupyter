@@ -66,9 +66,11 @@ class ResourcesHandler(tornado.web.RequestHandler):
         configure_cors(self)
 
     def get(self):
-        pass
+        # TODO: Probably do some request error handling here
+        resources = resource_handler.get_list_of_user_resources()
+        self.write({'resources': resources})
 
-    def post(self, metadata):
+    def post(self):
         """Needs a dict of metadata in format (this contains the required information.):
         {'abstract': '',
         'title': '',
