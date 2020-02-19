@@ -14,7 +14,8 @@ from login import username, password
 import logging
 import glob
 import os
-
+from pprint import pprint # Charlie: delete
+from datetime import datetime
 
 ''' Class that defines a handler for working with all of a user's resources.
 This is where they will be able to delete a resource, create a new one, or
@@ -93,27 +94,19 @@ class ResourceHandler:
 
     def create_HS_resource(self, metadata={}):
         """
-        Creates a hydroshare resource with the metadata specified in a dict
+        Creates a hydroshare resource from the metadata specified in a dict
         """
-        metadata['abstract'] = [1, 2, 3]
-        if metadata.keys() == ['abstract', 'title', 'keywords', 'rtype', 'fpath', 'metadata', 'extra_metadata']:
-            print("Equal!")
+        if list(metadata.keys()) == ['abstract', 'title', 'keywords', 'rtype', 'fpath', 'metadata', 'extra_metadata']:
+            print("Creating resource")
+            resource_id = self.hs.createResource(metadata['rtype'],
+                                                metadata['title'],
+                                                resource_file=metadata['fpath'],
+                                                keywords = metadata['keywords'],
+                                                abstract = metadata['abstract'],
+                                                metadata = metadata['metadata'],
+                                                extra_metadata=metadata['extra_metadata'])
+            # print("Resource id: {}".format(resource_id))
         else:
-            print("not equal!")
+            print("Not enough metadata")
             # Charlie TODO: throw exception
-
-        # abstract = 'My abstract'
-        # title = 'My resource'
-        # keywords = ('my keyword 1', 'my keyword 2')
-        # rtype = 'GenericResource'
-        # fpath = 'test_delete.md'
-        # metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}, {"creator":{"name":"Charlie2"}}]'
-        # extra_metadata = '{"key-1": "value-1", "key-2": "value-2"}'
-        # resource_id = self.hs.createResource(rtype, title, resource_file=fpath, keywords=keywords, abstract=abstract, metadata=metadata, extra_metadata=extra_metadata)
         return
-
-
-# DELETE BEFORE PUSHING
-if __name__ == '__main__':
-    handler = ResourceHandler()
-    handler.create_HS_resource()
