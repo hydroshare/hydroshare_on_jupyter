@@ -28,7 +28,7 @@ resource_handler = ResourceHandler()
 def configure_cors(handler):
     handler.set_header("Access-Control-Allow-Origin", "*") # TODO: change from * (any server) to our specific url
     handler.set_header("Access-Control-Allow-Headers", "x-requested-with")
-    handler.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+    handler.set_header('Access-Control-Allow-Methods', 'POST, PUT, GET, DELETE, OPTIONS')
 
 
 ''' Class that handles starting up the frontend for our web app
@@ -62,7 +62,7 @@ class ResourcesHandler(tornado.web.RequestHandler):
 ''' Class that handles GETing list of a files that are in a user's
 hydroshare instance of a resource
 '''
-class ResourcesFileHandlerHS(tornado.web.RequestHandler):
+class ResourcesHandlerHS(tornado.web.RequestHandler):
 
     def set_default_headers(self):
         configure_cors(self)
@@ -82,7 +82,7 @@ class ResourcesFileHandlerHS(tornado.web.RequestHandler):
 ''' Class that handles GETing list of a files that are in a user's
 jupyterhub instance of a resource
 '''
-class ResourcesFileHandlerJH(tornado.web.RequestHandler):
+class ResourcesHandlerJH(tornado.web.RequestHandler):
 
     def set_default_headers(self):
         configure_cors(self)
@@ -91,6 +91,49 @@ class ResourcesFileHandlerJH(tornado.web.RequestHandler):
         resource = Resource(res_id, resource_handler)
         jh_files = resource.get_files_JH()
         self.write({'files': jh_files})
+
+
+''' Class that handles DELETEing file in JH
+'''
+class FileHandlerJH(tornado.web.RequestHandler):
+
+    def set_default_headers(self):
+        configure_cors(self)
+
+    def OPTIONS(self):
+        pass
+
+    def delete(self, res_id):
+        body = json.loads(self.request.body.decode('utf-8'))
+        resource = Resource(res_id, resource_handler)
+        resource.delete_file_or_folder_from_JH(body["filepath"])
+
+    def put(self,res_id):
+        body = json.loads(self.request.body.decode('utf-8'))
+        resource = Resource(res_id, resource_handler)
+        resource.overwrite_HS_with_file_from_JH(body["filepath"])
+
+
+''' Class that handles GETing list of a files that are in a user's
+hydroshare instance of a resource
+'''
+class FileHandlerHS(tornado.web.RequestHandler):
+
+    def set_default_headers(self):
+        configure_cors(self)
+
+    def OPTIONS(self):
+        pass
+
+    def delete(self, res_id):
+        body = json.loads(self.request.body.decode('utf-8'))
+        resource = Resource(res_id, resource_handler)
+        resource.delete_file_or_folder_from_HS(body["filepath"])
+    
+    def put(self,res_id):
+        body = json.loads(self.request.body.decode('utf-8'))
+        resource = Resource(res_id, resource_handler)
+        resource.overwrite_JH_with_file_from_HS(body["filepath"])
 
 
 ''' Class that handles GETing user information on the currently logged
@@ -127,8 +170,10 @@ def make_app():
         (r"/", WebAppHandler),
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesHandler),
-        (r"/resources/([^/]+)/hs-files", ResourcesFileHandlerHS),
-        (r"/resources/([^/]+)/local-files", ResourcesFileHandlerJH)
+        (r"/resources/([^/]+)/hs-resources", ResourcesHandlerHS),
+        (r"/resources/([^/]+)/hs-files", FileHandlerHS),
+        (r"/resources/([^/]+)/local-resources", ResourcesHandlerJH),
+        (r"/resources/([^/]+)/local-files", FileHandlerJH)
     ])
 
 ''' Starts running the server

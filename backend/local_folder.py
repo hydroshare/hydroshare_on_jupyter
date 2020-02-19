@@ -10,6 +10,7 @@ Email: vickymmcd@gmail.com
 
 import os
 import glob
+import shutil
 
 
 ''' Class that defines a Local Folder so we can access attributes of it.
@@ -78,3 +79,10 @@ class LocalFolder:
                     "type": file_type,
                 })
         return files2
+
+    def delete_file(self, filepath):
+        os.remove(filepath)
+
+    def delete_folder(self, filepath):
+        shutil.rmtree(filepath) 
+
