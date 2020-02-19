@@ -90,3 +90,30 @@ class ResourceHandler:
                 }
 
         return list(resources.values())
+
+    def create_HS_resource(self, metadata={}):
+        """
+        Creates a hydroshare resource with the metadata specified in a dict
+        """
+        metadata['abstract'] = [1, 2, 3]
+        if metadata.keys() == ['abstract', 'title', 'keywords', 'rtype', 'fpath', 'metadata', 'extra_metadata']:
+            print("Equal!")
+        else:
+            print("not equal!")
+            # Charlie TODO: throw exception
+
+        # abstract = 'My abstract'
+        # title = 'My resource'
+        # keywords = ('my keyword 1', 'my keyword 2')
+        # rtype = 'GenericResource'
+        # fpath = 'test_delete.md'
+        # metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}, {"creator":{"name":"Charlie2"}}]'
+        # extra_metadata = '{"key-1": "value-1", "key-2": "value-2"}'
+        # resource_id = self.hs.createResource(rtype, title, resource_file=fpath, keywords=keywords, abstract=abstract, metadata=metadata, extra_metadata=extra_metadata)
+        return
+
+
+# DELETE BEFORE PUSHING
+if __name__ == '__main__':
+    handler = ResourceHandler()
+    handler.create_HS_resource()
