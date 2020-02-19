@@ -91,7 +91,9 @@ class ResourcesHandler(tornado.web.RequestHandler):
         the bare minimum required to make a resource. It is not enough to make it public
         or to publish it. You may be able to access the link though.
         """
-        # TODO
+        # TODO Handle post request?
+        resource_id = resource_handler.create_HS_resource(metadata)
+        self.write(resource_id)
         pass
 
 
