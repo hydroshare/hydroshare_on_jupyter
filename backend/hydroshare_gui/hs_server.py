@@ -69,7 +69,28 @@ class ResourcesHandler(tornado.web.RequestHandler):
         pass
 
     def post(self, metadata):
-        """Needs a dict of metadata"""
+        """Needs a dict of metadata in format (this contains the required information.):
+        {'abstract': '',
+        'title': '',
+        'keywords': (),
+        'rtype': 'GenericResource',
+        'fpath': '',
+        'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}]',
+        'extra_metadata': ''}
+
+        Example with information:
+        {'abstract': 'My abstract',
+        'title': 'My resource',
+        'keywords': ('my keyword 1', 'my keyword 2'),
+        'rtype': 'GenericResource',
+        'fpath': 'test_delete.md',
+        'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}, {"creator":{"name":"Charlie2"}}]',
+        'extra_metadata': '{"key-1": "value-1", "key-2": "value-2"}'}
+
+        ** NOTE: The required information in the first example above is only 
+        the bare minimum required to make a resource. It is not enough to make it public
+        or to publish it. You may be able to access the link though.
+        """
         # TODO
         pass
 
