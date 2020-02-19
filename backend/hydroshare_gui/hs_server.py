@@ -41,21 +41,6 @@ class WebAppHandler(tornado.web.RequestHandler):
     def get(self):
         self.render('index.html')
 
-''' Class that handles GETing new resource metadata & POSTing
-a new resource (by id) for that user
-'''
-class CreateHSResourceHandler(tornado.web.RequestHandler):
-
-    def set_default_headers(self):
-        configure_cors(self)
-
-    def get(self):
-        # TODO: Probably do some request error handling here
-        resources = resource_handler.get_list_of_user_resources()
-        self.write({'resources': resources})
-
-    def post(self):
-        pass
 
 ''' Class that handles GETing a list of a user's resources & POSTing
 a new resource for that user

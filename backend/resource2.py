@@ -52,10 +52,10 @@ class Resource:
 
         self.save_resource_locally()
         local_folder = LocalFolder()
-        files = local_folder.get_contents_recursive(path_prefix)
+        files = local_folder.get_contents_recursive(self.path_prefix)
         files_final = [({
             "name": "/",
-            "sizeBytes": local_folder.get_size(path_prefix),
+            "sizeBytes": local_folder.get_size(self.path_prefix),
             "type": "folder",
             "contents": files,
         })]
