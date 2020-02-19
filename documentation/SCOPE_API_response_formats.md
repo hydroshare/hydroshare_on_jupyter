@@ -104,7 +104,7 @@ Example output:
 
 # /resources/<resource_id>/hs-files
 DELETEs file from Hydroshare  
-Frontend payload: 
+Frontend payload:
 ```
 {"filepath": "filepath_to_file_to_delete"}
 ```
@@ -134,7 +134,7 @@ Example output:
 
 # /resources/<resource_id>/local-files
 DELETEs file from JupyterHub  
-Frontend payload: 
+Frontend payload:
 ```
 {"filepath": "filepath_to_file_to_delete"}
 ```
@@ -144,4 +144,9 @@ Frontend payload for syncing HS file to JH:
 ```
 {"request_type": "overwrite_JH",
 "filepath": "file_path_to_file_to_sync"}
+```
+Frontend payload for creating a new file in JH:
+```
+{"request_type": "new_file",
+"new_filename":"name_of_new_file.filetype"}
 ```
