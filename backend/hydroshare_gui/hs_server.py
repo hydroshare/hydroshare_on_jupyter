@@ -74,7 +74,7 @@ class ResourcesHandler(tornado.web.RequestHandler):
         'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}, {"creator":{"name":"Charlie2"}}]',
         'extra_metadata': '{"key-1": "value-1", "key-2": "value-2"}'}
 
-        ** NOTE: The required information in the first example above is only 
+        ** NOTE: The required information in the first example above is only
         the bare minimum required to make a resource. It is not enough to make it public
         or to publish it. You may be able to access the link though.
         """
@@ -130,7 +130,10 @@ class FileHandlerJH(tornado.web.RequestHandler):
     def put(self,res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)
-        resource.overwrite_HS_with_file_from_JH(body["filepath"])
+        if body["request_type"] == "new_file":
+            resource.create_file_JH(body["new_filename"])
+        elif body["request_type"] == "overwrite_HS":
+            resource.overwrite_HS_with_file_from_JH(body["filepath"])
 
 
 ''' Class that handles GETing list of a files that are in a user's
@@ -148,7 +151,7 @@ class FileHandlerHS(tornado.web.RequestHandler):
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)
         resource.delete_file_or_folder_from_HS(body["filepath"])
-    
+
     def put(self,res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)

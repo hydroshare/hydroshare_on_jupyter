@@ -29,10 +29,18 @@ class Resource:
         self.hs = self.resource_handler.hs
 
         self.remote_folder = RemoteFolder(self.hs, self.res_id)
-        
+
         self.path_prefix = self.output_folder + "/" + self.res_id + "/" + self.res_id + "/data/contents/"
         self.hs_files = self.get_files_upon_init_HS()
-        
+
+
+    def create_file_JH(self, filename):
+        '''Creates a new file with the given name in JH
+        '''
+        with open(self.path_prefix + filename, "w") as fp:
+            # if you wanted you could write to the file here, but we just want to create it
+            pass
+
 
     def save_resource_locally(self, unzip=True):
         '''Saves the HS resource locally, if it does not already exist.
@@ -157,7 +165,7 @@ class Resource:
 
     def delete_JH_folder_if_empty(self, filepath):
         ''' deletes JH folder if it is empty
-        calls delete_file_or_folder_from JH to check if 
+        calls delete_file_or_folder_from JH to check if
         parent directory needs to be deleted '''
 
         if not os.listdir(self.path_prefix + filepath):
@@ -171,12 +179,12 @@ class Resource:
         else:
             self.remote_folder.delete_file(filepath)
 
-    
+
     def delete_HS_folder_if_empty(self, filepath):
         ''' deletes from from HS if it is empty
-        this can only be used with hs_files as the HydroShare API does not give us empty 
-        folders when giving us files. This function should only be used if a recent 
-        action could have caused a folder to be empty ''' 
+        this can only be used with hs_files as the HydroShare API does not give us empty
+        folders when giving us files. This function should only be used if a recent
+        action could have caused a folder to be empty '''
         splitPath = filepath.split('/')
         parentDict = self.hs_files
         for directory in splitPath:
@@ -184,7 +192,7 @@ class Resource:
                 parentDict = parentDict[directory]
             else:
                 return False
-        
+
         return True
 
     def is_file_in_JH(self, filepath):
@@ -209,7 +217,7 @@ class Resource:
                         return True
                 j += 1
             i += 1
-        
+
         return False
 
     def is_folder_in_HS(self, folderpath):
@@ -230,7 +238,7 @@ class Resource:
             if found == False:
                 return False
             i += 1
-        
+
         return True
 
 
@@ -242,7 +250,7 @@ class Resource:
             outputPath = filepath.rsplit('/', 1)[0] + "/"
             if not os.path.exists(outputPath):
                 os.makedirs(outputPath)
-        self.remote_folder.download_file_to_JH(self.res_id, filepath, self.path_prefix)   
+        self.remote_folder.download_file_to_JH(self.res_id, filepath, self.path_prefix)
 
     def overwrite_HS_with_file_from_JH(self, filepath):
         ''' overwrites HS file with one from JH '''
@@ -254,5 +262,4 @@ class Resource:
             if self.is_folder_in_HS(folderPath) == False:
                 self.remote_folder.create_folder(folderPath)
 
-        self.remote_folder.upload_file_to_HS(self.path_prefix+filepath, filepath)  
-
+        self.remote_folder.upload_file_to_HS(self.path_prefix+filepath, filepath)
