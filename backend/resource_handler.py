@@ -96,6 +96,7 @@ class ResourceHandler:
         """
         Creates a hydroshare resource from the metadata specified in a dict
         """
+        resource_id = ''
         if list(metadata.keys()) == ['abstract', 'title', 'keywords', 'rtype', 'fpath', 'metadata', 'extra_metadata']:
             print("Creating resource")
             resource_id = self.hs.createResource(metadata['rtype'],
@@ -109,4 +110,4 @@ class ResourceHandler:
         else:
             print("Not enough metadata")
             # Charlie TODO: throw exception
-        return
+        return resource_id

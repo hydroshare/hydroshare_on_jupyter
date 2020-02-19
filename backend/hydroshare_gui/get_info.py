@@ -31,21 +31,6 @@ from metadata_parser import MetadataParser
 from collections import OrderedDict
 import pandas as pd
 
-# TODO (charlie): make this into a class & put this code in init
-auth = HydroShareAuthBasic(username=username, password=password)
-hs = HydroShare(auth=auth)
-
-# TODO (charlie): Once create resource is working, remove this line
-test_resource_id = 'c40d9567678740dab868f35440a69b30'
-
-### Making directory for local hs resources
-get_info_path = os.path.dirname(os.path.realpath(__file__)) # Get path to this file's location
-# output_folder = 'backend/tests/hs_resources'
-output_folder = get_info_path + "/local_hs_resources"
-if not os.path.exists(output_folder): # Make directory if it doesn't exist
-    os.makedirs(output_folder)
-    print("Made {} folder for new resources".format(output_folder))
-
 # TODO (charlie): investigate whether we can delete
 def get_metadata_of_all_files():
     #TODO scrape from xml file instead of API call
@@ -110,67 +95,9 @@ def get_metadata_one_file(resource_id):
     pprint(resource_md)
     return(resource_md)
 
-
-"""IN HYDROSHARE"""
-def create_resource_in_HS():
-    # Creates a private resource for user
-    """
-    TODO:
-    - Check if resource exists (API will just create a duplicate!)
-    - Check if public
-    """
-
-    abstract = 'My abstract'
-    title = 'Where does this go?'
-    keywords = ('my keyword 1', 'my keyword 2')
-    rtype = 'GenericResource'
-    fpath = output_folder + '/{}/{}/readme.txt'.format(test_resource_id, test_resource_id)
-    metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"John Smith"}}, {"creator":{"name":"Lisa Miller"}}]'
-    extra_metadata = '{"key-1": "value-1", "key-2": "value-2"}'
-
-    print("Creating resource")
-    resource_id = hs.createResource(rtype, title, resource_file=fpath, keywords=keywords, abstract=abstract, metadata=metadata, extra_metadata=extra_metadata)
-    print(resource_id)
-
-    return
-
 # TODO (charlie): rename and allow for setting to public or private
 def make_resource_public_in_HS(resource_id):
     hs.setAccessRules(resource_id, public=True)
-
-def delete_resource_in_HS(resource_id):
-    hs.deleteResource(resource_id)
-
-def update_resource_in_HS(local_file_path, resource_folder_path, resource_id):
-    options = {
-                 "folder": resource_folder_path,
-                 "files": local_file_path
-              }
-    result = hs.resource(resource_id).files(options)
-    return result
-
-# TODO (charlie): investigate & make work, rename should be just one thing for JH & HS, flags
-def rename_resource_in_HS():    # files2 = []
-    # for filepath in files:
-    #     file = filepath[len(prefix):]
-    #     if file.rfind(".") != -1:
-    #         type = file[file.rfind(".")+1:]
-    #         filename = file[:file.rfind(".")]
-    #     else:
-    #         type = "folder"
-    #         filename = file
-    #     if type == "folder":
-    #         files2.append({"file_name": filename, "type": type, "size": os.path.getsize(filepath), "contents": get_recursive_folder_contents(filepath)})
-    #     else:
-    #         files2.append({"file_name": filename, "type": type, "size": os.path.getsize(filepath)})
-    pass
-
-"""IN JUPYTERHUB"""
-def delete_resource_in_JH():
-    pass
-
-def locate_resource_in_JH():
-    pass
 
 
 def get_folder_last_modified_time(id):

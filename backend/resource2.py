@@ -171,6 +171,10 @@ class Resource:
         if not os.listdir(self.path_prefix + filepath):
             self.delete_file_or_folder_from_JH(filepath)
 
+    def is_file_in_JH(self, filepath):
+        ''' is a file in JH '''
+        return path.exists(self.path_prefix+filepath)
+
     def delete_file_or_folder_from_HS(self,filepath):
         ''' deletes file or folder from HS '''
         # if file path does not contain file (ie: we want to delete folder)
@@ -194,10 +198,6 @@ class Resource:
                 return False
 
         return True
-
-    def is_file_in_JH(self, filepath):
-        ''' is a file in JH '''
-        return path.exists(self.path_prefix+filepath)
 
     def is_file_in_HS(self, filepath, fileType):
         ''' does a file exist in hs_files '''
