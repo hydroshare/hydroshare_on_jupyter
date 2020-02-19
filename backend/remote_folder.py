@@ -65,7 +65,7 @@ class RemoteFolder:
 
         return folder_size, contents
 
-    def rename_file(self, res_id, filepath, old_filename, new_filename):
+    def rename_file(self, filepath, old_filename, new_filename):
         '''Renames the hydroshare version of the file from old_filename to
         new_filename by using the HS API.
         '''
@@ -74,7 +74,7 @@ class RemoteFolder:
                  "source_path": filepath + "/" + old_filename,
                  "target_path": filepath + "/" + new_filename
                           }
-        self.hs.resource(res_id).functions.move_or_rename(options)
+        self.hs.resource(self.res_id).functions.move_or_rename(options)
 
     def delete_file(self, filepath):
         """ deletes file in HS, if file is only item in directory, remove that parent directory"""
@@ -92,7 +92,7 @@ class RemoteFolder:
         """ upload JH file to HS """
         # make sure input files exist
         if not os.path.exists(JHfilepath):
-            raise Exception(f'Could not find file: {f}')
+            raise Exception(f'Could not find file: {JHfilepath}')
 
         self.hs.addResourceFile(self.res_id, JHfilepath, HSfilepath)
 
