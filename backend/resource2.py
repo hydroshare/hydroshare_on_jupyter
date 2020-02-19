@@ -155,6 +155,14 @@ class Resource:
             if "/" in filepath:
                 self.delete_JH_folder_if_empty(filepath.rsplit('/', 1)[0])
 
+    def delete_JH_folder_if_empty(self, filepath):
+        ''' deletes JH folder if it is empty
+        calls delete_file_or_folder_from JH to check if 
+        parent directory needs to be deleted '''
+
+        if not os.listdir(self.path_prefix + filepath):
+            self.delete_file_or_folder_from_JH(filepath)
+
     def delete_file_or_folder_from_HS(self,filepath):
         ''' deletes file or folder from HS '''
         # if file path does not contain file (ie: we want to delete folder)
@@ -163,11 +171,12 @@ class Resource:
         else:
             self.remote_folder.delete_file(filepath)
 
-    def delete_JH_folder_if_empty(self, filepath):
-        if not os.listdir(self.path_prefix + filepath):
-            self.delete_file_or_folder_from_JH(filepath)
-
+    
     def delete_HS_folder_if_empty(self, filepath):
+        ''' deletes from from HS if it is empty
+        this can only be used with hs_files as the HydroShare API does not give us empty 
+        folders when giving us files. This function should only be used if a recent 
+        action could have caused a folder to be empty ''' 
         splitPath = filepath.split('/')
         parentDict = self.hs_files
         for directory in splitPath:
@@ -177,13 +186,13 @@ class Resource:
                 return False
         
         return True
-        if not os.listdir(filepath):
-            self.delete_file_or_folder_from_HS(self, filepath)
 
     def is_file_in_JH(self, filepath):
+        ''' is a file in JH '''
         return path.exists(self.path_prefix+filepath)
 
     def is_file_in_HS(self, filepath, fileType):
+        ''' does a file exist in hs_files '''
         splitPath = filepath.split('/')
         parentDict = self.hs_files
         i = 0
@@ -204,6 +213,7 @@ class Resource:
         return False
 
     def is_folder_in_HS(self, folderpath):
+        ''' does a folder exist in hs_files '''
         splitPath = folderpath.split('/')
         parentDict = self.hs_files
         i = 0
@@ -225,6 +235,7 @@ class Resource:
 
 
     def overwrite_JH_with_file_from_HS(self, filepath):
+        ''' overwrites JH file with one from HS '''
         if self.is_file_in_JH(filepath):
             self.delete_file_or_folder_from_JH(filepath)
         elif "/" in filepath:
@@ -234,6 +245,7 @@ class Resource:
         self.remote_folder.download_file_to_JH(self.res_id, filepath, self.path_prefix)   
 
     def overwrite_HS_with_file_from_JH(self, filepath):
+        ''' overwrites HS file with one from JH '''
         pathWithoutType, fileType = filepath.split(".")
         if self.is_file_in_HS(pathWithoutType, fileType):
             self.delete_file_or_folder_from_HS(filepath)
