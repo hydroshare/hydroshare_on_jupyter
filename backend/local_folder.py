@@ -11,21 +11,13 @@ Email: vickymmcd@gmail.com
 import os
 import glob
 import shutil
+from pathlib import *
+from pprint import pprint # delete
 
 
 ''' Class that defines a Local Folder so we can access attributes of it.
 '''
 class LocalFolder:
-
-    def get_size(self, folderpath):
-        """ Gets the size of the contents of a folder stored locally
-        """
-        total_size = 0
-        for path, dirs, files in os.walk(folderpath):
-            for f in files:
-                fp = os.path.join(path, f)
-                total_size += os.path.getsize(fp)
-        return total_size
 
     def get_contents_recursive(self, folderpath):
         """Uses recursion to get & properly nest contents of folders stored locally
@@ -35,39 +27,31 @@ class LocalFolder:
         # return empty list if the folder is empty
         if len(files) == 0:
             return []
+
         files2 = []
         for filepath in files:
-            # +1 is to account for / after folderpath before file name
-            # TODO (charlie): use pathlib instead of doing string manipulations
-            file = filepath[len(folderpath)+1:]
+            # check contents recursively:
             folder_contents = self.get_contents_recursive(filepath)
             
-            # if filepath is a file and not a folder (contents is empty
-            # and there is a .sometype), separate the file name from file type
-            # using the dot
-            if (len(folder_contents) == 0 and
-                                                    file.rfind(".") != -1):
-                file_type = file[file.rfind(".")+1:]
-                filename = file[:file.rfind(".")]
-            # doesn't have a .sometype, but is still a file according to os,
-            # call file type file & use whole filename
-            elif os.path.isfile(filepath):
-                file_type = "file"
-                filename = file
-            # if os says it is a directory, set the type to be a folder
-            elif os.path.isdir(filepath):
+            # Populate info:
+            dirpath = Path(filepath)
+            filename = dirpath.stem
+            # Set file type
+            if dirpath.is_file(): # is file
+                if dirpath.suffix:
+                    file_type = dirpath.suffix[1:] # without '.'
+                else:
+                    file_type = 'file'
+            elif dirpath.is_dir(): # is folder
                 file_type = "folder"
-                filename = file
-            # if it isn't a file & isn't a folder, we aren't sure what it is
-            else:
+            else: # is neither
                 file_type = "unknown"
-                filename = file
 
             # if it was a folder, we need to populate its list of contents
             if file_type == "folder":
                 files2.append({
                     "name": filename,
-                    "sizeBytes": self.get_size(filepath),
+                    "sizeBytes": dirpath.stat().st_size,
                     "type": file_type,
                     "contents": folder_contents,
                 })
@@ -75,7 +59,7 @@ class LocalFolder:
             else:
                 files2.append({
                     "name": filename,
-                    "sizeBytes": os.path.getsize(filepath),
+                    "sizeBytes": dirpath.stat().st_size,
                     "type": file_type,
                 })
         return files2
@@ -84,5 +68,4 @@ class LocalFolder:
         os.remove(filepath)
 
     def delete_folder(self, filepath):
-        shutil.rmtree(filepath) 
-
+        shutil.rmtree(filepath)
