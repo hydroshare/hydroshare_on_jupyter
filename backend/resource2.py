@@ -13,7 +13,8 @@ from remote_folder import RemoteFolder
 import logging
 import os
 from os import path
-
+from resource_handler import ResourceHandler # remove after testing
+from pprint import pprint
 
 ''' Class that defines a Hydroshare resource & it's associated files that
 are local to Jupyterhub.
@@ -263,3 +264,21 @@ class Resource:
                 self.remote_folder.create_folder(folderPath)
 
         self.remote_folder.upload_file_to_HS(self.path_prefix+filepath, filepath)
+
+    def get_resource_last_modified_time_HS(self, resource_id):
+        """
+        TODO (Charlie): Finish this func
+        metadata['dates'] gives array of two dicts with key 'start_date'
+        that contains a time. One is creation and the other is last modified
+        Need to compare and return the most recent time.
+        Ex:
+        'dates': [{'end_date': None,
+            'start_date': '2019-05-15T19:31:38.201061Z',
+            'type': 'created'},
+           {'end_date': None,
+            'start_date': '2019-05-15T19:32:36.139858Z',
+            'type': 'modified'}],
+        """
+        # metadata = self.hs.getScienceMetadata(resource_id)
+        # pprint(metadata)
+        pass
