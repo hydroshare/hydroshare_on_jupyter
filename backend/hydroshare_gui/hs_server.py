@@ -144,15 +144,15 @@ class FileHandlerJH(tornado.web.RequestHandler):
 
     def post(self, res_id):
         resource = Resource(res_id, resource_handler)
+        response_message = "OK"
         for field_name, files in self.request.files.items():
             for info in files:
-                filename, content_type = info["filename"], info["content_type"]
-                body = info["body"]
-                logging.info(
-                    'POST "%s" "%s" %d bytes', filename, content_type, len(body)
-                )
-
-        self.write("OK")
+                response = resource.upload_file_to_JH(info)
+                if response != True:
+                    response_message = response
+        jh_files = resource.get_files_JH()
+        self.write({'response': response_message,
+                    'files': jh_files})
 
 
 ''' Class that handles GETing list of a files that are in a user's
