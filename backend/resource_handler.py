@@ -27,7 +27,7 @@ class ResourceHandler:
         '''
         # authentication for using Hydroshare API
         auth = HydroShareAuthBasic(username=username, password=password)
-        self.hs = HydroShare(auth=auth)
+        self.hs = HydroShare(auth=auth, hostname='beta.hydroshare.org')
         # Get path to this file's location
         current_path = os.path.dirname(os.path.realpath(__file__))
         self.output_folder = current_path + "/hydroshare_gui/local_hs_resources"

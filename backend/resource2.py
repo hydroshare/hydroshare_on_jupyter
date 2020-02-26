@@ -38,7 +38,6 @@ class Resource:
         self.local_folder = LocalFolder()
 
         self.path_prefix = self.output_folder + "/" + self.res_id + "/" + self.res_id + "/data/contents/"
-        print("hiya")
         self.hs_files = self.get_files_upon_init_HS()
         self.JH_files = self.get_files_upon_init_JH()
 
@@ -102,6 +101,7 @@ class Resource:
         for file_info in hs_resource_info["results"]:
             # extract filepath from url
             filepath = file_info["url"][len(url_prefix)+1:]
+            print(file_info["modified_time"])
             # get proper definition formatting of file if it is a file
             file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info["size"])
             # if it is a folder, build up contents
