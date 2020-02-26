@@ -69,6 +69,7 @@ class Resource:
         '''
 
         self.save_resource_locally()
+        parent_folder_path = Path(self.path_prefix)
         files = self.local_folder.get_contents_recursive(self.path_prefix)
         files_final = [({
             "name": "/",
