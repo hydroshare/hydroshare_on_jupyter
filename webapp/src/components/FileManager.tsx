@@ -5,38 +5,64 @@
  */
 
 import * as React from 'react';
+import { ReactElement } from 'react';
 import {
   DragDropContext,
   Draggable,
   DraggableStateSnapshot,
   Droppable,
   DroppableStateSnapshot,
+  DropResult,
 } from 'react-beautiful-dnd';
 import * as moment from "moment";
 
 import '../styles/FileManager.scss';
 
 import {
-  IFileOrFolder,
+  FileOrFolderTypes,
+  IFile,
+  IFolder,
 } from "../store/types";
-import {ReactElement} from "react";
 
-interface IFileManagerProps {
-  hydroShareFilesAndFolders: IFileOrFolder[]
-  jupyterHubFilesAndFolders: IFileOrFolder[]
+enum PATH_PREFIXES {
+  JUPYTERHUB = 'jh',
+  HYDROSHARE = 'hs',
 }
 
+interface IFileManagerProps {
+  hydroShareResourceRootDir: IFolder
+  jupyterHubResourceRootDir: IFolder
+}
+
+let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
+
 // TODO: Define the shape of result
-const onDragEnd = (result: any) => {
-  console.log("Drag ended!");
+const onDragEnd = (result: DropResult) => {
+  const {
+    draggableId: srcURI,
+    destination: dest,
+  } = result;
+  if (!dest?.droppableId) {
+    // Not sure when this happens, but droppableId is apparently optional
+    return;
+  }
+  const destURI = dest.droppableId;
+  const srcFileOrFolder = fileOrFolderLookupTable.get(srcURI);
+  const destFolder = fileOrFolderLookupTable.get(destURI);
+  console.log(`Received request to move ${srcURI} to ${destURI}.`);
+  console.log(srcFileOrFolder);
+  console.log(destFolder);
 };
 
 const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
-  const hydroShareFilePane = props.hydroShareFilesAndFolders ? (
-    <FilePane droppableId="hydroshare-file-pane" idPrefix="hs" contents={props.hydroShareFilesAndFolders}/>
+  // Clear the lookup table
+  fileOrFolderLookupTable.clear();
+
+  const hydroShareFilePane = props.hydroShareResourceRootDir ? (
+    <FilePane droppableId={generateItemPath(props.hydroShareResourceRootDir, 'hs')} idPrefix={PATH_PREFIXES.HYDROSHARE} contents={props.hydroShareResourceRootDir.contents}/>
   ) : null;
-  const jupyterHubFilePane = props.jupyterHubFilesAndFolders ? (
-    <FilePane droppableId="jupyterhub-file-pane" idPrefix="jh" contents={props.jupyterHubFilesAndFolders}/>
+  const jupyterHubFilePane = props.jupyterHubResourceRootDir ? (
+    <FilePane droppableId={generateItemPath(props.jupyterHubResourceRootDir, 'jh')} idPrefix={PATH_PREFIXES.JUPYTERHUB} contents={props.jupyterHubResourceRootDir.contents}/>
   ) : null;
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -49,13 +75,22 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
 };
 
 interface IFilePaneProps {
-  contents: IFileOrFolder[]
+  contents?: (IFile | IFolder)[]
   droppableId: string
   idPrefix: string
 }
 
-const getStyles = (snapshot: DroppableStateSnapshot | DraggableStateSnapshot, nestLevel: number = 0) => {
-  return {};
+const getDroppableStyles = (snapshot: DroppableStateSnapshot, nestLevel: number = 0) => {
+  return {
+    backgroundColor: snapshot.isDraggingOver ? 'red' : undefined,
+    transform: 'none !important',
+  };
+};
+
+const getDraggableStyles = (snapshot: DraggableStateSnapshot, nestLevel: number = 0) => {
+  return {
+    transform: 'none !important',
+  };
 };
 
 const generateTableCell = (content: ReactElement | string | number | moment.Moment, nestLevel: number = 0) => {
@@ -76,14 +111,30 @@ const generateCheckBox = () => {
   );
 };
 
-const generateFolderElement = (folder: IFileOrFolder, index: number, idPrefix: string, nestLevel: number = 0) => {
-  const itemFullPath = `${idPrefix}:${folder.dirPath}/${folder.name}`;
+const generateItemPath = (item: IFile | IFolder, idPrefix: string) => {
+  let path = `${idPrefix}:`;
+  if (item.dirPath) {
+    path += item.dirPath;
+  }
+  if (!path.endsWith('/')) {
+    path += '/';
+  }
+  path += item.name;
+  if (item.type === FileOrFolderTypes.FILE) {
+      path += `.${item.type}`;
+  }
+  return path;
+};
+
+const generateFolderElement = (folder: IFolder, index: number, idPrefix: string, nestLevel: number = 0) => {
+  const folderFullPath = generateItemPath(folder, idPrefix);
+  fileOrFolderLookupTable.set(folderFullPath, folder);
   const folderLineItem = (
-    <Draggable draggableId={itemFullPath} index={0} key={itemFullPath}>
+    <Draggable draggableId={folderFullPath} index={0} key={folderFullPath}>
         {(provided, snapshot) => (
           <div
             className="table-row folder-element"
-            style={getStyles(snapshot, nestLevel)}
+            style={getDraggableStyles(snapshot, nestLevel)}
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
@@ -102,28 +153,31 @@ const generateFolderElement = (folder: IFileOrFolder, index: number, idPrefix: s
     generateFileOrFolderElement(item, idx+1, idPrefix,nestLevel+1));
 
   return (
-    <Droppable droppableId={itemFullPath} key={itemFullPath}>
+    <Droppable droppableId={folderFullPath} key={folderFullPath}>
       {(provided, snapshot) => (
       <div
+        style={getDroppableStyles(snapshot, nestLevel)}
         ref={provided.innerRef}
         {...provided.droppableProps}
       >
         {folderLineItem}
         {folderContentsLineItems}
+        {provided.placeholder}
       </div>
     )}
     </Droppable>
   );
 };
 
-const generateFileElement = (item: IFileOrFolder, index: number, idPrefix: string, nestLevel: number = 0) => {
-  const itemFullPath = `${idPrefix}:${item.dirPath}/${item.name}.${item.type}`;
+const generateFileElement = (item: IFile | IFolder, index: number, idPrefix: string, nestLevel: number = 0) => {
+  const itemFullPath = generateItemPath(item, idPrefix);
+  fileOrFolderLookupTable.set(itemFullPath, item);
   return (
     <Draggable draggableId={itemFullPath} index={index} key={itemFullPath}>
       {(provided, snapshot) => (
         <div
           className="table-row file-element"
-          style={getStyles(snapshot, nestLevel)}
+          style={getDraggableStyles(snapshot, nestLevel)}
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -139,11 +193,11 @@ const generateFileElement = (item: IFileOrFolder, index: number, idPrefix: strin
   );
 };
 
-const generateFileOrFolderElement = (item: IFileOrFolder, index: number, idPrefix: string, nestLevel: number = 0) => {
-  if (item.contents) {
-    return generateFolderElement(item, index, idPrefix, nestLevel);
+const generateFileOrFolderElement = (item: IFile | IFolder, index: number, idPrefix: string, nestLevel: number = 0) => {
+  if (item.type === FileOrFolderTypes.FOLDER) {
+    return generateFolderElement(item as IFolder, index, idPrefix, nestLevel);
   } else {
-    return generateFileElement(item, index, idPrefix, nestLevel);
+    return generateFileElement(item as IFile, index, idPrefix, nestLevel);
   }
 };
 
@@ -166,11 +220,11 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
         {(provided, snapshot) => (
           <div
             className="FilePane-files-container"
-            style={getStyles(snapshot)}
+            style={getDroppableStyles(snapshot)}
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {props.contents.map((item, idx) => generateFileOrFolderElement(item, idx, props.idPrefix))}
+            {props.contents?.map((item, idx) => generateFileOrFolderElement(item, idx, props.idPrefix))}
             {provided.placeholder}
           </div>
         )}

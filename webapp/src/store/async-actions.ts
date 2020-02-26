@@ -75,26 +75,26 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
 
 export function getResourceLocalFiles(resourceId: string) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/local-resources`);
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/local-files`);
     const {
       data: {
-        files,
+        files: rootDir,
       },
     } = response;
 
-    dispatch(setResourceLocalFiles(resourceId, files));
+    dispatch(setResourceLocalFiles(resourceId, rootDir));
   };
 }
 
 export function getResourceHydroShareFiles(resourceId: string) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/hs-resources`);
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/hs-files`);
     const {
       data: {
-        files,
+        files: rootDir,
       },
     } = response;
 
-    dispatch(setResourceHydroShareFiles(resourceId, files));
+    dispatch(setResourceHydroShareFiles(resourceId, rootDir));
   };
 }

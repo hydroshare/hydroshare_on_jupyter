@@ -7,8 +7,10 @@ import {
   UserInfoActions,
 } from './actions/action-names';
 import {
-  IFileOrFolder,
   IResourcePageState,
+  FileOrFolderTypes,
+  IFile,
+  IFolder,
   IMainPageState,
   IResourcesState,
   IUserInfo,
@@ -42,7 +44,7 @@ export function resourcePageReducer(state: IResourcePageState = initResourcePage
       return {
         ...state,
         allJupyterSelected: doMakeSelected,
-        selectedLocalFilesAndFolders: toggleAllFilesOrFoldersSelected(action.payload.files, doMakeSelected),
+        selectedLocalFilesAndFolders: toggleAllFilesOrFoldersSelected(action.payload.jupyterHubFiles, doMakeSelected),
       };
     case ResourcePageActions.TOGGLE_IS_SELECTED_ALL_HYDROSHARE:
       doMakeSelected = !state.allHydroShareSelected;
@@ -78,18 +80,18 @@ export function resourcePageReducer(state: IResourcePageState = initResourcePage
   }
 }
 
-function toggleAllFilesOrFoldersSelected(files: IFileOrFolder[], doMakeSelected: boolean): Set<string> {
+function toggleAllFilesOrFoldersSelected(rootDir: IFolder, doMakeSelected: boolean): Set<string> {
   if (!doMakeSelected) {
     return new Set();
   }
   let selectedFilesAndFolders: Set<string> = new Set();
-  files.forEach((resourceFileOrFolder: IFileOrFolder) => {
-    selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, resourceFileOrFolder, doMakeSelected);
+  rootDir.contents.forEach((resourceFileOrFolders: IFile | IFolder) => {
+    selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, resourceFileOrFolders, doMakeSelected);
   });
   return selectedFilesAndFolders;
 }
 
-function toggleFileOrFolderSelected(toggledItem: IFileOrFolder, selectedFilesAndFolders: Set<string>): Set<string> {
+function toggleFileOrFolderSelected(toggledItem: IFile | IFolder, selectedFilesAndFolders: Set<string>): Set<string> {
   selectedFilesAndFolders = new Set(selectedFilesAndFolders);
   const itemWasSelected = selectedFilesAndFolders.has(toggledItem.dirPath + toggledItem.name);
   return recursivelySetSelectedState(selectedFilesAndFolders, toggledItem, !itemWasSelected);
@@ -127,13 +129,22 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
         resourceId,
         files,
       } = action.payload;
+      let sizeBytes = 0;
+      files?.forEach(f => { sizeBytes += f.sizeBytes });
+      const jupyterHubRootDir: IFolder = {
+        contents: recursivelyConvertDatesToMoment(files),
+        dirPath: '/',
+        name: '',
+        sizeBytes,
+        type: FileOrFolderTypes.FOLDER,
+      };
       return {
         ...state,
         allResources: {
           ...state.allResources,
           [resourceId]: {
             ...state.allResources[resourceId],
-            files: recursivelyConvertDatesToMoment(files),
+            jupyterHubFiles: jupyterHubRootDir,
           },
         },
       };
@@ -143,6 +154,15 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
         files: f,
       } = action.payload;
 
+      let hsRootSizeBytes = 0;
+      f?.forEach(f => { hsRootSizeBytes += f.sizeBytes });
+      const hydroShareRootDir: IFolder = {
+        contents: recursivelyConvertDatesToMoment(f),
+        dirPath: '/',
+        name: '',
+        sizeBytes: hsRootSizeBytes,
+        type: FileOrFolderTypes.FOLDER,
+      };
       return {
         ...state,
         allResources: {
@@ -151,7 +171,7 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
             ...state.allResources[resId],
             hydroShareResource: {
               ...state.allResources[resId].hydroShareResource,
-              files: recursivelyConvertDatesToMoment(f),
+              files: hydroShareRootDir,
             },
           },
         },
@@ -161,7 +181,7 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
   }
 }
 
-function recursivelyConvertDatesToMoment(files: IFileOrFolder[]) {
+function recursivelyConvertDatesToMoment(files: (IFile | IFolder)[]) {
   return files.map(fileOrFolder => {
     fileOrFolder.lastModified = moment(fileOrFolder.lastModified);
     return fileOrFolder;
@@ -180,16 +200,17 @@ export function userDataReducer(state: IUserInfo, action: UserActionTypes): IUse
   }
 }
 
-function recursivelySetSelectedState(selections: Set<string>, item: IFileOrFolder, makeSelected: boolean): Set<string> {
+function recursivelySetSelectedState(selections: Set<string>, item: IFile | IFolder, makeSelected: boolean): Set<string> {
   const itemPath = item.dirPath + item.name;
   if (makeSelected) {
     selections.add(itemPath);
   } else {
     selections.delete(itemPath);
   }
-  // Check if this is a folder with child files and/or folders
-  if (item.contents) {
-    item.contents.forEach(childItem => {
+
+  if (item.type === FileOrFolderTypes.FOLDER) {
+    const folder = item as IFolder;
+    folder.contents.forEach(childItem => {
       selections = recursivelySetSelectedState(selections, childItem, makeSelected);
     });
   }

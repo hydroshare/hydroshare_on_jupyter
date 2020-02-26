@@ -74,7 +74,8 @@ class Resource:
         parent_folder_path = Path(self.path_prefix)
         files = self.local_folder.get_contents_recursive(self.path_prefix)
         files_final = [({
-            "name": "/",
+            "name": "",
+            "dirPath": "/",
             "sizeBytes": parent_folder_path.stat().st_size,
             "type": "folder",
             "contents": files,
@@ -142,7 +143,8 @@ class Resource:
             rootsize += (f["sizeBytes"])
 
         folders_with_root = [({
-            "name": "/",
+            "name": "",
+            "dirPath": "/",
             "sizeBytes": rootsize,
             "type": "folder",
             "contents": folders_final,

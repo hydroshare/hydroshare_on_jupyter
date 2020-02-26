@@ -9,7 +9,8 @@ import {
 } from '../async-actions';
 import {
     ICreateResourceRequest,
-    IFileOrFolder,
+    IFile,
+    IFolder,
     IJupyterResource,
     IRootState,
     SortByOptions,
@@ -22,7 +23,7 @@ import {
 
 export function getFilesIfNeeded(resource: IJupyterResource): ThunkAction<Promise<void>, {}, {}, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-        if (resource && !resource.files) {
+        if (resource && !resource.jupyterHubFiles) {
             dispatch(getResourceLocalFiles(resource.id));
         }
         if (resource && resource.hydroShareResource && !resource.hydroShareResource.files) {
@@ -31,7 +32,7 @@ export function getFilesIfNeeded(resource: IJupyterResource): ThunkAction<Promis
     };
 }
 
-export function openFileInJupyterHub(jupyterResource: IJupyterResource, file: IFileOrFolder) {
+export function openFileInJupyterHub(jupyterResource: IJupyterResource, file: IFile | IFolder) {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
         const state = getState();
         if (state.user) {
@@ -52,11 +53,11 @@ export function toggleIsSelectedAllHydroShare(resource: IJupyterResource) {
     return action(ResourcePageActions.TOGGLE_IS_SELECTED_ALL_HYDROSHARE, resource);
 }
 
-export function toggleIsSelectedOneLocal(fileOrFolder: IFileOrFolder) {
+export function toggleIsSelectedOneLocal(fileOrFolder: IFile | IFolder) {
     return action(ResourcePageActions.TOGGLE_IS_SELECTED_ONE_JUPYTER, fileOrFolder);
 }
 
-export function toggleIsSelectedOneHydroShare(fileOrFolder: IFileOrFolder) {
+export function toggleIsSelectedOneHydroShare(fileOrFolder: IFile | IFolder) {
     return action(ResourcePageActions.TOGGLE_IS_SELECTED_ONE_HYDROSHARE, fileOrFolder);
 }
 
