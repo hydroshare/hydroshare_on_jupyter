@@ -90,7 +90,7 @@ class ResourcesHandler(tornado.web.RequestHandler):
         the bare minimum required to make a resource. It is NOT enough to make it public
         or to publish it.
         """
-
+        # TODO: Create endpoint?
         body = json.loads(self.request.body.decode('utf-8'))
         # Need resource title and creators
         resource_title = body["resource title"] # string
