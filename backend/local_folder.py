@@ -68,4 +68,13 @@ class LocalFolder:
         os.remove(filepath)
 
     def delete_folder(self, filepath):
-        shutil.rmtree(filepath)
+        shutil.rmtree(filepath) 
+
+    def create_folder(self, folderpath):
+        print(folderpath)
+        try:
+            # Create target Directory
+            os.makedirs(folderpath)
+        except FileExistsError:
+            print("Directory " , folderpath ,  " already exists")
+
