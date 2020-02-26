@@ -90,9 +90,10 @@ Example output:
 }
 ```
 
-POSTs to create new empty resource in Hydroshare  
+POSTs to create new empty resource in Hydroshare    
+Payload: 
 ```
-Payload: {"title": "title_of_new_resource"}
+{"title": "title_of_new_resource"}
 ```
 
 # /resources/<resource_id>/hs-resources
