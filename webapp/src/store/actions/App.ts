@@ -10,7 +10,7 @@ import {
   getUserInfo,
 } from '../async-actions';
 import {
-  IJupyterProject,
+  IJupyterResource,
 } from '../types';
 
 export function loadInitData(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
@@ -20,6 +20,6 @@ export function loadInitData(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   };
 }
 
-export function viewProject(project: IJupyterProject) {
-  return push('/projects/' + project.id);
+export function viewResource(resource: IJupyterResource) {
+  return push('/resources/' + resource.id);
 }

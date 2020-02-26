@@ -3,9 +3,9 @@
 // overall comment for frontend, we need to reevaluate our prop variables bc sometimes I think we may overcomplicate things
 // or be redundant. Maybe not, but I remember being in just "get it working mode" and not really trying to make it pretty
 import * as React from 'react';
+import { AnyAction } from 'redux';
 
 import {
-  AllActionTypes,
   IFileOrFolder,
   SortByOptions,
 } from '../store/types';
@@ -38,7 +38,7 @@ interface IPropsInterface {
   selectedFilesAndFolders: Set<string>
   sortBy: SortByOptions | undefined,
   searchTerm: string
-  toggleAllSelected: () => AllActionTypes
+  toggleAllSelected: () => AnyAction
   hydroShare: boolean,
 }
 
