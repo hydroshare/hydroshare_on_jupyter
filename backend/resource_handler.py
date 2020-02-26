@@ -14,6 +14,7 @@ from login import username, password
 import logging
 import glob
 import os
+import json
 
 ''' Class that defines a handler for working with all of a user's resources.
 This is where they will be able to delete a resource, create a new one, or
@@ -45,66 +46,69 @@ class ResourceHandler:
         '''Gets dictionary of jupyterhub resources by resource id that are
         saved locally.
         '''
+        # TODO (Charlie): Make more robust?
         resource_folders = glob.glob(os.path.join(self.output_folder, '*'))
         # TODO: Use a filesystem-independent way of this
         mp_by_res_id = {}
+        res_ids = []
         for folder_path in resource_folders:
-            res_id = folder_path.split('/')[-1]
-            metadata_file_Path = os.path.join(folder_path, res_id, 'data', 'resourcemetadata.xml')
-            mp = MetadataParser(metadata_file_Path)
-            mp_by_res_id[res_id] = mp
+            res_id = folder_path.split('/')[-1] #TODO: regex
+            res_ids.append(res_id)
 
-        return mp_by_res_id
+        return res_ids
 
-    def get_list_of_user_resources(self):
+    def get_list_of_user_resources(self): # TODO (Vicky): Cache this info
         '''Gets list of all the resources for the logged in user, including
         those stored on hydroshare and those stored locally on jupyterhub
         and information about each one including whether HS ones are stored
         locally.
+
+        Assumes there are no local resources that don't exist in HS
         '''
         resources = {}
+        is_local = False # referenced later when checking if res is local
 
+        # Get local res_ids
+        local_res_ids = self.get_local_JH_resources()
         # Get the user's resources from HydroShare
         user_hs_resources = self.hs.resources(owner=username)
         for res in user_hs_resources:
             res_id = res['resource_id']
+            # check if local
+            if res_id in local_res_ids:
+                is_local = True
+
             resources[res_id] = {
                 'id': res_id,
                 'title': res['resource_title'],
-                'hydroShareResource': res,
+                'hydroShareResource': res, # includes privacy info under 'public'
+                'localCopyExists': is_local,
             }
 
-        # Get the resources copied to the local filesystem
-        local_resources = self.get_local_JH_resources()
-        for res_id, res_metadata in local_resources.items():
-            if res_id in resources:
-                # TODO: Add local files
-                resources[res_id]['localCopyExists'] = True
-            else:
-                resources[res_id] = {
-                    'id': res_id,
-                    'title': res_metadata.get_title(),
-                    'hydroShareResource': res_metadata.spoof_hs_api_response(),
-                    'localCopyExists': True,
-                }
-
         return list(resources.values())
-
+    
     def create_HS_resource(self, metadata={}):
         """
         Creates a hydroshare resource from the metadata specified in a dict
         """
         resource_id = ''
-        if list(metadata.keys()) == ['abstract', 'title', 'keywords', 'rtype', 'fpath', 'metadata', 'extra_metadata']:
-            print("Creating resource")
-            resource_id = self.hs.createResource(metadata['rtype'],
-                                                metadata['title'],
-                                                resource_file=metadata['fpath'],
-                                                keywords = metadata['keywords'],
-                                                abstract = metadata['abstract'],
-                                                metadata = metadata['metadata'],
-                                                extra_metadata=metadata['extra_metadata'])
-        else:
-            print("Not enough metadata")
-            # Charlie TODO: throw exception
+        resource_id = self.hs.createResource(metadata['rtype'],
+                                            metadata['title'],
+                                            resource_file=metadata['fpath'],
+                                            keywords = metadata['keywords'],
+                                            abstract = metadata['abstract'],
+                                            metadata = metadata['metadata'],
+                                            extra_metadata=metadata['extra_metadata'])
+
         return resource_id
+
+    def copy_HS_resource(self, og_res_id):
+        response = self.hs.resource(og_res_id).copy()
+        new_id = response.content.decode("utf-8") # b'id'
+        
+        # Change name to 'Copy of []'
+        title = self.hs.getScienceMetadata(new_id)['title']
+        new_title = "Copy of " + title
+        self.hs.updateScienceMetadata(new_id, {"title": new_title})
+        
+        return new_id
