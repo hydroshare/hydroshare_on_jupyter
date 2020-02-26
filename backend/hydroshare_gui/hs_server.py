@@ -42,7 +42,7 @@ class WebAppHandler(tornado.web.RequestHandler):
         self.render('index.html')
 
 
-''' Class that handles GETing a list of a user's resources & POSTing
+''' Class that handles GETing a list of a user's resources (with metadata) & POSTing
 a new resource for that user
 '''
 class ResourcesHandler(tornado.web.RequestHandler):
@@ -80,7 +80,7 @@ class ResourcesHandler(tornado.web.RequestHandler):
         the bare minimum required to make a resource. It is NOT enough to make it public
         or to publish it.
         """
-
+        # TODO: Create endpoint?
         body = json.loads(self.request.body.decode('utf-8'))
         # Need resource title and creators
         resource_title = body["resource title"] # string

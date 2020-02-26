@@ -1,4 +1,14 @@
+"""
+Extracts metadata from resourcemetadata.xml files (including 'None')
+Will error if given other filetype (and won't read directory)
+
+Will need to scrape through and look at problems like (if this is wanted):
+* title returns title of xml file, not of resource
+
+"""
+
 from xml.etree import ElementTree
+import os
 
 NAMESPACES = {
     'dc': 'http://purl.org/dc/elements/1.1/',
@@ -14,7 +24,6 @@ class MetadataParser:
     def __init__(self, file_path):
         self.data = ElementTree.parse(file_path).getroot()
 
-    # TODO (charlie) check if these functions internally have error handling?
     def get_abstract(self):
         return self._get_elem_value('./rdf:Description/dc:description/rdf:Description/dcterms:abstract')
 
@@ -37,6 +46,9 @@ class MetadataParser:
     def get_title(self):
         return self._get_elem_value('./rdf:Description/dc:title')
 
+    def get_public(self):
+        return
+
     def spoof_hs_api_response(self):
         return {
             'resource_id': self.get_id(),
@@ -51,3 +63,11 @@ class MetadataParser:
     def _get_elem_value(self, path):
         elem = self.data.find(path, NAMESPACES)
         return elem.text if elem is not None else None
+
+if __name__ == '__main__':
+    filepath = os.path.abspath('hydroshare_gui/local_hs_resources')
+    filepath = '/home/charlie/Documents/hydroshare-jupyter-gui/backend/hydroshare_gui/local_hs_resources/8b826c43f55043f583c85ae312a8894f/8b826c43f55043f583c85ae312a8894f/data/resourcemap.xml'
+    # filepath = '/home/charlie/Documents/hydroshare-jupyter-gui/backend/hydroshare_gui/local_hs_resources/8b826c43f55043f583c85ae312a8894f/8b826c43f55043f583c85ae312a8894f/tagmanifest-md5.txt'
+    parser = MetadataParser(filepath)
+    thing = parser.get_title()
+    print(thing)

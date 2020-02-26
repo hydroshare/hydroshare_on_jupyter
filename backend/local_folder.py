@@ -12,7 +12,6 @@ import os
 import glob
 import shutil
 from pathlib import *
-from pprint import pprint # delete
 
 
 ''' Class that defines a Local Folder so we can access attributes of it.
