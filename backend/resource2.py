@@ -37,6 +37,7 @@ class Resource:
         self.local_folder = LocalFolder()
 
         self.path_prefix = self.output_folder + "/" + self.res_id + "/" + self.res_id + "/data/contents/"
+        print("hiya")
         self.hs_files = self.get_files_upon_init_HS()
         self.JH_files = self.get_files_upon_init_JH()
 
@@ -92,15 +93,16 @@ class Resource:
 
         # get the file information for all files in the HS resource in json
         hs_resource_info = self.hs.resource(self.res_id).files.all().json()
+        url_prefix = 'http://www.hydroshare.org/resource/' + self.res_id + '/data/contents'
         folders_dict = {}
         folders_final = []
         nested_files = {}
         # get the needed info for each file
         for file_info in hs_resource_info["results"]:
             # extract filepath from url
-            filepath = re.search('[^\/]+$', file_info["url"]).group() # searches for part of string after last '/' and returns that part
+            filepath = file_info["url"][len(url_prefix)+1:]
             # get proper definition formatting of file if it is a file
-            file_definition_hs = self.remote_folder.get_file_metadata(filepath, file_info["size"])
+            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info["size"])
             # if it is a folder, build up contents
             if not file_definition_hs:
                 nested_files[filepath + "/"] = file_info
@@ -127,6 +129,7 @@ class Resource:
                 folder_size, folder_contents = self.remote_folder.get_contents_recursive(val, folders_dict, nested_files)
                 folders_final.append({
                     "name": key[1],
+                    "path": '/' + key[2].strip('/'),
                     "sizeBytes": folder_size,
                     "type": "folder",
                     "contents": folder_contents,

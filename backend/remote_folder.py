@@ -23,7 +23,7 @@ class RemoteFolder:
         self.res_id = res_id
         self.hs = hs
 
-    def get_file_metadata(self, filepath, size):
+    def get_file_metadata(self, filepath, long_path, size):
         """Gets file definition formatting for returning HS files, given path
         & size. Returns false if the path is a folder & not a file.
         """
@@ -32,12 +32,14 @@ class RemoteFolder:
             filename = filepath[:filepath.rfind(".")]
             return ({
                 "name": filename,
+                "path": '/' + long_path.strip('/'),
                 "sizeBytes": size,
                 "type": file_type,
             })
         elif filepath.rfind("/") == -1:
             return ({
                 "name": filepath,
+                "path": '/' + long_path.strip('/'),
                 "sizeBytes": size,
                 "type": "file",
             })
@@ -55,12 +57,13 @@ class RemoteFolder:
                 folder_size += subfolder_size
                 contents.append({
                     "name" : v[1],
+                    "path" : '/' + v[2].strip('/'),
                     "sizeBytes" : subfolder_size,
                     "type" : "folder",
                     "contents" : subfolder_contents,
                 })
             else:
-                contents.append(self.get_file_metadata(v[1], nested_files[v[2]]["size"]))
+                contents.append(self.get_file_metadata(v[1], v[2], nested_files[v[2]]["size"]))
                 folder_size += nested_files[v[2]]["size"]
 
         return folder_size, contents
@@ -86,10 +89,6 @@ class RemoteFolder:
 
     def download_file_to_JH(self, HS_filepath, JH_filepath):
         """ download HS file to JH"""
-        print("destination: ")
-        print(JH_filepath)
-        print("source: ")
-        print(HS_filepath)
         self.hs.getResourceFile(self.res_id, HS_filepath, destination=JH_filepath)
 
     def upload_file_to_HS(self, JHfilepath, HSfilepath):
@@ -103,4 +102,3 @@ class RemoteFolder:
     def create_folder(self, filepath):
         """ create folder in HS """
         self.hs.createResourceFolder(self.res_id, pathname=filepath)
-
