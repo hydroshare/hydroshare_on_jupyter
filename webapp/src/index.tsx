@@ -3,14 +3,13 @@ import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/css/App.css';
+import './styles/App.scss';
 
 import { ConnectedRouter } from 'connected-react-router';
 import {
   Route,
   Switch,
 } from 'react-router';
-import registerServiceWorker from './registerServiceWorker';
 import store, { history } from './store';
 
 import Header from './components/Header';
@@ -34,4 +33,3 @@ ReactDOM.render(
   </Provider>,
   document.getElementById('root') as HTMLElement
 );
-registerServiceWorker();

@@ -1,0 +1,45 @@
+@import 'colors';
+
+.FileManager {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+
+  .FilePane {
+    $column-width-checkbox: 6%;
+    $column-width-other: 23%;
+    $column-padding: 2%;
+    $border-style: 1px solid $blue-grey;
+
+    width: 50%;
+    float: left;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border: $border-style;
+
+    .FilePane-header {
+      display: inline-block;
+      font-size: 0.8em;
+    }
+
+    .table-row {
+      border-bottom: $border-style;
+      white-space: nowrap;
+    }
+
+    .FilePane-header > *,
+    .FilePane-files-container .table-row > * {
+      display: inline-block;
+      overflow: hidden;
+      padding: 0.5em $column-padding 0.2em;
+      &:first-child {
+        width: $column-width-checkbox;
+      }
+      &:not(:first-child) {
+        width: $column-width-other;
+        border-left: $border-style;
+      }
+    }
+  }
+}

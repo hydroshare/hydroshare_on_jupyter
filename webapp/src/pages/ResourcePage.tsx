@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from "redux-thunk";
 import { push } from 'connected-react-router';
 
-import '../styles/css/ResourcePage.css';
+import '../styles/ResourcePage.scss';
 
 import FilterBarResource from '../components/FilterBarResource';
 import FileList from '../components/FileList';
@@ -16,6 +16,7 @@ import {
   SortByOptions,
 } from '../store/types';
 import ResourceMetadataDisplay from '../components/ResourceMetadataDisplay';
+import FileManager from "../components/FileManager";
 
 const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
   // Extract the resource ID from the URL
@@ -122,6 +123,10 @@ class ResourcePage extends React.Component<PropsType, never> {
           />
           {hydroShareFiles}
         </div>
+        <FileManager
+          hydroShareFilesAndFolders={hydroShareResource.files}
+          jupyterHubFilesAndFolders={this.props.resource.files}
+        />
       </div>
     )
   }
