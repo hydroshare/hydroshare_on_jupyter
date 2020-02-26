@@ -1,29 +1,27 @@
 import * as moment from 'moment';
+import { AnyAction } from 'redux';
 
 import {
-  ProjectDetailsPageActions,
-  ProjectsActions,
+  ResourcePageActions,
+  ResourcesActions,
   UserInfoActions,
 } from './actions/action-names';
 import {
-  AllActionTypes,
   IFileOrFolder,
+  IResourcePageState,
   IMainPageState,
-  IProjectDetailsPageState,
-  IProjectsPageState,
-  IProjectsState,
+  IResourcesState,
   IUserInfo,
-  MainPageActionTypes,
-  ProjectsActionTypes,
+  ResourcesActionTypes,
   UserActionTypes,
 } from './types';
 
-const initProjectsPageState: IProjectsPageState = {
-  allSelected: false,
+const initResourceListPageState: IMainPageState = {
+  allResourcesSelected: false,
   searchTerm: '',
 };
 
-const initProjectDetailsPageState: IProjectDetailsPageState = {
+const initResourcePageState: IResourcePageState = {
   allJupyterSelected: false,
   allHydroShareSelected: false,
   selectedLocalFilesAndFolders: new Set(),
@@ -31,33 +29,22 @@ const initProjectDetailsPageState: IProjectDetailsPageState = {
   searchTerm: '',
 };
 
-const initMainPageState: IMainPageState = {
-  openProjectId: null,
-};
-
-const initProjectsState: IProjectsState = {
+const initResourcesState: IResourcesState = {
   searchTerm: '',
-  allProjects: {},
+  allResources: {},
 };
 
-export function mainPageReducer(state: IMainPageState = initMainPageState, action: MainPageActionTypes): IMainPageState {
-  switch (action.type) {
-    default:
-      return state;
-  }
-}
-
-export function projectsDetailsPageReducer(state: IProjectDetailsPageState = initProjectDetailsPageState, action: AllActionTypes): IProjectDetailsPageState {
+export function resourcePageReducer(state: IResourcePageState = initResourcePageState, action: AnyAction): IResourcePageState {
   let doMakeSelected;
   switch (action.type) {
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER:
+    case ResourcePageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER:
       doMakeSelected = !state.allJupyterSelected;
       return {
         ...state,
         allJupyterSelected: doMakeSelected,
         selectedLocalFilesAndFolders: toggleAllFilesOrFoldersSelected(action.payload.files, doMakeSelected),
       };
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_HYDROSHARE:
+    case ResourcePageActions.TOGGLE_IS_SELECTED_ALL_HYDROSHARE:
       doMakeSelected = !state.allHydroShareSelected;
       const {
         hydroShareResource,
@@ -70,21 +57,21 @@ export function projectsDetailsPageReducer(state: IProjectDetailsPageState = ini
         allHydroShareSelected: doMakeSelected,
         selectedHydroShareFilesAndFolders: toggleAllFilesOrFoldersSelected(hydroShareResource.files, doMakeSelected),
       };
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE_JUPYTER:
+    case ResourcePageActions.TOGGLE_IS_SELECTED_ONE_JUPYTER:
       return {
         ...state,
         allJupyterSelected: false,
         selectedLocalFilesAndFolders: toggleFileOrFolderSelected(action.payload, state.selectedLocalFilesAndFolders),
       };
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ONE_HYDROSHARE:
+    case ResourcePageActions.TOGGLE_IS_SELECTED_ONE_HYDROSHARE:
       return {
         ...state,
         allHydroShareSelected: false,
         selectedHydroShareFilesAndFolders: toggleFileOrFolderSelected(action.payload, state.selectedHydroShareFilesAndFolders),
       };
-    case ProjectDetailsPageActions.SEARCH_PROJECT_BY:
+    case ResourcePageActions.SEARCH_RESOURCE_BY:
         return {...state, searchTerm: action.payload};
-    case ProjectDetailsPageActions.SORT_BY_NAME:
+    case ResourcePageActions.SORT_BY_NAME:
       return {...state, sortBy: action.payload};
     default:
       return state;
@@ -96,8 +83,8 @@ function toggleAllFilesOrFoldersSelected(files: IFileOrFolder[], doMakeSelected:
     return new Set();
   }
   let selectedFilesAndFolders: Set<string> = new Set();
-  files.forEach((projectFileOrFolder: IFileOrFolder) => {
-    selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, projectFileOrFolder, doMakeSelected);
+  files.forEach((resourceFileOrFolder: IFileOrFolder) => {
+    selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, resourceFileOrFolder, doMakeSelected);
   });
   return selectedFilesAndFolders;
 }
@@ -108,15 +95,15 @@ function toggleFileOrFolderSelected(toggledItem: IFileOrFolder, selectedFilesAnd
   return recursivelySetSelectedState(selectedFilesAndFolders, toggledItem, !itemWasSelected);
 }
 
-export function projectsPageReducer(state: IProjectsPageState = initProjectsPageState, action: AllActionTypes): IProjectsPageState {
+export function mainPageReducer(state: IMainPageState = initResourceListPageState, action: AnyAction): IMainPageState {
   switch (action.type) {
-    case ProjectDetailsPageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER:
-      return {...state, allSelected: !state.allSelected};
-    case ProjectDetailsPageActions.SEARCH_BY:
+    case ResourcePageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER:
+      return {...state, allResourcesSelected: !state.allResourcesSelected};
+    case ResourcePageActions.SEARCH_BY:
       return {...state, searchTerm: action.payload};
-    case ProjectDetailsPageActions.SORT_BY_NAME:
+    case ResourcePageActions.SORT_BY_NAME:
       return {...state, sortBy: action.payload};
-    case ProjectsActions.NEW_PROJECT:
+    case ResourcesActions.NEW_RESOURCE:
         return state;
     default:
       return state;
@@ -124,33 +111,33 @@ export function projectsPageReducer(state: IProjectsPageState = initProjectsPage
 }
 
 
-export function projectsReducer(state: IProjectsState = initProjectsState, action: ProjectsActionTypes): IProjectsState {
+export function resourcesReducer(state: IResourcesState = initResourcesState, action: ResourcesActionTypes): IResourcesState {
   switch (action.type) {
-    case ProjectsActions.SET_PROJECTS:
-      const allProjects = {};
-      action.payload.forEach(project => {
-        if (project.hydroShareResource) {
-          project.hydroShareResource.date_last_updated = moment(project.hydroShareResource.date_last_updated);
+    case ResourcesActions.SET_RESOURCES:
+      const allResources = {};
+      action.payload.forEach(jupyterHubResource => {
+        if (jupyterHubResource.hydroShareResource) {
+          jupyterHubResource.hydroShareResource.date_last_updated = moment(jupyterHubResource.hydroShareResource.date_last_updated);
         }
-        allProjects[project.hydroShareResource.resource_id] = project;
+        allResources[jupyterHubResource.hydroShareResource.resource_id] = jupyterHubResource;
       });
-      return {...state, allProjects };
-    case ProjectsActions.SET_PROJECT_LOCAL_FILES:
+      return {...state, allResources };
+    case ResourcesActions.SET_RESOURCE_LOCAL_FILES:
       const {
         resourceId,
         files,
       } = action.payload;
       return {
         ...state,
-        allProjects: {
-          ...state.allProjects,
+        allResources: {
+          ...state.allResources,
           [resourceId]: {
-            ...state.allProjects[resourceId],
+            ...state.allResources[resourceId],
             files: recursivelyConvertDatesToMoment(files),
           },
         },
       };
-    case ProjectsActions.SET_PROJECT_HYDROSHARE_FILES:
+    case ResourcesActions.SET_RESOURCE_HYDROSHARE_FILES:
       const {
         resourceId: resId,
         files: f,
@@ -158,12 +145,12 @@ export function projectsReducer(state: IProjectsState = initProjectsState, actio
 
       return {
         ...state,
-        allProjects: {
-          ...state.allProjects,
+        allResources: {
+          ...state.allResources,
           [resId]: {
-            ...state.allProjects[resId],
+            ...state.allResources[resId],
             hydroShareResource: {
-              ...state.allProjects[resId].hydroShareResource,
+              ...state.allResources[resId].hydroShareResource,
               files: recursivelyConvertDatesToMoment(f),
             },
           },
@@ -181,7 +168,7 @@ function recursivelyConvertDatesToMoment(files: IFileOrFolder[]) {
   });
 }
 
-export function userReducer(state: IUserInfo, action: UserActionTypes): IUserInfo | null {
+export function userDataReducer(state: IUserInfo, action: UserActionTypes): IUserInfo | null {
   switch (action.type) {
     case UserInfoActions.SET_USER_INFO:
       return {...state, ...action.payload};

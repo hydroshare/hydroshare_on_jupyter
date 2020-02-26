@@ -8,10 +8,10 @@ import {
 } from 'redux-thunk';
 
 import {
-  setProjectLocalFiles,
-  setProjectHydroShareFiles,
-  setProjects,
-} from './actions/projects';
+  setResourceLocalFiles,
+  setResourceHydroShareFiles,
+  setResources,
+} from './actions/resources';
 import {
     setUserInfo,
 } from './actions/user';
@@ -69,7 +69,7 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
           },
       } = response;
 
-      dispatch(setProjects(resources));
+      dispatch(setResources(resources));
     };
 }
 
@@ -82,7 +82,7 @@ export function getResourceLocalFiles(resourceId: string) {
       },
     } = response;
 
-    dispatch(setProjectLocalFiles(resourceId, files));
+    dispatch(setResourceLocalFiles(resourceId, files));
   };
 }
 
@@ -95,6 +95,6 @@ export function getResourceHydroShareFiles(resourceId: string) {
       },
     } = response;
 
-    dispatch(setProjectHydroShareFiles(resourceId, files));
+    dispatch(setResourceHydroShareFiles(resourceId, files));
   };
 }

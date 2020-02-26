@@ -13,11 +13,10 @@ import {
 import thunk from 'redux-thunk';
 
 import {
-  projectsPageReducer,
   mainPageReducer,
-  projectsReducer,
-  projectsDetailsPageReducer,
-  userReducer,
+  resourcesReducer,
+  resourcePageReducer,
+  userDataReducer,
 } from './reducer';
 import {
   IRootState,
@@ -30,14 +29,13 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const store = createStore<IRootState, any, any, any>(
     combineReducers({
-        projectPage: projectsPageReducer,
         mainPage: mainPageReducer,
-        projects: projectsReducer,
-        projectDetailsPage: projectsDetailsPageReducer,
+        resources: resourcesReducer,
+        resourcePage: resourcePageReducer,
         router: connectRouter(history),
-        user: userReducer,
+        user: userDataReducer,
     }),
-    {},
+    undefined,
     composeEnhancers(
       applyMiddleware(
         routerMiddleware(history),
