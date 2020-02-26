@@ -8,10 +8,10 @@ import {
 } from 'redux-thunk';
 
 import {
-  setProjectLocalFiles,
-  setProjectHydroShareFiles,
-  setProjects,
-} from './actions/projects';
+  setResourceLocalFiles,
+  setResourceHydroShareFiles,
+  setResources,
+} from './actions/resources';
 import {
     setUserInfo,
 } from './actions/user';
@@ -69,32 +69,32 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
           },
       } = response;
 
-      dispatch(setProjects(resources));
+      dispatch(setResources(resources));
     };
 }
 
 export function getResourceLocalFiles(resourceId: string) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/local-files`);
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/local-resources`);
     const {
       data: {
         files,
       },
     } = response;
 
-    dispatch(setProjectLocalFiles(resourceId, files));
+    dispatch(setResourceLocalFiles(resourceId, files));
   };
 }
 
 export function getResourceHydroShareFiles(resourceId: string) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/hs-files`);
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/hs-resources`);
     const {
       data: {
         files,
       },
     } = response;
 
-    dispatch(setProjectHydroShareFiles(resourceId, files));
+    dispatch(setResourceHydroShareFiles(resourceId, files));
   };
 }

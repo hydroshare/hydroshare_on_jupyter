@@ -2,37 +2,23 @@ import { RouterState } from 'connected-react-router';
 import * as moment from 'moment';
 import {ActionType} from 'typesafe-actions';
 
-import * as mainPageActions from './actions/App';
-import * as projectsActions from './actions/projects';
+import * as resourcesActions from './actions/resources';
 import * as userActions from './actions/user';
-import * as projectPageActions from './actions/projectPage';
-import * as projectDetailsPageActions from './actions/ProjectDetailsPage';
+import * as resourcePageActions from './actions/ResourcePage';
 
-export type MainPageActionTypes = ActionType<typeof mainPageActions>;
-export type ProjectPageActionTypes = ActionType<typeof projectPageActions>;
-export type ProjectDetailsPageActionTypes = ActionType<typeof projectDetailsPageActions>;
-export type ProjectsActionTypes = ActionType<typeof projectsActions>;
+export type ResourcePageActionTypes = ActionType<typeof resourcePageActions>;
+export type ResourcesActionTypes = ActionType<typeof resourcesActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
-
-export type AllActionTypes = (
-  MainPageActionTypes
-  | UserActionTypes
-  | ProjectsActionTypes
-  | ProjectPageActionTypes
-  | ProjectDetailsPageActionTypes
-);
-
 
 export interface IRootState {
   mainPage: IMainPageState
-  projectPage: IProjectsPageState
-  projects: IProjectsState
-  projectDetailsPage: IProjectDetailsPageState
+  resources: IResourcesState
+  resourcePage: IResourcePageState
   router: RouterState
   user: IUserInfo | null
 }
 
-export interface IProjectDetailsPageState {
+export interface IResourcePageState {
   allJupyterSelected: boolean
   allHydroShareSelected: boolean
   selectedLocalFilesAndFolders: Set<string>
@@ -41,22 +27,22 @@ export interface IProjectDetailsPageState {
   sortBy?: SortByOptions
 }
 
-export interface IProjectsPageState {
-  allSelected: boolean
+export interface IMainPageState {
+  allResourcesSelected: boolean
   sortBy?: SortByOptions
   searchTerm: string
 }
 
 export interface IFileOrFolder {
   contents?: IFileOrFolder[] // If a folder, a list of its contents
-  dirPath: string // The path to the folder containing this file relative to the project root (must end with trailing /)
+  dirPath: string // The path to the folder containing this file relative to the resource root (must end with trailing /)
   lastModified?: moment.Moment
   name: string
   type: string
   sizeBytes: number
 }
 
-export interface IJupyterProject {
+export interface IJupyterResource {
   id: string
   localCopyExists: boolean
   files: IFileOrFolder[]
@@ -65,15 +51,12 @@ export interface IJupyterProject {
   hydroShareResource: IHydroShareResourceInfo
 }
 
-export interface IMainPageState {
-  openProjectId: string | null
-}
-
 // TODO: Rename this (and its associated reducer) to something better
-export interface IProjectsState {
-  allProjects: {
-    [projectId: string]: IJupyterProject
+export interface IResourcesState {
+  allResources: {
+    [resourceId: string]: IJupyterResource
   }
+  // TODO: Figure out where this is used and move it to that reducer
   searchTerm: string,
 }
 
@@ -91,7 +74,7 @@ export interface IUserInfoData {
 }
 
 export interface IResourcesData {
-  resources: IJupyterProject[]
+  resources: IJupyterResource[]
 }
 
 export interface IResourceFilesData {
@@ -137,7 +120,7 @@ export enum SortByOptions {
   Type = 'TYPE'
 }
 
-export interface ICreateNewResource {
+export interface ICreateResourceRequest {
   name: string,
   privacy: string
 }
