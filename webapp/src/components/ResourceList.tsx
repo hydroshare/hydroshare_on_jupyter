@@ -9,16 +9,8 @@ import {
   SortByOptions,
 } from '../store/types';
 
-import {
-  Button
-} from 'react-bootstrap';
-
 import NewResourceModal from './NewResourceModal';
 import { ICreateResourceRequest } from '../store/types';
-
-import { FaFileMedical} from "react-icons/fa";
-
-import MaterialTable, {MTableToolbar} from 'material-table';
 
 interface IResourceListProps {
   viewResource: any
@@ -109,57 +101,17 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     return tableList;
   }
 
-  public viewResource(resource: ITableResourceInfo | undefined) {
-    if (resource) {
-      this.props.viewResource(this.props.resources[resource.Id]);
-    }
-  }
-
   public render() {
     const { resources } = this.props;
-    // const viewProject = () => this.props.viewProject(project);
     return (
       <div>
-      <MaterialTable
-        title={"My Resources"}
-        columns={[
-          { title: 'Name', field: 'Name'},
-          // { title: 'Status', field: 'Status'},
-          { title: 'Resource Location', field: 'Location'}
-        ]}
-        data={this.convertToTableStructure(resources)}
-        actions={[
-          {
-            icon: 'delete',
-            tooltip: 'Delete resource',
-            position: 'row',
-            onClick: (event, rowData) => alert("You deleted " + rowData)
-          }
-        ]}
-        options={{
-          selection: true,
-          sorting: true,
-          search: true,
-          actionsColumnIndex: -1,
-          maxBodyHeight: 500,
-          headerStyle: {backgroundColor: '#ededed', fontSize: 16},
-          paging: false,
-        }}
-        components={{
-          Toolbar: props => (
-            <div className="resource-toolbar">
-              <MTableToolbar className="MTtoolbar" {...props} />
-              <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaFileMedical/> New Resource</Button>
-            </div>
-          )}}
-        onRowClick={((evt, selectedRow) => this.viewResource( selectedRow ))}
-      />
-      <NewResourceModal
-              show={this.state.showModal}
-              onHide={this.handleCloseModal}
-              newResource={this.props.newResource}
-            />
-            </div>
+        {Object.values(resources).map(res => (<p key={res.id} onClick={() => this.props.viewResource(res)}>{res.title}</p>))}
+        <NewResourceModal
+          show={this.state.showModal}
+          onHide={this.handleCloseModal}
+          newResource={this.props.newResource}
+        />
+        </div>
     );
   }
 }
