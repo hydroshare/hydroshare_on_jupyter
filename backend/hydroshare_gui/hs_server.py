@@ -115,27 +115,9 @@ class ResourcesHandler(tornado.web.RequestHandler):
         self.write(resource_id)
         pass
 
-
-''' Class that handles GETing list of a files that are in a user's
-hydroshare instance of a resource
+''' Class that handles DELETEing file in JH
 '''
-class ResourcesHandlerHS(tornado.web.RequestHandler):
-
-    def set_default_headers(self):
-        configure_cors(self)
-
-    def get(self, res_id):
-        # TODO: Get folder info
-        resource = Resource(res_id, resource_handler)
-        hs_files = resource.get_files_HS()
-        self.write({'files': hs_files})
-
-
-
-''' Class that handles GETing list of a files that are in a user's
-jupyterhub instance of a resource
-'''
-class ResourcesHandlerJH(tornado.web.RequestHandler):
+class FileHandlerJH(tornado.web.RequestHandler):
 
     def set_default_headers(self):
         configure_cors(self)
@@ -144,17 +126,6 @@ class ResourcesHandlerJH(tornado.web.RequestHandler):
         resource = Resource(res_id, resource_handler)
         jh_files = resource.get_files_JH()
         self.write({'files': jh_files})
-
-
-''' Class that handles DELETEing file in JH
-'''
-class FileHandlerJH(tornado.web.RequestHandler):
-
-    def set_default_headers(self):
-        configure_cors(self)
-
-    def OPTIONS(self):
-        pass
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
@@ -180,8 +151,11 @@ class FileHandlerHS(tornado.web.RequestHandler):
     def set_default_headers(self):
         configure_cors(self)
 
-    def OPTIONS(self):
-        pass
+    def get(self, res_id):
+        # TODO: Get folder info
+        resource = Resource(res_id, resource_handler)
+        hs_files = resource.get_files_HS()
+        self.write({'files': hs_files})
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
@@ -236,9 +210,7 @@ def make_app():
         (r"/bundle.js", BundleHandler),
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesHandler),
-        (r"/resources/([^/]+)/hs-resources", ResourcesHandlerHS),
         (r"/resources/([^/]+)/hs-files", FileHandlerHS),
-        (r"/resources/([^/]+)/local-resources", ResourcesHandlerJH),
         (r"/resources/([^/]+)/local-files", FileHandlerJH)
     ])
 
