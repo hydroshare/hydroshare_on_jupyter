@@ -139,11 +139,18 @@ Frontend payload:
 {"filepath": "filepath_to_file_to_delete"}
 ```
 
-PUTs overwrites JH file with HS one  
+PUTs overwrites JH file with HS one, renames a file, or creates a new one
 Frontend payload for syncing HS file to JH:
 ```
 {"request_type": "overwrite_JH",
 "filepath": "file_path_to_file_to_sync"}
+```
+Frontend payload for renaming:
+```
+{"request_type": "rename_file",
+"filepath": "filepath_to_folder_with_file_to_rename",
+"old_filename": "old_file_name",
+"new_filename": "new_file_name"}
 ```
 Frontend payload for creating a new file in JH:
 ```
