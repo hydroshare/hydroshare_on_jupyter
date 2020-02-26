@@ -29,6 +29,7 @@ backend/hydroshare_gui/local_hs_resources
 documentation/Jupyter_Install.md
 backend/test_delete.md
 backend/charlie_status.md
+backend/charlie_tests.py
 
 webapp/build/*
 bundle.js

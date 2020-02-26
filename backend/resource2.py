@@ -18,9 +18,6 @@ import re
 import pathlib
 from pathlib import *
 
-from resource_handler import ResourceHandler # remove after testing
-from pprint import pprint
-
 ''' Class that defines a Hydroshare resource & it's associated files that
 are local to Jupyterhub.
 '''
@@ -302,7 +299,9 @@ class Resource:
         self.remote_folder.upload_file_to_HS(self.path_prefix+filepath, filepath)
         self.hs_files = self.get_files_upon_init_HS()
 
-    def get_resource_last_modified_time_HS(self, res_id):
+    def get_resource_last_modified_time_HS(self):
+        # TODO: (Charlie): This may not be necessary -- it's more specific than the dates provided in
+        # the get resources func in resource_handler, but we might not care
         """
         Gets dates from the resource science metadata and returns the
         most recent modified time in datetime.datetime format
@@ -319,7 +318,7 @@ class Resource:
             'start_date': '2019-05-15T19:32:36.139858Z',
             'type': 'modified'}],
         """
-        metadata = self.hs.getScienceMetadata(res_id)
+        metadata = self.hs.getScienceMetadata(self.res_id)
         # Obtain dates
         dates = []
         for date in metadata['dates']:
@@ -329,19 +328,4 @@ class Resource:
         # Compare dates to get most recent one (normally it's the first, but
         # it messes up if it's 'day of' for some reason)
         most_recent = max(dates)
-        print(type(most_recent))
         return most_recent # datetime.datetime
-
-    def upload_file_to_JH(self, file_info):
-        if self.is_file_or_folder_in_JH(self.path_prefix+file_info["filename"]) == False:
-            self.local_folder.upload_file_to_JH(file_info, self.path_prefix)
-            return True
-        else:
-            return "Error uploading " + file_info["filename"] +" to JupyterHub: a file with that name already exists"
-
-if __name__ == '__main__':
-    # res_id = '1efcd98af1544905adcb80c79e779c3d' # same day
-    res_id = '302fde4890e74702ac731d2a82680e8f' # different day
-    handler = ResourceHandler()
-    res = Resource(res_id, handler)
-    res.get_files_upon_init_HS()
