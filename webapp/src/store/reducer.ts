@@ -93,7 +93,7 @@ function toggleAllFilesOrFoldersSelected(rootDir: IFolder, doMakeSelected: boole
 
 function toggleFileOrFolderSelected(toggledItem: IFile | IFolder, selectedFilesAndFolders: Set<string>): Set<string> {
   selectedFilesAndFolders = new Set(selectedFilesAndFolders);
-  const itemWasSelected = selectedFilesAndFolders.has(toggledItem.dirPath + toggledItem.name);
+  const itemWasSelected = selectedFilesAndFolders.has(toggledItem.path + toggledItem.name);
   return recursivelySetSelectedState(selectedFilesAndFolders, toggledItem, !itemWasSelected);
 }
 
@@ -127,42 +127,26 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
     case ResourcesActions.SET_RESOURCE_LOCAL_FILES:
       const {
         resourceId,
-        files,
+        rootDir,
       } = action.payload;
-      let sizeBytes = 0;
-      files?.forEach(f => { sizeBytes += f.sizeBytes });
-      const jupyterHubRootDir: IFolder = {
-        contents: recursivelyConvertDatesToMoment(files),
-        dirPath: '/',
-        name: '',
-        sizeBytes,
-        type: FileOrFolderTypes.FOLDER,
-      };
+      rootDir.contents = recursivelyConvertDatesToMoment(rootDir.contents);
       return {
         ...state,
         allResources: {
           ...state.allResources,
           [resourceId]: {
             ...state.allResources[resourceId],
-            jupyterHubFiles: jupyterHubRootDir,
+            jupyterHubFiles: rootDir,
           },
         },
       };
     case ResourcesActions.SET_RESOURCE_HYDROSHARE_FILES:
       const {
         resourceId: resId,
-        files: f,
+        rootDir: rDir,
       } = action.payload;
 
-      let hsRootSizeBytes = 0;
-      f?.forEach(f => { hsRootSizeBytes += f.sizeBytes });
-      const hydroShareRootDir: IFolder = {
-        contents: recursivelyConvertDatesToMoment(f),
-        dirPath: '/',
-        name: '',
-        sizeBytes: hsRootSizeBytes,
-        type: FileOrFolderTypes.FOLDER,
-      };
+      rDir.contents = recursivelyConvertDatesToMoment(rDir.contents);
       return {
         ...state,
         allResources: {
@@ -171,7 +155,7 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
             ...state.allResources[resId],
             hydroShareResource: {
               ...state.allResources[resId].hydroShareResource,
-              files: hydroShareRootDir,
+              files: rDir,
             },
           },
         },
@@ -201,7 +185,7 @@ export function userDataReducer(state: IUserInfo, action: UserActionTypes): IUse
 }
 
 function recursivelySetSelectedState(selections: Set<string>, item: IFile | IFolder, makeSelected: boolean): Set<string> {
-  const itemPath = item.dirPath + item.name;
+  const itemPath = item.path + item.name;
   if (makeSelected) {
     selections.add(itemPath);
   } else {

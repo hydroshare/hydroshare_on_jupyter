@@ -34,7 +34,7 @@ export interface IMainPageState {
 }
 
 export interface IFile {
-  dirPath: string // The path to the folder containing this file relative to the project root (must end with trailing /)
+  path: string // If a folder, no trailing forward slash
   lastModified?: moment.Moment
   name: string
   type: FileOrFolderTypes
@@ -81,7 +81,7 @@ export interface IResourcesData {
 }
 
 export interface IResourceFilesData {
-  files: IFolder[]
+  rootDir: IFolder
 }
 
 export interface IUserInfo {

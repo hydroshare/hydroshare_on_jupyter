@@ -36,7 +36,6 @@ interface IFileManagerProps {
 
 let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
 
-// TODO: Define the shape of result
 const onDragEnd = (result: DropResult) => {
   const {
     draggableId: srcURI,
@@ -47,22 +46,39 @@ const onDragEnd = (result: DropResult) => {
     return;
   }
   const destURI = dest.droppableId;
-  const srcFileOrFolder = fileOrFolderLookupTable.get(srcURI);
-  const destFolder = fileOrFolderLookupTable.get(destURI);
+  const srcFileOrFolder = fileOrFolderLookupTable.get(srcURI) as IFile | IFolder;
+  const destFolder = fileOrFolderLookupTable.get(destURI) as IFolder;
+  const srcPrefix = srcURI.split(':')[0];
+  const destPrefix = destURI.split(':')[0];
   console.log(`Received request to move ${srcURI} to ${destURI}.`);
+  const srcParentFolderPathComponents = srcFileOrFolder.path.split('/');
+  srcParentFolderPathComponents.pop();
+  let srcParentFolderPath = '/';
+  if (srcParentFolderPathComponents.length > 1) { // Length is 1 if parent folder is root dir
+    srcParentFolderPath += srcParentFolderPathComponents.join('/');
+  }
+  if (srcPrefix === destPrefix && srcParentFolderPath === destFolder.path) {
+    console.log("File dropped in same location. Ignoring move request.");
+    return;
+  }
   console.log(srcFileOrFolder);
   console.log(destFolder);
 };
 
 const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
+  const {
+    hydroShareResourceRootDir,
+    jupyterHubResourceRootDir,
+  } = props;
+
   // Clear the lookup table
   fileOrFolderLookupTable.clear();
 
   const hydroShareFilePane = props.hydroShareResourceRootDir ? (
-    <FilePane droppableId={generateItemPath(props.hydroShareResourceRootDir, 'hs')} idPrefix={PATH_PREFIXES.HYDROSHARE} contents={props.hydroShareResourceRootDir.contents}/>
+    <FilePane droppableId={generateItemPath(hydroShareResourceRootDir, 'hs')} idPrefix={PATH_PREFIXES.HYDROSHARE} rootDir={hydroShareResourceRootDir}/>
   ) : null;
   const jupyterHubFilePane = props.jupyterHubResourceRootDir ? (
-    <FilePane droppableId={generateItemPath(props.jupyterHubResourceRootDir, 'jh')} idPrefix={PATH_PREFIXES.JUPYTERHUB} contents={props.jupyterHubResourceRootDir.contents}/>
+    <FilePane droppableId={generateItemPath(jupyterHubResourceRootDir, 'jh')} idPrefix={PATH_PREFIXES.JUPYTERHUB} rootDir={jupyterHubResourceRootDir}/>
   ) : null;
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -75,7 +91,7 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
 };
 
 interface IFilePaneProps {
-  contents?: (IFile | IFolder)[]
+  rootDir: IFolder
   droppableId: string
   idPrefix: string
 }
@@ -113,12 +129,12 @@ const generateCheckBox = () => {
 
 const generateItemPath = (item: IFile | IFolder, idPrefix: string) => {
   let path = `${idPrefix}:`;
-  if (item.dirPath) {
-    path += item.dirPath;
-  }
-  if (!path.endsWith('/')) {
+  if (item.path) {
+    path += item.path;
+  } else {
     path += '/';
   }
+  return path;
   path += item.name;
   if (item.type === FileOrFolderTypes.FILE) {
       path += `.${item.type}`;
@@ -202,6 +218,7 @@ const generateFileOrFolderElement = (item: IFile | IFolder, index: number, idPre
 };
 
 const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
+  fileOrFolderLookupTable.set(generateItemPath(props.rootDir, props.idPrefix), props.rootDir);
 
   const onAllFilesCheckboxToggled = () => console.log("Checked!");
 
@@ -224,7 +241,7 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {props.contents?.map((item, idx) => generateFileOrFolderElement(item, idx, props.idPrefix))}
+            {props.rootDir?.contents.map((item, idx) => generateFileOrFolderElement(item, idx, props.idPrefix))}
             {provided.placeholder}
           </div>
         )}

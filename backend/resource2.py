@@ -35,10 +35,8 @@ class Resource:
         self.remote_folder = RemoteFolder(self.hs, self.res_id)
         self.local_folder = LocalFolder()
 
-        self.path_prefix = self.output_folder + "/" + self.res_id + "/" + self.res_id + "/data/contents/"
+        self.path_prefix = Path(self.output_folder) / self.res_id / self.res_id / 'data' / 'contents'
         self.hs_files = self.get_files_upon_init_HS()
-        print("HS_files")
-        print(self.hs_files)
         self.JH_files = self.get_files_upon_init_JH()
 
 
@@ -72,15 +70,15 @@ class Resource:
 
         self.save_resource_locally()
         parent_folder_path = Path(self.path_prefix)
-        files = self.local_folder.get_contents_recursive(self.path_prefix)
-        files_final = [({
+        files = self.local_folder.get_contents_recursive(self.path_prefix, parent_folder_path)
+        root_dir = {
             "name": "",
-            "dirPath": "/",
+            "path": "/",
             "sizeBytes": parent_folder_path.stat().st_size,
             "type": "folder",
             "contents": files,
-        })]
-        return files_final
+        }
+        return root_dir
 
     def update_hs_files(self):
         self.hs_files = self.get_files_upon_init_HS()
@@ -99,7 +97,6 @@ class Resource:
         folders_dict = {}
         folders_final = []
         nested_files = {}
-        print(hs_resource_info)
         # get the needed info for each file
         for file_info in hs_resource_info["results"]:
             # extract filepath from url
@@ -142,15 +139,15 @@ class Resource:
         for f in folders_final:
             rootsize += (f["sizeBytes"])
 
-        folders_with_root = [({
+        root_dir = {
             "name": "",
-            "dirPath": "/",
+            "path": "/",
             "sizeBytes": rootsize,
             "type": "folder",
             "contents": folders_final,
-        })]
+        }
 
-        return folders_with_root
+        return root_dir
 
     def rename_or_move_file_HS(self, old_filepath, new_filepath):
         '''Renames the hydroshare version of the file from old_filename to

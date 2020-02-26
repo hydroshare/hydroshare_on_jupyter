@@ -78,7 +78,7 @@ export function getResourceLocalFiles(resourceId: string) {
     const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/local-files`);
     const {
       data: {
-        files: rootDir,
+        rootDir,
       },
     } = response;
 
@@ -91,7 +91,7 @@ export function getResourceHydroShareFiles(resourceId: string) {
     const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/hs-files`);
     const {
       data: {
-        files: rootDir,
+        rootDir,
       },
     } = response;
 

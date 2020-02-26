@@ -10,16 +10,16 @@ export function setResources(resources: IJupyterResource[]) {
   return action(ResourcesActions.SET_RESOURCES, resources);
 }
 
-export function setResourceLocalFiles(resourceId: string, rootDir: IFolder[]) {
+export function setResourceLocalFiles(resourceId: string, rootDir: IFolder) {
   return action(ResourcesActions.SET_RESOURCE_LOCAL_FILES, {
     resourceId,
-    files: rootDir,
+    rootDir,
   });
 }
 
-export function setResourceHydroShareFiles(resourceId: string, rootDir: IFolder[]) {
+export function setResourceHydroShareFiles(resourceId: string, rootDir: IFolder) {
   return action(ResourcesActions.SET_RESOURCE_HYDROSHARE_FILES, {
     resourceId,
-    files: rootDir,
+    rootDir,
   });
 }

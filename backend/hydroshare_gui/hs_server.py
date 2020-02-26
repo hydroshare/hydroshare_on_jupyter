@@ -105,7 +105,7 @@ class FileHandlerJH(tornado.web.RequestHandler):
     def get(self, res_id):
         resource = Resource(res_id, resource_handler)
         jh_files = resource.get_files_JH()
-        self.write({'files': jh_files})
+        self.write({'rootDir': jh_files})
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
@@ -153,8 +153,8 @@ class FileHandlerHS(tornado.web.RequestHandler):
     def get(self, res_id):
         # TODO: Get folder info
         resource = Resource(res_id, resource_handler)
-        hs_files = resource.get_files_HS()
-        self.write({'files': hs_files})
+        root_dir = resource.get_files_HS()
+        self.write({'rootDir': root_dir})
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
@@ -163,7 +163,7 @@ class FileHandlerHS(tornado.web.RequestHandler):
             resource = Resource(res_id, resource_handler)
             resource.delete_file_or_folder_from_HS(filepath)
             resource.update_hs_files()
-            self.write({"files": resource.hs_files})
+            self.write({"rootDir": resource.hs_files})
         else:
             self.write("Please specify filepath to delete")
 
@@ -180,7 +180,7 @@ class FileHandlerHS(tornado.web.RequestHandler):
             return
 
         resource.update_hs_files()
-        self.write({"HS_files": resource.hs_files})
+        self.write({"rootDir": resource.hs_files})
 
 
 ''' Class that handles GETing user information on the currently logged
