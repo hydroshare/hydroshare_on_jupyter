@@ -4,23 +4,23 @@ import {
   Form,
 } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
-import { ICreateNewResource } from '../store/types';
+import { ICreateResourceRequest } from '../store/types';
 
-import '../styles/css/NewProjectModal.css';
+import '../styles/css/NewResourceModal.css';
 
-interface INewProjectModalProps {
+interface INewResourceModalProps {
     show: boolean
     onHide: () => any
-    newProject: (newResource: ICreateNewResource) => any
+    newResource: (newResource: ICreateResourceRequest) => any
 }
 
-interface INewProjectModalState {
+interface INewResourceModalState {
     formValidated: boolean
 }
 
-export default class NewProjectModal extends React.Component<INewProjectModalProps, INewProjectModalState> {
+export default class NewResourceModal extends React.Component<INewResourceModalProps, INewResourceModalState> {
 
-    constructor(props: INewProjectModalProps) {
+    constructor(props: INewResourceModalProps) {
       super(props);
       this.state = {
         formValidated: false,
@@ -41,7 +41,7 @@ export default class NewProjectModal extends React.Component<INewProjectModalPro
         this.setState({
             formValidated: true
         })
-        this.props.newProject({
+        this.props.newResource({
             name: form.elements.formBasicName.value,
             privacy: form.elements.formBasicPrivacy.value
         })
@@ -65,19 +65,19 @@ export default class NewProjectModal extends React.Component<INewProjectModalPro
                 >
                 <Modal.Header closeButton={true}>
                     <Modal.Title id="contained-modal-title-vcenter">
-                    Create new project
+                    Create new resource
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form noValidate={false} validated={this.state.formValidated} onSubmit={this.createNewResource}>
                         <Form.Group controlId="formBasicName">
-                            <Form.Label>Name of project</Form.Label>
+                            <Form.Label>Name of resource</Form.Label>
                             <Form.Text className="text-muted">
-                                Note: You will not be able to rename your project once created.
+                                Note: You will not be able to rename your resource once created.
                             </Form.Text>
-                            <Form.Control required={true} type="name" placeholder="Project name" />
+                            <Form.Control required={true} type="name" placeholder="Resource name" />
                             <Form.Control.Feedback type="invalid">
-                                Please choose a project name.
+                                Please choose a resource name.
                             </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group controlId="formBasicPrivacy">
@@ -88,7 +88,7 @@ export default class NewProjectModal extends React.Component<INewProjectModalPro
                             </Form.Control>
                         </Form.Group>
                         <Button variant="primary" type="submit">
-                            Create new project
+                            Create new resource
                         </Button>
                     </Form>
                 </Modal.Body>

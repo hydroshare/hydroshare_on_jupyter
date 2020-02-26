@@ -10,15 +10,15 @@ import { FaFileMedical, FaRegFolder, FaRegFolderOpen, FaTrashAlt } from "react-i
 import { Col } from 'reactstrap';
 
 import '../styles/css/FilterBar.css';
-import NewProjectModal from './NewProjectModal';
-import { ICreateNewResource } from '../store/types';
+import NewResourceModal from './NewResourceModal';
+import { ICreateResourceRequest } from '../store/types';
 
 interface IPropTypes {
   // allSelected: boolean
   // toggleAllSelected: () => any
   searchChange: (event: any) => void
   sortBy: (sortBy: string) => any
-  newProject: (newResource: ICreateNewResource) => any
+  newResource: (newResource: ICreateResourceRequest) => any
 }
 
 interface IStateTypes {
@@ -64,13 +64,13 @@ export default class FilterBar extends React.Component<IPropTypes, IStateTypes> 
             </Form>
             <Button className="folder-open" variant="light"><FaRegFolderOpen/></Button>
             <Button className="folder" variant="light"><FaRegFolder/></Button>
-            <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaFileMedical/> New Project</Button>
+            <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaFileMedical/> New Resource</Button>
             <Button className="delete-button" variant="danger" onClick={this.deleteClick}><FaTrashAlt /></Button>
 
-            <NewProjectModal
+            <NewResourceModal
               show={this.state.showModal}
               onHide={this.handleCloseModal}
-              newProject={this.props.newProject}
+              newResource={this.props.newResource}
             />
         </div>
     );

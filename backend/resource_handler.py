@@ -14,8 +14,6 @@ from login import username, password
 import logging
 import glob
 import os
-from pprint import pprint # Charlie: delete
-from datetime import datetime
 
 ''' Class that defines a handler for working with all of a user's resources.
 This is where they will be able to delete a resource, create a new one, or
@@ -106,7 +104,6 @@ class ResourceHandler:
                                                 abstract = metadata['abstract'],
                                                 metadata = metadata['metadata'],
                                                 extra_metadata=metadata['extra_metadata'])
-            # print("Resource id: {}".format(resource_id))
         else:
             print("Not enough metadata")
             # Charlie TODO: throw exception

@@ -5,7 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/css/ResourceList.css';
 
 import {
-  IJupyterProject,
+  IJupyterResource,
   SortByOptions,
 } from '../store/types';
 
@@ -13,21 +13,21 @@ import {
   Button
 } from 'react-bootstrap';
 
-import NewProjectModal from './NewProjectModal';
-import { ICreateNewResource } from '../store/types';
+import NewResourceModal from './NewResourceModal';
+import { ICreateResourceRequest } from '../store/types';
 
 import { FaFileMedical} from "react-icons/fa";
 
 import MaterialTable, {MTableToolbar} from 'material-table';
 
 interface IResourceListProps {
-  viewProject: any
+  viewResource: any
   searchTerm: string
-  projects: {
-      [projectId: string]: IJupyterProject
+  resources: {
+      [resourceId: string]: IJupyterResource
   }
   sortByTerm: SortByOptions | undefined
-  newProject: (newResource: ICreateNewResource) => any
+  newResource: (newResource: ICreateResourceRequest) => any
 }
 
 interface ITableResourceInfo {
@@ -79,16 +79,16 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       this.setState({ showModal: false });
     }
 
-  public convertToTableStructure(projects: {[projectId: string]: IJupyterProject}): ITableResourceInfo[] {
+  public convertToTableStructure(resources: {[resourceId: string]: IJupyterResource}): ITableResourceInfo[] {
     const tableList: ITableResourceInfo[] = [];
-    Object.values(projects).map((project: IJupyterProject, i: number) => {
+    Object.values(resources).map((resource: IJupyterResource, i: number) => {
         const locations = ['HydroShare'];
         const {
           id,
           // hydroShareResource,
           localCopyExists,
           title,
-        } = project;
+        } = resource;
         if (localCopyExists) {
             locations.push('JupyterHub');
         }
@@ -109,14 +109,14 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     return tableList;
   }
 
-  public viewProject(project: ITableResourceInfo | undefined) {
-    if (project) {
-      this.props.viewProject(this.props.projects[project.Id]);
+  public viewResource(resource: ITableResourceInfo | undefined) {
+    if (resource) {
+      this.props.viewResource(this.props.resources[resource.Id]);
     }
   }
 
   public render() {
-    const { projects } = this.props;
+    const { resources } = this.props;
     // const viewProject = () => this.props.viewProject(project);
     return (
       <div>
@@ -127,7 +127,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           // { title: 'Status', field: 'Status'},
           { title: 'Resource Location', field: 'Location'}
         ]}
-        data={this.convertToTableStructure(projects)}
+        data={this.convertToTableStructure(resources)}
         actions={[
           {
             icon: 'delete',
@@ -152,12 +152,12 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
               <Button className="new-resource-button" variant="light" onClick={this.handleOpenModal}><FaFileMedical/> New Resource</Button>
             </div>
           )}}
-        onRowClick={((evt, selectedRow) => this.viewProject( selectedRow ))}
+        onRowClick={((evt, selectedRow) => this.viewResource( selectedRow ))}
       />
-      <NewProjectModal
+      <NewResourceModal
               show={this.state.showModal}
               onHide={this.handleCloseModal}
-              newProject={this.props.newProject}
+              newResource={this.props.newResource}
             />
             </div>
     );
