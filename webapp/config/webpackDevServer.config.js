@@ -10,6 +10,7 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     contentBase: path.join(APP_DIR, 'public'),
+    port: 3000,
   },
   entry: path.join(APP_DIR, 'src', 'index.tsx'),
   output: {

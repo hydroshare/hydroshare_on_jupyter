@@ -78,3 +78,11 @@ class LocalFolder:
         except FileExistsError:
             print("Directory " , folderpath ,  " already exists")
 
+    def upload_file_to_JH(self, file_info, file_destination):
+        
+        filename, content_type = file_info["filename"], file_info["content_type"]
+        body = file_info["body"]
+        f = open(file_destination+filename, "wb")
+        f.write(body)
+        f.close()
+
