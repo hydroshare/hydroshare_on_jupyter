@@ -144,6 +144,15 @@ class Resource:
         self.remote_folder.rename_file(filepath, old_filename, new_filename)
         return folders_final
 
+    def rename_file_JH(self, filepath, old_filename, new_filename):
+        '''Renames the jupyterhub version of the file from old_filename to
+        new_filename.
+        '''
+        if path.exists(self.path_prefix + filepath + '/' + old_filename):
+            os.rename(self.path_prefix + filepath + '/' + old_filename, self.path_prefix + filepath + '/' + new_filename)
+        else:
+            logging.info('Trying to rename file that does not exist: ' + filepath + '/' + old_filename)
+
     def delete_file_or_folder_from_JH(self, filepath):
         ''' deletes file or folder from JH '''
         local_folder = LocalFolder()

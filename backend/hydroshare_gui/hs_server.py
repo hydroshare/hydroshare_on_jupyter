@@ -57,7 +57,7 @@ class ResourcesHandler(tornado.web.RequestHandler):
 
     def post(self):
         """Expects: body["resource title"] (string), body["creators"] (list of strings), body["privacy"] (string)
-        
+
         Makes a dict of metadata in format (this contains the required information.):
         {'abstract': '',
         'title': '',
@@ -76,7 +76,7 @@ class ResourcesHandler(tornado.web.RequestHandler):
         'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}, {"creator":{"name":"Charlie2"}}]',
         'extra_metadata': '{"key-1": "value-1", "key-2": "value-2"}'}
 
-        ** NOTE: The required information in the first example above is only 
+        ** NOTE: The required information in the first example above is only
         the bare minimum required to make a resource. It is NOT enough to make it public
         or to publish it.
         """
@@ -156,6 +156,8 @@ class FileHandlerJH(tornado.web.RequestHandler):
         resource = Resource(res_id, resource_handler)
         if body["request_type"] == "new_file":
             resource.create_file_JH(body["new_filename"])
+        elif body["request_type"] == "rename_file":
+            resource.rename_file_JH(body["filepath"], body["old_filename"], body["new_filename"])
         elif body["request_type"] == "overwrite_HS":
             resource.overwrite_HS_with_file_from_JH(body["filepath"])
 
