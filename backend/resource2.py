@@ -15,6 +15,7 @@ import os
 from os import path
 import dateutil.parser # for parsing resource times
 import re
+import pathlib
 from pathlib import *
 
 from resource_handler import ResourceHandler # remove after testing
@@ -189,7 +190,7 @@ class Resource:
 
     def is_file_or_folder_in_JH(self, filepath):
         ''' is a file in JH '''
-        return path.exists(self.path_prefix+filepath)
+        return path.isfile(filepath)
 
     def delete_file_or_folder_from_HS(self,filepath):
         ''' deletes file or folder from HS '''
@@ -327,6 +328,13 @@ class Resource:
         most_recent = max(dates)
         print(type(most_recent))
         return most_recent # datetime.datetime
+
+    def upload_file_to_JH(self, file_info):
+        if self.is_file_or_folder_in_JH(self.path_prefix+file_info["filename"]) == False:
+            self.local_folder.upload_file_to_JH(file_info, self.path_prefix)
+            return True
+        else:
+            return "Error uploading " + file_info["filename"] +" to JupyterHub: a file with that name already exists"
 
 if __name__ == '__main__':
     # res_id = '1efcd98af1544905adcb80c79e779c3d' # same day

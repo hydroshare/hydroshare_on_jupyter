@@ -142,6 +142,18 @@ class FileHandlerJH(tornado.web.RequestHandler):
         elif body["request_type"] == "overwrite_HS":
             resource.overwrite_HS_with_file_from_JH(body["filepath"])
 
+    def post(self, res_id):
+        resource = Resource(res_id, resource_handler)
+        response_message = "OK"
+        for field_name, files in self.request.files.items():
+            for info in files:
+                response = resource.upload_file_to_JH(info)
+                if response != True:
+                    response_message = response
+        jh_files = resource.get_files_JH()
+        self.write({'response': response_message,
+                    'files': jh_files})
+
 
 ''' Class that handles GETing list of a files that are in a user's
 hydroshare instance of a resource
