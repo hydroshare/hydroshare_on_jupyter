@@ -42,6 +42,9 @@ class ResourceHandler:
         '''
         return self.hs.getUserInfo()
 
+    def delete_resource_JH(self, res_id):
+        pass
+
     def get_local_JH_resources(self):
         '''Gets dictionary of jupyterhub resources by resource id that are
         saved locally.

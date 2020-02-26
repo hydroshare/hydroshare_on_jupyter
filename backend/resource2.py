@@ -15,6 +15,8 @@ import os
 from os import path
 import dateutil.parser # for parsing resource times
 import re
+import pathlib
+from pathlib import *
 
 ''' Class that defines a Hydroshare resource & it's associated files that
 are local to Jupyterhub.
@@ -30,9 +32,12 @@ class Resource:
         self.hs = self.resource_handler.hs
 
         self.remote_folder = RemoteFolder(self.hs, self.res_id)
+        self.local_folder = LocalFolder()
 
         self.path_prefix = self.output_folder + "/" + self.res_id + "/" + self.res_id + "/data/contents/"
+        print("hiya")
         self.hs_files = self.get_files_upon_init_HS()
+        self.JH_files = self.get_files_upon_init_JH()
 
 
     def create_file_JH(self, filename):
@@ -55,20 +60,26 @@ class Resource:
             logging.info("Resource already exists!")
 
     def get_files_JH(self):
+        return self.JH_files
+
+    def get_files_upon_init_JH(self):
         '''Gets metadata for all the files currently stored in the JH instance
         of this resource.
         '''
 
         self.save_resource_locally()
-        local_folder = LocalFolder()
-        files = local_folder.get_contents_recursive(self.path_prefix)
+        parent_folder_path = Path(self.path_prefix)
+        files = self.local_folder.get_contents_recursive(self.path_prefix)
         files_final = [({
             "name": "/",
-            "sizeBytes": local_folder.get_size(self.path_prefix),
+            "sizeBytes": parent_folder_path.stat().st_size,
             "type": "folder",
             "contents": files,
         })]
         return files_final
+
+    def update_hs_files(self):
+        self.hs_files = self.get_files_upon_init_HS()
 
     def get_files_HS(self):
         return self.hs_files
@@ -80,15 +91,16 @@ class Resource:
 
         # get the file information for all files in the HS resource in json
         hs_resource_info = self.hs.resource(self.res_id).files.all().json()
+        url_prefix = 'http://www.hydroshare.org/resource/' + self.res_id + '/data/contents'
         folders_dict = {}
         folders_final = []
         nested_files = {}
         # get the needed info for each file
         for file_info in hs_resource_info["results"]:
             # extract filepath from url
-            filepath = re.search('[^\/]+$', file_info["url"]).group() # searches for part of string after last '/' and returns that part
+            filepath = file_info["url"][len(url_prefix)+1:]
             # get proper definition formatting of file if it is a file
-            file_definition_hs = self.remote_folder.get_file_metadata(filepath, file_info["size"])
+            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info["size"])
             # if it is a folder, build up contents
             if not file_definition_hs:
                 nested_files[filepath + "/"] = file_info
@@ -115,6 +127,7 @@ class Resource:
                 folder_size, folder_contents = self.remote_folder.get_contents_recursive(val, folders_dict, nested_files)
                 folders_final.append({
                     "name": key[1],
+                    "path": '/' + key[2].strip('/'),
                     "sizeBytes": folder_size,
                     "type": "folder",
                     "contents": folder_contents,
@@ -140,20 +153,27 @@ class Resource:
         self.remote_folder.rename_file(filepath, old_filename, new_filename)
         return folders_final
 
+    def rename_file_JH(self, filepath, old_filename, new_filename):
+        '''Renames the jupyterhub version of the file from old_filename to
+        new_filename.
+        '''
+        if path.exists(self.path_prefix + filepath + '/' + old_filename):
+            os.rename(self.path_prefix + filepath + '/' + old_filename, self.path_prefix + filepath + '/' + new_filename)
+        else:
+            logging.info('Trying to rename file that does not exist: ' + filepath + '/' + old_filename)
+
     def delete_file_or_folder_from_JH(self, filepath):
         ''' deletes file or folder from JH '''
-        local_folder = LocalFolder()
-        print(filepath)
         # if filepath does not contain file (ie: we want to delete folder)
         if "." not in filepath:
-            local_folder.delete_folder(self.path_prefix+filepath)
+            self.local_folder.delete_folder(self.path_prefix+filepath)
 
             # check if after deleting this folder, the parent directory is empty
             # if so this will delete that parent directory
             if "/" in filepath:
-                self.delete_JH_folder_if_empty(filepath.split('/', 1)[0])
+                self.delete_JH_folder_if_empty(filepath.rsplit('/', 1)[0])
         else:
-            local_folder.delete_file(self.path_prefix+filepath)
+            self.local_folder.delete_file(self.path_prefix+filepath)
 
             # check if after deleting this file, the parent directory is empty
             # if so this will delete that parent directory
@@ -168,33 +188,49 @@ class Resource:
         if not os.listdir(self.path_prefix + filepath):
             self.delete_file_or_folder_from_JH(filepath)
 
-    def is_file_in_JH(self, filepath):
+    def is_file_or_folder_in_JH(self, filepath):
         ''' is a file in JH '''
-        return path.exists(self.path_prefix+filepath)
+        return path.isfile(filepath)
 
     def delete_file_or_folder_from_HS(self,filepath):
         ''' deletes file or folder from HS '''
         # if file path does not contain file (ie: we want to delete folder)
         if "." not in filepath:
             self.remote_folder.delete_folder(filepath+"/")
+            # check if after deleting this folder, the parent directory is empty
+            # if so this will delete that parent directory
+            if "/" in filepath:
+                self.delete_HS_folder_if_empty(filepath.split('/', 1)[0], filepath.rsplit('/', 1)[1])
         else:
             self.remote_folder.delete_file(filepath)
+            # check if after deleting this file, the parent directory is empty
+            # if so this will delete that parent directory
+            if "/" in filepath:
+                self.delete_HS_folder_if_empty(filepath.rsplit('/', 1)[0], filepath.rsplit('/', 1)[1].split(".")[0])
 
-
-    def delete_HS_folder_if_empty(self, filepath):
-        ''' deletes from from HS if it is empty
+    def delete_HS_folder_if_empty(self, folderpath, acceptable_name):
+        ''' deletes folder from HS if it is empty
         this can only be used with hs_files as the HydroShare API does not give us empty
         folders when giving us files. This function should only be used if a recent
         action could have caused a folder to be empty '''
-        splitPath = filepath.split('/')
+        splitPath = ["/"]
+        splitPath += folderpath.split('/')
         parentDict = self.hs_files
         for directory in splitPath:
-            if directory in parentDict:
-                parentDict = parentDict[directory]
-            else:
-                return False
+            i = 0
+            while i < len(parentDict):
+                if parentDict[i]["name"] == directory:
+                    parentDict = parentDict[i]["contents"]
+                    break
+                i += 1
 
-        return True
+        j = 0
+        for i in range(len(parentDict)):
+            if parentDict[i]["name"] != acceptable_name:
+                j += 1
+        if j == 0:
+            self.delete_file_or_folder_from_HS(folderpath)
+
 
     def is_file_in_HS(self, filepath, fileType):
         ''' does a file exist in hs_files '''
@@ -241,13 +277,14 @@ class Resource:
 
     def overwrite_JH_with_file_from_HS(self, filepath):
         ''' overwrites JH file with one from HS '''
-        if self.is_file_in_JH(filepath):
+        if self.is_file_or_folder_in_JH(filepath):
             self.delete_file_or_folder_from_JH(filepath)
-        elif "/" in filepath:
-            outputPath = filepath.rsplit('/', 1)[0] + "/"
-            if not os.path.exists(outputPath):
-                os.makedirs(outputPath)
-        self.remote_folder.download_file_to_JH(self.res_id, filepath, self.path_prefix)
+        if "/" in filepath:
+            outputPath = filepath.rsplit('/', 1)[0]
+            if self.is_file_or_folder_in_JH(outputPath) == False:
+                os.makedirs(self.path_prefix + outputPath + "/")
+        self.remote_folder.download_file_to_JH(filepath, self.path_prefix)
+        self.JH_files = self.get_files_upon_init_JH()
 
     def overwrite_HS_with_file_from_JH(self, filepath):
         ''' overwrites HS file with one from JH '''
@@ -260,6 +297,7 @@ class Resource:
                 self.remote_folder.create_folder(folderPath)
 
         self.remote_folder.upload_file_to_HS(self.path_prefix+filepath, filepath)
+        self.hs_files = self.get_files_upon_init_HS()
 
     def get_resource_last_modified_time_HS(self):
         # TODO: (Charlie): This may not be necessary -- it's more specific than the dates provided in

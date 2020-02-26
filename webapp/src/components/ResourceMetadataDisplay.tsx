@@ -1,22 +1,22 @@
 import * as React from 'react';
 import {
-  IJupyterProject,
+  IJupyterResource,
 } from '../store/types';
 
-import '../styles/css/ProjectInfo.css';
+import '../styles/ResourceInfo.scss';
 
 export interface IPropTypes {
-  project: IJupyterProject
+  resource: IJupyterResource
 }
 
-export default class ProjectInfo extends React.Component<IPropTypes, never> {
+export default class ResourceMetadataDisplay extends React.Component<IPropTypes, never> {
 
   public render() {
     const {
       id,
       title,
       hydroShareResource,
-    } = this.props.project;
+    } = this.props.resource;
     const hydroShareUrl = `https://www.hydroshare.org/resource/${id}/`;
     const hsResourceMeta = hydroShareResource ? (
         <div className="resource-info">
@@ -37,7 +37,7 @@ export default class ProjectInfo extends React.Component<IPropTypes, never> {
         </div>
     ) : null;
     return (
-      <div className="ProjectInfo">
+      <div className="ResourceInfo">
         <h1 className="title">{title}</h1>
         <div className="resource-meta-container">
           {hsResourceMeta}

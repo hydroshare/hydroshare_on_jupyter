@@ -8,18 +8,18 @@ import {
 // import { FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
-import '../styles/css/FilterBarProjectDetails.css';
+import '../styles/FilterBarResource.scss';
 
-interface IFilterBarProjectDetailsProps {
+interface IFilterBarResourceProps {
     allSelected: boolean
     toggleAllSelected: () => any
     sortBy: (sortBy: string) => any
     searchChange: any
 }
 
-export default class FilterBarProjectDetails extends React.Component<IFilterBarProjectDetailsProps, never> {
+export default class FilterBarResource extends React.Component<IFilterBarResourceProps, never> {
 
-    constructor(props: IFilterBarProjectDetailsProps) {
+    constructor(props: IFilterBarResourceProps) {
       super(props);
     }
 

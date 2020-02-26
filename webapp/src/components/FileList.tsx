@@ -3,14 +3,14 @@
 // overall comment for frontend, we need to reevaluate our prop variables bc sometimes I think we may overcomplicate things
 // or be redundant. Maybe not, but I remember being in just "get it working mode" and not really trying to make it pretty
 import * as React from 'react';
+import { AnyAction } from 'redux';
 
 import {
-  AllActionTypes,
   IFileOrFolder,
   SortByOptions,
 } from '../store/types';
-import '../styles/css/FileList.css';
-
+import '../styles/FileList.scss';
+/*
 import {
   Button
 } from 'react-bootstrap';
@@ -20,7 +20,7 @@ import OpenFileModal from './OpenFileModal';
 import { FaFileMedical, FaRegFolder} from "react-icons/fa";
 
 import MaterialTable, {MTableToolbar} from 'material-table';
-
+*/
 const HUMAN_READABLE_FILE_SIZES = [
   'B',
   'KB',
@@ -38,7 +38,7 @@ interface IPropsInterface {
   selectedFilesAndFolders: Set<string>
   sortBy: SortByOptions | undefined,
   searchTerm: string
-  toggleAllSelected: () => AllActionTypes
+  toggleAllSelected: () => AnyAction
   hydroShare: boolean,
 }
 
@@ -144,6 +144,8 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
 
     console.log(this.props.files)
 
+    return null;
+/*
     return (
       <div className='FileList'>
         <MaterialTable
@@ -179,7 +181,7 @@ export default class FileList extends React.Component<IPropsInterface, IStateInt
                 onHide={this.handleCloseModal}
               />
       </div>
-    )
+    )*/
   }
 
   private generateSpaces = (count: number): string => {
