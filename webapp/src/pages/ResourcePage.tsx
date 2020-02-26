@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from "redux-thunk";
 import { push } from 'connected-react-router';
 
-import '../styles/css/ResourcePage.css';
+import '../styles/ResourcePage.scss';
 
 import FilterBarResource from '../components/FilterBarResource';
 import FileList from '../components/FileList';

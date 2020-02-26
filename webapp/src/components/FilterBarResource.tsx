@@ -8,7 +8,7 @@ import {
 // import { FaTrashAlt } from "react-icons/fa";
 import { Col } from 'reactstrap';
 
-import '../styles/css/FilterBarResource.scss';
+import '../styles/FilterBarResource.scss';
 
 interface IFilterBarResourceProps {
     allSelected: boolean
