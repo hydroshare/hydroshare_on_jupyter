@@ -16,7 +16,7 @@
 `yarn build`
 
 
-3. Install Jupyter and generate a config file by running this command:
+3. Install Jupyter and then generate a config file by running this command:
 
 `jupyter notebook --generate-config`
 
