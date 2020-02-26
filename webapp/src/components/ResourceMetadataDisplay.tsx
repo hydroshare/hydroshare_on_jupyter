@@ -3,7 +3,7 @@ import {
   IJupyterResource,
 } from '../store/types';
 
-import '../styles/css/ResourceInfo.css';
+import '../styles/ResourceInfo.scss';
 
 export interface IPropTypes {
   resource: IJupyterResource
