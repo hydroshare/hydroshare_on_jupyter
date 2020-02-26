@@ -13,6 +13,9 @@ from remote_folder import RemoteFolder
 import logging
 import os
 from os import path
+import dateutil.parser # for parsing resource times
+import re
+
 from resource_handler import ResourceHandler # remove after testing
 from pprint import pprint
 
@@ -80,17 +83,13 @@ class Resource:
 
         # get the file information for all files in the HS resource in json
         hs_resource_info = self.hs.resource(self.res_id).files.all().json()
-        # figure out what the url prefix to the filepath is
-        url_prefix = 'http://www.hydroshare.org/resource/' + self.res_id + '/data/contents'
         folders_dict = {}
         folders_final = []
         nested_files = {}
         # get the needed info for each file
         for file_info in hs_resource_info["results"]:
             # extract filepath from url
-
-            # TODO (kyle/charlie): make this a regex to make it more robust
-            filepath = file_info["url"][len(url_prefix)+1:]
+            filepath = re.search('[^\/]+$', file_info["url"]).group() # searches for part of string after last '/' and returns that part
             # get proper definition formatting of file if it is a file
             file_definition_hs = self.remote_folder.get_file_metadata(filepath, file_info["size"])
             # if it is a folder, build up contents
@@ -274,9 +273,12 @@ class Resource:
 
         self.remote_folder.upload_file_to_HS(self.path_prefix+filepath, filepath)
 
-    def get_resource_last_modified_time_HS(self, resource_id):
+    def get_resource_last_modified_time_HS(self, res_id):
         """
-        TODO (Charlie): Finish this func
+        Gets dates from the resource science metadata and returns the
+        most recent modified time in datetime.datetime format
+
+        Notes:
         metadata['dates'] gives array of two dicts with key 'start_date'
         that contains a time. One is creation and the other is last modified
         Need to compare and return the most recent time.
@@ -288,6 +290,22 @@ class Resource:
             'start_date': '2019-05-15T19:32:36.139858Z',
             'type': 'modified'}],
         """
-        # metadata = self.hs.getScienceMetadata(resource_id)
-        # pprint(metadata)
-        pass
+        metadata = self.hs.getScienceMetadata(res_id)
+        # Obtain dates
+        dates = []
+        for date in metadata['dates']:
+            temp = date['start_date']
+            temp = dateutil.parser.parse(temp)
+            dates.append(temp)
+        # Compare dates to get most recent one (normally it's the first, but
+        # it messes up if it's 'day of' for some reason)
+        most_recent = max(dates)
+        print(type(most_recent))
+        return most_recent # datetime.datetime
+
+if __name__ == '__main__':
+    # res_id = '1efcd98af1544905adcb80c79e779c3d' # same day
+    res_id = '302fde4890e74702ac731d2a82680e8f' # different day
+    handler = ResourceHandler()
+    res = Resource(res_id, handler)
+    res.get_files_upon_init_HS()
