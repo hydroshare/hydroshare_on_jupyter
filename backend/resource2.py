@@ -15,6 +15,7 @@ import os
 from os import path
 import dateutil.parser # for parsing resource times
 import re
+from pathlib import *
 
 from resource_handler import ResourceHandler # remove after testing
 from pprint import pprint
@@ -64,10 +65,11 @@ class Resource:
 
         self.save_resource_locally()
         local_folder = LocalFolder()
+        parent_folder_path = Path(self.path_prefix)
         files = local_folder.get_contents_recursive(self.path_prefix)
         files_final = [({
             "name": "/",
-            "sizeBytes": local_folder.get_size(self.path_prefix),
+            "sizeBytes": parent_folder_path.stat().st_size,
             "type": "folder",
             "contents": files,
         })]

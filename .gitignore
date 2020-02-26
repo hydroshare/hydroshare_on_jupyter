@@ -30,6 +30,9 @@ documentation/Jupyter_Install.md
 backend/test_delete.md
 backend/charlie_status.md
 
+webapp/build/*
+bundle.js
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
