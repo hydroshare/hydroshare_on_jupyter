@@ -151,8 +151,8 @@ class FileHandlerJH(tornado.web.RequestHandler):
                 if response != True:
                     response_message = response
         jh_files = resource.get_files_JH()
-        self.write({'response': response_message,
-                    'files': jh_files})
+        self.write({'response_message': response_message,
+                    'JH_files': jh_files})
 
 
 ''' Class that handles GETing list of a files that are in a user's
@@ -184,7 +184,7 @@ class FileHandlerHS(tornado.web.RequestHandler):
         elif body["request_type"] == "overwrite_JH":
             resource.overwrite_JH_with_file_from_HS(body["filepath"])
         resource.update_hs_files()
-        self.write({"files": resource.hs_files})
+        self.write({"HS_files": resource.hs_files})
 
 
 ''' Class that handles GETing user information on the currently logged
