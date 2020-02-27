@@ -335,3 +335,10 @@ class Resource:
         # it messes up if it's 'day of' for some reason)
         most_recent = max(dates)
         return most_recent # datetime.datetime
+
+    def upload_file_to_JH(self, file_info):
+        if self.is_file_or_folder_in_JH(self.path_prefix+file_info["filename"]) == False:
+            self.local_folder.upload_file_to_JH(file_info, self.path_prefix)
+            return True
+        else:
+            return "Error: a file " + file_info["filename"] +" already exists in JupyterHub at that location, cannot upload"
