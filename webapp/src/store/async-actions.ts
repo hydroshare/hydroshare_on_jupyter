@@ -16,6 +16,9 @@ import {
     setUserInfo,
 } from './actions/user';
 import {
+  IFile,
+  IFolder,
+  IJupyterResource,
   IResourceFilesData,
   IResourcesData,
   IUserInfoData,
@@ -26,6 +29,10 @@ const BACKEND_URL = '//localhost:8080';
 
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
     return axios.get<T>(BACKEND_URL + endpoint);
+}
+
+function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
+  return axios.put<T>(BACKEND_URL + endpoint, data);
 }
 
 export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
@@ -97,4 +104,15 @@ export function getResourceHydroShareFiles(resourceId: string) {
 
     dispatch(setResourceHydroShareFiles(resourceId, rootDir));
   };
+}
+
+export function transferFromJupyterHubToHydroShare(resource: IJupyterResource, source: IFile | IFolder) {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    const data = {
+      request_type: 'overwrite_HS',
+      filepath: source.path,
+    };
+    const response = await putToBackend(`/resources/${resource.id}/local-files`, data);
+    console.log(response);
+  }
 }

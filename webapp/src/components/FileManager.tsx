@@ -32,44 +32,48 @@ enum PATH_PREFIXES {
 interface IFileManagerProps {
   hydroShareResourceRootDir: IFolder
   jupyterHubResourceRootDir: IFolder
+  transferFileFromJupyterHubToHydroShare: (file: IFile) => any
 }
 
 let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
-
-const onDragEnd = (result: DropResult) => {
-  const {
-    draggableId: srcURI,
-    destination: dest,
-  } = result;
-  if (!dest?.droppableId) {
-    // Not sure when this happens, but droppableId is apparently optional
-    return;
-  }
-  const destURI = dest.droppableId;
-  const srcFileOrFolder = fileOrFolderLookupTable.get(srcURI) as IFile | IFolder;
-  const destFolder = fileOrFolderLookupTable.get(destURI) as IFolder;
-  const srcPrefix = srcURI.split(':')[0];
-  const destPrefix = destURI.split(':')[0];
-  console.log(`Received request to move ${srcURI} to ${destURI}.`);
-  const srcParentFolderPathComponents = srcFileOrFolder.path.split('/');
-  srcParentFolderPathComponents.pop();
-  let srcParentFolderPath = '/';
-  if (srcParentFolderPathComponents.length > 1) { // Length is 1 if parent folder is root dir
-    srcParentFolderPath += srcParentFolderPathComponents.join('/');
-  }
-  if (srcPrefix === destPrefix && srcParentFolderPath === destFolder.path) {
-    console.log("File dropped in same location. Ignoring move request.");
-    return;
-  }
-  console.log(srcFileOrFolder);
-  console.log(destFolder);
-};
 
 const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
   const {
     hydroShareResourceRootDir,
     jupyterHubResourceRootDir,
   } = props;
+
+  const onDragEnd = (result: DropResult) => {
+    const {
+      draggableId: srcURI,
+      destination: dest,
+    } = result;
+    if (!dest?.droppableId) {
+      // Not sure when this happens, but droppableId is apparently optional
+      return;
+    }
+    const destURI = dest.droppableId;
+    const srcFileOrFolder = fileOrFolderLookupTable.get(srcURI) as IFile | IFolder;
+    const destFolder = fileOrFolderLookupTable.get(destURI) as IFolder;
+    const srcPrefix = srcURI.split(':')[0];
+    const destPrefix = destURI.split(':')[0];
+    console.log(`Received request to move ${srcURI} to ${destURI}.`);
+    const srcParentFolderPathComponents = srcFileOrFolder.path.split('/');
+    srcParentFolderPathComponents.pop();
+    let srcParentFolderPath = '/';
+    if (srcParentFolderPathComponents.length > 1) { // Length is 1 if parent folder is root dir
+      srcParentFolderPath += srcParentFolderPathComponents.join('/');
+    }
+    if (srcPrefix === destPrefix && srcParentFolderPath === destFolder.path) {
+      console.log("File dropped in same location. Ignoring move request.");
+      return;
+    }
+    if (srcPrefix === PATH_PREFIXES.JUPYTERHUB && destPrefix === PATH_PREFIXES.HYDROSHARE) {
+      props.transferFileFromJupyterHubToHydroShare(srcFileOrFolder);
+    }
+    console.log(srcFileOrFolder);
+    console.log(destFolder);
+  };
 
   // Clear the lookup table
   fileOrFolderLookupTable.clear();

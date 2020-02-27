@@ -10,6 +10,9 @@ import ResourceMetadataDisplay from '../components/ResourceMetadataDisplay';
 
 import * as resourcePageActions from '../store/actions/ResourcePage';
 import {
+  transferFromJupyterHubToHydroShare,
+} from '../store/async-actions';
+import {
   IFile,
   IFolder,
   IJupyterResource,
@@ -49,6 +52,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     toggleSelectedOneLocal: (item: IFile | IFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneLocal(item)),
     openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcePageActions.openFileInJupyterHub(resource, file)),
     toggleSelectedOneHydroShare: (item: IFile | IFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneHydroShare(item)),
+    transferFileFromJupyterHubToHydroShare: (resource: IJupyterResource, file: IFile) => dispatch(transferFromJupyterHubToHydroShare(resource, file)),
     searchResourceBy: (searchTerm: string) => dispatch(resourcePageActions.searchResourceBy(searchTerm)),
     sortBy: (sortByTerm: SortByOptions) => dispatch(resourcePageActions.sortBy(sortByTerm)),
     goBackToResources: () => dispatch(push('/')),
@@ -88,6 +92,9 @@ class ResourcePage extends React.Component<PropsType, never> {
     // const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(resource!);
     // const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(resource!);
 
+    const transferFileFromJupyterHubToHydroShare = (f: IFile | IFolder) => {
+      this.props.transferFileFromJupyterHubToHydroShare(resource, f);
+    };
 
     return (
       <div className="page resource-details">
@@ -96,6 +103,7 @@ class ResourcePage extends React.Component<PropsType, never> {
         <FileManager
           hydroShareResourceRootDir={resource.hydroShareResource.files}
           jupyterHubResourceRootDir={resource.jupyterHubFiles}
+          transferFileFromJupyterHubToHydroShare={transferFileFromJupyterHubToHydroShare}
         />
       </div>
     )
