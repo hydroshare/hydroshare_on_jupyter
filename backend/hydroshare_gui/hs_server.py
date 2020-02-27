@@ -137,8 +137,8 @@ class FileHandlerJH(tornado.web.RequestHandler):
         resource = Resource(res_id, resource_handler)
         if body["request_type"] == "new_file":
             resource.create_file_JH(body["new_filename"])
-        elif body["request_type"] == "rename_file":
-            resource.rename_file_JH(body["filepath"], body["old_filename"], body["new_filename"])
+        elif body["request_type"] == "rename_or_move_file":
+            resource.rename_or_move_file_JH(body["old_filepath"], body["new_filepath"])
         elif body["request_type"] == "overwrite_HS":
             resource.overwrite_HS_with_file_from_JH(body["filepath"])
 
@@ -179,8 +179,8 @@ class FileHandlerHS(tornado.web.RequestHandler):
     def put(self,res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)
-        if body["request_type"] == "rename_file":
-            resource.rename_file_HS(body["filepath"], body["old_filename"], body["new_filename"])
+        if body["request_type"] == "rename_or_move_file":
+            resource.rename_file_HS(body["old_filepath"], body["new_filepath"])
         elif body["request_type"] == "overwrite_JH":
             resource.overwrite_JH_with_file_from_HS(body["filepath"])
         resource.update_hs_files()

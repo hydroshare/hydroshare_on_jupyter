@@ -65,14 +65,14 @@ class RemoteFolder:
 
         return folder_size, contents
 
-    def rename_file(self, filepath, old_filename, new_filename):
+    def rename_or_move_file(self, old_filepath, new_filepath):
         '''Renames the hydroshare version of the file from old_filename to
         new_filename by using the HS API.
         '''
 
         options = {
-                 "source_path": filepath + "/" + old_filename,
-                 "target_path": filepath + "/" + new_filename
+                 "source_path": old_filepath,
+                 "target_path": new_filepath
                           }
         self.hs.resource(self.res_id).functions.move_or_rename(options)
 
