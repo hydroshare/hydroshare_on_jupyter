@@ -109,16 +109,15 @@ Frontend payload:
 {"filepath": "filepath_to_file_to_delete"}
 ```
 
-PUTs either renames a file or overwrites JH file with HS one  
-Frontend payload for renaming:
+PUTs either renames/moves a file or overwrites JH file with HS one  
+Frontend payload for renaming or moving:
 ```
-{"request_type": "rename_file",
-"filepath": "filepath_to_folder_with_file_to_rename",
-"old_filename": "old_file_name",
-"new_filename": "new_file_name"}
+{"request_type": "rename_or_move_file",
+"old_filepath": "filepath_to_file_to_rename_or_move",
+"new_filepath": "new_filepath"}
 ```
 
-Frontend payload for syncing HS file to JH:
+Frontend payload for syncing HS file to JH:  
 ```
 {"request_type": "overwrite_JH",
 "filepath": "file_path_to_file_to_sync"}
@@ -138,18 +137,17 @@ Frontend payload:
 {"filepath": "filepath_to_file_to_delete"}
 ```
 
-PUTs overwrites JH file with HS one, renames a file, or creates a new one  
+PUTs overwrites JH file with HS one, renames/moves a file, or creates a new one  
 Frontend payload for syncing HS file to JH:
 ```
 {"request_type": "overwrite_HS",
 "filepath": "file_path_to_file_to_sync"}
 ```
-Frontend payload for renaming:
+Frontend payload for renaming/moving:
 ```
-{"request_type": "rename_file",
-"filepath": "filepath_to_folder_with_file_to_rename",
-"old_filename": "old_file_name",
-"new_filename": "new_file_name"}
+{"request_type": "rename_or_move_file",
+"old_filepath": "filepath_to_file",
+"new_filepath": "filepath_to_new_location_or_new_name"}
 ```
 Frontend payload for creating a new file in JH:
 ```
