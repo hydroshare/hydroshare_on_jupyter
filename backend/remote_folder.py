@@ -23,7 +23,7 @@ class RemoteFolder:
         self.res_id = res_id
         self.hs = hs
 
-    def get_file_metadata(self, filepath, long_path, size):
+    def get_file_metadata(self, filepath, long_path, file_info):
         """Gets file definition formatting for returning HS files, given path
         & size. Returns false if the path is a folder & not a file.
         """
@@ -33,14 +33,16 @@ class RemoteFolder:
             return ({
                 "name": filename,
                 "path": '/' + long_path.strip('/'),
-                "sizeBytes": size,
+                "sizeBytes": file_info["size"],
+                "modifiedTime": file_info["modified_time"],
                 "type": file_type,
             })
         elif filepath.rfind("/") == -1:
             return ({
                 "name": filepath,
                 "path": '/' + long_path.strip('/'),
-                "sizeBytes": size,
+                "sizeBytes": file_info["size"],
+                "modifiedTime": file_info["modified_time"],
                 "type": "file",
             })
         else:
@@ -63,7 +65,7 @@ class RemoteFolder:
                     "contents" : subfolder_contents,
                 })
             else:
-                contents.append(self.get_file_metadata(v[1], v[2], nested_files[v[2]]["size"]))
+                contents.append(self.get_file_metadata(v[1], v[2], nested_files[v[2]]))
                 folder_size += nested_files[v[2]]["size"]
 
         return folder_size, contents

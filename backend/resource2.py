@@ -101,7 +101,7 @@ class Resource:
             filepath = file_info["url"][len(url_prefix)+1:]
             print(file_info["modified_time"])
             # get proper definition formatting of file if it is a file
-            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info["size"])
+            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info)
             # if it is a folder, build up contents
             if not file_definition_hs:
                 nested_files[filepath + "/"] = file_info
