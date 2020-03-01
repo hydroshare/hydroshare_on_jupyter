@@ -37,6 +37,8 @@ class Resource:
 
         self.path_prefix = self.output_folder + "/" + self.res_id + "/" + self.res_id + "/data/contents/"
         self.hs_files = self.get_files_upon_init_HS()
+        print("HS_files")
+        print(self.hs_files)
         self.JH_files = self.get_files_upon_init_JH()
 
 
@@ -95,11 +97,11 @@ class Resource:
         folders_dict = {}
         folders_final = []
         nested_files = {}
+        print(hs_resource_info)
         # get the needed info for each file
         for file_info in hs_resource_info["results"]:
             # extract filepath from url
             filepath = file_info["url"][len(url_prefix)+1:]
-            print(file_info["modified_time"])
             # get proper definition formatting of file if it is a file
             file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info["size"])
             # if it is a folder, build up contents
@@ -244,7 +246,6 @@ class Resource:
         splitPath = filepath.split('/')
         parentDict = self.hs_files
         i = 0
-        print(parentDict)
         while i < len(splitPath):
             j = 0
             while j < len(parentDict):
