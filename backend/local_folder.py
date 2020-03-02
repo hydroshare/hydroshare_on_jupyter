@@ -70,7 +70,6 @@ class LocalFolder:
         shutil.rmtree(filepath) 
 
     def create_folder(self, folderpath):
-        print(folderpath)
         try:
             # Create target Directory
             os.makedirs(folderpath)
