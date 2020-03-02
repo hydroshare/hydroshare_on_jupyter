@@ -90,10 +90,44 @@ class ResourceHandler:
 
         return list(resources.values())
     
-    def create_HS_resource(self, metadata={}):
+    def create_HS_resource(self, resource_title, creators):
         """
         Creates a hydroshare resource from the metadata specified in a dict
+
+        The metadata should be given in the format:
+        {'abstract': '',
+        'title': '',
+        'keywords': (),
+        'rtype': 'GenericResource',
+        'fpath': '',
+        'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}]',
+        'extra_metadata': ''}
+
+        Example with information:
+        {'abstract': 'My abstract',
+        'title': 'My resource',
+        'keywords': ('my keyword 1', 'my keyword 2'),
+        'rtype': 'GenericResource',
+        'fpath': 'test_delete.md',
+        'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}, {"creator":{"name":"Charlie2"}}]',
+        'extra_metadata': '{"key-1": "value-1", "key-2": "value-2"}'}
         """
+        # TODO: Add type exceptions for resource_title and creators
+        # Formatting creators for metadata['metadata']:
+        meta_metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}'
+        for creator in creators:
+            creator_string = ', {"creator":{"name":"'+creator+'"}}'
+            meta_metadata = meta_metadata + creator_string
+        meta_metadata = meta_metadata + ']'
+
+        metadata = {'abstract': '',
+                    'title': resource_title,
+                    'keywords': (),
+                    'rtype': 'GenericResource',
+                    'fpath': '',
+                    'metadata': meta_metadata,
+                    'extra_metadata': ''}
+
         resource_id = ''
         resource_id = self.hs.createResource(metadata['rtype'],
                                             metadata['title'],
