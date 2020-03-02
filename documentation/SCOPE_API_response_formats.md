@@ -91,7 +91,7 @@ Example output:
 ```
 
 POSTs to create new empty resource in Hydroshare    
-Payload: 
+Payload:
 ```
 {"title": "title_of_new_resource"}
 ```
@@ -100,7 +100,7 @@ Payload:
 GETs list of files that are in a user's HS instance of a resource with the given resource_id ({'files':res})  
 Example output:
 ```
-{"files": [{"name": "README", "sizeBytes": 16, "type": "md"}, {"name": "Introduction_to_Coding1", "sizeBytes": 545, "type": "ipynb"}, {"name": "Second_File", "sizeBytes": 658, "type": "ipynb"}, {"name": "Introduction_to_Coding", "sizeBytes": 11440, "type": "ipynb"}, {"name": "README", "sizeBytes": 199, "type": "file"}, {"name": "Test", "sizeBytes": 549020, "type": "folder", "contents": [{"name": "terrible_name", "sizeBytes": 10877, "type": "png"}, {"name": "10-SingleCycleCPU_1", "sizeBytes": 538143, "type": "pdf"}]}]}
+{"files": [{"name": "/", "sizeBytes": 561878, "modifiedTime": "2020-02-21 06:54:41", "type": "folder", "contents": [{"name": "Introduction_to_Coding", "path": "/Introduction_to_Coding.ipynb", "sizeBytes": 11440, "modifiedTime": "2020-02-21 06:54:40", "type": "ipynb"}, {"name": "README", "path": "/README", "sizeBytes": 199, "modifiedTime": "2020-02-21 06:54:40", "type": "file"}, {"name": "Second_File", "path": "/Second_File.ipynb", "sizeBytes": 658, "modifiedTime": "2020-02-21 06:54:41", "type": "ipynb"}, {"name": "Introduction_to_Coding1", "path": "/Introduction_to_Coding1.ipynb", "sizeBytes": 545, "modifiedTime": "2020-02-21 06:54:40", "type": "ipynb"}, {"name": "README", "path": "/README.md", "sizeBytes": 16, "modifiedTime": "2020-02-21 06:54:41", "type": "md"}, {"name": "Test", "path": "/Test", "sizeBytes": 549020, "modifiedTime": "2020-02-21 06:54:39", "type": "folder", "contents": [{"name": "terrible_name", "path": "/Test/terrible_name.png", "sizeBytes": 10877, "modifiedTime": "2020-02-21 06:54:39", "type": "png"}, {"name": "10-SingleCycleCPU_1", "path": "/Test/10-SingleCycleCPU_1.pdf", "sizeBytes": 538143, "modifiedTime": "2020-02-21 06:54:39", "type": "pdf"}]}]}]}
 ```
 
 DELETEs file from Hydroshare  
@@ -128,7 +128,7 @@ GETs list of files that are in a user's JH isntance of a resource with the give 
 Example output:
 
 ```
-{"files": [{"name": "Introduction_to_Coding", "sizeBytes": 11440, "type": "ipynb"}, {"name": "Test", "sizeBytes": 549020, "type": "folder", "contents": [{"name": "terrible_name", "sizeBytes": 10877, "type": "png"}, {"name": "10-SingleCycleCPU_1", "sizeBytes": 538143, "type": "pdf"}]}, {"name": "Introduction_to_Coding1", "sizeBytes": 545, "type": "ipynb"}, {"name": "README", "sizeBytes": 199, "type": "file"}, {"name": "README", "sizeBytes": 16, "type": "md"}, {"name": "Second_File", "sizeBytes": 658, "type": "ipynb"}]}
+{"files": [{"name": "/", "sizeBytes": 4096, "modifiedTime": "2020-02-19 15:14:56.432693", "type": "folder", "contents": [{"name": "Introduction_to_Coding", "sizeBytes": 11440, "modifiedTime": "2020-02-10 09:46:55.117488", "type": "ipynb"}, {"name": "Test", "sizeBytes": 4096, "modifiedTime": "2020-02-26 08:45:39.975201", "type": "folder", "contents": [{"name": "better_name", "sizeBytes": 10877, "modifiedTime": "2020-02-10 09:46:55.117488", "type": "png"}, {"name": "10-SingleCycleCPU_1", "sizeBytes": 538143, "modifiedTime": "2020-02-10 09:46:55.113488", "type": "pdf"}]}, {"name": "Introduction_to_Coding1", "sizeBytes": 545, "modifiedTime": "2020-02-10 09:46:55.117488", "type": "ipynb"}, {"name": "README", "sizeBytes": 199, "modifiedTime": "2020-02-10 09:46:55.121488", "type": "file"}, {"name": "README", "sizeBytes": 16, "modifiedTime": "2020-02-10 09:46:55.121488", "type": "md"}, {"name": "Second_File", "sizeBytes": 658, "modifiedTime": "2020-02-10 09:46:55.121488", "type": "ipynb"}]}]}
 ```
 
 DELETEs file from JupyterHub  

@@ -9,6 +9,8 @@ Email: vickymmcd@gmail.com
 # -*- coding: utf-8 -*-
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from login import username, password
+import datetime
+from dateutil.parser import parse
 import os
 
 
@@ -34,7 +36,7 @@ class RemoteFolder:
                 "name": filename,
                 "path": '/' + long_path.strip('/'),
                 "sizeBytes": file_info["size"],
-                "modifiedTime": file_info["modified_time"],
+                "modifiedTime": str(parse(file_info["modified_time"])),
                 "type": file_type,
             })
         elif filepath.rfind("/") == -1:
@@ -42,7 +44,7 @@ class RemoteFolder:
                 "name": filepath,
                 "path": '/' + long_path.strip('/'),
                 "sizeBytes": file_info["size"],
-                "modifiedTime": file_info["modified_time"],
+                "modifiedTime": str(parse(file_info["modified_time"])),
                 "type": "file",
             })
         else:
@@ -53,22 +55,29 @@ class RemoteFolder:
         """
         contents = []
         folder_size = 0
+        folder_time = datetime.datetime.min
         for v in val:
             if v in folders_dict:
-                subfolder_size, subfolder_contents = self.get_contents_recursive(folders_dict[v], folders_dict, nested_files)
+                subfolder_time, subfolder_size, subfolder_contents = self.get_contents_recursive(folders_dict[v], folders_dict, nested_files)
                 folder_size += subfolder_size
+                if subfolder_time > folder_time:
+                    folder_time = subfolder_time
                 contents.append({
                     "name" : v[1],
                     "path" : '/' + v[2].strip('/'),
                     "sizeBytes" : subfolder_size,
+                    "modifiedTime" : str(subfolder_time),
                     "type" : "folder",
                     "contents" : subfolder_contents,
                 })
             else:
                 contents.append(self.get_file_metadata(v[1], v[2], nested_files[v[2]]))
                 folder_size += nested_files[v[2]]["size"]
+                curr_time = parse(nested_files[v[2]]["modified_time"])
+                if curr_time > folder_time:
+                    folder_time = curr_time
 
-        return folder_size, contents
+        return folder_time, folder_size, contents
 
     def rename_or_move_file(self, old_filepath, new_filepath):
         '''Renames the hydroshare version of the file from old_filename to

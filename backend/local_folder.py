@@ -11,6 +11,7 @@ Email: vickymmcd@gmail.com
 import os
 import glob
 import shutil
+import datetime
 from pathlib import *
 
 
@@ -31,7 +32,7 @@ class LocalFolder:
         for filepath in files:
             # check contents recursively:
             folder_contents = self.get_contents_recursive(filepath)
-            
+
             # Populate info:
             dirpath = Path(filepath)
             filename = dirpath.stem
@@ -51,6 +52,7 @@ class LocalFolder:
                 files2.append({
                     "name": filename,
                     "sizeBytes": dirpath.stat().st_size,
+                    "modifiedTime": str(datetime.datetime.fromtimestamp(dirpath.stat().st_mtime)),
                     "type": file_type,
                     "contents": folder_contents,
                 })
@@ -59,6 +61,7 @@ class LocalFolder:
                 files2.append({
                     "name": filename,
                     "sizeBytes": dirpath.stat().st_size,
+                    "modifiedTime": str(datetime.datetime.fromtimestamp(dirpath.stat().st_mtime)),
                     "type": file_type,
                 })
         return files2
@@ -67,7 +70,7 @@ class LocalFolder:
         os.remove(filepath)
 
     def delete_folder(self, filepath):
-        shutil.rmtree(filepath) 
+        shutil.rmtree(filepath)
 
     def create_folder(self, folderpath):
         print(folderpath)
@@ -78,10 +81,9 @@ class LocalFolder:
             print("Directory " , folderpath ,  " already exists")
 
     def upload_file_to_JH(self, file_info, file_destination):
-        
+
         filename, content_type = file_info["filename"], file_info["content_type"]
         body = file_info["body"]
         f = open(file_destination+filename, "wb")
         f.write(body)
         f.close()
-
