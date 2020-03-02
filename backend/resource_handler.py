@@ -89,7 +89,7 @@ class ResourceHandler:
             }
 
         return list(resources.values())
-    
+
     def create_HS_resource(self, metadata={}):
         """
         Creates a hydroshare resource from the metadata specified in a dict
@@ -108,10 +108,10 @@ class ResourceHandler:
     def copy_HS_resource(self, og_res_id):
         response = self.hs.resource(og_res_id).copy()
         new_id = response.content.decode("utf-8") # b'id'
-        
+
         # Change name to 'Copy of []'
         title = self.hs.getScienceMetadata(new_id)['title']
         new_title = "Copy of " + title
         self.hs.updateScienceMetadata(new_id, {"title": new_title})
-        
+
         return new_id
