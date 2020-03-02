@@ -71,9 +71,9 @@ class ResourcesHandler(tornado.web.RequestHandler):
         This is enough to create the resource, but not to make it public or private
         (that should happen on HydroShare)
 
-        Expects:
-        body["resource title"] (string)
-        body["creators"] (list of strings)
+        Expects body:
+        {"resource title": string
+        "creators": list of strings}
         """
         body = json.loads(self.request.body.decode('utf-8'))
         resource_title = body["resource title"] # string
