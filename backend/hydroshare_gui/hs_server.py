@@ -76,13 +76,16 @@ class ResourcesHandler(tornado.web.RequestHandler):
         "creators": list of strings}
         """
         body = json.loads(self.request.body.decode('utf-8'))
-        resource_title = body["resource title"] # string
-        creators = body["creators"] # list of names (strings)
+        resource_title = body.get("resource title") # string
+        creators = body.get("creators") # list of names (strings)
 
-        resource_id = resource_handler.create_HS_resource(resource_title, creators)
+        if resource_title is not None and creators is not None:
+            resource_id = resource_handler.create_HS_resource(resource_title, creators)
 
-        # TODO: Check this method of returning resource id
-        self.write(resource_id)
+            # TODO: Check this method of returning resource id
+            self.write(resource_id)
+        else:
+            self.write("Please specify title and creators to make new resource")
 
 ''' Class that handles DELETEing file in JH
 '''
@@ -98,9 +101,10 @@ class FileHandlerJH(tornado.web.RequestHandler):
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
-        if "filepath" in body:
+        filepath = body.get("filepath")
+        if filepath is not None:
             resource = Resource(res_id, resource_handler)
-            resource.delete_file_or_folder_from_JH(body["filepath"])
+            resource.delete_file_or_folder_from_JH(filepath)
         else:
             self.write("Please specify filepath to delete")
 
@@ -146,10 +150,14 @@ class FileHandlerHS(tornado.web.RequestHandler):
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
-        resource = Resource(res_id, resource_handler)
-        resource.delete_file_or_folder_from_HS(body["filepath"])
-        resource.update_hs_files()
-        self.write({"files": resource.hs_files})
+        filepath = body.get("filepath")
+        if filepath is not None:
+            resource = Resource(res_id, resource_handler)
+            resource.delete_file_or_folder_from_HS(filepath)
+            resource.update_hs_files()
+            self.write({"files": resource.hs_files})
+        else:
+            self.write("Please specify filepath to delete")
 
     def put(self,res_id):
         body = json.loads(self.request.body.decode('utf-8'))
