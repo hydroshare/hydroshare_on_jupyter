@@ -16,7 +16,7 @@ from os import path
 import dateutil.parser # for parsing resource times
 import re
 import pathlib
-from pathlib import *
+from pathlib import * # TODO: Charlie, change to pl for readability
 import shutil
 
 ''' Class that defines a Hydroshare resource & it's associated files that
@@ -155,7 +155,9 @@ class Resource:
         '''
         pathWithoutType, fileType = filepath.split(".")
         if self.is_file_in_HS(pathWithoutType, fileType):
-            self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
+            success = self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
+            if not success: #TODO: Charlie, send message to frontend
+                logging.info('Unable to rename or move file: ' + old_filepath)
             folderpath, filename = old_filepath.rsplit("/", 1)
             self.delete_HS_folder_if_empty(folderpath, filename)
         else:

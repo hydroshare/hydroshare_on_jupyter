@@ -7,10 +7,10 @@ Email: vickymmcd@gmail.com
 '''
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from hs_restclient import HydroShare, HydroShareAuthBasic
+from hs_restclient import HydroShare, HydroShareAuthBasic, exceptions
 from login import username, password
 import os
-
+import logging
 
 
 ''' Class that defines a Remote Folder so we can access attributes of it.
@@ -36,6 +36,7 @@ class RemoteFolder:
                 "sizeBytes": size,
                 "type": file_type,
             })
+        #TODO (Charlie): This might be simpler with pathlib
         elif filepath.rfind("/") == -1:
             return ({
                 "name": filepath,
@@ -77,15 +78,33 @@ class RemoteFolder:
                  "source_path": old_filepath,
                  "target_path": new_filepath
                           }
-        self.hs.resource(self.res_id).functions.move_or_rename(options)
+        #TODO: Charlie, check with team if this is good
+        try:
+            self.hs.resource(self.res_id).functions.move_or_rename(options)
+            return True
+        except:
+            return False
 
     def delete_file(self, filepath):
         """ deletes file in HS, if file is only item in directory, remove that parent directory"""
-        resource_id = self.hs.deleteResourceFile(self.res_id, filepath)
+        try:
+            resource_id = self.hs.deleteResourceFile(self.res_id, filepath)
+        except exceptions.HydroShareNotAuthorized:
+            # print("Not authorized")
+            logging.info("Not authorized to delete file in "+self.res_id)
+        except exceptions.HydroShareNotFound:
+            logging.info("{} does not exist in {}".format(filepath, self.res_id))
+        except:
+            logging.info("Unknown error while deleting file from "+self.res_id)
 
     def delete_folder(self, filepath):
         """ deletes folder in HS, if folder is only item in directory, remove that parent directory"""
+        try:
         response_json = self.hs.deleteResourceFolder(self.res_id, pathname=filepath)
+        except IndexError:
+            logging.info("Either {} does not exist in {}, or not authorized to delete folder".format(filepath, self.res_id))
+        except:
+            logging.info("Uknown error while trying to delete {} in {}".format(filepath, self.res_id))
 
     def download_file_to_JH(self, HS_filepath, JH_filepath):
         """ download HS file to JH"""
