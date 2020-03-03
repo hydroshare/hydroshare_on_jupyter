@@ -154,23 +154,29 @@ class Resource:
         '''Renames the hydroshare version of the file from old_filename to
         new_filename.
         '''
-        pathWithoutType, fileType = filepath.split(".")
-        if self.is_file_in_HS(pathWithoutType, fileType):
-            self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
-            folderpath, filename = old_filepath.rsplit("/", 1)
-            self.delete_HS_folder_if_empty(folderpath, filename)
+        if old_filepath is not None and new_filepath is not None:
+            pathWithoutType, fileType = old_filepath.split(".")
+            if self.is_file_in_HS(pathWithoutType, fileType):
+                self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
+                folderpath, filename = old_filepath.rsplit("/", 1)
+                self.delete_HS_folder_if_empty(folderpath, filename)
+            else:
+                logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
         else:
-            logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
+            logging.info('Missing inputs for old and new filepath')
 
     def rename_or_move_file_JH(self, old_filepath, new_filepath):
         """Renames the jupyterhub version of the file from old_filename to
         new_filename.
         """
-        if old_filepath is not None and new_filepath is not None and path.exists(self.path_prefix + old_filepath):
-            shutil.move(self.path_prefix + old_filepath, self.path_prefix + new_filepath)
-            self.delete_JH_folder_if_empty(old_filepath.rsplit("/", 1)[0])
+        if old_filepath is not None and new_filepath is not None:
+            if path.exists(self.path_prefix + old_filepath):
+                shutil.move(self.path_prefix + old_filepath, self.path_prefix + new_filepath)
+                self.delete_JH_folder_if_empty(old_filepath.rsplit("/", 1)[0])
+            else:
+                logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
         else:
-            logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
+            logging.info('Missing inputs for old and new filepath')
 
     def delete_file_or_folder_from_JH(self, filepath):
         """ deletes file or folder from JH """
@@ -296,16 +302,19 @@ class Resource:
 
     def overwrite_HS_with_file_from_JH(self, filepath):
         """ overwrites HS file with one from JH """
-        pathWithoutType, fileType = filepath.split(".")
-        if self.is_file_in_HS(pathWithoutType, fileType):
-            self.delete_file_or_folder_from_HS(filepath)
-        elif "/" in filepath:
-            folderPath = filepath.rsplit('/', 1)[0]
-            if self.is_folder_in_HS(folderPath) == False:
-                self.remote_folder.create_folder(folderPath)
+        if filepath is not None:
+            pathWithoutType, fileType = filepath.split(".")
+            if self.is_file_in_HS(pathWithoutType, fileType):
+                self.delete_file_or_folder_from_HS(filepath)
+            elif "/" in filepath:
+                folderPath = filepath.rsplit('/', 1)[0]
+                if self.is_folder_in_HS(folderPath) == False:
+                    self.remote_folder.create_folder(folderPath)
 
-        self.remote_folder.upload_file_to_HS(self.path_prefix+filepath, filepath)
-        self.hs_files = self.get_files_upon_init_HS()
+            self.remote_folder.upload_file_to_HS(self.path_prefix+filepath, filepath)
+            self.hs_files = self.get_files_upon_init_HS()
+        else:
+            logging.info('Missing filepath in call to overwrite')
 
     def get_resource_last_modified_time_HS(self):
         # TODO: (Charlie): This may not be necessary -- it's more specific than the dates provided in
