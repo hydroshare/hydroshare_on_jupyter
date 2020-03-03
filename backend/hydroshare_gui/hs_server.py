@@ -93,27 +93,29 @@ class ResourcesHandler(tornado.web.RequestHandler):
         # TODO: Create endpoint?
         body = json.loads(self.request.body.decode('utf-8'))
         # Need resource title and creators
-        resource_title = body["resource title"] # string
-        creators = body["creators"] # array of names (strings)
+        if "resource title" in body and "creators" in body:
+            resource_title = body["resource title"] # string
+            creators = body["creators"] # array of names (strings)
 
-        # Some silly string things for metadata['metadata']:
-        meta_metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}'
-        for creator in creators:
-            creator_string = ', {"creator":{"name":"'+creator+'"}}'
-            meta_metadata = meta_metadata + creator_string
-        meta_metadata = meta_metadata + ']'
+            # Some silly string things for metadata['metadata']:
+            meta_metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}'
+            for creator in creators:
+                creator_string = ', {"creator":{"name":"'+creator+'"}}'
+                meta_metadata = meta_metadata + creator_string
+            meta_metadata = meta_metadata + ']'
 
-        metadata = {'abstract': '',
-                    'title': resource_title,
-                    'keywords': (),
-                    'rtype': 'GenericResource',
-                    'fpath': '',
-                    'metadata': meta_metadata,
-                    'extra_metadata': ''}
-        resource_id = resource_handler.create_HS_resource(metadata)
-        # TODO: How to return the resource id?
-        self.write(resource_id)
-        pass
+            metadata = {'abstract': '',
+                        'title': resource_title,
+                        'keywords': (),
+                        'rtype': 'GenericResource',
+                        'fpath': '',
+                        'metadata': meta_metadata,
+                        'extra_metadata': ''}
+            resource_id = resource_handler.create_HS_resource(metadata)
+            # TODO: How to return the resource id?
+            self.write(resource_id)
+        else:
+            self.write("Invalid input provided to create resource")
 
 ''' Class that handles DELETEing file in JH
 '''
@@ -129,18 +131,24 @@ class FileHandlerJH(tornado.web.RequestHandler):
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
-        resource = Resource(res_id, resource_handler)
-        resource.delete_file_or_folder_from_JH(body["filepath"])
+        if "filepath" in body:
+            resource = Resource(res_id, resource_handler)
+            resource.delete_file_or_folder_from_JH(body["filepath"])
+        else:
+            self.write("Please specify filepath to delete")
 
     def put(self,res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)
-        if body["request_type"] == "new_file":
-            resource.create_file_JH(body["new_filename"])
-        elif body["request_type"] == "rename_or_move_file":
-            resource.rename_or_move_file_JH(body["old_filepath"], body["new_filepath"])
-        elif body["request_type"] == "overwrite_HS":
-            resource.overwrite_HS_with_file_from_JH(body["filepath"])
+        request_type = body.get("request_type")
+        if request_type == "new_file":
+            resource.create_file_JH(body.get("new_filename"))
+        elif request_type == "rename_or_move_file":
+            resource.rename_or_move_file_JH(body.get("old_filepath"), body.get("new_filepath"))
+        elif request_type == "overwrite_HS":
+            resource.overwrite_HS_with_file_from_JH(body.get("filepath"))
+        else:
+            self.write("Please specify valid request type for PUT")
 
     def post(self, res_id):
         resource = Resource(res_id, resource_handler)
@@ -175,7 +183,7 @@ class FileHandlerHS(tornado.web.RequestHandler):
         resource.delete_file_or_folder_from_HS(body["filepath"])
         resource.update_hs_files()
         self.write({"files": resource.hs_files})
-    
+
     def put(self,res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)

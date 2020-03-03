@@ -45,9 +45,10 @@ class Resource:
     def create_file_JH(self, filename):
         '''Creates a new file with the given name in JH
         '''
-        with open(self.path_prefix + filename, "w") as fp:
-            # if you wanted you could write to the file here, but we just want to create it
-            pass
+        if filename is not None:
+            with open(self.path_prefix + filename, "w") as fp:
+                # if you wanted you could write to the file here, but we just want to create it
+                pass
 
 
     def save_resource_locally(self, unzip=True):
@@ -165,7 +166,7 @@ class Resource:
         """Renames the jupyterhub version of the file from old_filename to
         new_filename.
         """
-        if path.exists(self.path_prefix + old_filepath):
+        if old_filepath is not None and new_filepath is not None and path.exists(self.path_prefix + old_filepath):
             shutil.move(self.path_prefix + old_filepath, self.path_prefix + new_filepath)
             self.delete_JH_folder_if_empty(old_filepath.rsplit("/", 1)[0])
         else:
