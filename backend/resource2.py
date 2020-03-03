@@ -153,7 +153,7 @@ class Resource:
         '''Renames the hydroshare version of the file from old_filename to
         new_filename.
         '''
-        pathWithoutType, fileType = filepath.split(".")
+        pathWithoutType, fileType = old_filepath.split(".")
         if self.is_file_in_HS(pathWithoutType, fileType):
             self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
             folderpath, filename = old_filepath.rsplit("/", 1)
