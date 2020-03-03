@@ -16,6 +16,7 @@ from os import path
 import dateutil.parser # for parsing resource times
 import re
 import pathlib
+import hs_restclient
 from pathlib import *
 import shutil
 
@@ -207,15 +208,20 @@ class Resource:
         """ is a file in JH """
         return path.isfile(filepath)
 
-    def delete_file_or_folder_from_HS(self,filepath):
+    def delete_file_or_folder_from_HS(self, filepath):
         """ deletes file or folder from HS """
         # if file path does not contain file (ie: we want to delete folder)
-        if "." not in filepath:
-            self.remote_folder.delete_folder(filepath+"/")
+        if isinstance(filepath, PosixPath):
+            filepath = Path(filepath)
+        # FIXME: This will not work if the directory has a . in it (which is valid in UNIX)
+        # Check if there is a suffix/extension (indicating we're deleting a folder)
+        if filepath.suffix:
+            self.remote_folder.delete_folder(str(filepath)+"/")
             # check if after deleting this folder, the parent directory is empty
             # if so this will delete that parent directory
-            if "/" in filepath:
-                self.delete_HS_folder_if_empty(filepath.split('/', 1)[0], filepath.rsplit('/', 1)[1])
+            # TODO: Delete this or make it recursive and use pathlib
+            # if "/" in filepath:
+            #     self.delete_HS_folder_if_empty(filepath.split('/', 1)[0], filepath.rsplit('/', 1)[1])
         else:
             self.remote_folder.delete_file(filepath)
             # check if after deleting this file, the parent directory is empty
@@ -246,46 +252,28 @@ class Resource:
         if j == 0:
             self.delete_file_or_folder_from_HS(folderpath)
 
-
-    def is_file_in_HS(self, filepath, fileType):
-        """ does a file exist in hs_files """
-        splitPath = filepath.split('/')
-        parentDict = self.hs_files
-        i = 0
-        while i < len(splitPath):
-            j = 0
-            while j < len(parentDict):
-                if parentDict[j]["name"] == splitPath[i]:
-                    if parentDict[j]["type"] == "folder":
-                        parentDict = parentDict[j]["contents"]
+    def is_file_or_folder_in_HS(self, item_path, file_extension=None):
+        """ Checks if a file or folder exists in a HydroShare resource
+            :param item_path the name (sans extension) of the file or folder
+            :param file_extension if a file, the extension of that file
+         """
+        if not isinstance(item_path, PosixPath):
+            item_path = Path(item_path)
+        current_dir_contents = self.hs_files.get('contents')
+        for current_path_part in item_path.parts:
+            found_next_part = False
+            for file_or_folder in current_dir_contents:
+                if file_or_folder["name"] == current_path_part:
+                    if file_or_folder["type"] == "folder":
+                        current_dir_contents = file_or_folder.get('contents')
+                        found_next_part = True
                         break
-                    elif parentDict[j]["type"] == fileType:
+                    elif file_extension is not None and file_or_folder["type"] == file_extension:
                         return True
-                j += 1
-            i += 1
+            if not found_next_part:
+                return False
 
         return False
-
-    def is_folder_in_HS(self, folderpath):
-        """ does a folder exist in hs_files """
-        splitPath = folderpath.split('/')
-        parentDict = self.hs_files
-        i = 0
-        while i < len(splitPath):
-            j = 0
-            found = False
-            while j < len(parentDict):
-                if parentDict[j]["name"] == splitPath[i]:
-                    if parentDict[j]["type"] == "folder":
-                        parentDict = parentDict[j]["contents"]
-                        found = True
-                        break
-                j += 1
-            if found == False:
-                return False
-            i += 1
-
-        return True
 
 
     def overwrite_JH_with_file_from_HS(self, filepath):
@@ -299,21 +287,33 @@ class Resource:
         self.remote_folder.download_file_to_JH(filepath, self.path_prefix)
         self.JH_files = self.get_files_upon_init_JH()
 
-    def overwrite_HS_with_file_from_JH(self, filepath):
+    def overwrite_HS_with_file_from_JH(self, file_path):
         """ overwrites HS file with one from JH """
-        if filepath is not None:
-            pathWithoutType, fileType = filepath.split(".")
-            if self.is_file_in_HS(pathWithoutType, fileType):
-                self.delete_file_or_folder_from_HS(filepath)
-            elif "/" in filepath:
-                folderPath = filepath.rsplit('/', 1)[0]
-                if self.is_folder_in_HS(folderPath) == False:
-                    self.remote_folder.create_folder(folderPath)
+        if str(file_path).startswith('/'):
+            file_path = str(file_path)[1:]
+        full_file_path_rel_resource_root = Path(file_path)
+        file_extension = full_file_path_rel_resource_root.suffix
+        path_without_extension = str(full_file_path_rel_resource_root)[:-len(file_extension)]
+        # Drop the leading . from the file extension
+        file_extension = file_extension[1:]
+        if self.is_file_or_folder_in_HS(path_without_extension, file_extension):
+            try:
+                self.delete_file_or_folder_from_HS(full_file_path_rel_resource_root)
+            except hs_restclient.HydroShareHTTPException as e:
+                logging.error(e)
+                return False
+        folder_path = full_file_path_rel_resource_root.parent
+        if str(folder_path) != '.':
+            if not self.is_file_or_folder_in_HS(folder_path):
+                try:
+                    self.remote_folder.create_folder(folder_path)
+                except hs_restclient.HydroShareHTTPException as e:
+                    logging.error(e)
+                    return False
 
-            self.remote_folder.upload_file_to_HS(self.path_prefix+filepath, filepath)
-            self.hs_files = self.get_files_upon_init_HS()
-        else:
-            logging.info('Missing filepath in call to overwrite')
+        full_src_path = self.path_prefix / str(full_file_path_rel_resource_root)
+        self.remote_folder.upload_file_to_HS(full_src_path, full_file_path_rel_resource_root)
+        self.hs_files = self.get_files_upon_init_HS()
 
     def get_resource_last_modified_time_HS(self):
         # TODO: (Charlie): This may not be necessary -- it's more specific than the dates provided in

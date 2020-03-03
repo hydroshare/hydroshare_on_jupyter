@@ -7,10 +7,11 @@ Email: vickymmcd@gmail.com
 '''
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from hs_restclient import HydroShare, HydroShareAuthBasic
+import hs_restclient
 from login import username, password
 import os
-
+import logging
+import pathlib
 
 
 ''' Class that defines a Remote Folder so we can access attributes of it.
@@ -97,8 +98,16 @@ class RemoteFolder:
         if not os.path.exists(JHfilepath):
             raise Exception(f'Could not find file: {JHfilepath}')
 
-        self.hs.addResourceFile(self.res_id, JHfilepath, HSfilepath)
+        try:
+            self.hs.addResourceFile(self.res_id, str(JHfilepath), str(HSfilepath))
+        except hs_restclient.HydroShareHTTPException as e:
+            logging.error(e)
 
     def create_folder(self, filepath):
-        """ create folder in HS """
+        """ Attempts to create a folder in the HydroShare resource """
+        if isinstance(filepath, pathlib.PosixPath):
+            filepath = str(filepath)
+        # Remove the leading /, if one exists
+        if filepath.startswith('/'):
+            filepath = filepath[1:]
         self.hs.createResourceFolder(self.res_id, pathname=filepath)
