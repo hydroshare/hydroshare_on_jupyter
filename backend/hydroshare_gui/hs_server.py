@@ -162,10 +162,15 @@ class FileHandlerHS(tornado.web.RequestHandler):
     def put(self,res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)
-        if body["request_type"] == "rename_or_move_file":
-            resource.rename_file_HS(body["old_filepath"], body["new_filepath"])
-        elif body["request_type"] == "overwrite_JH":
-            resource.overwrite_JH_with_file_from_HS(body["filepath"])
+        request_type = body.get("request_type")
+        if request_type == "rename_or_move_file":
+            resource.rename_file_HS(body.get("old_filepath"), body.get("new_filepath"))
+        elif request_type == "overwrite_JH":
+            resource.overwrite_JH_with_file_from_HS(body.get("filepath"))
+        else:
+            self.write("Please specify valid request type for PUT")
+            return
+
         resource.update_hs_files()
         self.write({"HS_files": resource.hs_files})
 
