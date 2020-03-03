@@ -32,7 +32,7 @@ enum PATH_PREFIXES {
 interface IFileManagerProps {
   hydroShareResourceRootDir: IFolder
   jupyterHubResourceRootDir: IFolder
-  transferFileFromJupyterHubToHydroShare: (file: IFile) => any
+  transferFileFromJupyterHubToHydroShare: (file: IFile, dest: IFolder) => any
 }
 
 let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
@@ -69,7 +69,7 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
       return;
     }
     if (srcPrefix === PATH_PREFIXES.JUPYTERHUB && destPrefix === PATH_PREFIXES.HYDROSHARE) {
-      props.transferFileFromJupyterHubToHydroShare(srcFileOrFolder);
+      props.transferFileFromJupyterHubToHydroShare(srcFileOrFolder, destFolder);
     }
     console.log(srcFileOrFolder);
     console.log(destFolder);

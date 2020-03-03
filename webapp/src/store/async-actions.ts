@@ -27,12 +27,21 @@ import {
 // TODO: Remove this hardcoding
 const BACKEND_URL = '//localhost:8080';
 
+const FILESYSTEM_PREFIXES = {
+  HydroShare: 'hs',
+  JupyterHub: 'local',
+};
+
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
     return axios.get<T>(BACKEND_URL + endpoint);
 }
-
+/*
 function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
   return axios.put<T>(BACKEND_URL + endpoint, data);
+}
+*/
+function patchToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
+  return axios.patch<T>(BACKEND_URL + endpoint, data);
 }
 
 export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
@@ -106,13 +115,16 @@ export function getResourceHydroShareFiles(resourceId: string) {
   };
 }
 
-export function transferFromJupyterHubToHydroShare(resource: IJupyterResource, source: IFile | IFolder) {
+export function transferFromJupyterHubToHydroShare(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     const data = {
-      request_type: 'overwrite_HS',
-      filepath: source.path,
+      operations: [{
+        method: 'copy',
+        source: FILESYSTEM_PREFIXES.JupyterHub + ':' + source.path,
+        destination: FILESYSTEM_PREFIXES.HydroShare + ':' + destination.path,
+      }],
     };
-    const response = await putToBackend(`/resources/${resource.id}/local-files`, data);
+    const response = await patchToBackend(`/resources/${resource.id}/file-ops`, data);
     console.log(response);
   }
 }

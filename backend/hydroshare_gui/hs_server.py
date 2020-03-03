@@ -27,7 +27,6 @@ class BaseRequestHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")  # TODO: change from * (any server) to our specific url
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, content-type")
-        # TODO: Should this be set per endpoint? (Do all endpoints allow all of these requests?)
         self.set_header('Access-Control-Allow-Methods', 'POST, PUT, GET, DELETE, OPTIONS')
 
     def options(self, _):
@@ -155,20 +154,83 @@ class FileHandlerHS(BaseRequestHandler):
         else:
             self.write("Please specify filepath to delete")
 
-    def put(self, res_id):
+
+HS_PREFIX = 'hs'
+JH_PREFIX = 'local'
+MOVE = 'move'
+COPY = 'copy'
+
+
+class FileOperationHandler(BaseRequestHandler):
+    """ Handles moving (or renaming) files within the local filesystem, on HydroShare, and between the two. """
+
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods', 'PATCH, OPTIONS')
+
+    def patch(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)
-        request_type = body.get("request_type")
-        if request_type == "rename_or_move_file":
-            resource.rename_file_HS(body.get("old_filepath"), body.get("new_filepath"))
-        elif request_type == "overwrite_JH":
-            resource.overwrite_JH_with_file_from_HS(body.get("filepath"))
-        else:
-            self.write("Please specify valid request type for PUT")
-            return
+        file_operations = body['operations']
 
-        resource.update_hs_files()
-        self.write({"rootDir": resource.hs_files})
+        results = []
+        success_count = 0
+        failure_count = 0
+
+        for operation in file_operations:
+            method = operation['method']  # 'copy' or 'move'
+            src_uri = operation['source']
+            dest_uri = operation['destination']
+            do_force = operation.get('force', False)
+
+            # Split paths into filesystem prefix ('hs' or 'local') and path relative to the resource root on
+            # that filesystem
+            src_fs, src_path = src_uri.split(':')
+            dest_fs, dest_path = dest_uri.split(':')
+
+            if src_fs == HS_PREFIX and dest_fs == HS_PREFIX:
+                if method == MOVE:  # Move or rename
+                    resource.rename_or_move_file_HS(src_path, dest_path)
+                    results.append({'success': True})
+                    success_count += 1
+                else:  # TODO: Copy
+                    raise NotImplementedError('Copy within HydroShare not implemented')
+            elif src_fs == JH_PREFIX and dest_fs == JH_PREFIX:
+                # TODO: Move/rename/copy file on local filesystem
+                if method == MOVE:  # Move or rename
+                    resource.rename_or_move_file_JH(src_path, dest_path)
+                    results.append({'success': True})
+                    success_count += 1
+                else:  # Copy
+                    raise NotImplementedError('Copy within the local filesystem not implemented yet')
+            elif src_fs == JH_PREFIX and dest_fs == HS_PREFIX:
+                # Transfer the file regardless of if we're moving or copying
+                # TODO: Support moving from one local folder to a different one on HS
+                resource.overwrite_HS_with_file_from_JH(src_path)
+                if method == MOVE:
+                    # TODO: Delete the local copy of the file
+                    pass
+                results.append({'success': True})
+                success_count += 1
+            elif src_fs == HS_PREFIX and dest_fs == JH_PREFIX:
+                # TODO: Move/copy file from HS to the local filesystem
+                raise NotImplementedError()
+            else:
+                msg = f'"source" prefix "{src_fs}" and/or destination prefix "{dest_fs} not recognized. Valid options' \
+                      f' are "hs" and "local"'
+                logging.warning(msg)
+                results.append({
+                    'success': False,
+                    'error': 'UnrecognizedPathPrefix',
+                    'message': msg,
+                })
+                failure_count += 1
+
+        self.write({
+            'results': results,
+            'successCount': success_count,
+            'failureCount': failure_count,
+        })
 
 
 class UserInfoHandler(BaseRequestHandler):
@@ -203,7 +265,8 @@ def make_app():
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesHandler),
         (r"/resources/([^/]+)/hs-files", FileHandlerHS),
-        (r"/resources/([^/]+)/local-files", FileHandlerJH)
+        (r"/resources/([^/]+)/local-files", FileHandlerJH),
+        (r"/resources/([^/]+)/file-ops", FileOperationHandler),
     ])
 
 

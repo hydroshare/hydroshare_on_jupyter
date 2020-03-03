@@ -52,7 +52,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     toggleSelectedOneLocal: (item: IFile | IFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneLocal(item)),
     openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcePageActions.openFileInJupyterHub(resource, file)),
     toggleSelectedOneHydroShare: (item: IFile | IFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneHydroShare(item)),
-    transferFileFromJupyterHubToHydroShare: (resource: IJupyterResource, file: IFile) => dispatch(transferFromJupyterHubToHydroShare(resource, file)),
+    transferFileFromJupyterHubToHydroShare: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(transferFromJupyterHubToHydroShare(resource, file, destination)),
     searchResourceBy: (searchTerm: string) => dispatch(resourcePageActions.searchResourceBy(searchTerm)),
     sortBy: (sortByTerm: SortByOptions) => dispatch(resourcePageActions.sortBy(sortByTerm)),
     goBackToResources: () => dispatch(push('/')),
@@ -92,8 +92,8 @@ class ResourcePage extends React.Component<PropsType, never> {
     // const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(resource!);
     // const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(resource!);
 
-    const transferFileFromJupyterHubToHydroShare = (f: IFile | IFolder) => {
-      this.props.transferFileFromJupyterHubToHydroShare(resource, f);
+    const transferFileFromJupyterHubToHydroShare = (f: IFile | IFolder, dest: IFolder) => {
+      this.props.transferFileFromJupyterHubToHydroShare(resource, f, dest);
     };
 
     return (
