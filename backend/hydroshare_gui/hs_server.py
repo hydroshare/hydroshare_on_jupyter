@@ -45,7 +45,7 @@ class WebAppHandler(BaseRequestHandler):
 class BundleHandler(BaseRequestHandler):
     """ Serves the web app JavaScript file """
     def get(self):
-        self.render('bundle_link')
+        self.render('bundle.js')
 
 
 class ResourcesHandler(BaseRequestHandler):
