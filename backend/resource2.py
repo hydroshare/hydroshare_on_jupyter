@@ -227,7 +227,7 @@ class Resource:
     def delete_file_or_folder_from_HS(self, filepath):
         """ deletes file or folder from HS """
         # if file path does not contain file (ie: we want to delete folder)
-        if isinstance(filepath, PosixPath):
+        if not isinstance(filepath, PosixPath):
             filepath = Path(filepath)
         # FIXME: This will not work if the directory has a . in it (which is valid in UNIX)
         # Check if there is a suffix/extension (indicating we're deleting a folder)
