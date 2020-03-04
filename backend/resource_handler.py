@@ -15,6 +15,8 @@ import logging
 import glob
 import os
 import json
+import shutil
+
 
 ''' Class that defines a handler for working with all of a user's resources.
 This is where they will be able to delete a resource, create a new one, or
@@ -43,7 +45,8 @@ class ResourceHandler:
         return self.hs.getUserInfo()
 
     def delete_resource_JH(self, res_id):
-        pass
+        JH_resource_path = self.output_folder + "/" + res_id
+        shutil.rmtree(JH_resource_path)
 
     def get_local_JH_resources(self):
         '''Gets dictionary of jupyterhub resources by resource id that are
@@ -89,7 +92,7 @@ class ResourceHandler:
             }
 
         return list(resources.values())
-    
+
     def create_HS_resource(self, resource_title, creators):
         """
         Creates a hydroshare resource from the metadata specified in a dict
@@ -142,10 +145,10 @@ class ResourceHandler:
     def copy_HS_resource(self, og_res_id):
         response = self.hs.resource(og_res_id).copy()
         new_id = response.content.decode("utf-8") # b'id'
-        
+
         # Change name to 'Copy of []'
         title = self.hs.getScienceMetadata(new_id)['title']
         new_title = "Copy of " + title
         self.hs.updateScienceMetadata(new_id, {"title": new_title})
-        
+
         return new_id

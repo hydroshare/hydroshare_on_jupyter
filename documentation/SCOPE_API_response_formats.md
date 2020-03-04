@@ -91,9 +91,15 @@ Example output:
 ```
 
 POSTs to create new empty resource in Hydroshare    
-Payload: 
+Payload:
 ```
 {"title": "title_of_new_resource"}
+```
+
+DELETEs JH Resource
+Frontend payload:
+```
+{"res_id": "resource_id_of_JH_resource_to_delete"}
 ```
 
 # /resources/<resource_id>/hs-files
