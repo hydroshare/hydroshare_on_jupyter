@@ -74,12 +74,14 @@ class Resource:
         '''
 
         self.save_resource_locally()
-        parent_folder_path = Path(self.path_prefix)
-        files = self.local_folder.get_contents_recursive(self.path_prefix, parent_folder_path, JH_PREFIX+':')
+        resource_files_root_path = Path(self.path_prefix)
+        if not resource_files_root_path.exists():
+            resource_files_root_path.mkdir(parents=True)
+        files = self.local_folder.get_contents_recursive(self.path_prefix, resource_files_root_path, JH_PREFIX+':')
         root_dir = {
             "name": "",
             "path": JH_PREFIX + ":/",
-            "sizeBytes": parent_folder_path.stat().st_size,
+            "sizeBytes": resource_files_root_path.stat().st_size,
             "type": "folder",
             "contents": files,
         }
