@@ -7,9 +7,11 @@ import {
   UserInfoActions,
 } from './actions/action-names';
 import {
-  IFileOrFolder,
-  IResourcePageState,
+  FileOrFolderTypes,
+  IFile,
+  IFolder,
   IMainPageState,
+  IResourcePageState,
   IResourcesState,
   IUserInfo,
   ResourcesActionTypes,
@@ -32,6 +34,8 @@ const initResourcePageState: IResourcePageState = {
 const initResourcesState: IResourcesState = {
   searchTerm: '',
   allResources: {},
+  resourceLocalFilesBeingFetched: new Set<string>(),
+  resourceHydroShareFilesBeingFetched: new Set<string>(),
 };
 
 export function resourcePageReducer(state: IResourcePageState = initResourcePageState, action: AnyAction): IResourcePageState {
@@ -42,7 +46,7 @@ export function resourcePageReducer(state: IResourcePageState = initResourcePage
       return {
         ...state,
         allJupyterSelected: doMakeSelected,
-        selectedLocalFilesAndFolders: toggleAllFilesOrFoldersSelected(action.payload.files, doMakeSelected),
+        selectedLocalFilesAndFolders: toggleAllFilesOrFoldersSelected(action.payload.jupyterHubFiles, doMakeSelected),
       };
     case ResourcePageActions.TOGGLE_IS_SELECTED_ALL_HYDROSHARE:
       doMakeSelected = !state.allHydroShareSelected;
@@ -78,20 +82,20 @@ export function resourcePageReducer(state: IResourcePageState = initResourcePage
   }
 }
 
-function toggleAllFilesOrFoldersSelected(files: IFileOrFolder[], doMakeSelected: boolean): Set<string> {
+function toggleAllFilesOrFoldersSelected(rootDir: IFolder, doMakeSelected: boolean): Set<string> {
   if (!doMakeSelected) {
     return new Set();
   }
   let selectedFilesAndFolders: Set<string> = new Set();
-  files.forEach((resourceFileOrFolder: IFileOrFolder) => {
-    selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, resourceFileOrFolder, doMakeSelected);
+  rootDir.contents.forEach((resourceFileOrFolders: IFile | IFolder) => {
+    selectedFilesAndFolders = recursivelySetSelectedState(selectedFilesAndFolders, resourceFileOrFolders, doMakeSelected);
   });
   return selectedFilesAndFolders;
 }
 
-function toggleFileOrFolderSelected(toggledItem: IFileOrFolder, selectedFilesAndFolders: Set<string>): Set<string> {
+function toggleFileOrFolderSelected(toggledItem: IFile | IFolder, selectedFilesAndFolders: Set<string>): Set<string> {
   selectedFilesAndFolders = new Set(selectedFilesAndFolders);
-  const itemWasSelected = selectedFilesAndFolders.has(toggledItem.dirPath + toggledItem.name);
+  const itemWasSelected = selectedFilesAndFolders.has(toggledItem.path + toggledItem.name);
   return recursivelySetSelectedState(selectedFilesAndFolders, toggledItem, !itemWasSelected);
 }
 
@@ -125,24 +129,31 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
     case ResourcesActions.SET_RESOURCE_LOCAL_FILES:
       const {
         resourceId,
-        files,
+        rootDir,
       } = action.payload;
+      rootDir.contents = recursivelyConvertDatesToMoment(rootDir.contents);
+      let resourceLocFilesBeingFetched = new Set(Array.from(state.resourceHydroShareFilesBeingFetched));
+      resourceLocFilesBeingFetched.delete(action.payload.resourceId);
       return {
         ...state,
         allResources: {
           ...state.allResources,
           [resourceId]: {
             ...state.allResources[resourceId],
-            files: recursivelyConvertDatesToMoment(files),
+            jupyterHubFiles: rootDir,
           },
         },
+        resourceLocalFilesBeingFetched: resourceLocFilesBeingFetched,
       };
     case ResourcesActions.SET_RESOURCE_HYDROSHARE_FILES:
       const {
         resourceId: resId,
-        files: f,
+        rootDir: rDir,
       } = action.payload;
 
+      rDir.contents = recursivelyConvertDatesToMoment(rDir.contents);
+      let resourceHSFilesBeingFetched = new Set(Array.from(state.resourceHydroShareFilesBeingFetched));
+      resourceHSFilesBeingFetched.delete(action.payload.resourceId);
       return {
         ...state,
         allResources: {
@@ -151,19 +162,36 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
             ...state.allResources[resId],
             hydroShareResource: {
               ...state.allResources[resId].hydroShareResource,
-              files: recursivelyConvertDatesToMoment(f),
+              files: rDir,
             },
           },
         },
+        resourceLocalFilesBeingFetched: resourceHSFilesBeingFetched,
+      };
+    case ResourcesActions.NOTIFY_GETTING_RESOURCE_HYDROSHARE_FILES:
+      let resourceHydroShareFilesBeingFetched = new Set(Array.from(state.resourceHydroShareFilesBeingFetched));
+      resourceHydroShareFilesBeingFetched.add(action.payload.resourceId);
+      return {
+        ...state,
+        resourceHydroShareFilesBeingFetched,
+      };
+    case ResourcesActions.NOTIFY_GETTING_RESOURCE_JUPYTERHUB_FILES:
+      let resourceLocalFilesBeingFetched = new Set(Array.from(state.resourceLocalFilesBeingFetched));
+      resourceLocalFilesBeingFetched.add(action.payload.resourceId);
+      return {
+        ...state,
+        resourceLocalFilesBeingFetched,
       };
     default:
       return state;
   }
 }
 
-function recursivelyConvertDatesToMoment(files: IFileOrFolder[]) {
+function recursivelyConvertDatesToMoment(files: (IFile | IFolder)[]) {
   return files.map(fileOrFolder => {
-    fileOrFolder.lastModified = moment(fileOrFolder.lastModified);
+    if (fileOrFolder.lastModified) {
+      fileOrFolder.lastModified = moment(fileOrFolder.lastModified);
+    }
     return fileOrFolder;
   });
 }
@@ -180,16 +208,17 @@ export function userDataReducer(state: IUserInfo, action: UserActionTypes): IUse
   }
 }
 
-function recursivelySetSelectedState(selections: Set<string>, item: IFileOrFolder, makeSelected: boolean): Set<string> {
-  const itemPath = item.dirPath + item.name;
+function recursivelySetSelectedState(selections: Set<string>, item: IFile | IFolder, makeSelected: boolean): Set<string> {
+  const itemPath = item.path + item.name;
   if (makeSelected) {
     selections.add(itemPath);
   } else {
     selections.delete(itemPath);
   }
-  // Check if this is a folder with child files and/or folders
-  if (item.contents) {
-    item.contents.forEach(childItem => {
+
+  if (item.type === FileOrFolderTypes.FOLDER) {
+    const folder = item as IFolder;
+    folder.contents.forEach(childItem => {
       selections = recursivelySetSelectedState(selections, childItem, makeSelected);
     });
   }
