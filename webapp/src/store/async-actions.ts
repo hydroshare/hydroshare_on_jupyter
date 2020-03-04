@@ -132,7 +132,7 @@ function performFileOperation(resource: IJupyterResource, source: IFile | IFolde
         destination: destination.path,
       }],
     };
-    const response = await patchToBackend<IFileOperationsRequestResponse>(`/resources/${resource.id}/file-ops`, data);
+    const response = await patchToBackend<IFileOperationsRequestResponse>(`/resources/${resource.id}/move-copy-files`, data);
     const {
       successCount,
     } = response.data;
