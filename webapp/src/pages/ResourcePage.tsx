@@ -5,18 +5,22 @@ import { push } from 'connected-react-router';
 
 import '../styles/ResourcePage.scss';
 
-import FilterBarResource from '../components/FilterBarResource';
-import FileList from '../components/FileList';
+import FileManager from "../components/FileManager";
+import ResourceMetadataDisplay from '../components/ResourceMetadataDisplay';
 
 import * as resourcePageActions from '../store/actions/ResourcePage';
+import * as resourcesActions from '../store/actions/resources';
 import {
-  IFileOrFolder,
+  copyFileOrFolder,
+  moveFileOrFolder,
+} from '../store/async-actions';
+import {
+  IFile,
+  IFolder,
   IJupyterResource,
   IRootState,
   SortByOptions,
 } from '../store/types';
-import ResourceMetadataDisplay from '../components/ResourceMetadataDisplay';
-import FileManager from "../components/FileManager";
 
 const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
   // Extract the resource ID from the URL
@@ -44,12 +48,14 @@ const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
-    getFilesIfNeeded: (resource: IJupyterResource) => dispatch(resourcePageActions.getFilesIfNeeded(resource)),
+    getFilesIfNeeded: (resource: IJupyterResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
     toggleSelectedAllLocal: (resource: IJupyterResource) => dispatch(resourcePageActions.toggleIsSelectedAllLocal(resource)),
     toggleSelectedAllHydroShare: (resource: IJupyterResource) => dispatch(resourcePageActions.toggleIsSelectedAllHydroShare(resource)),
-    toggleSelectedOneLocal: (item: IFileOrFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneLocal(item)),
-    openFile: (resource: IJupyterResource, file: IFileOrFolder) => dispatch(resourcePageActions.openFileInJupyterHub(resource, file)),
-    toggleSelectedOneHydroShare: (item: IFileOrFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneHydroShare(item)),
+    toggleSelectedOneLocal: (item: IFile | IFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneLocal(item)),
+    openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcePageActions.openFileInJupyterHub(resource, file)),
+    toggleSelectedOneHydroShare: (item: IFile | IFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneHydroShare(item)),
+    copyFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
+    moveFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
     searchResourceBy: (searchTerm: string) => dispatch(resourcePageActions.searchResourceBy(searchTerm)),
     sortBy: (sortByTerm: SortByOptions) => dispatch(resourcePageActions.sortBy(sortByTerm)),
     goBackToResources: () => dispatch(push('/')),
@@ -60,18 +66,16 @@ type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispa
 
 class ResourcePage extends React.Component<PropsType, never> {
 
-  public componentDidMount = (): void => {
-    if (this.props.resource) {
-      this.props.getFilesIfNeeded(this.props.resource);
-    }
-  };
-
   public handleSearchChange = (event: any) => {
     this.props.searchResourceBy(event.target.value)
   }
 
   public render() {
-    if (!this.props.resource) {
+    const {
+      resource,
+    } = this.props;
+
+    if (!resource) {
       return (
         <div className="page resource-details">
           <div className="no-resource">
@@ -82,50 +86,31 @@ class ResourcePage extends React.Component<PropsType, never> {
       );
     }
 
-    const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(this.props.resource!);
-    const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(this.props.resource!);
-    
+    this.props.getFilesIfNeeded(resource);
 
-    const {
-      hydroShareResource,
-    } = this.props.resource;
-    const openFile = (file: IFileOrFolder) => this.props.openFile(this.props.resource!, file);
-    const hydroShareFiles = hydroShareResource ? (
-        <FileList
-            allSelected={this.props.allHydroShareSelected}
-            files={hydroShareResource.files}
-            selectedFilesAndFolders={this.props.selectedHydroShareFilesAndFolders}
-            searchTerm={this.props.searchTerm}
-            sortBy={this.props.sortByTerm}
-            toggleAllSelected={toggleAllHydroShareSelected}
-            hydroShare={true}
-        />
-    ) : null;
+    // const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(resource!);
+    // const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(resource!);
 
-    const fileListContainerClasses = 'file-lists ' + (hydroShareResource ? 'split' : 'single');
+    const copyFileOrFolder = (f: IFile | IFolder, dest: IFolder) => {
+      this.props.copyFileOrFolder(resource, f, dest);
+    };
+
+    const moveFileOrFolder = (f: IFile | IFolder, dest: IFolder) => {
+      this.props.moveFileOrFolder(resource, f, dest);
+    };
+
+    const openFile = (file: IFile) => this.props.openFile(resource, file);
 
     return (
       <div className="page resource-details">
         {/*<a className="go-back" onClick={this.props.goBackToResources}>&lt; Back to resources</a>*/}
-        <ResourceMetadataDisplay resource={this.props.resource} />
-        <FilterBarResource allSelected={this.props.allJupyterSelected}
-                           toggleAllSelected={toggleAllLocalSelected} searchChange={this.handleSearchChange} sortBy={this.props.sortBy}/>
-        <div className={fileListContainerClasses}>
-          <FileList
-            allSelected={this.props.allJupyterSelected}
-            toggleAllSelected={toggleAllLocalSelected}
-            files={this.props.resource.files}
-            onFileOrFolderSelected={openFile}
-            selectedFilesAndFolders={this.props.selectedLocalFilesAndFolders}
-            sortBy={this.props.sortByTerm}
-            searchTerm={this.props.searchTerm}
-            hydroShare={false}
-          />
-          {hydroShareFiles}
-        </div>
+        <ResourceMetadataDisplay resource={resource} />
         <FileManager
-          hydroShareFilesAndFolders={hydroShareResource.files}
-          jupyterHubFilesAndFolders={this.props.resource.files}
+          hydroShareResourceRootDir={resource.hydroShareResource.files}
+          jupyterHubResourceRootDir={resource.jupyterHubFiles}
+          openFile={openFile}
+          copyFileOrFolder={copyFileOrFolder}
+          moveFileOrFolder={moveFileOrFolder}
         />
       </div>
     )

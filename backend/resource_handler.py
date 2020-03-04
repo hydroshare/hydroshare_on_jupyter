@@ -15,6 +15,8 @@ import logging
 import glob
 import os
 import json
+import shutil
+
 
 ''' Class that defines a handler for working with all of a user's resources.
 This is where they will be able to delete a resource, create a new one, or
@@ -36,6 +38,7 @@ class ResourceHandler:
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
             logging.info("Made {} folder for new resources".format(self.output_folder))
+        self.resources = self.get_list_of_user_resources_upon_init()
 
     def get_user_info(self):
         '''Gets information about the user currently logged into HS
@@ -43,7 +46,8 @@ class ResourceHandler:
         return self.hs.getUserInfo()
 
     def delete_resource_JH(self, res_id):
-        pass
+        JH_resource_path = self.output_folder + "/" + res_id
+        shutil.rmtree(JH_resource_path)
 
     def get_local_JH_resources(self):
         '''Gets dictionary of jupyterhub resources by resource id that are
@@ -60,11 +64,11 @@ class ResourceHandler:
 
         return res_ids
 
-    def get_list_of_user_resources(self): # TODO (Vicky): Cache this info
+    def get_list_of_user_resources_upon_init(self):
         '''Gets list of all the resources for the logged in user, including
         those stored on hydroshare and those stored locally on jupyterhub
         and information about each one including whether HS ones are stored
-        locally.
+        locally. Saves this info to be returned quickly in the future.
 
         Assumes there are no local resources that don't exist in HS
         '''
@@ -72,13 +76,13 @@ class ResourceHandler:
         is_local = False # referenced later when checking if res is local
 
         # Get local res_ids
-        local_res_ids = self.get_local_JH_resources()
+        self.local_res_ids = self.get_local_JH_resources()
         # Get the user's resources from HydroShare
         user_hs_resources = self.hs.resources(owner=username)
         for res in user_hs_resources:
             res_id = res['resource_id']
             # check if local
-            if res_id in local_res_ids:
+            if res_id in self.local_res_ids:
                 is_local = True
 
             resources[res_id] = {
@@ -89,7 +93,15 @@ class ResourceHandler:
             }
 
         return list(resources.values())
-    
+
+    def get_list_of_user_resources(self):
+        '''Returns list of all the resources for the logged in user, including
+        those stored on hydroshare and those stored locally on jupyterhub
+        and information about each one including whether HS ones are stored
+        locally.
+        '''
+        return self.resources
+
     def create_HS_resource(self, resource_title, creators):
         """
         Creates a hydroshare resource from the metadata specified in a dict
@@ -137,15 +149,40 @@ class ResourceHandler:
                                             metadata = metadata['metadata'],
                                             extra_metadata=metadata['extra_metadata'])
 
+        if resource_id in self.local_res_ids:
+            is_local = True
+        else:
+            is_local = False
+
+        self.resources.append({
+            'id': resource_id,
+            'title': metadata["title"],
+            'hydroShareResource': self.hs.getSystemMetadata(resource_id), # includes privacy info under 'public'
+            'localCopyExists': is_local,
+        })
+
         return resource_id
 
     def copy_HS_resource(self, og_res_id):
         response = self.hs.resource(og_res_id).copy()
         new_id = response.content.decode("utf-8") # b'id'
-        
+
+        # TODO: before doing this should we rename any existing local version to have the new ID??
+        if new_id in self.local_res_ids:
+            is_local = True
+        else:
+            is_local = False
+
         # Change name to 'Copy of []'
         title = self.hs.getScienceMetadata(new_id)['title']
         new_title = "Copy of " + title
         self.hs.updateScienceMetadata(new_id, {"title": new_title})
-        
+
+        self.resources.append({
+            'id': new_id,
+            'title': new_title,
+            'hydroShareResource': self.hs.getSystemMetadata(new_id), # includes privacy info under 'public'
+            'localCopyExists': is_local,
+        })
+
         return new_id
