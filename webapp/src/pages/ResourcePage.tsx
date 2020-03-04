@@ -99,6 +99,8 @@ class ResourcePage extends React.Component<PropsType, never> {
       this.props.moveFileOrFolder(resource, f, dest);
     };
 
+    const openFile = (file: IFile) => this.props.openFile(resource, file);
+
     return (
       <div className="page resource-details">
         {/*<a className="go-back" onClick={this.props.goBackToResources}>&lt; Back to resources</a>*/}
@@ -106,6 +108,7 @@ class ResourcePage extends React.Component<PropsType, never> {
         <FileManager
           hydroShareResourceRootDir={resource.hydroShareResource.files}
           jupyterHubResourceRootDir={resource.jupyterHubFiles}
+          openFile={openFile}
           copyFileOrFolder={copyFileOrFolder}
           moveFileOrFolder={moveFileOrFolder}
         />

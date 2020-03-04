@@ -29,6 +29,7 @@ interface IFileManagerProps {
   jupyterHubResourceRootDir: IFolder
   copyFileOrFolder: (src: IFile, dest: IFolder) => any
   moveFileOrFolder: (src: IFile, dest: IFolder) => any
+  openFile: (file: IFile) => any
 }
 
 let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
@@ -79,10 +80,10 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
   fileOrFolderLookupTable.clear();
 
   const hydroShareFilePane = props.hydroShareResourceRootDir ? (
-    <FilePane droppableId={hydroShareResourceRootDir.path} rootDir={hydroShareResourceRootDir}/>
+    <FilePane droppableId={hydroShareResourceRootDir.path} rootDir={hydroShareResourceRootDir} openFile={props.openFile}/>
   ) : null;
   const jupyterHubFilePane = props.jupyterHubResourceRootDir ? (
-    <FilePane droppableId={jupyterHubResourceRootDir.path} rootDir={jupyterHubResourceRootDir}/>
+    <FilePane droppableId={jupyterHubResourceRootDir.path} rootDir={jupyterHubResourceRootDir} openFile={props.openFile}/>
   ) : null;
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -97,6 +98,7 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
 interface IFilePaneProps {
   rootDir: IFolder
   droppableId: string
+  openFile: (f: IFile) => any
 }
 
 const getDroppableStyles = (snapshot: DroppableStateSnapshot, nestLevel: number = 0) => {
@@ -112,15 +114,27 @@ const getDraggableStyles = (snapshot: DraggableStateSnapshot, nestLevel: number 
   };
 };
 
-const generateTableCell = (content: ReactElement | string | number | moment.Moment, nestLevel: number = 0) => {
+const generateTableCell = (content: ReactElement | string | number | moment.Moment, nestLevel: number = 0, onClick: any = undefined) => {
   const style = {
     paddingLeft: `${nestLevel * 5}px`,
   };
   const tooltip = typeof content === 'string' ? content : undefined;
+  const classNames: Array<string> = [];
+  if (onClick) {
+    classNames.push('clickable');
+  }
   if (moment.isMoment(content)) {
-    return <div title={tooltip}><span style={style}>{content.format('MMM D, YYYY')}</span></div>
+    return (
+      <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
+        <span style={style}>{content.format('MMM D, YYYY')}</span>
+      </div>
+    );
   } else {
-    return <div title={tooltip}><span style={style}>{content}</span></div>;
+    return (
+      <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
+        <span style={style}>{content}</span>
+      </div>
+    );
   }
 };
 
@@ -130,7 +144,7 @@ const generateCheckBox = () => {
   );
 };
 
-const generateFolderElement = (folder: IFolder, index: number, nestLevel: number = 0) => {
+const generateFolderElement = (folder: IFolder, index: number, openFile: (f: IFile) => any, nestLevel: number = 0) => {
   fileOrFolderLookupTable.set(folder.path, folder);
   const folderLineItem = (
     <Draggable draggableId={folder.path} index={0} key={folder.path}>
@@ -153,7 +167,7 @@ const generateFolderElement = (folder: IFolder, index: number, nestLevel: number
   );
 
   const folderContentsLineItems = folder.contents?.map((item, idx) =>
-    generateFileOrFolderElement(item, idx+1,nestLevel+1));
+    generateFileOrFolderElement(item, idx+1, openFile,nestLevel+1));
 
   return (
     <Droppable droppableId={folder.path} key={folder.path}>
@@ -172,8 +186,9 @@ const generateFolderElement = (folder: IFolder, index: number, nestLevel: number
   );
 };
 
-const generateFileElement = (item: IFile | IFolder, index: number, nestLevel: number = 0) => {
+const generateFileElement = (item: IFile, index: number, openFile: (f: IFile) => any, nestLevel: number = 0) => {
   fileOrFolderLookupTable.set(item.path, item);
+  const onClick = () => openFile(item);
   return (
     <Draggable draggableId={item.path} index={index} key={item.path}>
       {(provided, snapshot) => (
@@ -185,7 +200,7 @@ const generateFileElement = (item: IFile | IFolder, index: number, nestLevel: nu
           {...provided.dragHandleProps}
         >
           {generateTableCell(generateCheckBox())}
-          {generateTableCell(item.name, nestLevel)}
+          {generateTableCell(item.name, nestLevel, onClick)}
           {generateTableCell(item.type)}
           {generateTableCell(getFormattedSizeString(item.sizeBytes))}
           {generateTableCell(item.lastModified || 'Unknown')}
@@ -195,11 +210,11 @@ const generateFileElement = (item: IFile | IFolder, index: number, nestLevel: nu
   );
 };
 
-const generateFileOrFolderElement = (item: IFile | IFolder, index: number, nestLevel: number = 0) => {
+const generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: (f: IFile) => IFile, nestLevel: number = 0) => {
   if (item.type === FileOrFolderTypes.FOLDER) {
-    return generateFolderElement(item as IFolder, index, nestLevel);
+    return generateFolderElement(item as IFolder, index, openFile, nestLevel);
   } else {
-    return generateFileElement(item as IFile, index, nestLevel);
+    return generateFileElement(item as IFile, index, openFile, nestLevel);
   }
 };
 
@@ -228,7 +243,7 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-            {props.rootDir?.contents.map((item, idx) => generateFileOrFolderElement(item, idx))}
+            {props.rootDir?.contents.map((item, idx) => generateFileOrFolderElement(item, idx, props.openFile))}
             {provided.placeholder}
           </div>
         )}
