@@ -17,6 +17,7 @@ import {
 } from './actions/user';
 import {
   IFile,
+  IFileOperationsRequestResponse,
   IFolder,
   IJupyterResource,
   IResourceFilesData,
@@ -26,11 +27,6 @@ import {
 
 // TODO: Remove this hardcoding
 const BACKEND_URL = '//localhost:8080';
-
-const FILESYSTEM_PREFIXES = {
-  HydroShare: 'hs',
-  JupyterHub: 'local',
-};
 
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
     return axios.get<T>(BACKEND_URL + endpoint);
@@ -115,16 +111,31 @@ export function getResourceHydroShareFiles(resourceId: string) {
   };
 }
 
-export function transferFromJupyterHubToHydroShare(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder) {
+export function copyFileOrFolder(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder) {
+  return performFileOperation(resource, source, destination, 'copy');
+}
+
+export function moveFileOrFolder(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder) {
+  return performFileOperation(resource, source, destination, 'move');
+}
+
+function performFileOperation(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder, method: 'move' | 'copy') {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     const data = {
       operations: [{
         method: 'copy',
-        source: FILESYSTEM_PREFIXES.JupyterHub + ':' + source.path,
-        destination: FILESYSTEM_PREFIXES.HydroShare + ':' + destination.path,
+        source: source.path,
+        destination: destination.path,
       }],
     };
-    const response = await patchToBackend(`/resources/${resource.id}/file-ops`, data);
-    console.log(response);
+    const response = await patchToBackend<IFileOperationsRequestResponse>(`/resources/${resource.id}/file-ops`, data);
+    const {
+      successCount,
+    } = response.data;
+    if (successCount > 0) {
+      // We could check to see if we need to refresh both lists
+      dispatch(getResourceLocalFiles(resource.id));
+      dispatch(getResourceHydroShareFiles(resource.id));
+    }
   }
 }

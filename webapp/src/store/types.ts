@@ -132,3 +132,12 @@ export interface ICreateResourceRequest {
   name: string,
   privacy: string
 }
+
+export interface IFileOperationsRequestResponse {
+  failureCount: number
+  results: [{
+    success: boolean
+    error?: string
+  }]
+  successCount: number
+}

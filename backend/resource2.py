@@ -20,6 +20,10 @@ import hs_restclient
 from pathlib import *
 import shutil
 
+HS_PREFIX = 'hs'
+JH_PREFIX = 'local'
+
+
 ''' Class that defines a Hydroshare resource & it's associated files that
 are local to Jupyterhub.
 '''
@@ -71,10 +75,10 @@ class Resource:
 
         self.save_resource_locally()
         parent_folder_path = Path(self.path_prefix)
-        files = self.local_folder.get_contents_recursive(self.path_prefix, parent_folder_path)
+        files = self.local_folder.get_contents_recursive(self.path_prefix, parent_folder_path, JH_PREFIX+':')
         root_dir = {
             "name": "",
-            "path": "/",
+            "path": JH_PREFIX + ":/",
             "sizeBytes": parent_folder_path.stat().st_size,
             "type": "folder",
             "contents": files,
@@ -103,7 +107,8 @@ class Resource:
             # extract filepath from url
             filepath = file_info["url"][len(url_prefix)+1:]
             # get proper definition formatting of file if it is a file
-            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info["size"])
+            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info["size"],
+                                                                      HS_PREFIX+':')
             # if it is a folder, build up contents
             if not file_definition_hs:
                 nested_files[filepath + "/"] = file_info
@@ -127,10 +132,11 @@ class Resource:
             # (level 0); folders at levels 1, 2, etc. will be built into the
             # result by means of the recursive calls
             if key[0] == 0:
-                folder_size, folder_contents = self.remote_folder.get_contents_recursive(val, folders_dict, nested_files)
+                folder_size, folder_contents = self.remote_folder.get_contents_recursive(val, folders_dict,
+                                                                                         nested_files, HS_PREFIX+':')
                 folders_final.append({
                     "name": key[1],
-                    "path": '/' + key[2].strip('/'),
+                    "path": HS_PREFIX + ':/' + key[2].strip('/'),
                     "sizeBytes": folder_size,
                     "type": "folder",
                     "contents": folder_contents,
@@ -142,7 +148,7 @@ class Resource:
 
         root_dir = {
             "name": "",
-            "path": "/",
+            "path": HS_PREFIX + ":/",
             "sizeBytes": rootsize,
             "type": "folder",
             "contents": folders_final,

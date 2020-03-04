@@ -12,7 +12,7 @@ import signal
 import logging
 import sys
 import json
-from resource2 import Resource
+from resource2 import Resource, HS_PREFIX, JH_PREFIX
 from resource_handler import ResourceHandler
 
 import tornado.ioloop
@@ -155,8 +155,6 @@ class FileHandlerHS(BaseRequestHandler):
             self.write("Please specify filepath to delete")
 
 
-HS_PREFIX = 'hs'
-JH_PREFIX = 'local'
 MOVE = 'move'
 COPY = 'copy'
 

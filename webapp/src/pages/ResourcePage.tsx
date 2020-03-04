@@ -9,8 +9,10 @@ import FileManager from "../components/FileManager";
 import ResourceMetadataDisplay from '../components/ResourceMetadataDisplay';
 
 import * as resourcePageActions from '../store/actions/ResourcePage';
+import * as resourcesActions from '../store/actions/resources';
 import {
-  transferFromJupyterHubToHydroShare,
+  copyFileOrFolder,
+  moveFileOrFolder,
 } from '../store/async-actions';
 import {
   IFile,
@@ -46,13 +48,14 @@ const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
-    getFilesIfNeeded: (resource: IJupyterResource) => dispatch(resourcePageActions.getFilesIfNeeded(resource)),
+    getFilesIfNeeded: (resource: IJupyterResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
     toggleSelectedAllLocal: (resource: IJupyterResource) => dispatch(resourcePageActions.toggleIsSelectedAllLocal(resource)),
     toggleSelectedAllHydroShare: (resource: IJupyterResource) => dispatch(resourcePageActions.toggleIsSelectedAllHydroShare(resource)),
     toggleSelectedOneLocal: (item: IFile | IFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneLocal(item)),
     openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcePageActions.openFileInJupyterHub(resource, file)),
     toggleSelectedOneHydroShare: (item: IFile | IFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneHydroShare(item)),
-    transferFileFromJupyterHubToHydroShare: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(transferFromJupyterHubToHydroShare(resource, file, destination)),
+    copyFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
+    moveFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
     searchResourceBy: (searchTerm: string) => dispatch(resourcePageActions.searchResourceBy(searchTerm)),
     sortBy: (sortByTerm: SortByOptions) => dispatch(resourcePageActions.sortBy(sortByTerm)),
     goBackToResources: () => dispatch(push('/')),
@@ -92,8 +95,12 @@ class ResourcePage extends React.Component<PropsType, never> {
     // const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(resource!);
     // const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(resource!);
 
-    const transferFileFromJupyterHubToHydroShare = (f: IFile | IFolder, dest: IFolder) => {
-      this.props.transferFileFromJupyterHubToHydroShare(resource, f, dest);
+    const copyFileOrFolder = (f: IFile | IFolder, dest: IFolder) => {
+      this.props.copyFileOrFolder(resource, f, dest);
+    };
+
+    const moveFileOrFolder = (f: IFile | IFolder, dest: IFolder) => {
+      this.props.moveFileOrFolder(resource, f, dest);
     };
 
     return (
@@ -103,7 +110,8 @@ class ResourcePage extends React.Component<PropsType, never> {
         <FileManager
           hydroShareResourceRootDir={resource.hydroShareResource.files}
           jupyterHubResourceRootDir={resource.jupyterHubFiles}
-          transferFileFromJupyterHubToHydroShare={transferFileFromJupyterHubToHydroShare}
+          copyFileOrFolder={copyFileOrFolder}
+          moveFileOrFolder={moveFileOrFolder}
         />
       </div>
     )

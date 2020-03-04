@@ -4,10 +4,6 @@ import {
     ResourcesActions,
 } from './action-names';
 import {
-    getResourceLocalFiles,
-    getResourceHydroShareFiles,
-} from '../async-actions';
-import {
     ICreateResourceRequest,
     IFile,
     IFolder,
@@ -17,20 +13,8 @@ import {
 } from '../types';
 import { AnyAction } from 'redux';
 import {
-    ThunkAction,
     ThunkDispatch,
 } from "redux-thunk";
-
-export function getFilesIfNeeded(resource: IJupyterResource): ThunkAction<Promise<void>, {}, {}, AnyAction> {
-    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-        if (resource && !resource.jupyterHubFiles) {
-            dispatch(getResourceLocalFiles(resource.id));
-        }
-        if (resource && resource.hydroShareResource && !resource.hydroShareResource.files) {
-            dispatch(getResourceHydroShareFiles(resource.id));
-        }
-    };
-}
 
 export function openFileInJupyterHub(jupyterResource: IJupyterResource, file: IFile | IFolder) {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {

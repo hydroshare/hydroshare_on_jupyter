@@ -18,7 +18,7 @@ from pathlib import *
 '''
 class LocalFolder:
 
-    def get_contents_recursive(self, folderpath, resource_data_root_dir):
+    def get_contents_recursive(self, folderpath, resource_data_root_dir, path_prefix):
         """Uses recursion to get & properly nest contents of folders stored locally
         """
         # get all the files in the folder
@@ -30,7 +30,7 @@ class LocalFolder:
         files2 = []
         for filepath in files:
             # check contents recursively:
-            folder_contents = self.get_contents_recursive(filepath, resource_data_root_dir)
+            folder_contents = self.get_contents_recursive(filepath, resource_data_root_dir, path_prefix)
             
             # Populate info:
             dirpath = Path(filepath)
@@ -55,7 +55,7 @@ class LocalFolder:
             if file_type == "folder":
                 files2.append({
                     "name": filename,
-                    "path": path_rel_resource_root,
+                    "path": path_prefix + path_rel_resource_root,
                     "sizeBytes": dirpath.stat().st_size,
                     "type": file_type,
                     "contents": folder_contents,
@@ -64,7 +64,7 @@ class LocalFolder:
             else:
                 files2.append({
                     "name": filename,
-                    "path": path_rel_resource_root,
+                    "path": path_prefix + path_rel_resource_root,
                     "sizeBytes": dirpath.stat().st_size,
                     "type": file_type,
                 })
