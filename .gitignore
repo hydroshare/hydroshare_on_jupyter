@@ -1,7 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+login.py
+
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.js
 
@@ -17,6 +19,20 @@
 .env.development.local
 .env.test.local
 .env.production.local
+__pycache__/*
+backend/login.py
+backend/hydroshare_gui/login.py
+backend/hydroshare_gui/backend/tests/hs_resources
+backend/hs_resources/
+backend/hydroshare_gui/__pycache__/*
+backend/hydroshare_gui/local_hs_resources
+documentation/Jupyter_Install.md
+backend/test_delete.md
+backend/charlie_status.md
+backend/charlie_tests.py
+
+webapp/build/*
+bundle.js
 
 npm-debug.log*
 yarn-debug.log*
@@ -24,3 +40,5 @@ yarn-error.log*
 
 # WebStorm
 .idea/
+*.pyc
+*.ipynb_checkpoints
