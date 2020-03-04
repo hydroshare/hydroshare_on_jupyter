@@ -41,5 +41,9 @@
         border-left: $border-style;
       }
     }
+
+    .clickable {
+      cursor: pointer;
+    }
   }
 }
