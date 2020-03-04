@@ -248,6 +248,12 @@ const HUMAN_READABLE_FILE_SIZES = [
 
 // TODO: Write some unit tests
 const getFormattedSizeString = (sizeBytes: number): string => {
+  if (sizeBytes === undefined || sizeBytes === null) {
+    return 'Unknown';
+  }
+  if (sizeBytes === 0) {
+    return '0B';
+  }
   const log10 = Math.log10(sizeBytes);
   const labelIndex = Math.floor(log10 / 3);
   const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, log10));
