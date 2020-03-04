@@ -12,7 +12,7 @@ import signal
 import logging
 import sys
 import json
-from resource2 import Resource, HS_PREFIX, JH_PREFIX
+from resource2 import Resource, HS_PREFIX, LOCAL_PREFIX
 from resource_handler import ResourceHandler
 
 import tornado.ioloop
@@ -183,7 +183,8 @@ class MoveCopyFiles(BaseRequestHandler):
             src_path = src_path[1:]
             dest_path = dest_path[1:]
 
-            if src_fs == HS_PREFIX and dest_fs == HS_PREFIX:
+            # Exactly what operation we perform depends on where the source and destination files/folders are
+            if src_fs == HS_PREFIX and dest_fs == HS_PREFIX:  # Move/copy within HydroShare
                 if method == MOVE:  # Move or rename
                     # TODO: Test how well this works
                     resource.rename_or_move_file_HS(src_path, dest_path)
@@ -191,7 +192,7 @@ class MoveCopyFiles(BaseRequestHandler):
                     success_count += 1
                 else:  # TODO: Copy
                     raise NotImplementedError('Copy within HydroShare not implemented')
-            elif src_fs == JH_PREFIX and dest_fs == JH_PREFIX:
+            elif src_fs == LOCAL_PREFIX and dest_fs == LOCAL_PREFIX:  # Move/copy within the local filesystem
                 # TODO: Move/rename/copy file on local filesystem
                 if method == MOVE:  # Move or rename
                     resource.rename_or_move_file_JH(src_path, dest_path)
@@ -199,7 +200,7 @@ class MoveCopyFiles(BaseRequestHandler):
                     success_count += 1
                 else:  # Copy
                     raise NotImplementedError('Copy within the local filesystem not implemented yet')
-            elif src_fs == JH_PREFIX and dest_fs == HS_PREFIX:
+            elif src_fs == LOCAL_PREFIX and dest_fs == HS_PREFIX:  # Move/copy from the local filesystem to HydroShare
                 # Transfer the file regardless of if we're moving or copying
                 # TODO: Support moving from one local folder to a different one on HS
                 resource.overwrite_HS_with_file_from_JH(src_path)
@@ -208,7 +209,7 @@ class MoveCopyFiles(BaseRequestHandler):
                     pass
                 results.append({'success': True})
                 success_count += 1
-            elif src_fs == HS_PREFIX and dest_fs == JH_PREFIX:
+            elif src_fs == HS_PREFIX and dest_fs == LOCAL_PREFIX:  # Move/copy from HydroShare to the local filesystem
                 # Transfer the file regardless of if we're moving or copying
                 # TODO: Support moving from one HS folder to a different one locally
                 resource.overwrite_JH_with_file_from_HS(src_path)
