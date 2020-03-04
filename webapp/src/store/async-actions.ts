@@ -8,6 +8,8 @@ import {
 } from 'redux-thunk';
 
 import {
+  notifyGettingResourceHydroShareFiles,
+  notifyGettingResourceJupyterHubFiles,
   setResourceLocalFiles,
   setResourceHydroShareFiles,
   setResources,
@@ -16,6 +18,10 @@ import {
     setUserInfo,
 } from './actions/user';
 import {
+  IFile,
+  IFileOperationsRequestResponse,
+  IFolder,
+  IJupyterResource,
   IResourceFilesData,
   IResourcesData,
   IUserInfoData,
@@ -26,6 +32,14 @@ const BACKEND_URL = '//localhost:8080';
 
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
     return axios.get<T>(BACKEND_URL + endpoint);
+}
+/*
+function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
+  return axios.put<T>(BACKEND_URL + endpoint, data);
+}
+*/
+function patchToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
+  return axios.patch<T>(BACKEND_URL + endpoint, data);
 }
 
 export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
@@ -73,28 +87,59 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
     };
 }
 
-export function getResourceLocalFiles(resourceId: string) {
+export function getResourceLocalFiles(resource: IJupyterResource) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/local-resources`);
+    dispatch(notifyGettingResourceJupyterHubFiles(resource));
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/local-files`);
     const {
       data: {
-        files,
+        rootDir,
       },
     } = response;
 
-    dispatch(setResourceLocalFiles(resourceId, files));
+    dispatch(setResourceLocalFiles(resource.id, rootDir));
   };
 }
 
-export function getResourceHydroShareFiles(resourceId: string) {
+export function getResourceHydroShareFiles(resource: IJupyterResource) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/hs-resources`);
+    dispatch(notifyGettingResourceHydroShareFiles(resource));
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/hs-files`);
     const {
       data: {
-        files,
+        rootDir,
       },
     } = response;
 
-    dispatch(setResourceHydroShareFiles(resourceId, files));
+    dispatch(setResourceHydroShareFiles(resource.id, rootDir));
   };
+}
+
+export function copyFileOrFolder(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder) {
+  return performFileOperation(resource, source, destination, 'copy');
+}
+
+export function moveFileOrFolder(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder) {
+  return performFileOperation(resource, source, destination, 'move');
+}
+
+function performFileOperation(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder, method: 'move' | 'copy') {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    const data = {
+      operations: [{
+        method,
+        source: source.path,
+        destination: destination.path,
+      }],
+    };
+    const response = await patchToBackend<IFileOperationsRequestResponse>(`/resources/${resource.id}/move-copy-files`, data);
+    const {
+      successCount,
+    } = response.data;
+    if (successCount > 0) {
+      // We could check to see if we need to refresh both lists
+      dispatch(getResourceLocalFiles(resource));
+      dispatch(getResourceHydroShareFiles(resource));
+    }
+  }
 }

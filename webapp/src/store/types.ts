@@ -33,19 +33,22 @@ export interface IMainPageState {
   searchTerm: string
 }
 
-export interface IFileOrFolder {
-  contents?: IFileOrFolder[] // If a folder, a list of its contents
-  dirPath: string // The path to the folder containing this file relative to the resource root (must end with trailing /)
+export interface IFile {
+  path: string // If a folder, no trailing forward slash
   lastModified?: moment.Moment
   name: string
-  type: string
+  type: FileOrFolderTypes
   sizeBytes: number
+}
+
+export interface IFolder extends IFile {
+  contents: (IFile | IFolder)[]
 }
 
 export interface IJupyterResource {
   id: string
   localCopyExists: boolean
-  files: IFileOrFolder[]
+  jupyterHubFiles: IFolder
   title: string
   readmeMarkdown?: string
   hydroShareResource: IHydroShareResourceInfo
@@ -56,6 +59,8 @@ export interface IResourcesState {
   allResources: {
     [resourceId: string]: IJupyterResource
   }
+  resourceLocalFilesBeingFetched: Set<string>
+  resourceHydroShareFilesBeingFetched: Set<string>
   // TODO: Figure out where this is used and move it to that reducer
   searchTerm: string,
 }
@@ -78,7 +83,7 @@ export interface IResourcesData {
 }
 
 export interface IResourceFilesData {
-  files: IFileOrFolder[]
+  rootDir: IFolder
 }
 
 export interface IUserInfo {
@@ -93,7 +98,7 @@ export interface IUserInfo {
 export interface IHydroShareResourceInfo {
   resource_id: string
   author: string
-  files: IFileOrFolder[]
+  files: IFolder
   date_last_updated: moment.Moment
   status: string
   resource_type: string
@@ -120,7 +125,21 @@ export enum SortByOptions {
   Type = 'TYPE'
 }
 
+export enum FileOrFolderTypes {
+  FOLDER = 'folder',
+  FILE = 'file',
+}
+
 export interface ICreateResourceRequest {
   name: string,
   privacy: string
+}
+
+export interface IFileOperationsRequestResponse {
+  failureCount: number
+  results: [{
+    success: boolean
+    error?: string
+  }]
+  successCount: number
 }
