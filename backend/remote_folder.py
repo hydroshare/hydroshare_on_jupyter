@@ -78,15 +78,12 @@ class RemoteFolder:
                  "source_path": old_filepath,
                  "target_path": new_filepath
                           }
-        #TODO: Charlie, check with team if this is good
-        try:
-            self.hs.resource(self.res_id).functions.move_or_rename(options)
-            return True
-        except:
-            return False
+        self.hs.resource(self.res_id).functions.move_or_rename(options)
+
 
     def delete_file(self, filepath):
         """ deletes file in HS, if file is only item in directory, remove that parent directory"""
+        # TODO: Charlie, send message to frontend
         try:
             resource_id = self.hs.deleteResourceFile(self.res_id, filepath)
         except exceptions.HydroShareNotAuthorized:
@@ -99,8 +96,9 @@ class RemoteFolder:
 
     def delete_folder(self, filepath):
         """ deletes folder in HS, if folder is only item in directory, remove that parent directory"""
+        # TODO: Charlie, send message to frontend
         try:
-        response_json = self.hs.deleteResourceFolder(self.res_id, pathname=filepath)
+            response_json = self.hs.deleteResourceFolder(self.res_id, pathname=filepath)
         except IndexError:
             logging.info("Either {} does not exist in {}, or not authorized to delete folder".format(filepath, self.res_id))
         except:
