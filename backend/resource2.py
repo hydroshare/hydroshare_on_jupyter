@@ -313,19 +313,11 @@ class Resource:
         # Drop the leading . from the file extension
         file_extension = file_extension[1:]
         if self.is_file_or_folder_in_HS(path_without_extension, file_extension):
-            try:
-                self.delete_file_or_folder_from_HS(full_file_path_rel_resource_root)
-            except hs_restclient.HydroShareHTTPException as e:
-                logging.error(e)
-                return False
+            self.delete_file_or_folder_from_HS(full_file_path_rel_resource_root)
         folder_path = full_file_path_rel_resource_root.parent
         if str(folder_path) != '.':
             if not self.is_file_or_folder_in_HS(folder_path):
-                try:
-                    self.remote_folder.create_folder(folder_path)
-                except hs_restclient.HydroShareHTTPException as e:
-                    logging.error(e)
-                    return False
+                self.remote_folder.create_folder(folder_path)
 
         full_src_path = self.path_prefix / str(full_file_path_rel_resource_root)
         self.remote_folder.upload_file_to_HS(full_src_path, full_file_path_rel_resource_root)
