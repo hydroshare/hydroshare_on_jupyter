@@ -209,8 +209,14 @@ class MoveCopyFiles(BaseRequestHandler):
                 results.append({'success': True})
                 success_count += 1
             elif src_fs == HS_PREFIX and dest_fs == JH_PREFIX:
-                # TODO: Move/copy file from HS to the local filesystem
-                raise NotImplementedError()
+                # Transfer the file regardless of if we're moving or copying
+                # TODO: Support moving from one HS folder to a different one locally
+                resource.overwrite_JH_with_file_from_HS(src_path)
+                if method == MOVE:
+                    # TODO: Delete the local copy of the file
+                    pass
+                results.append({'success': True})
+                success_count += 1
             else:
                 msg = f'"source" prefix "{src_fs}" and/or destination prefix "{dest_fs} not recognized. Valid options' \
                       f' are "hs" and "local"'
