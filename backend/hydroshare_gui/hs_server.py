@@ -76,13 +76,16 @@ class ResourcesHandler(tornado.web.RequestHandler):
         "creators": list of strings}
         """
         body = json.loads(self.request.body.decode('utf-8'))
-        resource_title = body["resource title"] # string
-        creators = body["creators"] # list of names (strings)
+        resource_title = body.get("resource title") # string
+        creators = body.get("creators") # list of names (strings)
 
-        resource_id = resource_handler.create_HS_resource(resource_title, creators)
+        if resource_title is not None and creators is not None:
+            resource_id = resource_handler.create_HS_resource(resource_title, creators)
 
-        # TODO: Check this method of returning resource id
-        self.write(resource_id)
+            # TODO: Check this method of returning resource id
+            self.write(resource_id)
+        else:
+            self.write("Please specify title and creators to make new resource")
 
 ''' Class that handles DELETEing file in JH
 '''
@@ -98,18 +101,25 @@ class FileHandlerJH(tornado.web.RequestHandler):
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
-        resource = Resource(res_id, resource_handler)
-        resource.delete_file_or_folder_from_JH(body["filepath"])
+        filepath = body.get("filepath")
+        if filepath is not None:
+            resource = Resource(res_id, resource_handler)
+            resource.delete_file_or_folder_from_JH(filepath)
+        else:
+            self.write("Please specify filepath to delete")
 
     def put(self,res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)
-        if body["request_type"] == "new_file":
-            resource.create_file_JH(body["new_filename"])
-        elif body["request_type"] == "rename_or_move_file":
-            resource.rename_or_move_file_JH(body["old_filepath"], body["new_filepath"])
-        elif body["request_type"] == "overwrite_HS":
-            resource.overwrite_HS_with_file_from_JH(body["filepath"])
+        request_type = body.get("request_type")
+        if request_type == "new_file":
+            resource.create_file_JH(body.get("new_filename"))
+        elif request_type == "rename_or_move_file":
+            resource.rename_or_move_file_JH(body.get("old_filepath"), body.get("new_filepath"))
+        elif request_type == "overwrite_HS":
+            resource.overwrite_HS_with_file_from_JH(body.get("filepath"))
+        else:
+            self.write("Please specify valid request type for PUT")
 
     def post(self, res_id):
         resource = Resource(res_id, resource_handler)
@@ -140,18 +150,27 @@ class FileHandlerHS(tornado.web.RequestHandler):
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
-        resource = Resource(res_id, resource_handler)
-        resource.delete_file_or_folder_from_HS(body["filepath"])
-        resource.update_hs_files()
-        self.write({"files": resource.hs_files})
-    
+        filepath = body.get("filepath")
+        if filepath is not None:
+            resource = Resource(res_id, resource_handler)
+            resource.delete_file_or_folder_from_HS(filepath)
+            resource.update_hs_files()
+            self.write({"files": resource.hs_files})
+        else:
+            self.write("Please specify filepath to delete")
+
     def put(self,res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)
-        if body["request_type"] == "rename_or_move_file":
-            resource.rename_file_HS(body["old_filepath"], body["new_filepath"])
-        elif body["request_type"] == "overwrite_JH":
-            resource.overwrite_JH_with_file_from_HS(body["filepath"])
+        request_type = body.get("request_type")
+        if request_type == "rename_or_move_file":
+            resource.rename_file_HS(body.get("old_filepath"), body.get("new_filepath"))
+        elif request_type == "overwrite_JH":
+            resource.overwrite_JH_with_file_from_HS(body.get("filepath"))
+        else:
+            self.write("Please specify valid request type for PUT")
+            return
+
         resource.update_hs_files()
         self.write({"HS_files": resource.hs_files})
 
