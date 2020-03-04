@@ -167,7 +167,9 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
 
 function recursivelyConvertDatesToMoment(files: (IFile | IFolder)[]) {
   return files.map(fileOrFolder => {
-    fileOrFolder.lastModified = moment(fileOrFolder.lastModified);
+    if (fileOrFolder.lastModified) {
+      fileOrFolder.lastModified = moment(fileOrFolder.lastModified);
+    }
     return fileOrFolder;
   });
 }
