@@ -1,7 +1,11 @@
 import * as moment from 'moment';
-import {AnyAction} from 'redux';
+import { AnyAction } from 'redux';
 
-import {ResourcePageActions, ResourcesActions, UserInfoActions,} from './actions/action-names';
+import {
+  ResourcePageActions,
+  ResourcesActions,
+  UserInfoActions,
+} from './actions/action-names';
 import {
   FileOrFolderTypes,
   IFile,
