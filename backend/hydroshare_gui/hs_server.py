@@ -47,10 +47,6 @@ class BundleHandler(BaseRequestHandler):
         self.render('bundle_link')
 
 
-class ResourcesHandler(tornado.web.RequestHandler):
-
-    def set_default_headers(self):
-        configure_cors(self)
 class ResourcesHandler(BaseRequestHandler):
     """ Class that handles GETing a list of a user's resources (with metadata) & POSTing
      a new resource for that user """
