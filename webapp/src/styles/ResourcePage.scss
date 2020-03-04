@@ -1,0 +1,29 @@
+.go-back {
+  font-size: 0.9em;
+  margin-bottom: 1em;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.file-lists.split .MuiPaper-root {
+  width: 100%;
+  float: left;
+  overflow: auto;
+}
+
+.MuiTableRow-head .MuiTableCell-head {
+  line-height: 1.2rem;
+}
+
+.file-lists.split .FileList:first-child .MuiTableRow-head > th:last-child {
+  border-right: 2px solid #dedede;
+}
+
+.file-lists {
+  overflow: auto;
+  display: flex;
+
+  & > div:first-child {
+    border-right: 4px solid #dedede;
+  }
+}

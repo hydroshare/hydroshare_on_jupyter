@@ -1,0 +1,7 @@
+MANIFEST.in
+setup.py
+hydroshare_gui.egg-info/PKG-INFO
+hydroshare_gui.egg-info/SOURCES.txt
+hydroshare_gui.egg-info/dependency_links.txt
+hydroshare_gui.egg-info/requires.txt
+hydroshare_gui.egg-info/top_level.txt
