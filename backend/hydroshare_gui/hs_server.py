@@ -111,10 +111,6 @@ class FileHandlerJH(BaseRequestHandler):
         request_type = body.get("request_type")
         if request_type == "new_file":
             resource.create_file_JH(body.get("new_filename"))
-        elif request_type == "rename_or_move_file":
-            resource.rename_or_move_file_JH(body.get("old_filepath"), body.get("new_filepath"))
-        elif request_type == "overwrite_HS":
-            resource.overwrite_HS_with_file_from_JH(body.get("filepath"))
         else:
             self.write("Please specify valid request type for PUT")
 
@@ -156,7 +152,7 @@ MOVE = 'move'
 COPY = 'copy'
 
 
-class FileOperationHandler(BaseRequestHandler):
+class MoveCopyFiles(BaseRequestHandler):
     """ Handles moving (or renaming) files within the local filesystem, on HydroShare, and between the two. """
 
     def set_default_headers(self):
@@ -272,7 +268,7 @@ def make_app():
         (r"/resources", ResourcesHandler),
         (r"/resources/([^/]+)/hs-files", FileHandlerHS),
         (r"/resources/([^/]+)/local-files", FileHandlerJH),
-        (r"/resources/([^/]+)/file-ops", FileOperationHandler),
+        (r"/resources/([^/]+)/move-copy-files", MoveCopyFiles),
     ])
 
 
