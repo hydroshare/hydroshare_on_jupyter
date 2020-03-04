@@ -56,9 +56,9 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
     console.log(`Received request to move ${srcURI} to ${destURI}.`);
     const srcParentFolderPathComponents = srcFileOrFolder.path.split('/');
     srcParentFolderPathComponents.pop();
-    let srcParentFolderPath = '/';
-    if (srcParentFolderPathComponents.length > 1) { // Length is 1 if parent folder is root dir
-      srcParentFolderPath += srcParentFolderPathComponents.join('/');
+    let srcParentFolderPath = srcParentFolderPathComponents.join('/');
+    if (srcParentFolderPathComponents.length === 1) { // Length is 1 if parent folder is root dir
+      srcParentFolderPath += '/';
     }
     if (srcParentFolderPath === destFolder.path) {
       console.log("File dropped in same location. Ignoring move request.");

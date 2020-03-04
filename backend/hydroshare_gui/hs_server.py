@@ -182,8 +182,13 @@ class FileOperationHandler(BaseRequestHandler):
             src_fs, src_path = src_uri.split(':')
             dest_fs, dest_path = dest_uri.split(':')
 
+            # Remove the leading forward slashes
+            src_path = src_path[1:]
+            dest_path = dest_path[1:]
+
             if src_fs == HS_PREFIX and dest_fs == HS_PREFIX:
                 if method == MOVE:  # Move or rename
+                    # TODO: Test how well this works
                     resource.rename_or_move_file_HS(src_path, dest_path)
                     results.append({'success': True})
                     success_count += 1

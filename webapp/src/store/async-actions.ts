@@ -123,7 +123,7 @@ function performFileOperation(resource: IJupyterResource, source: IFile | IFolde
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     const data = {
       operations: [{
-        method: 'copy',
+        method,
         source: source.path,
         destination: destination.path,
       }],

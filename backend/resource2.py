@@ -178,24 +178,32 @@ class Resource:
         new_filename.
         """
         if old_filepath is not None and new_filepath is not None:
-            if path.exists(self.path_prefix + old_filepath):
-                shutil.move(self.path_prefix + old_filepath, self.path_prefix + new_filepath)
-                self.delete_JH_folder_if_empty(old_filepath.rsplit("/", 1)[0])
+            src_full_path = self.path_prefix / old_filepath
+            dest_full_path = self.path_prefix / new_filepath
+            if src_full_path.exists():
+                shutil.move(str(src_full_path), str(dest_full_path))
+                self.delete_JH_folder_if_empty(src_full_path.parent)
             else:
                 logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
         else:
             logging.info('Missing inputs for old and new filepath')
 
     def delete_file_or_folder_from_JH(self, filepath):
-        """ deletes file or folder from JH """
-        # if filepath does not contain file (ie: we want to delete folder)
-        if "." not in filepath:
-            self.local_folder.delete_folder(self.path_prefix+filepath)
+        """ Deletes a file or folder from the local filesystem.
+            :param filepath the full path to the file or folder on the local filesystem
+            :type filepath str | PosixPath
+        """
+        if isinstance(filepath, str):
+            filepath = Path(filepath)
+
+        if filepath.is_dir():
+            self.local_folder.delete_folder(filepath)
 
             # check if after deleting this folder, the parent directory is empty
             # if so this will delete that parent directory
-            if "/" in filepath:
-                self.delete_JH_folder_if_empty(filepath.rsplit('/', 1)[0])
+            # TODO: Do we really want to do this?
+            if filepath.parent != self.path_prefix:
+                self.delete_JH_folder_if_empty(filepath.parent)
         else:
             self.local_folder.delete_file(self.path_prefix+filepath)
 
@@ -209,7 +217,7 @@ class Resource:
         calls delete_file_or_folder_from JH to check if
         parent directory needs to be deleted """
 
-        if not os.listdir(self.path_prefix + filepath):
+        if len(list((self.path_prefix / filepath).iterdir())) == 0:
             self.delete_file_or_folder_from_JH(filepath)
 
     def is_file_or_folder_in_JH(self, filepath):

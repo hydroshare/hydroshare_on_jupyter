@@ -74,6 +74,8 @@ class LocalFolder:
         os.remove(filepath)
 
     def delete_folder(self, filepath):
+        if isinstance(filepath, PosixPath):
+            filepath = str(filepath)
         shutil.rmtree(filepath) 
 
     def create_folder(self, folderpath):
