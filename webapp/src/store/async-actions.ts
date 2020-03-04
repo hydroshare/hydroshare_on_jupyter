@@ -8,6 +8,8 @@ import {
 } from 'redux-thunk';
 
 import {
+  notifyGettingResourceHydroShareFiles,
+  notifyGettingResourceJupyterHubFiles,
   setResourceLocalFiles,
   setResourceHydroShareFiles,
   setResources,
@@ -85,29 +87,31 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
     };
 }
 
-export function getResourceLocalFiles(resourceId: string) {
+export function getResourceLocalFiles(resource: IJupyterResource) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/local-files`);
+    dispatch(notifyGettingResourceJupyterHubFiles(resource));
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/local-files`);
     const {
       data: {
         rootDir,
       },
     } = response;
 
-    dispatch(setResourceLocalFiles(resourceId, rootDir));
+    dispatch(setResourceLocalFiles(resource.id, rootDir));
   };
 }
 
-export function getResourceHydroShareFiles(resourceId: string) {
+export function getResourceHydroShareFiles(resource: IJupyterResource) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-    const response = await getFromBackend<IResourceFilesData>(`/resources/${resourceId}/hs-files`);
+    dispatch(notifyGettingResourceHydroShareFiles(resource));
+    const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/hs-files`);
     const {
       data: {
         rootDir,
       },
     } = response;
 
-    dispatch(setResourceHydroShareFiles(resourceId, rootDir));
+    dispatch(setResourceHydroShareFiles(resource.id, rootDir));
   };
 }
 
@@ -134,8 +138,8 @@ function performFileOperation(resource: IJupyterResource, source: IFile | IFolde
     } = response.data;
     if (successCount > 0) {
       // We could check to see if we need to refresh both lists
-      dispatch(getResourceLocalFiles(resource.id));
-      dispatch(getResourceHydroShareFiles(resource.id));
+      dispatch(getResourceLocalFiles(resource));
+      dispatch(getResourceHydroShareFiles(resource));
     }
   }
 }

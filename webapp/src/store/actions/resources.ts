@@ -14,17 +14,30 @@ import {
 import {
   IFolder,
   IJupyterResource,
+  IRootState,
 } from '../types';
 
 export function getFilesIfNeeded(resource: IJupyterResource): ThunkAction<Promise<void>, {}, {}, AnyAction> {
-    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-        if (resource && !resource.jupyterHubFiles) {
-            dispatch(getResourceLocalFiles(resource.id));
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
+        const {
+          resourceLocalFilesBeingFetched,
+          resourceHydroShareFilesBeingFetched,
+        } = getState().resources;
+        if (resource && !resource.jupyterHubFiles && !resourceLocalFilesBeingFetched.has(resource.id)) {
+            dispatch(getResourceLocalFiles(resource));
         }
-        if (resource && resource.hydroShareResource && !resource.hydroShareResource.files) {
-            dispatch(getResourceHydroShareFiles(resource.id));
+        if (resource && resource.hydroShareResource && !resource.hydroShareResource.files && !resourceHydroShareFilesBeingFetched.has(resource.id)) {
+            dispatch(getResourceHydroShareFiles(resource));
         }
     };
+}
+
+export function notifyGettingResourceHydroShareFiles(resource: IJupyterResource) {
+  return action(ResourcesActions.NOTIFY_GETTING_RESOURCE_HYDROSHARE_FILES, { resourceId: resource.id });
+}
+
+export function notifyGettingResourceJupyterHubFiles(resource: IJupyterResource) {
+  return action(ResourcesActions.NOTIFY_GETTING_RESOURCE_JUPYTERHUB_FILES, { resourceId: resource.id });
 }
 
 export function setResources(resources: IJupyterResource[]) {

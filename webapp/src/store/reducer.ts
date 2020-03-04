@@ -1,17 +1,13 @@
 import * as moment from 'moment';
-import { AnyAction } from 'redux';
+import {AnyAction} from 'redux';
 
+import {ResourcePageActions, ResourcesActions, UserInfoActions,} from './actions/action-names';
 import {
-  ResourcePageActions,
-  ResourcesActions,
-  UserInfoActions,
-} from './actions/action-names';
-import {
-  IResourcePageState,
   FileOrFolderTypes,
   IFile,
   IFolder,
   IMainPageState,
+  IResourcePageState,
   IResourcesState,
   IUserInfo,
   ResourcesActionTypes,
@@ -34,6 +30,8 @@ const initResourcePageState: IResourcePageState = {
 const initResourcesState: IResourcesState = {
   searchTerm: '',
   allResources: {},
+  resourceLocalFilesBeingFetched: new Set<string>(),
+  resourceHydroShareFilesBeingFetched: new Set<string>(),
 };
 
 export function resourcePageReducer(state: IResourcePageState = initResourcePageState, action: AnyAction): IResourcePageState {
@@ -130,6 +128,8 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
         rootDir,
       } = action.payload;
       rootDir.contents = recursivelyConvertDatesToMoment(rootDir.contents);
+      let resourceLocFilesBeingFetched = new Set(Array.from(state.resourceHydroShareFilesBeingFetched));
+      resourceLocFilesBeingFetched.delete(action.payload.resourceId);
       return {
         ...state,
         allResources: {
@@ -139,6 +139,7 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
             jupyterHubFiles: rootDir,
           },
         },
+        resourceLocalFilesBeingFetched: resourceLocFilesBeingFetched,
       };
     case ResourcesActions.SET_RESOURCE_HYDROSHARE_FILES:
       const {
@@ -147,6 +148,8 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
       } = action.payload;
 
       rDir.contents = recursivelyConvertDatesToMoment(rDir.contents);
+      let resourceHSFilesBeingFetched = new Set(Array.from(state.resourceHydroShareFilesBeingFetched));
+      resourceHSFilesBeingFetched.delete(action.payload.resourceId);
       return {
         ...state,
         allResources: {
@@ -159,6 +162,21 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
             },
           },
         },
+        resourceLocalFilesBeingFetched: resourceHSFilesBeingFetched,
+      };
+    case ResourcesActions.NOTIFY_GETTING_RESOURCE_HYDROSHARE_FILES:
+      let resourceHydroShareFilesBeingFetched = new Set(Array.from(state.resourceHydroShareFilesBeingFetched));
+      resourceHydroShareFilesBeingFetched.add(action.payload.resourceId);
+      return {
+        ...state,
+        resourceHydroShareFilesBeingFetched,
+      };
+    case ResourcesActions.NOTIFY_GETTING_RESOURCE_JUPYTERHUB_FILES:
+      let resourceLocalFilesBeingFetched = new Set(Array.from(state.resourceLocalFilesBeingFetched));
+      resourceLocalFilesBeingFetched.add(action.payload.resourceId);
+      return {
+        ...state,
+        resourceLocalFilesBeingFetched,
       };
     default:
       return state;

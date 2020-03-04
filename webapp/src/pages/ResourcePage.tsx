@@ -66,12 +66,6 @@ type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispa
 
 class ResourcePage extends React.Component<PropsType, never> {
 
-  public componentDidMount = (): void => {
-    if (this.props.resource) {
-      this.props.getFilesIfNeeded(this.props.resource);
-    }
-  };
-
   public handleSearchChange = (event: any) => {
     this.props.searchResourceBy(event.target.value)
   }
@@ -91,6 +85,8 @@ class ResourcePage extends React.Component<PropsType, never> {
         </div>
       );
     }
+
+    this.props.getFilesIfNeeded(resource);
 
     // const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(resource!);
     // const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(resource!);
