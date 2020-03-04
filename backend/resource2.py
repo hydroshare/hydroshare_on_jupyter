@@ -13,7 +13,8 @@ from remote_folder import RemoteFolder
 import logging
 import os
 from os import path
-import dateutil.parser # for parsing resource times
+from dateutil.parser import parse
+import datetime
 import re
 import pathlib
 <<<<<<< HEAD
@@ -87,6 +88,7 @@ class Resource:
             "name": "",
             "path": LOCAL_PREFIX + ":/",
             "sizeBytes": resource_files_root_path.stat().st_size,
+            "modifiedTime": str(datetime.datetime.fromtimestamp(resource_files_root_path.stat().st_mtime)),
             "type": "folder",
             "contents": files,
         }
@@ -114,7 +116,7 @@ class Resource:
             # extract filepath from url
             filepath = file_info["url"][len(url_prefix)+1:]
             # get proper definition formatting of file if it is a file
-            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info["size"],
+            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info,
                                                                       HS_PREFIX+':')
             # if it is a folder, build up contents
             if not file_definition_hs:
@@ -139,12 +141,15 @@ class Resource:
             # (level 0); folders at levels 1, 2, etc. will be built into the
             # result by means of the recursive calls
             if key[0] == 0:
-                folder_size, folder_contents = self.remote_folder.get_contents_recursive(val, folders_dict,
+                folder_time, folder_size, folder_contents = self.remote_folder.get_contents_recursive(val, folders_dict,
                                                                                          nested_files, HS_PREFIX+':')
+                if folder_time:
+                    folder_time = str(folder_time)
                 folders_final.append({
                     "name": key[1],
                     "path": HS_PREFIX + ':/' + key[2].strip('/'),
                     "sizeBytes": folder_size,
+                    "modifiedTime": folder_time,
                     "type": "folder",
                     "contents": folder_contents,
                 })
@@ -153,10 +158,23 @@ class Resource:
         for f in folders_final:
             rootsize += (f["sizeBytes"])
 
+        folder_time = datetime.datetime.min
+        for f in folders_final:
+            if f.get("modifiedTime"):
+                curr_time = parse(f.get("modifiedTime"))
+                if curr_time > folder_time:
+                    folder_time = curr_time
+
+        if folder_time == datetime.datetime.min:
+            folder_time = None
+        else:
+            folder_time = str(folder_time)
+
         root_dir = {
             "name": "",
             "path": HS_PREFIX + ":/",
             "sizeBytes": rootsize,
+            "modifiedTime": folder_time,
             "type": "folder",
             "contents": folders_final,
         }

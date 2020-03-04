@@ -15,6 +15,8 @@ import logging
 =======
 import hs_restclient
 from login import username, password
+import datetime
+from dateutil.parser import parse
 import os
 import logging
 import pathlib
@@ -31,25 +33,32 @@ class RemoteFolder:
         self.res_id = res_id
         self.hs = hs
 
-    def get_file_metadata(self, filepath, long_path, size, path_prefix):
+    def get_file_metadata(self, filepath, long_path, file_info, path_prefix):
         """Gets file definition formatting for returning HS files, given path
         & size. Returns false if the path is a folder & not a file.
         """
+        if file_info.get("modified_time"):
+            modified_time = str(parse(file_info.get("modified_time")))
+        else:
+            modified_time = None
         if filepath.rfind("/") == -1 and filepath.rfind(".") != -1:
             file_type = filepath[filepath.rfind(".")+1:]
             filename = filepath[:filepath.rfind(".")]
             return ({
                 "name": filename,
                 "path": path_prefix + '/' + long_path.strip('/'),
-                "sizeBytes": size,
+                "sizeBytes": file_info.get("size"),
+                "modifiedTime": modified_time,
                 "type": file_type,
             })
         #TODO (Charlie): This might be simpler with pathlib
         elif filepath.rfind("/") == -1:
+
             return ({
                 "name": filepath,
                 "path": path_prefix + '/' + long_path.strip('/'),
-                "sizeBytes": size,
+                "sizeBytes": file_info.get("size"),
+                "modifiedTime": modified_time,
                 "type": "file",
             })
         else:
@@ -60,23 +69,34 @@ class RemoteFolder:
         """
         contents = []
         folder_size = 0
+        folder_time = datetime.datetime.min
         for v in val:
             if v in folders_dict:
-                subfolder_size, subfolder_contents = self.get_contents_recursive(folders_dict[v], folders_dict,
-                                                                                 nested_files, path_prefix)
+                subfolder_time, subfolder_size, subfolder_contents = self.get_contents_recursive(folders_dict[v], folders_dict, nested_files, path_prefix)
                 folder_size += subfolder_size
+                if subfolder_time and folder_time and subfolder_time > folder_time:
+                    folder_time = subfolder_time
+                if subfolder_time:
+                    subfolder_time = str(subfolder_time)
                 contents.append({
                     "name" : v[1],
                     "path" : path_prefix + '/' + v[2].strip('/'),
                     "sizeBytes" : subfolder_size,
+                    "modifiedTime" : subfolder_time,
                     "type" : "folder",
                     "contents" : subfolder_contents,
                 })
             else:
-                contents.append(self.get_file_metadata(v[1], v[2], nested_files[v[2]]["size"], path_prefix))
+                contents.append(self.get_file_metadata(v[1], v[2], nested_files[v[2]], path_prefix))
                 folder_size += nested_files[v[2]]["size"]
+                if nested_files[v[2]].get("modified_time"):
+                    curr_time = parse(nested_files[v[2]].get("modified_time"))
+                else:
+                    curr_time = None
+                if curr_time and folder_time and curr_time > folder_time:
+                    folder_time = curr_time
 
-        return folder_size, contents
+        return folder_time, folder_size, contents
 
     def rename_or_move_file(self, old_filepath, new_filepath):
         '''Renames the hydroshare version of the file from old_filename to
