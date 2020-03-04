@@ -20,8 +20,9 @@ import hs_restclient
 from pathlib import *
 import shutil
 
+# These file path prefixes distinguish between files in HydroShare and on the local filesystem
 HS_PREFIX = 'hs'
-JH_PREFIX = 'local'
+LOCAL_PREFIX = 'local'
 
 
 ''' Class that defines a Hydroshare resource & it's associated files that
@@ -77,10 +78,10 @@ class Resource:
         resource_files_root_path = Path(self.path_prefix)
         if not resource_files_root_path.exists():
             resource_files_root_path.mkdir(parents=True)
-        files = self.local_folder.get_contents_recursive(self.path_prefix, resource_files_root_path, JH_PREFIX+':')
+        files = self.local_folder.get_contents_recursive(self.path_prefix, resource_files_root_path, LOCAL_PREFIX + ':')
         root_dir = {
             "name": "",
-            "path": JH_PREFIX + ":/",
+            "path": LOCAL_PREFIX + ":/",
             "sizeBytes": resource_files_root_path.stat().st_size,
             "type": "folder",
             "contents": files,
