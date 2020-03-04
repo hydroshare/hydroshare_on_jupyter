@@ -65,6 +65,14 @@ class ResourcesHandler(tornado.web.RequestHandler):
         resources = resource_handler.get_list_of_user_resources()
         self.write({'resources': resources})
 
+    def delete(self):
+        body = json.loads(self.request.body.decode('utf-8'))
+        res_id = body.get("res_id")
+        if res_id is not None:
+            resource_handler.delete_resource_JH(res_id)
+        else:
+            self.write("Please specify resource id to delete")
+
     def post(self):
         """
         Makes a new resource with the bare minimum amount of information--
