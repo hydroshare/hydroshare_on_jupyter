@@ -31,17 +31,11 @@ Find the line that begins with `c.NotebookApp.nbserver_extensions` and change it
 
 `export PYTHONPATH=$PYTHONPATH:$(pwd)`
 
-7. In the same directory, add a file called login.py that contains the following:
 
-```
-username = 'your_hydroshare_username'
-password = 'your_hydroshare_password'
-```
-
-8. Now run:
+7. Now run:
 
 `jupyter notebook`
 
-You should see a message in the terminal that says "CUAHSI module enabled!"
+This will prompt you for your HydroShare username and password. Once entered correctly, you should see a message in the terminal that says "CUAHSI module enabled!"
 
 9. In your web browser, go to localhost:8080 and view the beautiful GUI!
