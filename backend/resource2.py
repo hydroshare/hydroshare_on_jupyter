@@ -77,10 +77,10 @@ class Resource:
         resource_files_root_path = Path(self.path_prefix)
         if not resource_files_root_path.exists():
             resource_files_root_path.mkdir(parents=True)
-        files = self.local_folder.get_contents_recursive(self.path_prefix, resource_files_root_path, LOCAL_PREFIX + ':')
+        files = self.local_folder.get_contents_recursive(self.path_prefix, resource_files_root_path, JH_PREFIX+':')
         root_dir = {
             "name": "",
-            "path": LOCAL_PREFIX + ":/",
+            "path": JH_PREFIX + ":/",
             "sizeBytes": resource_files_root_path.stat().st_size,
             "type": "folder",
             "contents": files,
@@ -227,25 +227,18 @@ class Resource:
     def delete_file_or_folder_from_HS(self, filepath):
         """ deletes file or folder from HS """
         # if file path does not contain file (ie: we want to delete folder)
-<<<<<<< HEAD
-        if "." not in filepath:
-            # TODO: Charlie, add message for fail cases
-            self.remote_folder.delete_folder(filepath+"/")
-=======
         if not isinstance(filepath, PosixPath):
             filepath = Path(filepath)
         # FIXME: This will not work if the directory has a . in it (which is valid in UNIX)
         # Check if there is a suffix/extension (indicating we're deleting a folder)
         if filepath.suffix:
             self.remote_folder.delete_folder(str(filepath)+"/")
->>>>>>> d75e786f0580ba0b1d2eb2363e964a6b1043b73e
             # check if after deleting this folder, the parent directory is empty
             # if so this will delete that parent directory
             # TODO: Delete this or make it recursive and use pathlib
             # if "/" in filepath:
             #     self.delete_HS_folder_if_empty(filepath.split('/', 1)[0], filepath.rsplit('/', 1)[1])
         else:
-            # TODO: Charlie, Make message for frontend from remote_folder fail cases
             self.remote_folder.delete_file(filepath)
             # check if after deleting this file, the parent directory is empty
             # if so this will delete that parent directory
@@ -307,7 +300,6 @@ class Resource:
             outputPath = filepath.rsplit('/', 1)[0]
             if self.is_file_or_folder_in_JH(outputPath) == False:
                 os.makedirs(self.path_prefix + outputPath + "/")
-        # TODO: Vicky, use self.is_file_in_HS to error check if HS file exists
         self.remote_folder.download_file_to_JH(filepath, self.path_prefix)
         self.JH_files = self.get_files_upon_init_JH()
 
