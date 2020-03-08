@@ -8,7 +8,6 @@ Email: vickymmcd@gmail.com
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import hs_restclient
-from login import username, password
 import datetime
 from dateutil.parser import parse
 import os

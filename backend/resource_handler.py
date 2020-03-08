@@ -10,7 +10,21 @@ Email: vickymmcd@gmail.com
 
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from metadata_parser import MetadataParser
-from login import username, password
+from getpass import getpass
+import base64
+try:
+    from login import username, password
+    password = base64.b64decode(password.decode("utf-8"))
+except ModuleNotFoundError:
+    username = input("Hydroshare Username: ")
+    password = getpass()
+    pw = (base64.b64encode(password.encode("utf-8")))
+
+    f= open("login.py","w+")
+    f.write("username = \"" + username + "\"\n")
+    f.write("password = " + str(pw) + "\n")
+    f.close()
+
 import logging
 import glob
 import os

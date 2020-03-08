@@ -295,4 +295,5 @@ if __name__ == '__main__':
         logging.basicConfig(level=level)
 
     application = make_app()
+    print("Starting server at localhost:8080")
     start_server(application)
