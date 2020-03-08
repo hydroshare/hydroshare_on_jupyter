@@ -16,15 +16,10 @@ from os import path
 import dateutil.parser # for parsing resource times
 import re
 import pathlib
-<<<<<<< HEAD
-from pathlib import * # TODO: Charlie, change to pl for readability
-=======
 import hs_restclient
 from pathlib import *
->>>>>>> d75e786f0580ba0b1d2eb2363e964a6b1043b73e
 import shutil
 
-# These file path prefixes distinguish between files in HydroShare and on the local filesystem
 HS_PREFIX = 'hs'
 LOCAL_PREFIX = 'local'
 

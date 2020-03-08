@@ -7,18 +7,11 @@ Email: vickymmcd@gmail.com
 '''
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-<<<<<<< HEAD
-from hs_restclient import HydroShare, HydroShareAuthBasic, exceptions
-from login import username, password
-import os
-import logging
-=======
 import hs_restclient
 from login import username, password
 import os
 import logging
 import pathlib
->>>>>>> d75e786f0580ba0b1d2eb2363e964a6b1043b73e
 
 
 ''' Class that defines a Remote Folder so we can access attributes of it.
