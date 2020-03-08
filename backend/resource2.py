@@ -17,12 +17,8 @@ from dateutil.parser import parse
 import datetime
 import re
 import pathlib
-<<<<<<< HEAD
 from pathlib import * # TODO: Charlie, change to pl for readability
-=======
 import hs_restclient
-from pathlib import *
->>>>>>> d75e786f0580ba0b1d2eb2363e964a6b1043b73e
 import shutil
 
 # These file path prefixes distinguish between files in HydroShare and on the local filesystem
@@ -250,18 +246,12 @@ class Resource:
     def delete_file_or_folder_from_HS(self, filepath):
         """ deletes file or folder from HS """
         # if file path does not contain file (ie: we want to delete folder)
-<<<<<<< HEAD
-        if "." not in filepath:
-            # TODO: Charlie, add message for fail cases
-            self.remote_folder.delete_folder(filepath+"/")
-=======
         if not isinstance(filepath, PosixPath):
             filepath = Path(filepath)
         # FIXME: This will not work if the directory has a . in it (which is valid in UNIX)
         # Check if there is a suffix/extension (indicating we're deleting a folder)
         if filepath.suffix:
             self.remote_folder.delete_folder(str(filepath)+"/")
->>>>>>> d75e786f0580ba0b1d2eb2363e964a6b1043b73e
             # check if after deleting this folder, the parent directory is empty
             # if so this will delete that parent directory
             # TODO: Delete this or make it recursive and use pathlib
