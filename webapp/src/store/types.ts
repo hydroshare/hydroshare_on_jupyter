@@ -10,8 +10,13 @@ export type ResourcePageActionTypes = ActionType<typeof resourcePageActions>;
 export type ResourcesActionTypes = ActionType<typeof resourcesActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
 
+export interface INotificationsState {
+  current: INotification[]
+}
+
 export interface IRootState {
   mainPage: IMainPageState
+  notifications: INotificationsState
   resources: IResourcesState
   resourcePage: IResourcePageState
   router: RouterState
@@ -52,6 +57,12 @@ export interface IJupyterResource {
   title: string
   readmeMarkdown?: string
   hydroShareResource: IHydroShareResourceInfo
+}
+
+export interface INotification {
+  message: string
+  time: Date
+  type: 'error' | 'warning'
 }
 
 // TODO: Rename this (and its associated reducer) to something better
@@ -140,6 +151,7 @@ export interface IFileOperationsRequestResponse {
   results: [{
     success: boolean
     error?: string
+    message?: string
   }]
   successCount: number
 }

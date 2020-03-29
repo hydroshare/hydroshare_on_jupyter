@@ -1,0 +1,75 @@
+@import 'colors';
+@import 'dimensions';
+
+.NotificationBanner {
+  color: white;
+  width: 100%;
+
+  .notification {
+    border-radius: 0.5em;
+    font-size: 0.9em;
+    font-weight: 700;
+    margin: 0.5em auto 0;
+    max-width: $content-width;
+    overflow: hidden;
+    width: 100%;
+
+    .content {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+
+      .icon {
+        fill: white;
+        height: 1.5em;
+        margin: 1em;
+        width: 1.5em;
+      }
+
+      .message {
+        flex-grow: 1;
+      }
+
+      .time,
+      button {
+        flex-grow: 0;
+      }
+
+      .time {
+        margin: 0 1em;
+      }
+
+      .dismiss-button {
+        align-items: center;
+        align-self: stretch;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        padding: 0 1em;
+        transition: background-color 0.3s ease;
+      }
+    }
+  }
+
+  .error {
+    background-color: $red;
+    $darkRed: darken($red, 10);
+    .dismiss-button {
+      border-left: 1px solid $darkRed;
+      &:hover {
+        background-color: $darkRed;
+      }
+    }
+  }
+
+  .warning {
+    background-color: $yellow;
+    $darkYellow: darken($yellow, 5);
+    .dismiss-button {
+      border-left: 1px solid $darkYellow;
+      &:hover {
+        background-color: $darkYellow;
+      }
+    }
+  }
+}

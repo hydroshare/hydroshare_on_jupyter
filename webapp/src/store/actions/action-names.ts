@@ -1,3 +1,8 @@
+export enum NotificationsActions {
+  DISMISS_NOTIFICATION = 'NotificationsActions/DISMISS_NOTIFICATION',
+  PUSH_NOTIFICATION = 'NotificationActions/PUSH_NOTIFICATION',
+}
+
 export enum ResourcePageActions {
   TOGGLE_IS_SELECTED_ALL_JUPYTER = 'ResourcePageActions/TOGGLE_IS_SELECTED_ALL_LOCAL',
   TOGGLE_IS_SELECTED_ALL_HYDROSHARE = 'ResourcePageActions/TOGGLE_IS_SELECTED_ALL_HYDROSHARE',
