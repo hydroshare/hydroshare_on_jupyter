@@ -59,7 +59,7 @@ export function notificationsReducer(state: INotificationsState = initNotificati
   switch (action.type) {
     case NotificationsActions.DISMISS_NOTIFICATION:
       let notifications = [...state.current];
-      notifications.splice(action.idx, 1);
+      notifications.splice(action.payload.idx, 1);
       return {
         ...state,
         current: notifications,
