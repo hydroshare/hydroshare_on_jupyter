@@ -2,6 +2,7 @@ import * as moment from 'moment';
 import { AnyAction } from 'redux';
 
 import {
+  NotificationsActions,
   ResourcePageActions,
   ResourcesActions,
   UserInfoActions,
@@ -11,12 +12,23 @@ import {
   IFile,
   IFolder,
   IMainPageState,
+  INotificationsState,
   IResourcePageState,
   IResourcesState,
   IUserInfo,
   ResourcesActionTypes,
   UserActionTypes,
 } from './types';
+
+const initNotificationsState: INotificationsState = {
+  current: [
+    {
+      message: "Alien invasion incoming!",
+      time: new Date(),
+      type: 'error',
+    }
+  ],
+};
 
 const initResourceListPageState: IMainPageState = {
   allResourcesSelected: false,
@@ -37,6 +49,20 @@ const initResourcesState: IResourcesState = {
   resourceLocalFilesBeingFetched: new Set<string>(),
   resourceHydroShareFilesBeingFetched: new Set<string>(),
 };
+
+export function notificationsReducer(state: INotificationsState = initNotificationsState, action: AnyAction): INotificationsState {
+  switch (action.type) {
+    case NotificationsActions.DISMISS_NOTIFICATION:
+      let notifications = [...state.current];
+      notifications.splice(action.idx, 1);
+      return {
+        ...state,
+        current: notifications,
+      };
+    default:
+      return state;
+  }
+}
 
 export function resourcePageReducer(state: IResourcePageState = initResourcePageState, action: AnyAction): IResourcePageState {
   let doMakeSelected;

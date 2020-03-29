@@ -14,6 +14,7 @@ import thunk from 'redux-thunk';
 
 import {
   mainPageReducer,
+  notificationsReducer,
   resourcesReducer,
   resourcePageReducer,
   userDataReducer,
@@ -30,6 +31,7 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore<IRootState, any, any, any>(
     combineReducers({
         mainPage: mainPageReducer,
+        notifications: notificationsReducer,
         resources: resourcesReducer,
         resourcePage: resourcePageReducer,
         router: connectRouter(history),

@@ -1,0 +1,37 @@
+@import 'colors';
+@import 'dimensions';
+
+.NotificationBanner {
+  color: white;
+  width: 100%;
+
+  & > * {
+    padding: 0.75em;
+    width: 100%;
+
+    .content {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      margin: 0 auto;
+      max-width: $content-width;
+
+      :not(:first-child) {
+        margin-left: 1em;
+      }
+
+      .message {
+        flex-grow: 1;
+      }
+
+      .time,
+      button {
+        flex-grow: 0;
+      }
+    }
+  }
+
+  .error {
+    background-color: $red;
+  }
+}
