@@ -13,14 +13,14 @@ from remote_folder import RemoteFolder
 import logging
 import os
 from os import path
-import dateutil.parser # for parsing resource times
+from dateutil.parser import parse
+import datetime
 import re
 import pathlib
+from pathlib import * # TODO: Charlie, change to pl for readability
 import hs_restclient
-from pathlib import *
 import shutil
 
-# These file path prefixes distinguish between files in HydroShare and on the local filesystem
 HS_PREFIX = 'hs'
 LOCAL_PREFIX = 'local'
 
@@ -78,11 +78,12 @@ class Resource:
         resource_files_root_path = Path(self.path_prefix)
         if not resource_files_root_path.exists():
             resource_files_root_path.mkdir(parents=True)
-        files = self.local_folder.get_contents_recursive(self.path_prefix, resource_files_root_path, LOCAL_PREFIX + ':')
+        files = self.local_folder.get_contents_recursive(self.path_prefix, resource_files_root_path, JH_PREFIX+':')
         root_dir = {
             "name": "",
-            "path": LOCAL_PREFIX + ":/",
+            "path": JH_PREFIX + ":/",
             "sizeBytes": resource_files_root_path.stat().st_size,
+            "modifiedTime": str(datetime.datetime.fromtimestamp(resource_files_root_path.stat().st_mtime)),
             "type": "folder",
             "contents": files,
         }
@@ -110,7 +111,7 @@ class Resource:
             # extract filepath from url
             filepath = file_info["url"][len(url_prefix)+1:]
             # get proper definition formatting of file if it is a file
-            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info["size"],
+            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info,
                                                                       HS_PREFIX+':')
             # if it is a folder, build up contents
             if not file_definition_hs:
@@ -135,12 +136,15 @@ class Resource:
             # (level 0); folders at levels 1, 2, etc. will be built into the
             # result by means of the recursive calls
             if key[0] == 0:
-                folder_size, folder_contents = self.remote_folder.get_contents_recursive(val, folders_dict,
+                folder_time, folder_size, folder_contents = self.remote_folder.get_contents_recursive(val, folders_dict,
                                                                                          nested_files, HS_PREFIX+':')
+                if folder_time:
+                    folder_time = str(folder_time)
                 folders_final.append({
                     "name": key[1],
                     "path": HS_PREFIX + ':/' + key[2].strip('/'),
                     "sizeBytes": folder_size,
+                    "modifiedTime": folder_time,
                     "type": "folder",
                     "contents": folder_contents,
                 })
@@ -149,10 +153,23 @@ class Resource:
         for f in folders_final:
             rootsize += (f["sizeBytes"])
 
+        folder_time = datetime.datetime.min
+        for f in folders_final:
+            if f.get("modifiedTime"):
+                curr_time = parse(f.get("modifiedTime"))
+                if curr_time > folder_time:
+                    folder_time = curr_time
+
+        if folder_time == datetime.datetime.min:
+            folder_time = None
+        else:
+            folder_time = str(folder_time)
+
         root_dir = {
             "name": "",
             "path": HS_PREFIX + ":/",
             "sizeBytes": rootsize,
+            "modifiedTime": folder_time,
             "type": "folder",
             "contents": folders_final,
         }
