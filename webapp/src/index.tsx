@@ -14,6 +14,7 @@ import store, { history } from './store';
 
 import Header from './components/Header';
 import MainPage from './pages/MainPage';
+import NotificationBanner from "./components/NotificationBanner";
 import ResourcePage from './pages/ResourcePage';
 
 
@@ -21,6 +22,7 @@ ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
       <Header />
+      <NotificationBanner/>
       <Switch>
         <Route exact={true} path="/">
           <MainPage />

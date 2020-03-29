@@ -1,12 +1,13 @@
+@import 'dimensions';
+
 header {
   width: 100%;
   border-bottom: 1px solid #dedede;
   padding: 1em;
-  margin-bottom: 2em;
 }
 
 .header-content {
-  max-width: 1140px;
+  max-width: $content-width;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;

@@ -2,6 +2,7 @@ import * as moment from 'moment';
 import { AnyAction } from 'redux';
 
 import {
+  NotificationsActions,
   ResourcePageActions,
   ResourcesActions,
   UserInfoActions,
@@ -11,12 +12,17 @@ import {
   IFile,
   IFolder,
   IMainPageState,
+  INotificationsState,
   IResourcePageState,
   IResourcesState,
   IUserInfo,
   ResourcesActionTypes,
   UserActionTypes,
 } from './types';
+
+const initNotificationsState: INotificationsState = {
+  current: [],
+};
 
 const initResourceListPageState: IMainPageState = {
   allResourcesSelected: false,
@@ -37,6 +43,29 @@ const initResourcesState: IResourcesState = {
   resourceLocalFilesBeingFetched: new Set<string>(),
   resourceHydroShareFilesBeingFetched: new Set<string>(),
 };
+
+export function notificationsReducer(state: INotificationsState = initNotificationsState, action: AnyAction): INotificationsState {
+  let notifications = [...state.current];
+  switch (action.type) {
+    case NotificationsActions.DISMISS_NOTIFICATION:
+      notifications.splice(action.payload.idx, 1);
+      return {
+        ...state,
+        current: notifications,
+      };
+    case NotificationsActions.PUSH_NOTIFICATION:
+      notifications.push({
+        ...action.payload,
+        time: new Date(),
+      });
+      return {
+        ...state,
+        current: notifications,
+      };
+    default:
+      return state;
+  }
+}
 
 export function resourcePageReducer(state: IResourcePageState = initResourcePageState, action: AnyAction): IResourcePageState {
   let doMakeSelected;
