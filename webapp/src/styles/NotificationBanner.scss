@@ -6,23 +6,21 @@
   width: 100%;
 
   .notification {
-    padding: 0.75em;
+    border-radius: 0.5em;
+    margin: 0.5em auto 0;
+    max-width: $content-width;
+    overflow: hidden;
     width: 100%;
 
     .content {
       align-items: center;
       display: flex;
       justify-content: space-between;
-      margin: 0 auto;
-      max-width: $content-width;
-
-      :not(:first-child) {
-        margin-left: 1em;
-      }
 
       .icon {
         fill: white;
         height: 1.5em;
+        margin: 1em;
         width: 1.5em;
       }
 
@@ -34,14 +32,42 @@
       button {
         flex-grow: 0;
       }
+
+      .time {
+        margin: 0 1em;
+      }
+
+      .dismiss-button {
+        align-items: center;
+        align-self: stretch;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        padding: 0 1em;
+        transition: background-color 0.3s ease;
+      }
     }
   }
 
   .error {
     background-color: $red;
+    $darkRed: darken($red, 10);
+    .dismiss-button {
+      border-left: 1px solid $darkRed;
+      &:hover {
+        background-color: $darkRed;
+      }
+    }
   }
 
   .warning {
     background-color: $yellow;
+    $darkYellow: darken($yellow, 5);
+    .dismiss-button {
+      border-left: 1px solid $darkYellow;
+      &:hover {
+        background-color: $darkYellow;
+      }
+    }
   }
 }

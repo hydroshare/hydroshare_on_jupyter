@@ -71,9 +71,11 @@ const Notification: React.FC<NotificationProps> = (props: NotificationProps) => 
         <span className="time">
           {notification.time.toLocaleTimeString()}
         </span>
-        <button onClick={() => dismiss()}>
-          Dismiss
-        </button>
+        <div onClick={() => dismiss()} className="dismiss-button">
+          <span>
+            Dismiss
+          </span>
+        </div>
       </div>
     </div>
   )
