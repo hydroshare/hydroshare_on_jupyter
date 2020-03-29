@@ -8,6 +8,9 @@ import {
 } from 'redux-thunk';
 
 import {
+  pushNotification,
+} from "./actions/notifications";
+import {
   notifyGettingResourceHydroShareFiles,
   notifyGettingResourceJupyterHubFiles,
   setResourceLocalFiles,
@@ -125,6 +128,7 @@ export function moveFileOrFolder(resource: IJupyterResource, source: IFile | IFo
 
 function performFileOperation(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder, method: 'move' | 'copy') {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    // Make the network request to perform the operation
     const data = {
       operations: [{
         method,
@@ -133,9 +137,21 @@ function performFileOperation(resource: IJupyterResource, source: IFile | IFolde
       }],
     };
     const response = await patchToBackend<IFileOperationsRequestResponse>(`/resources/${resource.id}/move-copy-files`, data);
+    // Handle the result from the server
     const {
+      failureCount,
+      results,
       successCount,
     } = response.data;
+    // Display notifications for any errors that occurred
+    if (failureCount > 0) {
+      results.forEach(res => {
+        if (!res.success && res.message) {
+          dispatch(pushNotification('error', res.message));
+        }
+      });
+    }
+    // Refresh the file lists if we should
     if (successCount > 0) {
       // We could check to see if we need to refresh both lists
       dispatch(getResourceLocalFiles(resource));

@@ -151,6 +151,7 @@ export interface IFileOperationsRequestResponse {
   results: [{
     success: boolean
     error?: string
+    message?: string
   }]
   successCount: number
 }

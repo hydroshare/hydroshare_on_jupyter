@@ -21,18 +21,7 @@ import {
 } from './types';
 
 const initNotificationsState: INotificationsState = {
-  current: [
-    {
-      message: "Alien invasion incoming!",
-      time: new Date(),
-      type: 'error',
-    },
-    {
-      message: "Alien invasion possible",
-      time: new Date(),
-      type: 'warning',
-    },
-  ],
+  current: [],
 };
 
 const initResourceListPageState: IMainPageState = {
@@ -56,10 +45,19 @@ const initResourcesState: IResourcesState = {
 };
 
 export function notificationsReducer(state: INotificationsState = initNotificationsState, action: AnyAction): INotificationsState {
+  let notifications = [...state.current];
   switch (action.type) {
     case NotificationsActions.DISMISS_NOTIFICATION:
-      let notifications = [...state.current];
       notifications.splice(action.payload.idx, 1);
+      return {
+        ...state,
+        current: notifications,
+      };
+    case NotificationsActions.PUSH_NOTIFICATION:
+      notifications.push({
+        ...action.payload,
+        time: new Date(),
+      });
       return {
         ...state,
         current: notifications,

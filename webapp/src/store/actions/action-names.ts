@@ -1,5 +1,6 @@
 export enum NotificationsActions {
   DISMISS_NOTIFICATION = 'NotificationsActions/DISMISS_NOTIFICATION',
+  PUSH_NOTIFICATION = 'NotificationActions/PUSH_NOTIFICATION',
 }
 
 export enum ResourcePageActions {
