@@ -226,7 +226,8 @@ Sample response:
     {
       "success": false,
       "error": "FileExists",
-    },
+      "message": "The file \"My beautiful data.csv\" already exists in \"My data\"."
+    }
   ]
 }
 
