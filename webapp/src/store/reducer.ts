@@ -26,7 +26,12 @@ const initNotificationsState: INotificationsState = {
       message: "Alien invasion incoming!",
       time: new Date(),
       type: 'error',
-    }
+    },
+    {
+      message: "Alien invasion possible",
+      time: new Date(),
+      type: 'warning',
+    },
   ],
 };
 
