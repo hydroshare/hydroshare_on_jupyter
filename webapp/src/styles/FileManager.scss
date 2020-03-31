@@ -20,6 +20,7 @@
     flex-direction: column;
     position: relative;
     border: $border-style;
+    background-color: white;
 
     .FilePane-header {
       align-items: center;
@@ -44,7 +45,17 @@
 
     .table-row {
       border-bottom: $border-style;
+      display: flex;
       white-space: nowrap;
+
+      &.dragging {
+        background-color: white;
+        border: $border-style;
+      }
+    }
+
+    .FilePane-files-container {
+      flex-grow: 1;
     }
 
     .table-header > *,
@@ -58,6 +69,21 @@
       &:not(:first-child) {
         width: $column-width-other;
         border-left: $border-style;
+      }
+    }
+
+    $draggable-bg-lighten-amount: 30;
+    &.jupyterhub {
+      .draggable-over {
+        background-color: lighten($jupyter-orange, $draggable-bg-lighten-amount);
+        border: 2px solid $jupyter-orange;
+      }
+    }
+
+    &.hydroshare {
+      .draggable-over {
+        background-color: lighten($hydroshare-blue, $draggable-bg-lighten-amount);
+        border: 2px solid $hydroshare-blue;
       }
     }
 
