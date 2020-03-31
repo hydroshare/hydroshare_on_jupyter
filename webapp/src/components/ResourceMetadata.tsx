@@ -3,13 +3,13 @@ import {
   IJupyterResource,
 } from '../store/types';
 
-import '../styles/ResourceInfo.scss';
+import '../styles/ResourceMetadata.scss';
 
 export interface IPropTypes {
   resource: IJupyterResource
 }
 
-export default class ResourceMetadataDisplay extends React.Component<IPropTypes, never> {
+export default class ResourceMetadata extends React.Component<IPropTypes, never> {
 
   public render() {
     const {
@@ -37,7 +37,7 @@ export default class ResourceMetadataDisplay extends React.Component<IPropTypes,
         </div>
     ) : null;
     return (
-      <div className="ResourceInfo">
+      <div className="ResourceInfo content-row tile">
         <h1 className="title">{title}</h1>
         <div className="resource-meta-container">
           {hsResourceMeta}
