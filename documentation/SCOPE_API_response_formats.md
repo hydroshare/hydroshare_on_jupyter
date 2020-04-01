@@ -177,7 +177,7 @@ Delete a file from a HydroShare resource.
 
 ### Request format
 ```json
-{"filepath": "filepath_to_file_to_delete"}
+{"filepaths": ["filepath_to_file1_to_delete", "filepath_to_file2_to_delete"]}
 ```
 
 # /resources/<resource_id>/file-ops
@@ -301,7 +301,7 @@ Deletes the local (JupyterHub) copy of a file in a resource.
 
 ```json
 {
-  "filepath": "filepath_to_file_to_delete"
+  "filepaths": ["filepath_to_file1_to_delete", "filepath_to_file2_to_delete"]
 }
 ```
 
