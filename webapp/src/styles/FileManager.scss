@@ -48,6 +48,10 @@
       display: flex;
       white-space: nowrap;
 
+      &:not(.dragging) {
+        transform: none !important;
+      }
+
       &.dragging {
         background-color: white;
         border: $border-style;
@@ -75,6 +79,7 @@
     $draggable-bg-lighten-amount: 30;
     &.jupyterhub {
       .draggable-over {
+        margin: -2px;
         background-color: lighten($jupyter-orange, $draggable-bg-lighten-amount);
         border: 2px solid $jupyter-orange;
       }
@@ -82,6 +87,7 @@
 
     &.hydroshare {
       .draggable-over {
+        margin: -2px;
         background-color: lighten($hydroshare-blue, $draggable-bg-lighten-amount);
         border: 2px solid $hydroshare-blue;
       }

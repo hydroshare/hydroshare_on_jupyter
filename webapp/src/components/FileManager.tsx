@@ -118,21 +118,9 @@ interface IFilePaneProps {
   title: string
 }
 
-const getDroppableStyles = (snapshot: DroppableStateSnapshot, nestLevel: number = 0) => {
-  return {
-    transform: 'none !important',
-  };
-};
-
 const getDroppableClasses = (snapshot: DroppableStateSnapshot, classes: string = '') => {
   if (snapshot.isDraggingOver) classes += ' draggable-over';
   return classes;
-};
-
-const getDraggableStyles = (snapshot: DraggableStateSnapshot, nestLevel: number = 0) => {
-  return {
-    transform: 'none !important',
-  };
 };
 
 const getDraggableClasses = (snapshot: DraggableStateSnapshot, classes: string = '') => {
@@ -177,7 +165,6 @@ const generateFolderElement = (folder: IFolder, index: number, openFile: (f: IFi
         {(provided, snapshot) => (
           <div
             className={getDraggableClasses(snapshot, 'table-row folder-element')}
-            style={getDraggableStyles(snapshot, nestLevel)}
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
@@ -200,7 +187,6 @@ const generateFolderElement = (folder: IFolder, index: number, openFile: (f: IFi
       {(provided, snapshot) => (
       <div
         className={getDroppableClasses(snapshot)}
-        style={getDroppableStyles(snapshot, nestLevel)}
         ref={provided.innerRef}
         {...provided.droppableProps}
       >
@@ -221,7 +207,6 @@ const generateFileElement = (item: IFile, index: number, openFile: (f: IFile) =>
       {(provided, snapshot) => (
         <div
           className={getDraggableClasses(snapshot, 'table-row file-element')}
-          style={getDraggableStyles(snapshot, nestLevel)}
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
@@ -262,23 +247,22 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
         <span className="title">{props.title}</span>
         <img src={props.headerImageUrl} alt={props.title} />
       </div>
-      <div className="table-header table-row">
-        <span>
-          <input type="checkbox" onChange={onAllFilesCheckboxToggled} />
-        </span>
-        <span>Name</span>
-        <span>Type</span>
-        <span>Size</span>
-        <span>Last Modified</span>
-      </div>
       <Droppable droppableId={props.droppableId}>
         {(provided, snapshot) => (
           <div
             className={getDroppableClasses(snapshot, 'FilePane-files-container')}
-            style={getDroppableStyles(snapshot)}
             ref={provided.innerRef}
             {...provided.droppableProps}
-          >
+            >
+            <div className="table-header table-row">
+              <span>
+                <input type="checkbox" onChange={onAllFilesCheckboxToggled} />
+              </span>
+              <span>Name</span>
+              <span>Type</span>
+              <span>Size</span>
+              <span>Last Modified</span>
+            </div>
             {props.rootDir?.contents.map((item, idx) => generateFileOrFolderElement(item, idx, props.openFile))}
             {provided.placeholder}
           </div>
