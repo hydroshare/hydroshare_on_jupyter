@@ -6,7 +6,7 @@ import { push } from 'connected-react-router';
 import '../styles/ResourcePage.scss';
 
 import FileManager from "../components/FileManager";
-import ResourceMetadataDisplay from '../components/ResourceMetadataDisplay';
+import ResourceMetadata from '../components/ResourceMetadata';
 
 import * as resourcePageActions from '../store/actions/ResourcePage';
 import * as resourcesActions from '../store/actions/resources';
@@ -104,7 +104,7 @@ class ResourcePage extends React.Component<PropsType, never> {
     return (
       <div className="page resource-details">
         {/*<a className="go-back" onClick={this.props.goBackToResources}>&lt; Back to resources</a>*/}
-        <ResourceMetadataDisplay resource={resource} />
+        <ResourceMetadata resource={resource} />
         <FileManager
           hydroShareResourceRootDir={resource.hydroShareResource.files}
           jupyterHubResourceRootDir={resource.jupyterHubFiles}

@@ -79,15 +79,29 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
   // Clear the lookup table
   fileOrFolderLookupTable.clear();
 
-  const hydroShareFilePane = props.hydroShareResourceRootDir ? (
-    <FilePane droppableId={hydroShareResourceRootDir.path} rootDir={hydroShareResourceRootDir} openFile={props.openFile}/>
-  ) : null;
   const jupyterHubFilePane = props.jupyterHubResourceRootDir ? (
-    <FilePane droppableId={jupyterHubResourceRootDir.path} rootDir={jupyterHubResourceRootDir} openFile={props.openFile}/>
+    <FilePane
+      className="tile"
+      droppableId={jupyterHubResourceRootDir.path}
+      rootDir={jupyterHubResourceRootDir}
+      headerImageUrl="/JupyterHub-logo.png"
+      openFile={props.openFile}
+      title="Local Files"
+    />
+  ) : null;
+  const hydroShareFilePane = props.hydroShareResourceRootDir ? (
+    <FilePane
+      className="tile"
+      droppableId={hydroShareResourceRootDir.path}
+      rootDir={hydroShareResourceRootDir}
+      headerImageUrl="/HydroShare-logo.png"
+      openFile={props.openFile}
+      title="HydroShare Files"
+    />
   ) : null;
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="FileManager">
+      <div className="FileManager content-row">
         {jupyterHubFilePane}
         {hydroShareFilePane}
       </div>
@@ -96,9 +110,12 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
 };
 
 interface IFilePaneProps {
+  className: string
   rootDir: IFolder
   droppableId: string
+  headerImageUrl: string
   openFile: (f: IFile) => any
+  title: string
 }
 
 const getDroppableStyles = (snapshot: DroppableStateSnapshot, nestLevel: number = 0) => {
@@ -224,9 +241,18 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
 
   const onAllFilesCheckboxToggled = () => console.log("Checked!");
 
+  const className = ['FilePane'];
+  if (props.className) {
+    className.push(props.className);
+  }
+
   return (
-    <div className="FilePane">
-      <div className="FilePane-header table-row">
+    <div className={className.join(' ')}>
+      <div className="FilePane-header">
+        <span className="title">{props.title}</span>
+        <img src={props.headerImageUrl} alt={props.title} />
+      </div>
+      <div className="table-header table-row">
         <span>
           <input type="checkbox" onChange={onAllFilesCheckboxToggled} />
         </span>
