@@ -1,4 +1,4 @@
-@import 'colors';
+@import 'variables';
 
 .FileManager {
   $gutter-width: 2.5%;
@@ -9,11 +9,6 @@
   width: 100%;
 
   .FilePane {
-    $column-width-checkbox: 6%;
-    $column-width-other: 23%;
-    $column-padding: 2%;
-    $border-style: 1px solid $blue-grey;
-
     width: 50% - $gutter-width/2;
     float: left;
     display: flex;
@@ -38,11 +33,6 @@
       }
     }
 
-    .table-header {
-      display: inline-block;
-      font-size: 0.8em;
-    }
-
     .table-row {
       border-bottom: $border-style;
       display: flex;
@@ -60,20 +50,6 @@
 
     .FilePane-files-container {
       flex-grow: 1;
-    }
-
-    .table-header > *,
-    .FilePane-files-container .table-row > * {
-      display: inline-block;
-      overflow: hidden;
-      padding: 0.5em $column-padding 0.2em;
-      &:first-child {
-        width: $column-width-checkbox;
-      }
-      &:not(:first-child) {
-        width: $column-width-other;
-        border-left: $border-style;
-      }
     }
 
     $draggable-bg-lighten-amount: 30;

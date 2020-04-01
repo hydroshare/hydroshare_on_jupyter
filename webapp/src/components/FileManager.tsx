@@ -236,7 +236,7 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
 
   const onAllFilesCheckboxToggled = () => console.log("Checked!");
 
-  const className = ['FilePane'];
+  const className = ['FilePane', 'table'];
   if (props.className) {
     className.push(props.className);
   }

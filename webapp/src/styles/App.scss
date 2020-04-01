@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap');
-@import 'colors';
-@import 'dimensions';
+@import 'variables';
 @import 'Header';
 
 * {
@@ -41,4 +40,35 @@ h2,
 .tile {
   box-shadow: $drop-shadow;
   background-color: white;
+}
+
+.table {
+    $column-width-checkbox: 6%;
+    $column-width-other: 23%;
+    $column-padding: 2%;
+
+    .table-header {
+      display: inline-block;
+      font-size: 0.8em;
+    }
+
+    .table-row {
+      border-bottom: $border-style;
+      display: flex;
+      white-space: nowrap;
+    }
+
+    .table-header > *,
+    .table-row > * {
+      display: inline-block;
+      overflow: hidden;
+      padding: 0.5em $column-padding 0.2em;
+      &:first-child {
+        width: $column-width-checkbox;
+      }
+      &:not(:first-child) {
+        width: $column-width-other;
+        border-left: $border-style;
+      }
+    }
 }
