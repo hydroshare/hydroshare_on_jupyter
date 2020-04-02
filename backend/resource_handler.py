@@ -14,6 +14,8 @@ from getpass import getpass
 from pathlib import Path
 import base64
 
+# TODO: (Charlie's question) Why is this in this class, vs hs_server? 
+# Prompt for username and password if not already saved
 try:
     from login import username, password
     password = base64.b64decode(password.decode("utf-8"))
@@ -22,12 +24,17 @@ except ModuleNotFoundError:
     password = getpass()
     pw = (base64.b64encode(password.encode("utf-8")))
 
+    # TODO (Charlie): Check that password works
+
     folder = Path(__file__).parent.absolute()
 
     f = open(folder / "login.py", "w+")
     f.write("username = \"" + username + "\"\n")
     f.write("password = " + str(pw) + "\n")
     f.close()
+
+# Check that user and password are valid
+
 
 import logging
 import glob
@@ -60,19 +67,33 @@ class ResourceHandler:
     def get_user_info(self):
         '''Gets information about the user currently logged into HS
         '''
-        return self.hs.getUserInfo()
+        user_info = None
+        error = None
+        try:
+            user_info = self.hs.getUserInfo()
+        except:
+            error = {'type':'InvalidCredentials', 'msg':'Invalid username or password'}
+
+        return user_info, error
 
     def delete_resource_JH(self, res_id):
+        error = None
         JH_resource_path = self.output_folder + "/" + res_id
-        shutil.rmtree(JH_resource_path)
+        
+        try:
+            shutil.rmtree(JH_resource_path)
+        except FileNotFoundError:
+            error = {'type':'FileNotFoundError', 'msg':'Resource does not exist in JupyterHub'}
+        except:
+            error = {'type':'UnknownError', 'msg':'Something went wrong. Could not delete resource.'}
+        return error
 
     def get_local_JH_resources(self):
         '''Gets dictionary of jupyterhub resources by resource id that are
         saved locally.
         '''
-        # TODO (Charlie): Make more robust?
         resource_folders = glob.glob(os.path.join(self.output_folder, '*'))
-        # TODO: Use a filesystem-independent way of this
+        # TODO (Emily): Use a filesystem-independent way of this
         mp_by_res_id = {}
         res_ids = []
         for folder_path in resource_folders:
@@ -89,15 +110,26 @@ class ResourceHandler:
 
         Assumes there are no local resources that don't exist in HS
         '''
+        error = None
+
         resources = {}
         is_local = False # referenced later when checking if res is local
 
         # Get local res_ids
         self.local_res_ids = self.get_local_JH_resources()
+
         # Get the user's resources from HydroShare
         user_hs_resources = self.hs.resources(owner=username)
+
+        try:
+            test_generator = list(user_hs_resources) # resources can't be listed if auth fails
+        except:
+            error = {'type': 'InvalidCredentials', 'msg': 'Invalid username or password'}
+            return list(resources.values()), error
+
         for res in user_hs_resources:
             res_id = res['resource_id']
+
             # check if local
             if res_id in self.local_res_ids:
                 is_local = True
@@ -109,7 +141,7 @@ class ResourceHandler:
                 'localCopyExists': is_local,
             }
 
-        return list(resources.values())
+        return list(resources.values()), error
 
     def create_HS_resource(self, resource_title, creators):
         """
@@ -133,7 +165,19 @@ class ResourceHandler:
         'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}, {"creator":{"name":"Charlie2"}}]',
         'extra_metadata': '{"key-1": "value-1", "key-2": "value-2"}'}
         """
-        # TODO: Add type exceptions for resource_title and creators
+        error = None
+        resource_id = None
+
+        # Type errors for resource_title and creators
+        if not isinstance(resource_title, str):
+            error = {'type':'IncorrectType',
+                    'msg':'Resource title should be a string.'}
+            return resource_id, error
+        if not isinstance(creators, list) or not all(isinstance(creator, str) for creator in creators):
+            error = {'type':'IncorrectType', 
+                    'msg':'"Creators" object should be a list of strings.'}
+            return resource_id, error
+
         # Formatting creators for metadata['metadata']:
         meta_metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}'
         for creator in creators:
@@ -150,15 +194,18 @@ class ResourceHandler:
                     'extra_metadata': ''}
 
         resource_id = ''
-        resource_id = self.hs.createResource(metadata['rtype'],
+        try:
+            resource_id = self.hs.createResource(metadata['rtype'],
                                             metadata['title'],
                                             resource_file=metadata['fpath'],
                                             keywords = metadata['keywords'],
                                             abstract = metadata['abstract'],
                                             metadata = metadata['metadata'],
                                             extra_metadata=metadata['extra_metadata'])
-
-        return resource_id
+        except:
+            error = {'type':'UnknownError',
+                    'msg':'Unable to create resource.'}
+        return resource_id, error
 
     def copy_HS_resource(self, og_res_id):
         response = self.hs.resource(og_res_id).copy()

@@ -53,17 +53,31 @@ class ResourcesHandler(BaseRequestHandler):
      a new resource for that user """
 
     def get(self):
-        # TODO: Probably do some request error handling here
-        resources = resource_handler.get_list_of_user_resources()
-        self.write({'resources': resources})
+        success = False
+        resources, error = resource_handler.get_list_of_user_resources()
+        if not error:
+            success = True
+
+        self.write({'resources': resources,
+                    'success': success,
+                    'error': error})
 
     def delete(self):
+        success = False
+        error = None
+
         body = json.loads(self.request.body.decode('utf-8'))
         res_id = body.get("res_id")
         if res_id is not None:
-            resource_handler.delete_resource_JH(res_id)
+            error = resource_handler.delete_resource_JH(res_id)
+            if not error:
+                success = True
         else:
-            self.write("Please specify resource id to delete")
+            error = {'type':'MissingResourceID', 
+                    'msg':'Please specify resource id to delete'}
+
+        self.write({'success': success,
+                    'error': error})
 
     def post(self):
         """
@@ -75,17 +89,25 @@ class ResourcesHandler(BaseRequestHandler):
         {"resource title": string
         "creators": list of strings}
         """
+        success = False
+        error = None
+        resource_id = None
+
         body = json.loads(self.request.body.decode('utf-8'))
         resource_title = body.get("resource title") # string
         creators = body.get("creators") # list of names (strings)
 
         if resource_title is not None and creators is not None:
-            resource_id = resource_handler.create_HS_resource(resource_title, creators)
-
-            # TODO: Check this method of returning resource id
-            self.write(resource_id)
+            resource_id, error = resource_handler.create_HS_resource(resource_title, creators)
+            if not error:
+                success = True
         else:
-            self.write("Please specify title and creators to make new resource")
+            error = {'type':'MissingInput',
+                    'msg':'Please specify title and creators to make new resource'}
+
+        self.write({'resource_id':resource_id,
+                    'success':success,
+                    'error': error})
 
 
 class FileHandlerJH(BaseRequestHandler):
@@ -229,6 +251,7 @@ class MoveCopyFiles(BaseRequestHandler):
                 })
                 failure_count += 1
 
+        # CHARLIE: Example for error message
         self.write({
             'results': results,
             'successCount': success_count,
@@ -241,8 +264,14 @@ class UserInfoHandler(BaseRequestHandler):
     in user including name, email, username, etc. """
 
     def get(self):
-        data = resource_handler.get_user_info()
-        self.write(data)
+        success = False
+        data, error = resource_handler.get_user_info()
+        if not error:
+            success = True
+        
+        self.write({'data': data,
+                    'success': success,
+                    'error': error})
 
 
 class HydroShareGUI(tornado.web.Application):
