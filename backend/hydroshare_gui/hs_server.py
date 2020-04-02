@@ -120,12 +120,13 @@ class FileHandlerJH(BaseRequestHandler):
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
-        filepath = body.get("filepath")
-        if filepath is not None:
-            resource = Resource(res_id, resource_handler)
-            resource.delete_file_or_folder_from_JH(filepath)
+        filepaths = body.get("filepaths")
+        if filepaths is not None:
+            for filepath in filepaths:
+                resource = Resource(res_id, resource_handler)
+                resource.delete_file_or_folder_from_JH(filepath)
         else:
-            self.write("Please specify filepath to delete")
+            self.write("Please specify list of filepaths to delete")
 
     def put(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
@@ -160,14 +161,15 @@ class FileHandlerHS(BaseRequestHandler):
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
-        filepath = body.get("filepath")
-        if filepath is not None:
-            resource = Resource(res_id, resource_handler)
-            resource.delete_file_or_folder_from_HS(filepath)
-            resource.update_hs_files()
-            self.write({"rootDir": resource.hs_files})
+        filepaths = body.get("filepaths")
+        if filepaths is not None:
+            for filepath in filepaths:
+                resource = Resource(res_id, resource_handler)
+                resource.delete_file_or_folder_from_HS(filepath)
+                resource.update_hs_files()
+                self.write({"rootDir": resource.hs_files})
         else:
-            self.write("Please specify filepath to delete")
+            self.write("Please specify list of filepaths to delete")
 
 
 MOVE = 'move'
@@ -227,8 +229,8 @@ class MoveCopyFiles(BaseRequestHandler):
                 # TODO: Support moving from one local folder to a different one on HS
                 resource.overwrite_HS_with_file_from_JH(src_path)
                 if method == MOVE:
-                    # TODO: Delete the local copy of the file
-                    pass
+                    # Delete the local copy of the file
+                    resource.delete_file_or_folder_from_JH(src_path)
                 results.append({'success': True})
                 success_count += 1
             elif src_fs == HS_PREFIX and dest_fs == LOCAL_PREFIX:  # Move/copy from HydroShare to the local filesystem
@@ -236,8 +238,8 @@ class MoveCopyFiles(BaseRequestHandler):
                 # TODO: Support moving from one HS folder to a different one locally
                 resource.overwrite_JH_with_file_from_HS(src_path)
                 if method == MOVE:
-                    # TODO: Delete the local copy of the file
-                    pass
+                    # Delete the HS copy of the file
+                    resource.delete_file_or_folder_from_HS(src_path)
                 results.append({'success': True})
                 success_count += 1
             else:

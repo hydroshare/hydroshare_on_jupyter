@@ -31,8 +31,14 @@ Find the line that begins with `c.NotebookApp.nbserver_extensions` and change it
 
 `export PYTHONPATH=$PYTHONPATH:$(pwd)`
 
+7. Set the path of the folder where your JupyterHub files live on your computer by setting the JH_FOLDER_PATH environment variable. If you are on Ubuntu, you can do this by opening up your `/etc/environment` file and adding the following line:
 
-7. Now run:
+`JH_FOLDER_PATH="/home/user/my_jh_files"`
+
+Of course, replace "/home/user/my_jh_files" with the path to your JupyterHub files folder. To make sure this path takes effect, you should then log out and log back in (or restart your machine).
+
+
+8. Now run:
 
 `jupyter notebook`
 

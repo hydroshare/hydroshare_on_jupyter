@@ -1,7 +1,10 @@
 @import 'colors';
 
 .FileManager {
-  display: inline-block;
+  $gutter-width: 2.5%;
+
+  display: flex;
+  justify-content: space-between;
   position: relative;
   width: 100%;
 
@@ -11,24 +14,55 @@
     $column-padding: 2%;
     $border-style: 1px solid $blue-grey;
 
-    width: 50%;
+    width: 50% - $gutter-width/2;
     float: left;
     display: flex;
     flex-direction: column;
     position: relative;
     border: $border-style;
+    background-color: white;
 
     .FilePane-header {
+      align-items: center;
+      border-bottom: $border-style;
+      display: flex;
+      justify-content: space-between;
+      padding: 0.6em 1em;
+
+      .title {
+        font-size: 1.2em;
+      }
+
+      img {
+        height: 1.5em;
+      }
+    }
+
+    .table-header {
       display: inline-block;
       font-size: 0.8em;
     }
 
     .table-row {
       border-bottom: $border-style;
+      display: flex;
       white-space: nowrap;
+
+      &:not(.dragging) {
+        transform: none !important;
+      }
+
+      &.dragging {
+        background-color: white;
+        border: $border-style;
+      }
     }
 
-    .FilePane-header > *,
+    .FilePane-files-container {
+      flex-grow: 1;
+    }
+
+    .table-header > *,
     .FilePane-files-container .table-row > * {
       display: inline-block;
       overflow: hidden;
@@ -39,6 +73,23 @@
       &:not(:first-child) {
         width: $column-width-other;
         border-left: $border-style;
+      }
+    }
+
+    $draggable-bg-lighten-amount: 30;
+    &.jupyterhub {
+      .draggable-over {
+        margin: -2px;
+        background-color: lighten($jupyter-orange, $draggable-bg-lighten-amount);
+        border: 2px solid $jupyter-orange;
+      }
+    }
+
+    &.hydroshare {
+      .draggable-over {
+        margin: -2px;
+        background-color: lighten($hydroshare-blue, $draggable-bg-lighten-amount);
+        border: 2px solid $hydroshare-blue;
       }
     }
 
