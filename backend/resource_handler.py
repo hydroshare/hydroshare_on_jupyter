@@ -57,12 +57,22 @@ class ResourceHandler:
         auth = HydroShareAuthBasic(username=username, password=password)
         self.hs = HydroShare(auth=auth, hostname='www.hydroshare.org')
         # Get path to this file's location
-        current_path = os.path.dirname(os.path.realpath(__file__))
-        self.output_folder = current_path + "/hydroshare_gui/local_hs_resources"
-        # Make directory if it doesn't exist
-        if not os.path.exists(self.output_folder):
-            os.makedirs(self.output_folder)
-            logging.info("Made {} folder for new resources".format(self.output_folder))
+        path_set = False
+        if os.getenv("JH_FOLDER_PATH") != None:
+            self.output_folder = os.environ.get("JH_FOLDER_PATH")
+            path_set = True
+            if not os.path.exists(self.output_folder):
+                print("Invalid JH folder path set, path does not exist.")
+                path_set = False
+        if not path_set:
+            current_path = os.path.dirname(os.path.realpath(__file__))
+            self.output_folder = current_path + "/hydroshare_gui/local_hs_resources"
+            print("No valid JH folder path set, using default: " + self.output_folder)
+            print("To set a different JH folder path, please set the JH_FOLDER_PATH environment variable.")
+            # Make directory if it doesn't exist
+            if not os.path.exists(self.output_folder):
+                os.makedirs(self.output_folder)
+                logging.info("Made {} folder for new resources".format(self.output_folder))
 
     def get_user_info(self):
         '''Gets information about the user currently logged into HS

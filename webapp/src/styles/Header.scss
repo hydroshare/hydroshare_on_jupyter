@@ -1,8 +1,10 @@
+@import 'colors';
 @import 'dimensions';
 
 header {
+  background-color: white;
   width: 100%;
-  border-bottom: 1px solid #dedede;
+  box-shadow: $drop-shadow;
   padding: 1em;
 }
 
