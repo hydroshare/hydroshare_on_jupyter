@@ -1,3 +1,8 @@
+export enum MainPageActions {
+  SET_SELECTED_RESOURCES = 'MainPageActions/SET_SELECTED_RESOURCES',
+  SET_TABLE_SORT_BY = 'MainPageActions/SET_TABLE_SORT_BY',
+}
+
 export enum NotificationsActions {
   DISMISS_NOTIFICATION = 'NotificationsActions/DISMISS_NOTIFICATION',
   PUSH_NOTIFICATION = 'NotificationActions/PUSH_NOTIFICATION',
