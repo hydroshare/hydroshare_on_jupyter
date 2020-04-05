@@ -126,7 +126,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           checked={selectedResources.has(resource.id)}
           onChange={() => this.toggleSingleResourceSelected(resource)}
         />
-        <span onClick={() => this.props.viewResource(resource)}>{resource.title}</span>
+        <span onClick={() => this.props.viewResource(resource)} className="clickable">{resource.title}</span>
         <span>{resource.hydroShareResource.author || 'Unknown'}</span>
         <span>Unknown</span>
         <span>Unknown</span>
@@ -153,10 +153,10 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           <span className="checkbox">
             <input type="checkbox" checked={allResourcesSelected} onChange={this.toggleAllResourcesSelected}/>
           </span>
-          <span>Name</span>
-          <span>Owner</span>
-          <span>Size</span>
-          <span>Last Modified</span>
+          <span className="clickable">Name</span>
+          <span className="clickable">Owner</span>
+          <span className="clickable">Size</span>
+          <span className="clickable">Last Modified</span>
         </div>
         {rowElements}
         <NewResourceModal
