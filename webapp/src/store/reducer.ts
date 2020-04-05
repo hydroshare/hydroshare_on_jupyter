@@ -2,6 +2,7 @@ import * as moment from 'moment';
 import { AnyAction } from 'redux';
 
 import {
+  MainPageActions,
   NotificationsActions,
   ResourcePageActions,
   ResourcesActions,
@@ -26,6 +27,7 @@ const initNotificationsState: INotificationsState = {
 
 const initResourceListPageState: IMainPageState = {
   allResourcesSelected: false,
+  selectedResources: new Set<string>(),
   searchTerm: '',
 };
 
@@ -130,8 +132,16 @@ function toggleFileOrFolderSelected(toggledItem: IFile | IFolder, selectedFilesA
 
 export function mainPageReducer(state: IMainPageState = initResourceListPageState, action: AnyAction): IMainPageState {
   switch (action.type) {
-    case ResourcePageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER:
-      return {...state, allResourcesSelected: !state.allResourcesSelected};
+    case MainPageActions.SET_SELECTED_RESOURCES:
+      const {
+        allResourcesSelected,
+        selectedResources,
+      } = action.payload;
+      return {
+        ...state,
+        allResourcesSelected,
+        selectedResources,
+      };
     case ResourcePageActions.SEARCH_BY:
       return {...state, searchTerm: action.payload};
     case ResourcePageActions.SORT_BY_NAME:

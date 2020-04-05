@@ -36,6 +36,7 @@ export interface IMainPageState {
   allResourcesSelected: boolean
   sortBy?: SortByOptions
   searchTerm: string
+  selectedResources: Set<string>
 }
 
 export interface IFile {

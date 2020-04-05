@@ -13,13 +13,17 @@ import NewResourceModal from './NewResourceModal';
 import { ICreateResourceRequest } from '../store/types';
 
 interface IResourceListProps {
+  allResourcesSelected: boolean
   className?: string
   viewResource: any
   searchTerm: string
   resources: {
       [resourceId: string]: IJupyterResource
   }
+  selectedResources: Set<string>
   sortByTerm: SortByOptions | undefined
+  toggleAllResourcesSelected: () => any
+  toggleSingleResourceSelected: (res: IJupyterResource) => any
   newResource: (newResource: ICreateResourceRequest) => any
 }
 
@@ -103,12 +107,21 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
   }
 
   public render() {
-    const { resources } = this.props;
+    const {
+      allResourcesSelected,
+      resources,
+      selectedResources,
+      toggleAllResourcesSelected,
+    } = this.props;
 
     const rowElements = Object.values(resources).map(resource => (
-      <div className="table-row" onClick={() => this.props.viewResource(resource)}>
-        <input type="checkbox"/>
-        <span>{resource.title}</span>
+      <div className="table-row">
+        <input
+          type="checkbox"
+          checked={selectedResources.has(resource.id)}
+          onChange={() => this.props.toggleSingleResourceSelected(resource)}
+        />
+        <span onClick={() => this.props.viewResource(resource)}>{resource.title}</span>
         <span>{resource.hydroShareResource.author || 'Unknown'}</span>
         <span>Unknown</span>
         <span>Unknown</span>
@@ -128,13 +141,12 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         </div>
         <div className="input-row">
           <input type="text" placeholder="Search"/>
-          <button><span>New</span></button>
-          <button><span>Upload</span></button>
-          <button><span>Delete</span></button>
+          <button onClick={this.handleOpenModal}><span>New Resource</span></button>
+          <button disabled={selectedResources.size === 0}><span>Delete</span></button>
         </div>
         <div className="table-header table-row">
           <span className="checkbox">
-            <input type="checkbox" />
+            <input type="checkbox" checked={allResourcesSelected} onChange={toggleAllResourcesSelected}/>
           </span>
           <span>Name</span>
           <span>Owner</span>
