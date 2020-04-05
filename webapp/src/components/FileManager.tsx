@@ -255,7 +255,7 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
             {...provided.droppableProps}
             >
             <div className="table-header table-row">
-              <span>
+              <span className="checkbox">
                 <input type="checkbox" onChange={onAllFilesCheckboxToggled} />
               </span>
               <span>Name</span>

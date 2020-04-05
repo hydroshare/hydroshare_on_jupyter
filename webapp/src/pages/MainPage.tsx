@@ -50,9 +50,14 @@ class MainPage extends React.Component<ReduxType, never>  {
   public render() {
     return (
       <div className="page resources">
-        <h1>Welcome to CUAHSI JupyterHub!</h1>
-        <p>Below is the list of resources you have saved in HydroShare and/or JupyterHub.</p>
-        <ResourceList newResource={this.props.newResource} viewResource={this.handleViewResource} resources={this.props.resources} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
+        <ResourceList
+          className="tile"
+          newResource={this.props.newResource}
+          viewResource={this.handleViewResource}
+          resources={this.props.resources}
+          searchTerm={this.props.searchTerm}
+          sortByTerm={this.props.sortByTerm}
+        />
       </div>
     )
   }

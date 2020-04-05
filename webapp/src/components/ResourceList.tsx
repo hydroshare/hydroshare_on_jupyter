@@ -13,6 +13,7 @@ import NewResourceModal from './NewResourceModal';
 import { ICreateResourceRequest } from '../store/types';
 
 interface IResourceListProps {
+  className?: string
   viewResource: any
   searchTerm: string
   resources: {
@@ -103,9 +104,44 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
 
   public render() {
     const { resources } = this.props;
+
+    const rowElements = Object.values(resources).map(resource => (
+      <div className="table-row" onClick={() => this.props.viewResource(resource)}>
+        <input type="checkbox"/>
+        <span>{resource.title}</span>
+        <span>{resource.hydroShareResource.author || 'Unknown'}</span>
+        <span>Unknown</span>
+        <span>Unknown</span>
+      </div>
+      )
+    );
+
+    const classNames = ['ResourceList', 'table'];
+    if (this.props.className) {
+      classNames.push(this.props.className);
+    }
     return (
-      <div>
-        {Object.values(resources).map(res => (<p key={res.id} onClick={() => this.props.viewResource(res)}>{res.title}</p>))}
+      <div className={classNames.join(' ')}>
+        <div className="ResourceList-header">
+          <h2>My Resources</h2>
+          <span>Here is a list of your HydroShare resources. To open one, simply click on it.</span>
+        </div>
+        <div className="input-row">
+          <input type="text" placeholder="Search"/>
+          <button><span>New</span></button>
+          <button><span>Upload</span></button>
+          <button><span>Delete</span></button>
+        </div>
+        <div className="table-header table-row">
+          <span className="checkbox">
+            <input type="checkbox" />
+          </span>
+          <span>Name</span>
+          <span>Owner</span>
+          <span>Size</span>
+          <span>Last Modified</span>
+        </div>
+        {rowElements}
         <NewResourceModal
           show={this.state.showModal}
           onHide={this.handleCloseModal}

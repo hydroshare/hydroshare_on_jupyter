@@ -43,32 +43,76 @@ h2,
 }
 
 .table {
-    $column-width-checkbox: 6%;
-    $column-width-other: 23%;
-    $column-padding: 2%;
+  $column-width-checkbox: 6%;
+  $column-width-other: 23%;
+  $column-padding: 2%;
 
-    .table-header {
-      display: inline-block;
-      font-size: 0.8em;
+  .table-header {
+    display: inline-block;
+    font-size: 0.8em;
+  }
+
+  .input-row {
+    $row-border-style: 5px solid $hydroshare-blue;
+
+    background-color: $hydroshare-blue;
+    border-left: $row-border-style;
+    border-right: $row-border-style;
+    display: flex;
+    flex-direction: row;
+    font-size: 0.9em;
+
+    & > * {
+      padding: 0.5em 0.75em;
     }
 
-    .table-row {
-      border-bottom: $border-style;
+    input[type="text"] {
+      border-top: $row-border-style;
+      border-right: none;
+      border-bottom: $row-border-style;
+      border-left: none;
+    }
+
+    button {
+      align-items: center;
+      border: none;
+      background: none;
+      cursor: pointer;
       display: flex;
-      white-space: nowrap;
-    }
+      transition: background-color 0.3s ease;
 
-    .table-header > *,
-    .table-row > * {
-      display: inline-block;
-      overflow: hidden;
-      padding: 0.5em $column-padding 0.2em;
-      &:first-child {
-        width: $column-width-checkbox;
+      &:hover:not(:disabled) {
+        background-color: darken($hydroshare-blue, 10);
       }
-      &:not(:first-child) {
-        width: $column-width-other;
-        border-left: $border-style;
+
+      &:disabled {
+        color: gray;
+      }
+
+      span {
+        color: white;
       }
     }
+  }
+
+  .table-row {
+    align-items: center;
+    border-bottom: $border-style;
+    display: flex;
+    white-space: nowrap;
+  }
+
+  .table-header > *,
+  .table-row > * {
+    display: inline-block;
+    overflow: hidden;
+    padding: 0.5em $column-padding 0.2em;
+    &:first-child {
+      width: $column-width-checkbox;
+    }
+    &:not(:first-child) {
+      width: $column-width-other;
+      border-left: $border-style;
+    }
+  }
 }

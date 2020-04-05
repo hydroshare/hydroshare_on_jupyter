@@ -5,16 +5,16 @@ header {
   width: 100%;
   box-shadow: $drop-shadow;
   padding: 1em;
-}
 
-.header-content {
-  max-width: $content-width;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+  .header-content {
+    max-width: $content-width;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-.header-content img {
-  max-height: 3em;
+    img {
+      max-height: 3em;
+    }
+  }
 }
