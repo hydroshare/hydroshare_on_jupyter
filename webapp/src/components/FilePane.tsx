@@ -35,7 +35,7 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
   let filesAndFolders: (IFile | IFolder)[];
   if (props.rootDir) {
     if (props.filterByName) {
-      filesAndFolders = filterFilesAndFolders(props.rootDir.contents, new RegExp(props.filterByName, 'i'));
+      filesAndFolders = filterFilesAndFolders(props.rootDir.contents, props.filterByName.toLowerCase());
     } else {
       filesAndFolders = props.rootDir.contents;
     }
@@ -71,11 +71,11 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
   );
 };
 
-const filterFilesAndFolders = (items: (IFile | IFolder)[], filter: RegExp): (IFile | IFolder)[] => {
+const filterFilesAndFolders = (items: (IFile | IFolder)[], filter: string): (IFile | IFolder)[] => {
   let filteredItems: (IFile | IFolder)[] = [];
   items.forEach(item => {
     // Add the file or folder if the name matches the filter
-    if (filter.exec(item.name)) {
+    if (item.name.toLowerCase().includes(filter)) {
       filteredItems.push(item);
     } else if (item.type === FileOrFolderTypes.FOLDER) {
       // See if any of the folder's contents match
