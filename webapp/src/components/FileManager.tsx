@@ -23,6 +23,8 @@ import FilePane from './FilePane';
 
 interface IFileManagerState {
   filterByName: string
+  selectedLocalFilesAndFolders: Set<string>
+  selectedHydroShareFilesAndFolders: Set<string>
 }
 
 interface IFileManagerProps {
@@ -39,7 +41,11 @@ let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
 export default class FileManager extends React.Component<IFileManagerProps, IFileManagerState> {
 
   state = {
+    allHydroShareFilesAndFoldersSelected: false,
+    allLocalFilesAndFoldersSelected: false,
     filterByName: '',
+    selectedLocalFilesAndFolders: new Set<string>(),
+    selectedHydroShareFilesAndFolders: new Set<string>(),
   };
 
   onDragEnd = (result: DropResult) => {
@@ -102,6 +108,14 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     });
   };
 
+  setSelectedHydroShareFilesAndFolders = (items: Set<string>) => this.setState({selectedHydroShareFilesAndFolders: items});
+  setSelectedLocalFilesAndFolders = (items: Set<string>) => this.setState({selectedLocalFilesAndFolders: items});
+
+  promptDeleteSelectedHydroShareFiles = () => {
+    console.log("Requested deletion of:");
+    console.log(Array.from(this.state.selectedHydroShareFilesAndFolders.values()));
+  };
+
   render() {
     const {
       hydroShareResourceRootDir,
@@ -132,6 +146,9 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
               type="text"
               value={filterByName}
             />
+            <button>New</button>
+            <button>Upload</button>
+            <button>Delete</button>
           </div>
         </div>;
       jupyterHubFilePane =
@@ -142,6 +159,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
           rootDir={jupyterHubResourceRootDir}
           header={header}
           openFile={openFile}
+          onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}
         />;
     }
     let hydroShareFilePane;
@@ -160,6 +178,11 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
               type="text"
               value={filterByName}
             />
+            <button
+              disabled={this.state.selectedHydroShareFilesAndFolders.size === 0}
+              onClick={this.promptDeleteSelectedHydroShareFiles}>
+              Delete
+            </button>
           </div>
         </div>;
       hydroShareFilePane =
@@ -169,6 +192,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
           filterByName={filterByName}
           rootDir={hydroShareResourceRootDir}
           header={header}
+          onSelectedFilesAndFoldersChange={this.setSelectedHydroShareFilesAndFolders}
         />;
     }
     ;
