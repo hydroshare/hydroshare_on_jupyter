@@ -14,7 +14,7 @@ from getpass import getpass
 from pathlib import Path
 import base64
 
-# TODO: (Charlie's question) Why is this in this class, vs hs_server? 
+# TODO: (Charlie's question) Why is this in this class, vs hs_server?
 # Prompt for username and password if not already saved
 try:
     from login import username, password
@@ -89,7 +89,7 @@ class ResourceHandler:
     def delete_resource_JH(self, res_id):
         error = None
         JH_resource_path = self.output_folder + "/" + res_id
-        
+
         try:
             shutil.rmtree(JH_resource_path)
         except FileNotFoundError:
@@ -137,7 +137,7 @@ class ResourceHandler:
             error = {'type': 'InvalidCredentials', 'msg': 'Invalid username or password'}
             return list(resources.values()), error
 
-        for res in user_hs_resources:
+        for res in test_generator:
             res_id = res['resource_id']
 
             # check if local
@@ -184,7 +184,7 @@ class ResourceHandler:
                     'msg':'Resource title should be a string.'}
             return resource_id, error
         if not isinstance(creators, list) or not all(isinstance(creator, str) for creator in creators):
-            error = {'type':'IncorrectType', 
+            error = {'type':'IncorrectType',
                     'msg':'"Creators" object should be a list of strings.'}
             return resource_id, error
 
