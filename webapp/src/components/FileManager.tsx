@@ -95,7 +95,6 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
       droppableId={hydroShareResourceRootDir.path}
       rootDir={hydroShareResourceRootDir}
       headerImageUrl="/HydroShare-logo.png"
-      openFile={props.openFile}
       title="HydroShare Files"
     />
   ) : null;
@@ -114,7 +113,7 @@ interface IFilePaneProps {
   rootDir: IFolder
   droppableId: string
   headerImageUrl: string
-  openFile: (f: IFile) => any
+  openFile?: (f: IFile) => any
   title: string
 }
 
@@ -158,7 +157,7 @@ const generateCheckBox = () => {
   );
 };
 
-const generateFolderElement = (folder: IFolder, index: number, openFile: (f: IFile) => any, nestLevel: number = 0) => {
+const generateFolderElement = (folder: IFolder, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
   fileOrFolderLookupTable.set(folder.path, folder);
   const folderLineItem = (
     <Draggable draggableId={folder.path} index={0} key={folder.path}>
@@ -199,9 +198,9 @@ const generateFolderElement = (folder: IFolder, index: number, openFile: (f: IFi
   );
 };
 
-const generateFileElement = (item: IFile, index: number, openFile: (f: IFile) => any, nestLevel: number = 0) => {
+const generateFileElement = (item: IFile, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
   fileOrFolderLookupTable.set(item.path, item);
-  const onClick = () => openFile(item);
+  const onClick = openFile ? () => openFile(item) : undefined;
   return (
     <Draggable draggableId={item.path} index={index} key={item.path}>
       {(provided, snapshot) => (
@@ -222,7 +221,7 @@ const generateFileElement = (item: IFile, index: number, openFile: (f: IFile) =>
   );
 };
 
-const generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: (f: IFile) => IFile, nestLevel: number = 0) => {
+const generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: ((f: IFile) => IFile) | undefined, nestLevel: number = 0) => {
   if (item.type === FileOrFolderTypes.FOLDER) {
     return generateFolderElement(item as IFolder, index, openFile, nestLevel);
   } else {
