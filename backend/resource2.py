@@ -101,13 +101,19 @@ class Resource:
         '''
 
         # get the file information for all files in the HS resource in json
-        hs_resource_info = self.hs.resource(self.res_id).files.all().json()
+        # print(self.hs.resource(self.res_id).files.all().json())
+        # testing = (self.hs.getResourceFileList(self.res_id))
+        # for test in testing:
+        #     print("THIS IS A TEST")
+        #     print(test)
+        hs_resource_info = (self.hs.getResourceFileList(self.res_id))
         url_prefix = 'http://www.hydroshare.org/resource/' + self.res_id + '/data/contents'
         folders_dict = {}
         folders_final = []
         nested_files = {}
         # get the needed info for each file
-        for file_info in hs_resource_info["results"]:
+        for file_info in hs_resource_info:
+            # print(file_info)
             # extract filepath from url
             filepath = file_info["url"][len(url_prefix)+1:]
             # get proper definition formatting of file if it is a file
@@ -181,15 +187,26 @@ class Resource:
         new_filename.
         '''
         if old_filepath is not None and new_filepath is not None:
-            pathWithoutType, fileType = old_filepath.split(".")
-            if self.is_file_in_HS(pathWithoutType, fileType):
+            if self.is_file_in_HS(old_filepath):
                 self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
-                folderpath, filename = old_filepath.rsplit("/", 1)
-                self.delete_HS_folder_if_empty(folderpath, filename)
+                if len(old_filepath.rsplit("/", 1)) > 1:
+                    folderpath, filename = old_filepath.rsplit("/", 1)
+                    self.delete_HS_folder_if_empty(folderpath, filename)
             else:
                 logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
         else:
             logging.info('Missing inputs for old and new filepath')
+
+    def is_file_in_HS(self, filepath):
+        """ does a file exist in hs_files """
+        files_info = self.hs_files["contents"]
+
+        for file_dict in files_info:
+            # cut out the hs:/ at beginning of path in comparison
+            if filepath == file_dict["path"][4:]:
+                return True
+
+        return False
 
     def rename_or_move_file_JH(self, old_filepath, new_filepath):
         """Renames the jupyterhub version of the file from old_filename to
@@ -317,7 +334,7 @@ class Resource:
         if "/" in filepath:
             outputPath = filepath.rsplit('/', 1)[0]
             if self.is_file_or_folder_in_JH(outputPath) == False:
-                os.makedirs(self.path_prefix + outputPath + "/")
+                os.makedirs(str(self.path_prefix) + "/" + outputPath + "/")
         self.remote_folder.download_file_to_JH(filepath, self.path_prefix)
         self.JH_files = self.get_files_upon_init_JH()
 
