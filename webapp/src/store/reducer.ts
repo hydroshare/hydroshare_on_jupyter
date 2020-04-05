@@ -2,7 +2,6 @@ import * as moment from 'moment';
 import { AnyAction } from 'redux';
 
 import {
-  MainPageActions,
   NotificationsActions,
   ResourcePageActions,
   ResourcesActions,
@@ -12,7 +11,6 @@ import {
   FileOrFolderTypes,
   IFile,
   IFolder,
-  IMainPageState,
   INotificationsState,
   IResourcePageState,
   IResourcesState,
@@ -23,12 +21,6 @@ import {
 
 const initNotificationsState: INotificationsState = {
   current: [],
-};
-
-const initResourceListPageState: IMainPageState = {
-  allResourcesSelected: false,
-  selectedResources: new Set<string>(),
-  searchTerm: '',
 };
 
 const initResourcePageState: IResourcePageState = {
@@ -129,30 +121,6 @@ function toggleFileOrFolderSelected(toggledItem: IFile | IFolder, selectedFilesA
   const itemWasSelected = selectedFilesAndFolders.has(toggledItem.path + toggledItem.name);
   return recursivelySetSelectedState(selectedFilesAndFolders, toggledItem, !itemWasSelected);
 }
-
-export function mainPageReducer(state: IMainPageState = initResourceListPageState, action: AnyAction): IMainPageState {
-  switch (action.type) {
-    case MainPageActions.SET_SELECTED_RESOURCES:
-      const {
-        allResourcesSelected,
-        selectedResources,
-      } = action.payload;
-      return {
-        ...state,
-        allResourcesSelected,
-        selectedResources,
-      };
-    case ResourcePageActions.SEARCH_BY:
-      return {...state, searchTerm: action.payload};
-    case ResourcePageActions.SORT_BY_NAME:
-      return {...state, sortBy: action.payload};
-    case ResourcesActions.NEW_RESOURCE:
-        return state;
-    default:
-      return state;
-  }
-}
-
 
 export function resourcesReducer(state: IResourcesState = initResourcesState, action: ResourcesActionTypes): IResourcesState {
   switch (action.type) {

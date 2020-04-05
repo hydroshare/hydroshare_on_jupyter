@@ -13,17 +13,11 @@ import NewResourceModal from './NewResourceModal';
 import { ICreateResourceRequest } from '../store/types';
 
 interface IResourceListProps {
-  allResourcesSelected: boolean
   className?: string
   viewResource: any
-  searchTerm: string
   resources: {
       [resourceId: string]: IJupyterResource
   }
-  selectedResources: Set<string>
-  sortByTerm: SortByOptions | undefined
-  toggleAllResourcesSelected: () => any
-  toggleSingleResourceSelected: (res: IJupyterResource) => any
   newResource: (newResource: ICreateResourceRequest) => any
 }
 
@@ -35,46 +29,29 @@ interface ITableResourceInfo {
 }
 
 interface IStateTypes {
+  allResourcesSelected: boolean
+  filterBy: string
+  selectedResources: Set<string>
   showModal: boolean
+  sortBy?: SortByOptions
 }
 
 export default class ResourceList extends React.Component<IResourceListProps, IStateTypes> {
 
-    constructor(props: IResourceListProps) {
-      super(props);
+    state = {
+      allResourcesSelected: false,
+      filterBy: '',
+      selectedResources: new Set<string>(),
+      showModal: false
+    };
 
-      this.state = {
-        showModal: false
-      }
-
-      this.handleOpenModal = this.handleOpenModal.bind(this);
-      this.handleCloseModal = this.handleCloseModal.bind(this);
-    }
-
-    public deleteClick =() => {
-        console.log("Send message to backend to delete")
-    }
-
-    public createNewResource =() => {
-        console.log("Send message to backend to create new resource")
-    }
-
-    public handleSortByChange = (e: any) => {
-        console.log("Sort by" + e.value)
-    }
-
-    // TODO (Emily): figure out what this file is doing
-    public goToFiles = (e: any) => {
-      console.log("go to file")
-    }
-
-    public handleOpenModal () {
+    openModal = () => {
       this.setState({ showModal: true });
-    }
+    };
 
-    public handleCloseModal () {
+    closeModal = () => {
       this.setState({ showModal: false });
-    }
+    };
 
   public convertToTableStructure(resources: {[resourceId: string]: IJupyterResource}): ITableResourceInfo[] {
     const tableList: ITableResourceInfo[] = [];
@@ -106,20 +83,48 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     return tableList;
   }
 
+  toggleAllResourcesSelected = () => {
+    let selectedResources;
+    if (this.state.allResourcesSelected) {
+      selectedResources = new Set<string>();
+    } else {
+      selectedResources = new Set(Object.keys(this.props.resources));
+    }
+    this.setState({
+      allResourcesSelected: !this.state.allResourcesSelected,
+      selectedResources,
+    });
+  };
+
+  toggleSingleResourceSelected = (resource: IJupyterResource) => {
+    let selectedResources = new Set(this.state.selectedResources);
+    if (selectedResources.has(resource.id)) {
+      selectedResources.delete(resource.id);
+    } else {
+      selectedResources.add(resource.id);
+    }
+    this.setState({
+      allResourcesSelected: selectedResources.size === Object.keys(this.props.resources).length,
+      selectedResources,
+    });
+  };
+
   public render() {
     const {
-      allResourcesSelected,
       resources,
-      selectedResources,
-      toggleAllResourcesSelected,
     } = this.props;
+
+    const {
+      allResourcesSelected,
+      selectedResources,
+    } = this.state;
 
     const rowElements = Object.values(resources).map(resource => (
       <div className="table-row">
         <input
           type="checkbox"
           checked={selectedResources.has(resource.id)}
-          onChange={() => this.props.toggleSingleResourceSelected(resource)}
+          onChange={() => this.toggleSingleResourceSelected(resource)}
         />
         <span onClick={() => this.props.viewResource(resource)}>{resource.title}</span>
         <span>{resource.hydroShareResource.author || 'Unknown'}</span>
@@ -141,12 +146,12 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         </div>
         <div className="input-row">
           <input type="text" placeholder="Search"/>
-          <button onClick={this.handleOpenModal}><span>New Resource</span></button>
+          <button onClick={this.openModal}><span>New Resource</span></button>
           <button disabled={selectedResources.size === 0}><span>Delete</span></button>
         </div>
         <div className="table-header table-row">
           <span className="checkbox">
-            <input type="checkbox" checked={allResourcesSelected} onChange={toggleAllResourcesSelected}/>
+            <input type="checkbox" checked={allResourcesSelected} onChange={this.toggleAllResourcesSelected}/>
           </span>
           <span>Name</span>
           <span>Owner</span>
@@ -156,7 +161,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         {rowElements}
         <NewResourceModal
           show={this.state.showModal}
-          onHide={this.handleCloseModal}
+          onHide={this.closeModal}
           newResource={this.props.newResource}
         />
         </div>
