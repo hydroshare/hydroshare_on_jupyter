@@ -32,6 +32,15 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
     className.push(props.className);
   }
 
+  let filesAndFolders: (IFile | IFolder)[];
+  if (props.rootDir) {
+    if (props.filterByName) {
+      filesAndFolders = filterFilesAndFolders(props.rootDir.contents, new RegExp(props.filterByName, 'i'));
+    } else {
+      filesAndFolders = props.rootDir.contents;
+    }
+  }
+
   return (
     <div className={className.join(' ')}>
       <div className="FilePane-header">
@@ -53,13 +62,33 @@ const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
               <span>Size</span>
               <span>Last Modified</span>
             </div>
-            {props.rootDir?.contents.map((item, idx) => generateFileOrFolderElement(item, idx, props.openFile))}
+            {filesAndFolders?.map((item, idx) => generateFileOrFolderElement(item, idx, props.openFile))}
             {provided.placeholder}
           </div>
         )}
       </Droppable>
     </div>
   );
+};
+
+const filterFilesAndFolders = (items: (IFile | IFolder)[], filter: RegExp): (IFile | IFolder)[] => {
+  let filteredItems: (IFile | IFolder)[] = [];
+  items.forEach(item => {
+    // Add the file or folder if the name matches the filter
+    if (filter.exec(item.name)) {
+      filteredItems.push(item);
+    } else if (item.type === FileOrFolderTypes.FOLDER) {
+      // See if any of the folder's contents match
+      let contents = filterFilesAndFolders((item as IFolder).contents, filter);
+      if (contents.length > 0) {
+        // Since some of the contents match, add this folder, but only show the contents that match the filter
+        let filteredFolder = {...item, contents};
+        filteredItems.push(filteredFolder);
+        // TODO: Expand this folder
+      }
+    }
+  });
+  return filteredItems;
 };
 
 const generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: ((f: IFile) => IFile) | undefined, nestLevel: number = 0) => {

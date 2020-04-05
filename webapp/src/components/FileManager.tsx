@@ -138,6 +138,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
         <FilePane
           className="tile jupyterhub"
           droppableId={jupyterHubResourceRootDir.path}
+          filterByName={filterByName}
           rootDir={jupyterHubResourceRootDir}
           header={header}
           openFile={openFile}
@@ -165,6 +166,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
         <FilePane
           className="tile hydroshare"
           droppableId={hydroShareResourceRootDir.path}
+          filterByName={filterByName}
           rootDir={hydroShareResourceRootDir}
           header={header}
         />;
