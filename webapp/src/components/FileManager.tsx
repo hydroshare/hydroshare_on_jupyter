@@ -5,16 +5,11 @@
  */
 
 import * as React from 'react';
-import { ReactElement } from 'react';
+import { ChangeEvent } from 'react';
 import {
   DragDropContext,
-  Draggable,
-  DraggableStateSnapshot,
-  Droppable,
-  DroppableStateSnapshot,
   DropResult,
 } from 'react-beautiful-dnd';
-import * as moment from "moment";
 
 import '../styles/FileManager.scss';
 
@@ -22,7 +17,13 @@ import {
   FileOrFolderTypes,
   IFile,
   IFolder,
-} from "../store/types";
+} from '../store/types';
+
+import FilePane from './FilePane';
+
+interface IFileManagerState {
+  filterByName: string
+}
 
 interface IFileManagerProps {
   hydroShareResourceRootDir: IFolder
@@ -32,15 +33,16 @@ interface IFileManagerProps {
   openFile: (file: IFile) => any
 }
 
+// For converting file paths back into IFiles and IFolders
 let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
 
-const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
-  const {
-    hydroShareResourceRootDir,
-    jupyterHubResourceRootDir,
-  } = props;
+export default class FileManager extends React.Component<IFileManagerProps, IFileManagerState> {
 
-  const onDragEnd = (result: DropResult) => {
+  state = {
+    filterByName: '',
+  };
+
+  onDragEnd = (result: DropResult) => {
     const {
       draggableId: srcURI,
       destination: dest,
@@ -67,231 +69,114 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
     }
     if (srcPrefix === destPrefix) {
       // Move files within HydroShare or the local filesystem
-      props.moveFileOrFolder(srcFileOrFolder, destFolder);
+      this.props.moveFileOrFolder(srcFileOrFolder, destFolder);
     } else {
       // Copy files between HydroShare and the local filesystem
-      props.copyFileOrFolder(srcFileOrFolder, destFolder);
+      this.props.copyFileOrFolder(srcFileOrFolder, destFolder);
     }
     console.log(srcFileOrFolder);
     console.log(destFolder);
   };
 
-  // Clear the lookup table
-  fileOrFolderLookupTable.clear();
+  filterByNameChanged = (e: ChangeEvent<HTMLInputElement>) => this.setState({filterByName: e.target.value});
 
-  const jupyterHubFilePane = props.jupyterHubResourceRootDir ? (
-    <FilePane
-      className="tile jupyterhub"
-      droppableId={jupyterHubResourceRootDir.path}
-      rootDir={jupyterHubResourceRootDir}
-      headerImageUrl="/JupyterHub-logo.png"
-      openFile={props.openFile}
-      title="Local Files"
-    />
-  ) : null;
-  const hydroShareFilePane = props.hydroShareResourceRootDir ? (
-    <FilePane
-      className="tile hydroshare"
-      droppableId={hydroShareResourceRootDir.path}
-      rootDir={hydroShareResourceRootDir}
-      headerImageUrl="/HydroShare-logo.png"
-      title="HydroShare Files"
-    />
-  ) : null;
-  return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="FileManager content-row">
-        {jupyterHubFilePane}
-        {hydroShareFilePane}
-      </div>
-    </DragDropContext>
-  );
-};
+  buildLookupTable = () => {
+    fileOrFolderLookupTable.clear();
 
-interface IFilePaneProps {
-  className: string
-  rootDir: IFolder
-  droppableId: string
-  headerImageUrl: string
-  openFile?: (f: IFile) => any
-  title: string
-}
-
-const getDroppableClasses = (snapshot: DroppableStateSnapshot, classes: string = '') => {
-  if (snapshot.isDraggingOver) classes += ' draggable-over';
-  return classes;
-};
-
-const getDraggableClasses = (snapshot: DraggableStateSnapshot, classes: string = '') => {
-  if (snapshot.isDragging) classes += ' dragging';
-  return classes;
-};
-
-const generateTableCell = (content: ReactElement | string | number | moment.Moment, nestLevel: number = 0, onClick: any = undefined) => {
-  const style = {
-    paddingLeft: `${nestLevel * 7}px`,
+    if (this.props.jupyterHubResourceRootDir) {
+      fileOrFolderLookupTable.set(this.props.jupyterHubResourceRootDir.path, this.props.jupyterHubResourceRootDir);
+      this.addFolderContentsToLookupTable(this.props.jupyterHubResourceRootDir);
+    }
+    if (this.props.hydroShareResourceRootDir) {
+      fileOrFolderLookupTable.set(this.props.hydroShareResourceRootDir.path, this.props.hydroShareResourceRootDir);
+      this.addFolderContentsToLookupTable(this.props.hydroShareResourceRootDir);
+    }
   };
-  const tooltip = typeof content === 'string' ? content : undefined;
-  const classNames: Array<string> = [];
-  if (onClick) {
-    classNames.push('clickable');
-  }
-  if (moment.isMoment(content)) {
-    return (
-      <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
-        <span style={style}>{content.format('MMM D, YYYY')}</span>
-      </div>
-    );
-  } else {
-    return (
-      <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
-        <span style={style}>{content}</span>
-      </div>
-    );
-  }
-};
 
-const generateCheckBox = () => {
-  return (
-    <input type="checkbox" />
-  );
-};
+  addFolderContentsToLookupTable = (folder: IFolder) => {
+    folder.contents.forEach(item => {
+      fileOrFolderLookupTable.set(item.path, item);
+      if (item.type === FileOrFolderTypes.FOLDER) {
+        this.addFolderContentsToLookupTable(item as IFolder);
+      }
+    });
+  };
 
-const generateFolderElement = (folder: IFolder, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
-  fileOrFolderLookupTable.set(folder.path, folder);
-  const folderLineItem = (
-    <Draggable draggableId={folder.path} index={0} key={folder.path}>
-        {(provided, snapshot) => (
-          <div
-            className={getDraggableClasses(snapshot, 'table-row folder-element')}
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-          >
-            {generateTableCell(generateCheckBox())}
-            {generateTableCell(folder.name, nestLevel)}
-            {generateTableCell('folder')}
-            {generateTableCell(getFormattedSizeString(folder.sizeBytes))}
-            {generateTableCell(folder.lastModified || 'Unknown')}
+  render() {
+    const {
+      hydroShareResourceRootDir,
+      jupyterHubResourceRootDir,
+      openFile,
+    } = this.props;
+
+    const {
+      filterByName,
+    } = this.state;
+
+    // Rebuild the lookup table
+    this.buildLookupTable();
+
+    let jupyterHubFilePane;
+    if (jupyterHubResourceRootDir) {
+      const header =
+        <div>
+          <div className="title-row">
+            <span className="title">JupyterHub Files</span>
+            <img src="/JupyterHub-logo.png" alt="JupyterHub logo"/>
           </div>
-        )}
-      </Draggable>
-  );
-
-  const folderContentsLineItems = folder.contents?.map((item, idx) =>
-    generateFileOrFolderElement(item, idx+1, openFile,nestLevel+1));
-
-  return (
-    <Droppable droppableId={folder.path} key={folder.path}>
-      {(provided, snapshot) => (
-      <div
-        className={getDroppableClasses(snapshot)}
-        ref={provided.innerRef}
-        {...provided.droppableProps}
-      >
-        {folderLineItem}
-        {folderContentsLineItems}
-        {provided.placeholder}
-      </div>
-    )}
-    </Droppable>
-  );
-};
-
-const generateFileElement = (item: IFile, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
-  fileOrFolderLookupTable.set(item.path, item);
-  const onClick = openFile ? () => openFile(item) : undefined;
-  return (
-    <Draggable draggableId={item.path} index={index} key={item.path}>
-      {(provided, snapshot) => (
-        <div
-          className={getDraggableClasses(snapshot, 'table-row file-element')}
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-        >
-          {generateTableCell(generateCheckBox())}
-          {generateTableCell(item.name, nestLevel, onClick)}
-          {generateTableCell(item.type)}
-          {generateTableCell(getFormattedSizeString(item.sizeBytes))}
-          {generateTableCell(item.lastModified || 'Unknown')}
+          <div className="actions-row">
+            <input
+              className="search"
+              onChange={this.filterByNameChanged}
+              placeholder="Filter"
+              type="text"
+              value={filterByName}
+            />
+          </div>
+        </div>;
+      jupyterHubFilePane =
+        <FilePane
+          className="tile jupyterhub"
+          droppableId={jupyterHubResourceRootDir.path}
+          rootDir={jupyterHubResourceRootDir}
+          header={header}
+          openFile={openFile}
+        />;
+    }
+    let hydroShareFilePane;
+    if (hydroShareResourceRootDir) {
+      const header =
+        <div>
+          <div className="title-row">
+            <span className="title">HydroShare Files</span>
+            <img src="/HydroShare-logo.png" alt="HydroShare logo"/>
+          </div>
+          <div className="actions-row">
+            <input
+              className="search"
+              onChange={this.filterByNameChanged}
+              placeholder="Filter"
+              type="text"
+              value={filterByName}
+            />
+          </div>
+        </div>;
+      hydroShareFilePane =
+        <FilePane
+          className="tile hydroshare"
+          droppableId={hydroShareResourceRootDir.path}
+          rootDir={hydroShareResourceRootDir}
+          header={header}
+        />;
+    }
+    ;
+    return (
+      <DragDropContext onDragEnd={this.onDragEnd}>
+        <div className="FileManager content-row">
+          {jupyterHubFilePane}
+          {hydroShareFilePane}
         </div>
-      )}
-    </Draggable>
-  );
-};
-
-const generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: ((f: IFile) => IFile) | undefined, nestLevel: number = 0) => {
-  if (item.type === FileOrFolderTypes.FOLDER) {
-    return generateFolderElement(item as IFolder, index, openFile, nestLevel);
-  } else {
-    return generateFileElement(item as IFile, index, openFile, nestLevel);
-  }
-};
-
-// TODO: Put in a different file?
-const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
-  fileOrFolderLookupTable.set(props.rootDir.path, props.rootDir);
-
-  const onAllFilesCheckboxToggled = () => console.log("Checked!");
-
-  const className = ['FilePane', 'table'];
-  if (props.className) {
-    className.push(props.className);
-  }
-
-  return (
-    <div className={className.join(' ')}>
-      <div className="FilePane-header">
-        <span className="title">{props.title}</span>
-        <img src={props.headerImageUrl} alt={props.title} />
-      </div>
-      <Droppable droppableId={props.droppableId}>
-        {(provided, snapshot) => (
-          <div
-            className={getDroppableClasses(snapshot, 'FilePane-files-container')}
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            >
-            <div className="table-header table-row">
-              <span className="checkbox">
-                <input type="checkbox" onChange={onAllFilesCheckboxToggled} />
-              </span>
-              <span>Name</span>
-              <span>Type</span>
-              <span>Size</span>
-              <span>Last Modified</span>
-            </div>
-            {props.rootDir?.contents.map((item, idx) => generateFileOrFolderElement(item, idx, props.openFile))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </div>
-  );
-};
-
-const HUMAN_READABLE_FILE_SIZES = [
-  'B',
-  'KB',
-  'MB',
-  'GB',
-  'TB',
-  'YB',
-];
-
-// TODO: Write some unit tests
-const getFormattedSizeString = (sizeBytes: number): string => {
-  if (sizeBytes === undefined || sizeBytes === null) {
-    return 'Unknown';
-  }
-  if (sizeBytes === 0) {
-    return '0B';
-  }
-  const log10 = Math.log10(sizeBytes);
-  const labelIndex = Math.floor(log10 / 3);
-  const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, log10));
-  return `${sizeInHumanReadableUnits}${HUMAN_READABLE_FILE_SIZES[labelIndex]}`;
-};
-
-export default FileManager;
+      </DragDropContext>
+    );
+  };
+}

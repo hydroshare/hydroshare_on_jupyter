@@ -17,7 +17,7 @@
     border: $border-style;
     background-color: white;
 
-    .FilePane-header {
+    .FilePane-header .title-row {
       align-items: center;
       border-bottom: $border-style;
       display: flex;
