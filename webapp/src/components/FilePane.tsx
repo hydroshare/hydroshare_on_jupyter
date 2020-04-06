@@ -14,9 +14,13 @@ import {
   IFolder,
 } from '../store/types';
 
+import '../styles/FilePane.scss';
+
 interface IFilePaneState {
   allFilesAndFoldersSelected: boolean
   selectedFilesAndFolders: Set<string>
+  sortAscending: boolean
+  sortBy: SORT_BY_OPTIONS
 }
 
 interface IFilePaneProps {
@@ -34,6 +38,18 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
   state = {
     allFilesAndFoldersSelected: false,
     selectedFilesAndFolders: new Set<string>(),
+    sortAscending: true,
+    sortBy: SORT_BY_OPTIONS.NAME,
+  };
+
+  setSortBy = (sortBy: SORT_BY_OPTIONS) => {
+    if (this.state.sortBy === sortBy) {
+      // Already sorted by this column, so reverse sort order
+      this.setState({sortAscending: !this.state.sortAscending});
+    } else {
+      // Otherwise sort by this column
+      this.setState({sortBy});
+    }
   };
 
   render() {
@@ -49,7 +65,10 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       } else {
         filesAndFolders = this.props.rootDir.contents;
       }
+      filesAndFolders = this.getFolderContentsSorted(filesAndFolders);
     }
+
+    const sortOrder = this.state.sortAscending ? 'sort-ascending' : 'sort-descending';
 
     return (
       <div className={className.join(' ')}>
@@ -71,10 +90,30 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                     type="checkbox"
                   />
                 </span>
-                <span>Name</span>
-                <span>Type</span>
-                <span>Size</span>
-                <span>Last Modified</span>
+                <button
+                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.NAME ? sortOrder : '')}
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.NAME)}>
+                  Name
+                  {this.state.sortBy === SORT_BY_OPTIONS.NAME && this.sortTriangle}
+                </button>
+                <button
+                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.TYPE ? sortOrder : '')}
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.TYPE)}>
+                  Type
+                  {this.state.sortBy === SORT_BY_OPTIONS.TYPE && this.sortTriangle}
+                </button>
+                <button
+                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SIZE ? sortOrder : '')}
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}>
+                  Size
+                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE && this.sortTriangle}
+                </button>
+                <button
+                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED ? sortOrder : '')}
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.LAST_MODIFIED)}>
+                  Last Modified
+                  {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && this.sortTriangle}
+                </button>
               </div>
               {filesAndFolders?.map((item, idx) => this.generateFileOrFolderElement(item, idx, this.props.openFile))}
               {provided.placeholder}
@@ -84,6 +123,10 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       </div>
     );
   };
+
+  sortTriangle = <svg xmlns="http://www.w3.org/2000/svg" className="triangle" width="10" height="10" viewBox="0 0 2.646 2.646">
+    <path d="M0 0l1.323 2.646L2.646 0z"/>
+  </svg>;
 
   filterFilesAndFolders = (items: (IFile | IFolder)[], filter: string): (IFile | IFolder)[] => {
     let filteredItems: (IFile | IFolder)[] = [];
@@ -155,8 +198,12 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       </Draggable>
     );
 
-    const folderContentsLineItems = folder.contents?.map((item, idx) =>
-      this.generateFileOrFolderElement(item, idx + 1, openFile, nestLevel + 1));
+    let folderContentsLineItems: ReactElement[];
+    if (folder.contents) {
+      let contents = [...folder.contents];
+      folderContentsLineItems = this.getFolderContentsSorted(contents).map((item, idx) =>
+        this.generateFileOrFolderElement(item, idx + 1, openFile, nestLevel + 1));
+    }
 
     return (
       <Droppable droppableId={folder.path} key={folder.path}>
@@ -214,6 +261,57 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
   getDraggableClasses = (snapshot: DraggableStateSnapshot, classes: string = '') => {
     if (snapshot.isDragging) classes += ' dragging';
     return classes;
+  };
+
+  getFolderContentsSorted = (items: (IFile | IFolder)[]) => items.sort((i1, i2) => {
+    const {
+      sortAscending,
+      sortBy,
+    } = this.state;
+    switch (sortBy) {
+      case SORT_BY_OPTIONS.NAME:
+        if (sortAscending) {
+          return this.getItemNameForSort(i1).localeCompare(this.getItemNameForSort(i2));
+        } else {
+          return this.getItemNameForSort(i2).localeCompare(this.getItemNameForSort(i1));
+        }
+      case SORT_BY_OPTIONS.TYPE:
+        if (sortAscending) {
+          return (i1.type || '').localeCompare(i2.type || '');
+        } else {
+          return (i2.type || '').localeCompare(i1.type || '');
+        }
+      case SORT_BY_OPTIONS.LAST_MODIFIED:
+        if (!i1.lastModified && !i2.lastModified) {
+          // Neither have a defined last modified time, so consider them equal
+          return 0;
+        }
+        if (!i1.lastModified) {
+          // Put i1 second if ascending, i2 if descending
+          return sortAscending ? -1 : 1;
+        }
+        if (!i2.lastModified) {
+          // Put i2 second if ascending, i1 if descending
+          return sortAscending ? 1 : -1;
+        }
+        if (sortAscending) {
+          return i1.lastModified?.diff(i2.lastModified)
+        } else {
+          return i2.lastModified?.diff(i1.lastModified)
+        }
+      case SORT_BY_OPTIONS.SIZE:
+        return (sortAscending ? 1 : -1) * ((i1.sizeBytes || -1) - (i2.sizeBytes || -1));
+      default: // Should never happen, but needed to satisfy TypeScript
+        return 0;
+    }
+  });
+
+  getItemNameForSort = (item: IFile | IFolder): string => {
+    if (item.type === FileOrFolderTypes.FOLDER) {
+      return item.name;
+    }
+    const file = item as IFile;
+    return file.type ? `${file.name}.${file.type}` : file.name;
   };
 
   toggleAllFilesAndFoldersSelected = () => {
@@ -283,12 +381,18 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     if (sizeBytes === 0) {
       return '0B';
     }
-    const log10 = Math.log10(sizeBytes);
-    const labelIndex = Math.floor(log10 / 3);
-    const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, log10));
+    const labelIndex = Math.floor(Math.log10(sizeBytes) / 3);
+    const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, 3*labelIndex));
     return `${sizeInHumanReadableUnits}${HUMAN_READABLE_FILE_SIZES[labelIndex]}`;
   };
 
+}
+
+enum SORT_BY_OPTIONS {
+  NAME,
+  TYPE,
+  SIZE,
+  LAST_MODIFIED,
 }
 
 const HUMAN_READABLE_FILE_SIZES = [
