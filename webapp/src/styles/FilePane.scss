@@ -27,6 +27,36 @@
     }
   }
 
+  .table-header {
+    user-select: none;
+    -moz-user-select: none;
+
+    button {
+      background-color: transparent;
+      border: none;
+      text-align: left;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #dddddd;
+      }
+    }
+
+    .sort-ascending,
+    .sort-descending {
+      align-items: center;
+      display: flex;
+      fill: #aaaaaa;
+      justify-content: space-between;
+    }
+
+    .sort-descending {
+      svg.triangle {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
   .table-row {
     border-bottom: $border-style;
     display: flex;
