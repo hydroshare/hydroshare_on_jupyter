@@ -27,6 +27,8 @@ Find the line that begins with `c.NotebookApp.nbserver_extensions` and change it
 
 6. Navigate to back to hydroshare_jupyter_gui and run the following:
 
+[//]: # (SPIFFY (Vicky) is this persistent or would they need to do this every time?)
+
 `export PYTHONPATH=$(pwd)/backend`
 
 `export PYTHONPATH=$PYTHONPATH:$(pwd)`
