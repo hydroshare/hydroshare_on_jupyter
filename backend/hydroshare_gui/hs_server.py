@@ -154,6 +154,7 @@ class FileHandlerJH(BaseRequestHandler):
 class FileHandlerHS(BaseRequestHandler):
     """ Class that handles GETing list of a files that are in a user's HydroShare instance of a resource """
 
+    # SPIFFY (Vicky) just confirming this in my own head but it is chill that this has many less things than the JH one?
     def get(self, res_id):
         # TODO: Get folder info
         resource = Resource(res_id, resource_handler)
@@ -227,6 +228,7 @@ class MoveCopyFiles(BaseRequestHandler):
                     raise NotImplementedError('Copy within the local filesystem not implemented yet')
             elif src_fs == LOCAL_PREFIX and dest_fs == HS_PREFIX:  # Move/copy from the local filesystem to HydroShare
                 # Transfer the file regardless of if we're moving or copying
+                # SPIFFY (Vicky) will there be a prompt or something about whether you want to move or copy?
                 # TODO: Support moving from one local folder to a different one on HS
                 resource.overwrite_HS_with_file_from_JH(src_path)
                 if method == MOVE:
@@ -315,6 +317,7 @@ def start_server(app):
 
 
 if __name__ == '__main__':
+    # SPIFFY (Vicky): Is this a good place to put logging stuff? anyone have a better structure?
     LEVELS = {'debug': logging.DEBUG,
               'info': logging.INFO,
               'warning': logging.WARNING,
