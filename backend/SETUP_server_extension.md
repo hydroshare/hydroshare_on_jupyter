@@ -1,3 +1,5 @@
+[//]: # (SPIFFY (Vicky) Forgot this file existed.. is this the right place for it?)
+
 # Setting up server extension
 
 $ gedit ~/.jupyter/jupyter_notebook_config.py

@@ -51,6 +51,7 @@ class Resource:
         '''
         if filename is not None:
             with open(self.path_prefix + filename, "w") as fp:
+                # SPIFFY (Vicky): seems a lil weird to have a pass in something final but maybe its finee...
                 # if you wanted you could write to the file here, but we just want to create it
                 pass
 
@@ -67,6 +68,7 @@ class Resource:
             logging.info("Resource already exists!")
 
     def get_files_JH(self):
+        # SPIFFY (Vicky): do we want it to update if someone creates a file not on our app but in their JH folder?
         return self.JH_files
 
     def get_files_upon_init_JH(self):
@@ -90,6 +92,8 @@ class Resource:
         return root_dir
 
     def update_hs_files(self):
+        # SPIFFY (Vicky) interesting.. do we want an update for HS? when is this called?
+        # looks like it is only called in delete.. in which case, this won't update if you make changes on HS?
         self.hs_files = self.get_files_upon_init_HS()
 
     def get_files_HS(self):
@@ -100,6 +104,8 @@ class Resource:
         of this resource.
         '''
 
+        # SPIFFY (Vicky) yeah.. i know we need to fix it, this is a mess :(
+        # SPIFFY (Vicky) on second thought even without the recent nonsense - this function is TOO LONG imo
         # get the file information for all files in the HS resource in json
         #print(self.hs.resource(self.res_id).files.all().json())
         # testing = (self.hs.getResourceFileList(self.res_id))
@@ -199,6 +205,7 @@ class Resource:
                 self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
                 if len(old_filepath.rsplit("/", 1)) > 1:
                     folderpath, filename = old_filepath.rsplit("/", 1)
+                    # SPIFFY (vicky): is the whole deleting thing possibly related to breaking resources?
                     self.delete_HS_folder_if_empty(folderpath, filename)
             else:
                 logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
@@ -211,6 +218,7 @@ class Resource:
 
         for file_dict in files_info:
             # cut out the hs:/ at beginning of path in comparison
+            # SPIFFY (Vicky): is this fine to hard code?
             if filepath == file_dict["path"][4:]:
                 return True
 
@@ -245,6 +253,7 @@ class Resource:
             # check if after deleting this folder, the parent directory is empty
             # if so this will delete that parent directory
             # TODO: Do we really want to do this?
+            # SPIFFY (vicky): woa do we?
             if filepath.parent != self.path_prefix:
                 self.delete_JH_folder_if_empty(filepath.parent)
         else:
@@ -252,6 +261,7 @@ class Resource:
 
             # check if after deleting this file, the parent directory is empty
             # if so this will delete that parent directory
+            # SPIFFY (Vicky) hmm
             if "/" in filepath:
                 self.delete_JH_folder_if_empty(filepath.rsplit('/', 1)[0])
 
@@ -272,6 +282,7 @@ class Resource:
         # if file path does not contain file (ie: we want to delete folder)
         if not isinstance(filepath, PosixPath):
             filepath = Path(filepath)
+        # SPIFFY (Vicky): this whole function appears to be a bit of a mess..
         # FIXME: This will not work if the directory has a . in it (which is valid in UNIX)
         # Check if there is a suffix/extension (indicating we're deleting a folder)
         if filepath.suffix:
@@ -344,6 +355,7 @@ class Resource:
             if self.is_file_or_folder_in_JH(outputPath) == False:
                 os.makedirs(str(self.path_prefix) + "/" + outputPath + "/")
         self.remote_folder.download_file_to_JH(filepath, self.path_prefix)
+        # SPIFFY (Vicky) prob shouldn't be calling an upon init thing? so maybe make an update function?
         self.JH_files = self.get_files_upon_init_JH()
 
     def overwrite_HS_with_file_from_JH(self, file_path):
@@ -355,6 +367,7 @@ class Resource:
         path_without_extension = str(full_file_path_rel_resource_root)[:-len(file_extension)]
         # Drop the leading . from the file extension
         file_extension = file_extension[1:]
+        # SPIFFY (Vicky): based on things Kyle was seeing, is below not working?
         if self.is_file_or_folder_in_HS(path_without_extension, file_extension):
             self.delete_file_or_folder_from_HS(full_file_path_rel_resource_root)
         folder_path = full_file_path_rel_resource_root.parent

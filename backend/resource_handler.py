@@ -14,6 +14,7 @@ from getpass import getpass
 from pathlib import Path
 import base64
 
+# SPIFFY (Vicky) probably a good section to talk about cause it's funky..
 # TODO: (Charlie's question) Why is this in this class, vs hs_server?
 # Prompt for username and password if not already saved
 try:
