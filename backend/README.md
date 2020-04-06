@@ -1,3 +1,5 @@
+[//]: # (SPIFFY (Vicky) pretty sure this file is outdated - do we want to update or remove?)
+
 # How to use the backend
 ## Running the server
 ### Setup
