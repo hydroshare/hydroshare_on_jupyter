@@ -18,6 +18,7 @@ import '../styles/FilePane.scss';
 
 interface IFilePaneState {
   allFilesAndFoldersSelected: boolean
+  expandedFolders: Set<string>
   selectedFilesAndFolders: Set<string>
   sortAscending: boolean
   sortBy: SORT_BY_OPTIONS
@@ -37,19 +38,10 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
 
   state = {
     allFilesAndFoldersSelected: false,
+    expandedFolders: new Set<string>(),
     selectedFilesAndFolders: new Set<string>(),
     sortAscending: true,
     sortBy: SORT_BY_OPTIONS.NAME,
-  };
-
-  setSortBy = (sortBy: SORT_BY_OPTIONS) => {
-    if (this.state.sortBy === sortBy) {
-      // Already sorted by this column, so reverse sort order
-      this.setState({sortAscending: !this.state.sortAscending});
-    } else {
-      // Otherwise sort by this column
-      this.setState({sortBy});
-    }
   };
 
   render() {
@@ -96,25 +88,25 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.NAME ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.NAME)}>
                   Name
-                  {this.state.sortBy === SORT_BY_OPTIONS.NAME && this.sortTriangle}
+                  {this.state.sortBy === SORT_BY_OPTIONS.NAME && sortTriangleSVG}
                 </button>
                 <button
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.TYPE ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.TYPE)}>
                   Type
-                  {this.state.sortBy === SORT_BY_OPTIONS.TYPE && this.sortTriangle}
+                  {this.state.sortBy === SORT_BY_OPTIONS.TYPE && sortTriangleSVG}
                 </button>
                 <button
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SIZE ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}>
                   Size
-                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE && this.sortTriangle}
+                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE && sortTriangleSVG}
                 </button>
                 <button
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.LAST_MODIFIED)}>
                   Last Modified
-                  {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && this.sortTriangle}
+                  {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && sortTriangleSVG}
                 </button>
               </div>
               {filesAndFolders?.map((item, idx) => this.generateFileOrFolderElement(item, idx, this.props.openFile))}
@@ -125,10 +117,6 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       </div>
     );
   };
-
-  sortTriangle = <svg xmlns="http://www.w3.org/2000/svg" className="triangle" width="10" height="10" viewBox="0 0 2.646 2.646">
-    <path d="M0 0l1.323 2.646L2.646 0z"/>
-  </svg>;
 
   filterFilesAndFolders = (items: (IFile | IFolder)[], filter: string): (IFile | IFolder)[] => {
     let filteredItems: (IFile | IFolder)[] = [];
@@ -191,7 +179,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             {...provided.dragHandleProps}
           >
             {this.generateTableCell(this.generateCheckBox(folder))}
-            {this.generateTableCell(folder.name, nestLevel)}
+            {this.generateFolderNameTableCell(folder, nestLevel)}
             {this.generateTableCell('folder')}
             {this.generateTableCell(this.getFormattedSizeString(folder.sizeBytes))}
             {this.generateTableCell(folder.lastModified || 'Unknown')}
@@ -201,7 +189,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     );
 
     let folderContentsLineItems: ReactElement[];
-    if (folder.contents) {
+    if (folder.contents && this.state.expandedFolders.has(folder.path)) {
       let contents = [...folder.contents];
       folderContentsLineItems = this.getFolderContentsSorted(contents).map((item, idx) =>
         this.generateFileOrFolderElement(item, idx + 1, openFile, nestLevel + 1));
@@ -233,19 +221,31 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     if (onClick) {
       classNames.push('clickable');
     }
-    if (moment.isMoment(content)) {
-      return (
-        <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
-          <span style={style}>{content.format('MMM D, YYYY')}</span>
-        </div>
-      );
-    } else {
-      return (
-        <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
-          <span style={style}>{content}</span>
-        </div>
-      );
-    }
+    const text = moment.isMoment(content) ? content.format('MMM D, YYYY') : content;
+    return (
+      <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
+        <span style={style}>{text}</span>
+      </div>
+    );
+  };
+
+  generateFolderNameTableCell = (folder: IFolder, nestLevel: number = 0) => {
+    const style = {
+      paddingLeft: `${nestLevel * 7}px`,
+    };
+    const tooltip = folder.name;
+    const classNames = 'clickable ' + (this.state.expandedFolders.has(folder.path) ? 'expanded' : 'collapsed');
+    const onClick = () => this.toggleFolderExpanded(folder);
+    return (
+      <div title={tooltip} onClick={onClick} className={classNames}>
+        <span style={style}>
+          <div className="icon-container">
+            {sortTriangleSVG}
+          </div>
+          {folder.name}
+        </span>
+      </div>
+    );
   };
 
   generateCheckBox = (item: IFile | IFolder) => {
@@ -316,6 +316,16 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     return file.type ? `${file.name}.${file.type}` : file.name;
   };
 
+  setSortBy = (sortBy: SORT_BY_OPTIONS) => {
+    if (this.state.sortBy === sortBy) {
+      // Already sorted by this column, so reverse sort order
+      this.setState({sortAscending: !this.state.sortAscending});
+    } else {
+      // Otherwise sort by this column
+      this.setState({sortBy});
+    }
+  };
+
   toggleAllFilesAndFoldersSelected = () => {
     let selectedFilesAndFolders = new Set<string>();
     if (!this.state.allFilesAndFoldersSelected) {
@@ -334,6 +344,16 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     if (this.props.onSelectedFilesAndFoldersChange) {
       this.props.onSelectedFilesAndFoldersChange(selectedFilesAndFolders);
     }
+  };
+
+  toggleFolderExpanded = (folder: IFolder) => {
+    let expandedFolders = new Set(this.state.expandedFolders);
+    if (expandedFolders.has(folder.path)) {
+      expandedFolders.delete(folder.path);
+    } else {
+      expandedFolders.add(folder.path);
+    }
+    this.setState({expandedFolders});
   };
 
   toggleSingleFileOrFolderSelected = (item: IFile | IFolder) => {
@@ -405,3 +425,7 @@ const HUMAN_READABLE_FILE_SIZES = [
   'TB',
   'YB',
 ];
+
+const sortTriangleSVG = <svg xmlns="http://www.w3.org/2000/svg" className="triangle" width="10" height="10" viewBox="0 0 2.646 2.646">
+    <path d="M0 0l1.323 2.646L2.646 0z"/>
+  </svg>;
