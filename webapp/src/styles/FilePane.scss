@@ -2,6 +2,7 @@
 
 .FilePane {
   $gutter-width: 2.5%;
+  $triangle-color: #aaaaaa;
 
   width: 50% - $gutter-width/2;
   float: left;
@@ -46,7 +47,7 @@
     .sort-descending {
       align-items: center;
       display: flex;
-      fill: #aaaaaa;
+      fill: $triangle-color;
       justify-content: space-between;
     }
 
@@ -69,6 +70,19 @@
     &.dragging {
       background-color: white;
       border: $border-style;
+    }
+
+    .icon-container {
+      display: inline-block;
+      margin-right: 0.5em;
+
+      svg {
+        fill: $triangle-color;
+      }
+    }
+
+    .collapsed svg {
+      transform: rotate(-90deg);
     }
   }
 
