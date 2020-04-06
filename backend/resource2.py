@@ -101,7 +101,7 @@ class Resource:
         '''
 
         # get the file information for all files in the HS resource in json
-        # print(self.hs.resource(self.res_id).files.all().json())
+        #print(self.hs.resource(self.res_id).files.all().json())
         # testing = (self.hs.getResourceFileList(self.res_id))
         # for test in testing:
         #     print("THIS IS A TEST")
@@ -111,6 +111,7 @@ class Resource:
         folders_dict = {}
         folders_final = []
         nested_files = {}
+        # try:
         # get the needed info for each file
         for file_info in hs_resource_info:
             # print(file_info)
@@ -134,6 +135,13 @@ class Resource:
             # if it is just a file, add it to the final list
             else:
                 folders_final.append(file_definition_hs)
+        # except Exception as e:
+        #     print(type(e))
+        #     print(e.url)
+        #     print(e.method)
+        #     print(e.status_code)
+        #     print(e.status_msg)
+
 
         # go through folders dictionary & build up the nested structure
         i = 0
