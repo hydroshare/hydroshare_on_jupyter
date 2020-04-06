@@ -15,6 +15,7 @@ import logging
 import pathlib
 
 
+# spiffy: move below "class RemoteFolder:". Also what's a remote folder? (maybe rename the file too)
 ''' Class that defines a Remote Folder so we can access attributes of it.
 '''
 class RemoteFolder:
@@ -31,8 +32,10 @@ class RemoteFolder:
         """
         if file_info.get("modified_time"):
             modified_time = str(parse(file_info.get("modified_time")))
+        # spiffy: this could be done away with if line 33 was instead modified_time = file_info.get("modified_time")
         else:
             modified_time = None
+        # spiffy: what's this doing?
         if filepath.rfind("/") == -1 and filepath.rfind(".") != -1:
             file_type = filepath[filepath.rfind(".")+1:]
             filename = filepath[:filepath.rfind(".")]
@@ -44,6 +47,7 @@ class RemoteFolder:
                 "type": file_type,
             })
         #TODO (Charlie): This might be simpler with pathlib
+        # spiffy: what's this doing?
         elif filepath.rfind("/") == -1:
 
             return ({
@@ -63,6 +67,7 @@ class RemoteFolder:
         folder_size = 0
         folder_time = datetime.datetime.min
         for v in val:
+            # spiffy: maybe unpack v so the rest of the code is clearer (i.e. what each index is)
             if v in folders_dict:
                 subfolder_time, subfolder_size, subfolder_contents = self.get_contents_recursive(folders_dict[v], folders_dict, nested_files, path_prefix)
                 folder_size += subfolder_size
@@ -71,6 +76,7 @@ class RemoteFolder:
                 if subfolder_time:
                     subfolder_time = str(subfolder_time)
                 contents.append({
+                    # spiffy: remove whitespace before : (per PEP8)
                     "name" : v[1],
                     "path" : path_prefix + '/' + v[2].strip('/'),
                     "sizeBytes" : subfolder_size,
@@ -79,6 +85,7 @@ class RemoteFolder:
                     "contents" : subfolder_contents,
                 })
             else:
+                # spiffy: what's happening here?
                 contents.append(self.get_file_metadata(v[1], v[2], nested_files[v[2]], path_prefix))
                 folder_size += nested_files[v[2]]["size"]
                 if nested_files[v[2]].get("modified_time"):
@@ -107,6 +114,7 @@ class RemoteFolder:
         # TODO: Charlie, send message to frontend
         try:
             resource_id = self.hs.deleteResourceFile(self.res_id, filepath)
+        # spiffy: where does "exceptions" come from? My IDE isn't recognizing it. Doesn't it need to be imported?
         except exceptions.HydroShareNotAuthorized:
             # print("Not authorized")
             logging.info("Not authorized to delete file in "+self.res_id)
