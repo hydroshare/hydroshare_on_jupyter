@@ -14,7 +14,7 @@ import shutil
 import datetime
 from pathlib import *
 
-
+# spiffy: move below "class LocalFolder:"
 ''' Class that defines a Local Folder so we can access attributes of it.
 '''
 class LocalFolder:
@@ -89,19 +89,27 @@ class LocalFolder:
     def delete_folder(self, filepath):
         if isinstance(filepath, PosixPath):
             filepath = str(filepath)
+        # spiffy: this could probably raise an exception if the user doesn't have permission to delete the file
+        # also, what happens if the filepath (folder path?) is invalid?
         shutil.rmtree(filepath)
 
+    # spiffy: docstring: are any needed parent folders created (i.e. if I want /A/B/C and B doesn't exist, is B created
+    # first or does directory creation fail)?
     def create_folder(self, folderpath):
         try:
             # Create target Directory
             os.makedirs(folderpath)
         except FileExistsError:
+            # spiffy: probably shouldn't catch this exception so that a message can be sent to the frontend
             print("Directory " , folderpath ,  " already exists")
 
     def upload_file_to_JH(self, file_info, file_destination):
 
         filename, content_type = file_info["filename"], file_info["content_type"]
         body = file_info["body"]
+        # spiffy: should probably deal with the case that the user doesn't have write permission in file_destination
+        # somewhere (either here or in the caller, wherever makes the most sense -- probably the caller if the
+        # exception raised here isn't helpful/descriptive)
         f = open(file_destination+filename, "wb")
         f.write(body)
         f.close()

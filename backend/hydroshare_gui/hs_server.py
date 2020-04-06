@@ -23,6 +23,7 @@ import tornado.options
 resource_handler = ResourceHandler()
 
 
+# spiffy: my IDE is telling me this should implement data_received(...) (not sure if that's really necessary)
 class BaseRequestHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")  # TODO: change from * (any server) to our specific url
@@ -32,6 +33,8 @@ class BaseRequestHandler(tornado.web.RequestHandler):
 
     def options(self, _):
         # SPIFFY (Vicky) just curious - what is this?
+        # spiffy: web browsers make an OPTIONS request to check what methods (line 31) are allowed at/for an endpoint.
+        # We just need to respond with the header set on line 31.
         self.set_status(204)  # No content
         self.finish()
 
@@ -39,6 +42,7 @@ class BaseRequestHandler(tornado.web.RequestHandler):
 class WebAppHandler(BaseRequestHandler):
     """ Handles starting up the frontend for our web app """
     # SPIFFY (Vicky) is this ever used or is it left over from pre bundle.js?
+    # spiffy: it's still used. This is the HTML that loads the bundle.js later.
     def get(self):
         self.render('index.html')
 
@@ -56,6 +60,7 @@ class ResourcesHandler(BaseRequestHandler):
     def get(self):
         success = False
         resources, error = resource_handler.get_list_of_user_resources()
+        # spiffy: this could also be written on line 67 as 'success': error is None
         if not error:
             success = True
 
@@ -65,6 +70,7 @@ class ResourcesHandler(BaseRequestHandler):
 
     def delete(self):
         success = False
+        # spiffy: not needed in Python (error always set later)
         error = None
 
         body = json.loads(self.request.body.decode('utf-8'))
@@ -91,6 +97,7 @@ class ResourcesHandler(BaseRequestHandler):
         "creators": list of strings}
         """
         success = False
+        # spiffy: not needed in Python (error always set later)
         error = None
         resource_id = None
 
@@ -127,6 +134,8 @@ class FileHandlerJH(BaseRequestHandler):
                 resource = Resource(res_id, resource_handler)
                 resource.delete_file_or_folder_from_JH(filepath)
         else:
+            # spiffy: the format of this should be updated (the response code should also be something other than 200)
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
             self.write("Please specify list of filepaths to delete")
 
     def put(self, res_id):
@@ -136,10 +145,13 @@ class FileHandlerJH(BaseRequestHandler):
         if request_type == "new_file":
             resource.create_file_JH(body.get("new_filename"))
         else:
+            # spiffy: the format of this should be updated (the response code should also be something other than 200)
             self.write("Please specify valid request type for PUT")
 
     def post(self, res_id):
         resource = Resource(res_id, resource_handler)
+        # spiffy: this is normally achieved using different response status codes
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
         response_message = "OK"
         for field_name, files in self.request.files.items():
             for info in files:
@@ -277,6 +289,7 @@ class UserInfoHandler(BaseRequestHandler):
                     'error': error})
 
 
+# spiffy: should rename this once we have our name
 class HydroShareGUI(tornado.web.Application):
     """ Class for setting up the server & making sure it can exit cleanly """
 
