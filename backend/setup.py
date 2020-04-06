@@ -2,6 +2,7 @@
 from distutils.core import setup
 # import setuptools
 
+# spiffy: can we get rid of this?
 # setuptools.setup(
 #     name='hydroshare_gui',
 #     version='0.1.0',
@@ -15,20 +16,21 @@ from distutils.core import setup
 # )
 
 setup(
-    name='hydroshare_gui',
+    name='hydroshare_gui',  # spiffy: need to decide on the name we're going with (hs_sync?)
     version='0.1.0',
     author='CUAHSI SCOPE team 2019',
     author_email='scope-cuahsi@olin.edu',
     packages=[],
-    url='',
-    license='',
-    description='hydroshare gui app.',
+    url='',  # spiffy: The GitHub repo?
+    license='',  # spiffy: We should ask CUAHSI if they want us to use the same as https://github.com/hydroshare/hydroshare/blob/develop/LICENSE.txt
+    description='hydroshare gui app.',  # spiffy: this should be better
+    # spiffy: Should we require versions >= or exactly equal to the ones specified?
     install_requires=['notebook>=5.5.0', 
                         'tornado', 
                         'certifi==2019.11.28',
                         'chardet==3.0.4',
                         'hs-restclient==1.3.5',
-                        'hydroshare-gui==0.1.0',
+                        'hydroshare-gui==0.1.0',  # spiffy: Should this really depend on itself?
                         'idna==2.9',
                         'oauthlib==3.1.0',
                         'requests==2.23.0',

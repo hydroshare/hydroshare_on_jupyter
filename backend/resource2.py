@@ -1,3 +1,5 @@
+# spiffy: this file should probably be renamed (maybe to hydroshare_resource or hs_resource?) Calling it resource2
+# makes me wonder what happened to resource1/resource
 '''
 This file sets up the resource class for getting and updating files &
 information associated with a given resource in Jupyterhub & Hydroshare.
@@ -8,6 +10,7 @@ Email: vickymmcd@gmail.com
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+# spiffy: remove unused imports
 from local_folder import LocalFolder
 from remote_folder import RemoteFolder
 import logging
@@ -17,20 +20,25 @@ from dateutil.parser import parse
 import datetime
 import re
 import pathlib
+# spiffy: you mean change to import pathlib as pl?
 from pathlib import * # TODO: Charlie, change to pl for readability
 import hs_restclient
 import shutil
 
+# spiffy: we should probably rename all "JH" to "local" or just "jupyter" or something like that, since this is supposed
+# to be platform-independent
 HS_PREFIX = 'hs'
 LOCAL_PREFIX = 'local'
 
 
+# spiffy: move below "class Resource:"
 ''' Class that defines a Hydroshare resource & it's associated files that
 are local to Jupyterhub.
 '''
 class Resource:
 
     def __init__(self, res_id, resource_handler):
+        # spiffy: block comments should be """ not ''' (per PEP style guide)
         '''Authenticates Hydroshare & sets up class variables.
         '''
         self.res_id = res_id
@@ -64,9 +72,11 @@ class Resource:
         # Get resource from HS if it doesn't already exist locally
         if not os.path.exists('{}/{}'.format(self.output_folder, self.res_id)):
 
+            # spiffy: perhaps "Downloading resource from HydroShare..."?
             logging.info("getting hs resource")
             self.hs.getResource(self.res_id, destination=self.output_folder, unzip=unzip)
         else:
+            # spiffy: we can probably get rid of this
             logging.info("Resource already exists!")
 
     def get_files_JH(self):
@@ -111,6 +121,7 @@ class Resource:
         # SPIFFY (Vicky) yeah.. i know we need to fix it, this is a mess :(
         # SPIFFY (Vicky) on second thought even without the recent nonsense - this function is TOO LONG imo
         # get the file information for all files in the HS resource in json
+        # spiffy: can we remove this?
         #print(self.hs.resource(self.res_id).files.all().json())
         # testing = (self.hs.getResourceFileList(self.res_id))
         # for test in testing:
@@ -121,6 +132,7 @@ class Resource:
         folders_dict = {}
         folders_final = []
         nested_files = {}
+        # spiffy: remove commented-out lines?
         try:
             # get the needed info for each file
             for file_info in hs_resource_info:
@@ -146,6 +158,7 @@ class Resource:
                 else:
                     folders_final.append(file_definition_hs)
         except Exception as e:
+            # spiffy: is this what we want to keep?
             print(type(e))
             # print(e.url)
             # print(e.method)
@@ -164,6 +177,7 @@ class Resource:
                                                                                          nested_files, HS_PREFIX+':')
                 if folder_time:
                     folder_time = str(folder_time)
+                # spiffy: use folder_size and folder_contents instead of key[i]
                 folders_final.append({
                     "name": key[1],
                     "path": HS_PREFIX + ':/' + key[2].strip('/'),
@@ -173,6 +187,7 @@ class Resource:
                     "contents": folder_contents,
                 })
 
+        # spiffy: probably add some comments explaining what these lines are doing
         rootsize = 0
         for f in folders_final:
             rootsize += (f["sizeBytes"])
@@ -184,6 +199,7 @@ class Resource:
                 if curr_time > folder_time:
                     folder_time = curr_time
 
+        # spiffy: could we not just set it to None to start?
         if folder_time == datetime.datetime.min:
             folder_time = None
         else:
@@ -204,9 +220,12 @@ class Resource:
         '''Renames the hydroshare version of the file from old_filename to
         new_filename.
         '''
+        # spiffy: I think we should throw an exception if either of the parameters are None. Checking the paths is
+        # something the calling function should handle
         if old_filepath is not None and new_filepath is not None:
             if self.is_file_in_HS(old_filepath):
                 self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
+                # spiffy: what is this doing and how is it working?
                 if len(old_filepath.rsplit("/", 1)) > 1:
                     folderpath, filename = old_filepath.rsplit("/", 1)
                     # SPIFFY (vicky): is the whole deleting thing possibly related to breaking resources?
@@ -214,10 +233,13 @@ class Resource:
                     # create that folder again (bc HS wouldn't tell us that that folder still existed), the resource would break. so maybe this stopped working?
                     self.delete_HS_folder_if_empty(folderpath, filename)
             else:
+                # spiffy: probably another exception here so that the calling function knows something went wrong
+                # and can notify the frontend
                 logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
         else:
             logging.info('Missing inputs for old and new filepath')
 
+    # spiffy: there's a is_file_or_folder_in_HS below. Do we need both?
     def is_file_in_HS(self, filepath):
         """ does a file exist in hs_files """
         files_info = self.hs_files["contents"]
@@ -234,13 +256,14 @@ class Resource:
         """Renames the jupyterhub version of the file from old_filename to
         new_filename.
         """
+        # spiffy: should probably throw an exception if this is not true
         if old_filepath is not None and new_filepath is not None:
             src_full_path = self.path_prefix / old_filepath
             dest_full_path = self.path_prefix / new_filepath
             if src_full_path.exists():
                 shutil.move(str(src_full_path), str(dest_full_path))
                 self.delete_JH_folder_if_empty(src_full_path.parent)
-            else:
+            else:  # spiffy: also an exception
                 logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
         else:
             logging.info('Missing inputs for old and new filepath')
@@ -258,6 +281,7 @@ class Resource:
 
             # check if after deleting this folder, the parent directory is empty
             # if so this will delete that parent directory
+            # spiffy: if we're keeping this, we should explain why
             # TODO: Do we really want to do this?
             # SPIFFY (vicky): woa do we?
             # SPIFFY (Emily) the reason we currently do this is to make the behavior consistent with HS
@@ -269,6 +293,7 @@ class Resource:
 
             # check if after deleting this file, the parent directory is empty
             # if so this will delete that parent directory
+            # spiffy: if we're keeping this, we should explain why
             # SPIFFY (Vicky) hmm
             if "/" in filepath:
                 self.delete_JH_folder_if_empty(filepath.rsplit('/', 1)[0])
@@ -281,6 +306,7 @@ class Resource:
         if len(list((self.path_prefix / filepath).iterdir())) == 0:
             self.delete_file_or_folder_from_JH(filepath)
 
+    # spiffy: "exists" is a word commonly used for this functionality (maybe we should use it here in the function name)
     def is_file_or_folder_in_JH(self, filepath):
         """ is a file in JH """
         return path.isfile(filepath)
@@ -307,6 +333,8 @@ class Resource:
             # check if after deleting this file, the parent directory is empty
             # if so this will delete that parent directory
             if "/" in filepath:
+                # spiffy: can we get some comments explaining what this is doing? Maybe assign the output of rsplit to
+                # some temporary variables with helpful names
                 self.delete_HS_folder_if_empty(filepath.rsplit('/', 1)[0], filepath.rsplit('/', 1)[1].split(".")[0])
 
     def delete_HS_folder_if_empty(self, folderpath, acceptable_name):
@@ -314,6 +342,7 @@ class Resource:
         this can only be used with hs_files as the HydroShare API does not give us empty
         folders when giving us files. This function should only be used if a recent
         action could have caused a folder to be empty """
+        # spiffy: snake_case_please
         splitPath = ["/"]
         splitPath += folderpath.split('/')
         parentDict = self.hs_files
@@ -332,6 +361,7 @@ class Resource:
         if j == 0:
             self.delete_file_or_folder_from_HS(folderpath)
 
+    # spiffy: "exists"?
     def is_file_or_folder_in_HS(self, item_path, file_extension=None):
         """ Checks if a file or folder exists in a HydroShare resource
             :param item_path the name (sans extension) of the file or folder
@@ -362,6 +392,7 @@ class Resource:
         if self.is_file_or_folder_in_JH(filepath):
             self.delete_file_or_folder_from_JH(filepath)
         if "/" in filepath:
+            # spiffy: ick rsplit. What is this doing?
             outputPath = filepath.rsplit('/', 1)[0]
             if self.is_file_or_folder_in_JH(outputPath) == False:
                 os.makedirs(str(self.path_prefix) + "/" + outputPath + "/")
@@ -390,6 +421,7 @@ class Resource:
         self.remote_folder.upload_file_to_HS(full_src_path, full_file_path_rel_resource_root)
         self.hs_files = self.get_files_upon_init_HS()
 
+    # spiffy: are we keeping this?
     def get_resource_last_modified_time_HS(self):
         # TODO: (Charlie): This may not be necessary -- it's more specific than the dates provided in
         # the get resources func in resource_handler, but we might not care
@@ -427,4 +459,5 @@ class Resource:
             self.local_folder.upload_file_to_JH(file_info, self.path_prefix)
             return True
         else:
+            # spiffy: probably throw an exception here instead
             return "Error: a file " + file_info["filename"] +" already exists in JupyterHub at that location, cannot upload"
