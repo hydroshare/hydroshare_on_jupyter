@@ -31,13 +31,14 @@ class BaseRequestHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, PUT, GET, DELETE, OPTIONS')
 
     def options(self, _):
+        # SPIFFY (Vicky) just curious - what is this?
         self.set_status(204)  # No content
         self.finish()
 
 
 class WebAppHandler(BaseRequestHandler):
     """ Handles starting up the frontend for our web app """
-
+    # SPIFFY (Vicky) is this ever used or is it left over from pre bundle.js?
     def get(self):
         self.render('index.html')
 
@@ -73,7 +74,7 @@ class ResourcesHandler(BaseRequestHandler):
             if not error:
                 success = True
         else:
-            error = {'type':'MissingResourceID', 
+            error = {'type':'MissingResourceID',
                     'msg':'Please specify resource id to delete'}
 
         self.write({'success': success,
@@ -270,7 +271,7 @@ class UserInfoHandler(BaseRequestHandler):
         data, error = resource_handler.get_user_info()
         if not error:
             success = True
-        
+
         self.write({'data': data,
                     'success': success,
                     'error': error})

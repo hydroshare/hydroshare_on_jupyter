@@ -1,3 +1,5 @@
+[//]: # (SPIFFY (Vicky) Can this file have a more descriptive name?)
+
 # General structure of frontend
 
 We are writing the frontend in `Typescript` which adds typing to javascript.
@@ -22,6 +24,9 @@ Below is a quick description of each file and the components they define:
  - `FilterBarResource.tsx` filter bar for list page
  - `Header.tsx` header bar for page. Contains the image of CUAHSI logo as well as "welcome, x user"
  - `NewResourceModal.tsx` modal that pops up to create a new project
+
+ [//]: # (SPIFFY (Vicky) Not sure if this codereview todo from last time has been resolved?)
+
  [//]: # (TODO (Emily)): can we get things like replacing openfilemodal in as tasks in asana? I didn't know this was a thing)
  - `OpenFileModal.tsx` placeholder modal for opening files. Made this for AGU, will be changed so don't bother reviewing this.
  - `ProjectInfo.tsx` displays information about resource (author, last modified, abstract)
