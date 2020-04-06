@@ -19,6 +19,16 @@ from pathlib import *
 '''
 class LocalFolder:
 
+    def get_size(self, folderpath):
+        """ Gets the size of the contents of a folder stored locally
+        """
+        total_size = 0
+        for path, dirs, files in os.walk(folderpath):
+            for f in files:
+                fp = os.path.join(path, f)
+                total_size += os.path.getsize(fp)
+        return total_size
+
     def get_contents_recursive(self, folderpath, resource_data_root_dir, path_prefix):
         """Uses recursion to get & properly nest contents of folders stored locally
         """
@@ -57,7 +67,7 @@ class LocalFolder:
                 files2.append({
                     "name": filename,
                     "path": path_prefix + path_rel_resource_root,
-                    "sizeBytes": dirpath.stat().st_size,
+                    "sizeBytes": self.get_size(filepath),
                     "modifiedTime": str(datetime.datetime.fromtimestamp(dirpath.stat().st_mtime)),
                     "type": file_type,
                     "contents": folder_contents,
@@ -67,7 +77,7 @@ class LocalFolder:
                 files2.append({
                     "name": filename,
                     "path": path_prefix + path_rel_resource_root,
-                    "sizeBytes": dirpath.stat().st_size,
+                    "sizeBytes": os.path.getsize(filepath),
                     "modifiedTime": str(datetime.datetime.fromtimestamp(dirpath.stat().st_mtime)),
                     "type": file_type,
                 })

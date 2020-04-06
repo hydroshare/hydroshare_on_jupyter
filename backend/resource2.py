@@ -82,7 +82,7 @@ class Resource:
         root_dir = {
             "name": "",
             "path": LOCAL_PREFIX + ":/",
-            "sizeBytes": resource_files_root_path.stat().st_size,
+            "sizeBytes": self.local_folder.get_size(self.path_prefix),
             "modifiedTime": str(datetime.datetime.fromtimestamp(resource_files_root_path.stat().st_mtime)),
             "type": "folder",
             "contents": files,
@@ -111,36 +111,36 @@ class Resource:
         folders_dict = {}
         folders_final = []
         nested_files = {}
-        # try:
-        # get the needed info for each file
-        for file_info in hs_resource_info:
-            # print(file_info)
-            # extract filepath from url
-            filepath = file_info["url"][len(url_prefix)+1:]
-            # get proper definition formatting of file if it is a file
-            file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info,
-                                                                      HS_PREFIX+':')
-            # if it is a folder, build up contents
-            if not file_definition_hs:
-                nested_files[filepath + "/"] = file_info
-                folders = filepath.split("/")
-                currpath = ""
-                for x in range(0, len(folders)-1):
-                    folder = folders[x]
-                    currpath = currpath + folder + "/"
-                    # build up dictionary of folder -> what is in it
-                    if (x, folder, currpath) not in folders_dict:
-                        folders_dict[(x, folder, currpath)] = []
-                    folders_dict[(x, folder, currpath)].append((x+1, folders[x+1], currpath + folders[x+1] + "/"))
-            # if it is just a file, add it to the final list
-            else:
-                folders_final.append(file_definition_hs)
-        # except Exception as e:
-        #     print(type(e))
-        #     print(e.url)
-        #     print(e.method)
-        #     print(e.status_code)
-        #     print(e.status_msg)
+        try:
+            # get the needed info for each file
+            for file_info in hs_resource_info:
+                # print(file_info)
+                # extract filepath from url
+                filepath = file_info["url"][len(url_prefix)+1:]
+                # get proper definition formatting of file if it is a file
+                file_definition_hs = self.remote_folder.get_file_metadata(filepath, filepath, file_info,
+                                                                          HS_PREFIX+':')
+                # if it is a folder, build up contents
+                if not file_definition_hs:
+                    nested_files[filepath + "/"] = file_info
+                    folders = filepath.split("/")
+                    currpath = ""
+                    for x in range(0, len(folders)-1):
+                        folder = folders[x]
+                        currpath = currpath + folder + "/"
+                        # build up dictionary of folder -> what is in it
+                        if (x, folder, currpath) not in folders_dict:
+                            folders_dict[(x, folder, currpath)] = []
+                        folders_dict[(x, folder, currpath)].append((x+1, folders[x+1], currpath + folders[x+1] + "/"))
+                # if it is just a file, add it to the final list
+                else:
+                    folders_final.append(file_definition_hs)
+        except Exception as e:
+            print(type(e))
+            # print(e.url)
+            # print(e.method)
+            # print(e.status_code)
+            # print(e.status_msg)
 
 
         # go through folders dictionary & build up the nested structure
