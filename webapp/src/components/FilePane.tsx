@@ -53,6 +53,8 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
   };
 
   render() {
+    // SPIFFY (Emily) how do the diff classnames render? just curious
+    // maybe we could make this name more descriptive? like cssClassName or something
     const className = ['FilePane', 'table'];
     if (this.props.className) {
       className.push(this.props.className);

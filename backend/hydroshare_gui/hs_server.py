@@ -24,6 +24,7 @@ resource_handler = ResourceHandler()
 
 
 class BaseRequestHandler(tornado.web.RequestHandler):
+    # SPIFFY (Emily) probably should add a header comment
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")  # TODO: change from * (any server) to our specific url
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, content-type")
@@ -52,6 +53,7 @@ class BundleHandler(BaseRequestHandler):
 class ResourcesHandler(BaseRequestHandler):
     """ Class that handles GETing a list of a user's resources (with metadata) & POSTing
      a new resource for that user """
+     # SPIFFY (Emily) should probably add delete to this header comment
 
     def get(self):
         success = False
@@ -91,6 +93,7 @@ class ResourcesHandler(BaseRequestHandler):
         "creators": list of strings}
         """
         success = False
+        # SPIFFY (Emily) should we make this error_message to differentiate from the error returned on likne 105?
         error = None
         resource_id = None
 
@@ -113,6 +116,7 @@ class ResourcesHandler(BaseRequestHandler):
 
 class FileHandlerJH(BaseRequestHandler):
     """ Class that handles DELETEing file in JH """
+    # SPIFFY (Emily) header comment should be updated
 
     def get(self, res_id):
         resource = Resource(res_id, resource_handler)
@@ -153,6 +157,7 @@ class FileHandlerJH(BaseRequestHandler):
 
 class FileHandlerHS(BaseRequestHandler):
     """ Class that handles GETing list of a files that are in a user's HydroShare instance of a resource """
+    # SPIFFY (Emily) Header comment should be updated
 
     # SPIFFY (Vicky) just confirming this in my own head but it is chill that this has many less things than the JH one?
     def get(self, res_id):
@@ -166,6 +171,7 @@ class FileHandlerHS(BaseRequestHandler):
         filepaths = body.get("filepaths")
         if filepaths is not None:
             for filepath in filepaths:
+                # SPIFFY (Emily) should move this line outside of the for loop so we're not remaking this object over and over
                 resource = Resource(res_id, resource_handler)
                 resource.delete_file_or_folder_from_HS(filepath)
                 resource.update_hs_files()
@@ -198,6 +204,7 @@ class MoveCopyFiles(BaseRequestHandler):
             method = operation['method']  # 'copy' or 'move'
             src_uri = operation['source']
             dest_uri = operation['destination']
+            # SPIFFY (Emily) just curious what is this variable doing? it doesn't appear later in the function
             do_force = operation.get('force', False)
 
             # Split paths into filesystem prefix ('hs' or 'local') and path relative to the resource root on

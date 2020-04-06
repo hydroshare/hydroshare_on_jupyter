@@ -1,3 +1,4 @@
+// SPIFFY (Emily) we shouldn't need this anymore. Kyle can you confirm?
 import * as React from 'react';
 import {
   Button,
