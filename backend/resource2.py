@@ -38,9 +38,11 @@ class Resource:
         self.output_folder = self.resource_handler.output_folder
         self.hs = self.resource_handler.hs
 
+        # SPIFFY (Emily) I wonder, should we rename RemoteFolder to HSFolder or something?
         self.remote_folder = RemoteFolder(self.hs, self.res_id)
         self.local_folder = LocalFolder()
 
+        # SPIFFY (Emily) this is for me and my path task, but is this the right way of doing Path stuff?
         self.path_prefix = Path(self.output_folder) / self.res_id / self.res_id / 'data' / 'contents'
         self.hs_files = self.get_files_upon_init_HS()
         self.JH_files = self.get_files_upon_init_JH()
@@ -69,6 +71,7 @@ class Resource:
 
     def get_files_JH(self):
         # SPIFFY (Vicky): do we want it to update if someone creates a file not on our app but in their JH folder?
+        # SPIFFY (Emily) maybe but how do we check that that occurs? Have a cron that periodically refreshes?
         return self.JH_files
 
     def get_files_upon_init_JH(self):
@@ -93,6 +96,7 @@ class Resource:
 
     def update_hs_files(self):
         # SPIFFY (Vicky) interesting.. do we want an update for HS? when is this called?
+        # SPIFFY (Emily) maybe but how do we check that that occurs? Have a cron that periodically refreshes?
         # looks like it is only called in delete.. in which case, this won't update if you make changes on HS?
         self.hs_files = self.get_files_upon_init_HS()
 
@@ -206,6 +210,8 @@ class Resource:
                 if len(old_filepath.rsplit("/", 1)) > 1:
                     folderpath, filename = old_filepath.rsplit("/", 1)
                     # SPIFFY (vicky): is the whole deleting thing possibly related to breaking resources?
+                    # SPIFFY (Emily) before we did this, if we deleted an element from an empty folder and then tried to 
+                    # create that folder again (bc HS wouldn't tell us that that folder still existed), the resource would break. so maybe this stopped working?
                     self.delete_HS_folder_if_empty(folderpath, filename)
             else:
                 logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
@@ -254,6 +260,8 @@ class Resource:
             # if so this will delete that parent directory
             # TODO: Do we really want to do this?
             # SPIFFY (vicky): woa do we?
+            # SPIFFY (Emily) the reason we currently do this is to make the behavior consistent with HS
+            # but we could decide not to
             if filepath.parent != self.path_prefix:
                 self.delete_JH_folder_if_empty(filepath.parent)
         else:
@@ -283,6 +291,7 @@ class Resource:
         if not isinstance(filepath, PosixPath):
             filepath = Path(filepath)
         # SPIFFY (Vicky): this whole function appears to be a bit of a mess..
+        # SPIFFY (Emily) yup i should fix this after i fix all the path funkiness
         # FIXME: This will not work if the directory has a . in it (which is valid in UNIX)
         # Check if there is a suffix/extension (indicating we're deleting a folder)
         if filepath.suffix:
@@ -290,6 +299,7 @@ class Resource:
             # check if after deleting this folder, the parent directory is empty
             # if so this will delete that parent directory
             # TODO: Delete this or make it recursive and use pathlib
+            # SPIFFY (Emily) this probably should not be commented? I can't remember why it was
             # if "/" in filepath:
             #     self.delete_HS_folder_if_empty(filepath.split('/', 1)[0], filepath.rsplit('/', 1)[1])
         else:
@@ -330,6 +340,7 @@ class Resource:
         if not isinstance(item_path, PosixPath):
             item_path = Path(item_path)
         current_dir_contents = self.hs_files.get('contents')
+        # SPIFFY (Emily) sigh why does HS have to be so chaotic? I wrote this, but it doesn't seem super elegant
         for current_path_part in item_path.parts:
             found_next_part = False
             for file_or_folder in current_dir_contents:
@@ -403,6 +414,7 @@ class Resource:
         dates = []
         for date in metadata['dates']:
             temp = date['start_date']
+            # SPIFFY (Emily) I get an "undefined variable dateutil" warning here
             temp = dateutil.parser.parse(temp)
             dates.append(temp)
         # Compare dates to get most recent one (normally it's the first, but

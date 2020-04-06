@@ -223,6 +223,7 @@ class ResourceHandler:
         new_id = response.content.decode("utf-8") # b'id'
 
         # TODO: before doing this should we rename any existing local version to have the new ID??
+        # SPIFFY (Emily) is_local is never used, so are these necessary?
         if new_id in self.local_res_ids:
             is_local = True
         else:
