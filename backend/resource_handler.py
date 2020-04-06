@@ -1,7 +1,9 @@
 '''
 This file sets up the resource handler for working with resources in
+# spiffy: can we please make sure we use "HydroShare" and "JupyterHub"?
 hydroshare & jupyterhub.
 
+# spiffy: we should probably put our full names in these files
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Email: vickymmcd@gmail.com
 '''
@@ -14,6 +16,7 @@ from getpass import getpass
 from pathlib import Path
 import base64
 
+# spiffy: Kyle has the same question. Also maybe we should be reading from a text file using open() instead of importing...
 # TODO: (Charlie's question) Why is this in this class, vs hs_server?
 # Prompt for username and password if not already saved
 try:
@@ -42,7 +45,7 @@ import os
 import json
 import shutil
 
-
+# spiffy: block comments should be triple " not triple ' and placed after class/def line (per PEP style guide)
 ''' Class that defines a handler for working with all of a user's resources.
 This is where they will be able to delete a resource, create a new one, or
 just get the list of a user's resources in hydroshare or jupyterhub.
@@ -50,23 +53,33 @@ just get the list of a user's resources in hydroshare or jupyterhub.
 class ResourceHandler:
 
     def __init__(self):
+        # spiffy: block comments should be triple " not triple ' (per PEP style guide)
         '''Makes an output folder for storing HS files locally, if none exists,
         and sets up authentication on hydroshare API.
         '''
         # authentication for using Hydroshare API
         auth = HydroShareAuthBasic(username=username, password=password)
+        # spiffy: do we want to allow specifying the hostname as a parameter? This is potentially useful if people are
+        # running this on their own computers & HS instances
         self.hs = HydroShare(auth=auth, hostname='www.hydroshare.org')
         # Get path to this file's location
+        # spiffy: you could also do self.output_folder = None and then check if it's still None later
         path_set = False
+        # spiffy: should be "is not None"
+        # spiffy: also, we may want to call it something that doesn't presume they're using JupyterHub. Once we figure
+        # out what we're calling this thing, maybe <name>_DATA_PATH? Like HS_SYNC_DATA_PATH
         if os.getenv("JH_FOLDER_PATH") != None:
             self.output_folder = os.environ.get("JH_FOLDER_PATH")
             path_set = True
             if not os.path.exists(self.output_folder):
+                # spiffy: prefer not using "JH" (maybe just "Invalid data path specified. Could not find directory."
                 print("Invalid JH folder path set, path does not exist.")
+                # spiffy: then set self.output_folder back to None
                 path_set = False
         if not path_set:
             current_path = os.path.dirname(os.path.realpath(__file__))
             self.output_folder = current_path + "/hydroshare_gui/local_hs_resources"
+            # spiffy: prefer not using "JH"
             print("No valid JH folder path set, using default: " + self.output_folder)
             print("To set a different JH folder path, please set the JH_FOLDER_PATH environment variable.")
             # Make directory if it doesn't exist
@@ -75,6 +88,7 @@ class ResourceHandler:
                 logging.info("Made {} folder for new resources".format(self.output_folder))
 
     def get_user_info(self):
+        # spiffy: probably should not abbreviate HydroShare in docstrings
         '''Gets information about the user currently logged into HS
         '''
         user_info = None
@@ -153,6 +167,7 @@ class ResourceHandler:
 
         return list(resources.values()), error
 
+    # spiffy: do we need to include HS in the function name?
     def create_HS_resource(self, resource_title, creators):
         """
         Creates a hydroshare resource from the metadata specified in a dict
@@ -180,6 +195,7 @@ class ResourceHandler:
 
         # Type errors for resource_title and creators
         if not isinstance(resource_title, str):
+            # spiffy: should be whitespaces after all colons in strings (per PEP8 -- a linter helps with reminders)
             error = {'type':'IncorrectType',
                     'msg':'Resource title should be a string.'}
             return resource_id, error
@@ -189,6 +205,8 @@ class ResourceHandler:
             return resource_id, error
 
         # Formatting creators for metadata['metadata']:
+        # spiffy: should these dates really be hardcoded?
+        # spiffy: also, it'd probably make errors less likely to crop up if this was a dictionary that was turned into JSON using the json module
         meta_metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}'
         for creator in creators:
             creator_string = ', {"creator":{"name":"'+creator+'"}}'
@@ -217,11 +235,13 @@ class ResourceHandler:
                     'msg':'Unable to create resource.'}
         return resource_id, error
 
+    # spiffy: can we please get a docstring explaining what this function does?
     def copy_HS_resource(self, og_res_id):
         response = self.hs.resource(og_res_id).copy()
         new_id = response.content.decode("utf-8") # b'id'
 
         # TODO: before doing this should we rename any existing local version to have the new ID??
+        # spiffy; is_local = new_id in self.local_res_ids also works (but do we even need is_local?)
         if new_id in self.local_res_ids:
             is_local = True
         else:
