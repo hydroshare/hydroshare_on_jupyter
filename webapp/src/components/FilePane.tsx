@@ -283,9 +283,8 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     if (sizeBytes === 0) {
       return '0B';
     }
-    const log10 = Math.log10(sizeBytes);
-    const labelIndex = Math.floor(log10 / 3);
-    const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, log10));
+    const labelIndex = Math.floor(Math.log10(sizeBytes) / 3);
+    const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, 3*labelIndex));
     return `${sizeInHumanReadableUnits}${HUMAN_READABLE_FILE_SIZES[labelIndex]}`;
   };
 
