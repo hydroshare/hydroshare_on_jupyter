@@ -8,12 +8,14 @@ import {
   IJupyterResource,
   SortByOptions,
 } from '../store/types';
+import Modal from "./Modal";
 
 import NewResourceModal from './NewResourceModal';
 import { ICreateResourceRequest } from '../store/types';
 
 interface IResourceListProps {
   className?: string
+  deleteResources: (resources: IJupyterResource[]) => any
   viewResource: any
   resources: {
       [resourceId: string]: IJupyterResource
@@ -31,8 +33,8 @@ interface ITableResourceInfo {
 interface IStateTypes {
   allResourcesSelected: boolean
   filterBy: string
+  modal: MODAL_TYPES
   selectedResources: Set<string>
-  showModal: boolean
   sortBy?: SortByOptions
 }
 
@@ -41,17 +43,20 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     state = {
       allResourcesSelected: false,
       filterBy: '',
+      resourceToMaybeDelete: undefined,
+      modal: MODAL_TYPES.NONE,
       selectedResources: new Set<string>(),
-      showModal: false
     };
 
-    openModal = () => {
-      this.setState({ showModal: true });
+    deleteSelectedResource = () => {
+      this.props.deleteResources(Array.from(this.state.selectedResources).map(r => this.props.resources[r]));
+      this.setState({modal: MODAL_TYPES.NONE});
     };
 
-    closeModal = () => {
-      this.setState({ showModal: false });
-    };
+    showConfirmResourceDeletionModal = () => this.setState({ modal: MODAL_TYPES.CONFIRM_RESOURCE_DELETION });
+    showNewResourceModal = () => this.setState({ modal: MODAL_TYPES.NEW_RESOURCE });
+
+    closeModal = () => this.setState({ modal: MODAL_TYPES.NONE });
 
   public convertToTableStructure(resources: {[resourceId: string]: IJupyterResource}): ITableResourceInfo[] {
     const tableList: ITableResourceInfo[] = [];
@@ -134,6 +139,24 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       )
     );
 
+    let modal;
+    switch (this.state.modal) {
+      case MODAL_TYPES.NEW_RESOURCE:
+        modal = <NewResourceModal
+          show={true}
+          onHide={this.closeModal}
+          newResource={this.props.newResource}
+        />;
+        break;
+      case MODAL_TYPES.CONFIRM_RESOURCE_DELETION:
+        const selectedResources = Array.from(this.state.selectedResources).map(r => this.props.resources[r]);
+        modal = <ResourceDeleteConfirmationModal
+          close={this.closeModal}
+          resources={selectedResources}
+          submit={this.deleteSelectedResource}
+        />
+    }
+
     const classNames = ['ResourceList', 'table'];
     if (this.props.className) {
       classNames.push(this.props.className);
@@ -146,8 +169,12 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         </div>
         <div className="input-row">
           <input type="text" placeholder="Search"/>
-          <button onClick={this.openModal}><span>New Resource</span></button>
-          <button disabled={selectedResources.size === 0}><span>Delete</span></button>
+          <button onClick={this.showNewResourceModal}><span>New Resource</span></button>
+          <button
+            disabled={selectedResources.size === 0}
+            onClick={this.showConfirmResourceDeletionModal}>
+            <span>Delete</span>
+          </button>
         </div>
         <div className="table-header table-row">
           <span className="checkbox">
@@ -159,12 +186,29 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           <span className="clickable">Last Modified</span>
         </div>
         {rowElements}
-        <NewResourceModal
-          show={this.state.showModal}
-          onHide={this.closeModal}
-          newResource={this.props.newResource}
-        />
+        {modal}
         </div>
     );
   }
+}
+
+type RDCModalProps = {
+  close: () => any
+  resources: IJupyterResource[]
+  submit: () => any
+};
+
+const ResourceDeleteConfirmationModal: React.FC<RDCModalProps> = (props: RDCModalProps) => {
+  return (
+    <Modal close={props.close} title="Confirm Deletion" submit={props.submit} isValid={true} submitText="Delete">
+      <p>Are you sure you want to delete the following resources?</p>
+      {props.resources.map(r => <p>{r.title}</p>)}
+    </Modal>
+  )
+};
+
+enum MODAL_TYPES {
+  NONE,
+  NEW_RESOURCE,
+  CONFIRM_RESOURCE_DELETION,
 }

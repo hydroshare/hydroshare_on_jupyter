@@ -35,7 +35,7 @@ import {
 // TODO: Remove this hardcoding
 const BACKEND_URL = '//localhost:8080';
 
-function deleteToBackend<T>(endpoint: string, params: any): Promise<AxiosResponse<T>> {
+function deleteToBackend<T>(endpoint: string, params: any = undefined): Promise<AxiosResponse<T>> {
     return axios.delete<T>(BACKEND_URL + endpoint, {params});
 }
 
@@ -75,6 +75,27 @@ export function createNewFile(resource: IJupyterResource, filename: string): Thu
       console.error(e);
       dispatch(pushNotification('error', 'An error occurred when attempting to create the file.'));
     }
+  };
+}
+
+export function deleteResources(resources: IJupyterResource[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    let completedRequests = 0;
+    let successfulRequests = 0;
+    resources.forEach(resource => {
+      deleteToBackend('/resources/' + resource.id)
+        .then(() => ++successfulRequests)
+        .catch(error => {
+          console.error(error);
+          dispatch(pushNotification('error', `Could not delete resource ${resource.title}.`));
+        })
+        .finally(() => {
+          ++completedRequests;
+          if (completedRequests === resources.length && successfulRequests > 0) {
+            dispatch(getResources());
+          }
+        });
+    });
   };
 }
 
