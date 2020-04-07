@@ -1,9 +1,8 @@
 '''
 This file sets up the resource handler for working with resources in
-# spiffy: can we please make sure we use "HydroShare" and "JupyterHub"?
-hydroshare & jupyterhub.
+HydroShare & JupyterHub.
 
-# spiffy: we should probably put our full names in these files
+# TODO: put our full names in these files
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Email: vickymmcd@gmail.com
 '''
@@ -16,8 +15,7 @@ from getpass import getpass
 from pathlib import Path
 import base64
 
-# spiffy: Kyle has the same question. Also maybe we should be reading from a text file using open() instead of importing...
-# SPIFFY (Vicky) probably a good section to talk about cause it's funky..
+# TODO (Vicky): make this read stuff from a file instead of import & also move elsewhere
 # TODO: (Charlie's question) Why is this in this class, vs hs_server?
 # Prompt for username and password if not already saved
 try:
@@ -46,30 +44,27 @@ import os
 import json
 import shutil
 
-# spiffy: block comments should be triple " not triple ' and placed after class/def line (per PEP style guide)
-''' Class that defines a handler for working with all of a user's resources.
+
+class ResourceHandler:
+""" Class that defines a handler for working with all of a user's resources.
 This is where they will be able to delete a resource, create a new one, or
 just get the list of a user's resources in hydroshare or jupyterhub.
-'''
-class ResourceHandler:
-
+"""
     def __init__(self):
-        # spiffy: block comments should be triple " not triple ' (per PEP style guide)
+        # TODO: block comments should be triple " not triple ' (per PEP style guide)
         '''Makes an output folder for storing HS files locally, if none exists,
         and sets up authentication on hydroshare API.
         '''
         # authentication for using Hydroshare API
         auth = HydroShareAuthBasic(username=username, password=password)
-        # spiffy: do we want to allow specifying the hostname as a parameter? This is potentially useful if people are
-        # running this on their own computers & HS instances
+        # TODO (Vicky): specify hostname as a parameter to this function
         self.hs = HydroShare(auth=auth, hostname='www.hydroshare.org')
         # Get path to this file's location
-        # spiffy: you could also do self.output_folder = None and then check if it's still None later
+        # TODO: get rid of path_set variable, you could also do self.output_folder = None and then check if it's still None later
         path_set = False
-        # spiffy: should be "is not None"
-        # spiffy: also, we may want to call it something that doesn't presume they're using JupyterHub. Once we figure
+        # TODO: also, we may want to call it something that doesn't presume they're using JupyterHub. Once we figure
         # out what we're calling this thing, maybe <name>_DATA_PATH? Like HS_SYNC_DATA_PATH
-        if os.getenv("JH_FOLDER_PATH") != None:
+        if os.getenv("JH_FOLDER_PATH") is not None:
             self.output_folder = os.environ.get("JH_FOLDER_PATH")
             path_set = True
             if not os.path.exists(self.output_folder):
