@@ -57,7 +57,7 @@ class Resource:
         """Creates a new file with the given name in JH
         """
         if filename is not None:
-            with open(self.path_prefix + filename, "w") as fp:
+            with open(self.path_prefix / filename, "w") as fp:
                 # SPIFFY (Vicky): seems a lil weird to have a pass in something final but maybe its finee...
                 # if you wanted you could write to the file here, but we just want to create it
                 pass

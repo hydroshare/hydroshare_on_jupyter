@@ -141,6 +141,9 @@ class FileHandlerJH(BaseRequestHandler):
         request_type = body.get("request_type")
         if request_type == "new_file":
             resource.create_file_JH(body.get("new_filename"))
+            self.write({
+                'success': True,
+            })
         else:
             # TODO: the format of this should be updated (the response code should also be something other than 200)
             self.write("Please specify valid request type for PUT")
@@ -156,6 +159,7 @@ class FileHandlerJH(BaseRequestHandler):
                 response = resource.upload_file_to_JH(info)
                 if response != True:
                     response_message = response
+        # TODO (Emily): I don't believe the cached copy of the files has been updated yet...
         jh_files = resource.get_files_JH()
         self.write({'response_message': response_message,
                     'JH_files': jh_files})
