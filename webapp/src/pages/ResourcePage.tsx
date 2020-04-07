@@ -5,6 +5,7 @@ import { push } from 'connected-react-router';
 
 import '../styles/ResourcePage.scss';
 
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import FileManager from "../components/FileManager";
 import NewFileModal from "../components/NewFileModal";
 import ResourceMetadata from '../components/ResourceMetadata';
@@ -14,6 +15,7 @@ import * as resourcesActions from '../store/actions/resources';
 import {
   createNewFile,
   copyFileOrFolder,
+  deleteResourceFilesOrFolders,
   moveFileOrFolder,
 } from '../store/async-actions';
 import {
@@ -50,6 +52,7 @@ const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
     createNewFile: (resource: IJupyterResource, filename: string) => dispatch(createNewFile(resource, filename)),
+    deleteResourceFilesOrFolders: (resource: IJupyterResource, paths: string[]) => dispatch(deleteResourceFilesOrFolders(resource, paths)),
     getFilesIfNeeded: (resource: IJupyterResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
     openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcePageActions.openFileInJupyterHub(resource, file)),
     copyFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
@@ -61,16 +64,31 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
 type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 type StateType = {
+  filesOrFoldersToConfirmDeleting: string[] | undefined
   modal: MODAL_TYPES,
 };
 
 class ResourcePage extends React.Component<PropsType, StateType> {
 
-  state = {
+  state: StateType = {
+    filesOrFoldersToConfirmDeleting: undefined,
     modal: MODAL_TYPES.NONE,
   };
 
   displayModal = (type: MODAL_TYPES) => this.setState({modal: type});
+
+  displayDeleteConfirmationModal = (paths: string[]) => this.setState({
+    modal: MODAL_TYPES.DELETE,
+    filesOrFoldersToConfirmDeleting: paths,
+  });
+
+  doDeleteSelectedFiles = () => {
+    this.props.deleteResourceFilesOrFolders(this.props.resource!, this.state.filesOrFoldersToConfirmDeleting!);
+    this.setState({
+      filesOrFoldersToConfirmDeleting: undefined,
+      modal: MODAL_TYPES.NONE,
+    });
+  };
 
   hideModal = () => this.setState({modal: MODAL_TYPES.NONE});
 
@@ -116,6 +134,13 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       case MODAL_TYPES.NEW:
         modal = <NewFileModal close={this.hideModal} submit={createNewFile}/>;
         break;
+      case MODAL_TYPES.DELETE:
+        modal = <DeleteConfirmationModal
+          close={this.hideModal}
+          submit={this.doDeleteSelectedFiles}
+          paths={this.state.filesOrFoldersToConfirmDeleting!}
+        />;
+        break;
     }
 
     return (
@@ -128,6 +153,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           copyFileOrFolder={copyFileOrFolder}
           moveFileOrFolder={moveFileOrFolder}
           promptCreateNewFileOrFolder={() => this.displayModal(MODAL_TYPES.NEW)}
+          promptDeleteFilesOrFolders={this.displayDeleteConfirmationModal}
         />
         {modal}
       </div>
@@ -139,6 +165,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
 enum MODAL_TYPES {
   NONE,
   NEW,
+  DELETE,
 }
 
 export default connect(
