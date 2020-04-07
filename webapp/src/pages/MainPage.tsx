@@ -8,6 +8,9 @@ import { ThunkDispatch } from "redux-thunk";
 import * as AppActions from '../store/actions/App';
 import * as resourcePageActions from '../store/actions/ResourcePage';
 import {
+  deleteResources,
+} from '../store/async-actions';
+import {
   IJupyterResource,
   IRootState,
   ICreateResourceRequest,
@@ -21,6 +24,7 @@ const mapStateToProps = ({ resources }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
+    deleteResources: (resources: IJupyterResource[]) => dispatch(deleteResources(resources)),
     viewResource: (resource: IJupyterResource) => dispatch(AppActions.viewResource(resource)),
     newResource: (newResource: ICreateResourceRequest) => dispatch(resourcePageActions.createNewResource(newResource))
   }
@@ -39,6 +43,7 @@ class MainPage extends React.Component<ReduxType, never>  {
       <div className="page resources">
         <ResourceList
           className="tile"
+          deleteResources={this.props.deleteResources}
           newResource={this.props.newResource}
           viewResource={this.handleViewResource}
           resources={this.props.resources}
