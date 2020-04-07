@@ -27,7 +27,7 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
                 </div>
                 <div className="info-group">
                     <span className="info-header">Last Modified</span>
-                    <p>{hydroShareResource.date_last_updated.format('MMM D, YYYY H:mm a')}</p>
+                    <p>{hydroShareResource.date_last_updated.format('MMM D, YYYY')}</p>
                 </div>
             </div>
             <div className="info-group">

@@ -128,7 +128,7 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
       const allResources = {};
       action.payload.forEach(jupyterHubResource => {
         if (jupyterHubResource.hydroShareResource) {
-          jupyterHubResource.hydroShareResource.date_last_updated = moment(jupyterHubResource.hydroShareResource.date_last_updated);
+          jupyterHubResource.hydroShareResource.date_last_updated = moment(jupyterHubResource.hydroShareResource.date_last_updated, 'MM-DD-YYYY');
         }
         allResources[jupyterHubResource.hydroShareResource.resource_id] = jupyterHubResource;
       });
