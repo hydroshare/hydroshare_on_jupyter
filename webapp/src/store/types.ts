@@ -69,17 +69,21 @@ export interface IResourcesState {
   searchTerm: string,
 }
 
-export interface IUserInfoData {
-  email: string
-  first_name: string
-  id: number
-  last_name: string
-  organization: string
-  title: string
-  username: string
-  zip: {
-    fire: string
+export interface IUserInfoDataResponse {
+  data: {
+    email: string
+    first_name: string
+    id: number
+    last_name: string
+    organization: string
+    title: string
+    username: string
+    zip: {
+      fire: string
+    }
   }
+  error?: IServerError
+  success: boolean
 }
 
 export interface IResourcesData {
@@ -139,11 +143,16 @@ export interface ICreateResourceRequest {
   privacy: string
 }
 
+export interface IServerError {
+  type: string
+  message: string
+}
+
 export interface IFileOperationsRequestResponse {
   failureCount: number
   results: [{
     success: boolean
-    error?: string
+    error?: IServerError
     message?: string
   }]
   successCount: number

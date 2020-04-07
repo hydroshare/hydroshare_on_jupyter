@@ -29,7 +29,7 @@ import {
   IJupyterResource,
   IResourceFilesData,
   IResourcesData,
-  IUserInfoData,
+  IUserInfoDataResponse,
 } from './types';
 
 // TODO: Remove this hardcoding
@@ -119,32 +119,30 @@ export function deleteResourceFilesOrFolders(resource: IJupyterResource, paths: 
 
 export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-      try {
-          const response = await getFromBackend<IUserInfoData>('/user');
-          const {
-              data: {
-                  email,
-                  id,
-                  first_name,
-                  last_name,
-                  organization,
-                  title,
-                  username,
-              }
-          } = response;
-          const userInfo = {
-              email,
-              id,
-              name: first_name + ' ' + last_name,
-              organization,
-              title,
-              username,
-          };
-          dispatch(setUserInfo(userInfo));
-      } catch (e) {
-          // TODO: Display an error message
-          console.error(e);
+    try {
+      const response = await getFromBackend<IUserInfoDataResponse>('/user');
+      const {
+        data,
+        error,
+      } = response.data;
+      if (error) {
+        console.error(error.type + ': ' + error.message);
+        dispatch(pushNotification('error', error.message));
+      } else {
+        const userInfo = {
+          email: data.email,
+          id: data.id,
+          name: data.first_name + ' ' + data.last_name,
+          organization: data.organization,
+          title: data.title,
+          username: data.username,
+        };
+        dispatch(setUserInfo(userInfo));
       }
+  } catch (e) {
+      console.error(e);
+      dispatch(pushNotification('error', 'Could not get user information from the server.'));
+    }
   }
 }
 
