@@ -6,11 +6,13 @@ import { push } from 'connected-react-router';
 import '../styles/ResourcePage.scss';
 
 import FileManager from "../components/FileManager";
+import NewFileModal from "../components/NewFileModal";
 import ResourceMetadata from '../components/ResourceMetadata';
 
 import * as resourcePageActions from '../store/actions/ResourcePage';
 import * as resourcesActions from '../store/actions/resources';
 import {
+  createNewFile,
   copyFileOrFolder,
   moveFileOrFolder,
 } from '../store/async-actions';
@@ -47,6 +49,7 @@ const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
+    createNewFile: (resource: IJupyterResource, filename: string) => dispatch(createNewFile(resource, filename)),
     getFilesIfNeeded: (resource: IJupyterResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
     openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcePageActions.openFileInJupyterHub(resource, file)),
     copyFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
@@ -57,7 +60,19 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
 
 type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
-class ResourcePage extends React.Component<PropsType, never> {
+type StateType = {
+  modal: MODAL_TYPES,
+};
+
+class ResourcePage extends React.Component<PropsType, StateType> {
+
+  state = {
+    modal: MODAL_TYPES.NONE,
+  };
+
+  displayModal = (type: MODAL_TYPES) => this.setState({modal: type});
+
+  hideModal = () => this.setState({modal: MODAL_TYPES.NONE});
 
   public render() {
     const {
@@ -88,11 +103,23 @@ class ResourcePage extends React.Component<PropsType, never> {
       this.props.moveFileOrFolder(resource, f, dest);
     };
 
+    const createNewFile = (filename: string) => {
+      this.props.createNewFile(resource, filename);
+      this.setState({modal: MODAL_TYPES.NONE});
+    };
+
     const openFile = (file: IFile) => this.props.openFile(resource, file);
+
+    let modal;
+
+    switch (this.state.modal) {
+      case MODAL_TYPES.NEW:
+        modal = <NewFileModal close={this.hideModal} submit={createNewFile}/>;
+        break;
+    }
 
     return (
       <div className="page resource-details">
-        {/*<a className="go-back" onClick={this.props.goBackToResources}>&lt; Back to resources</a>*/}
         <ResourceMetadata resource={resource} />
         <FileManager
           hydroShareResourceRootDir={resource.hydroShareResource.files}
@@ -100,11 +127,18 @@ class ResourcePage extends React.Component<PropsType, never> {
           openFile={openFile}
           copyFileOrFolder={copyFileOrFolder}
           moveFileOrFolder={moveFileOrFolder}
+          promptCreateNewFileOrFolder={() => this.displayModal(MODAL_TYPES.NEW)}
         />
+        {modal}
       </div>
     )
   }
 
+}
+
+enum MODAL_TYPES {
+  NONE,
+  NEW,
 }
 
 export default connect(

@@ -148,3 +148,7 @@ export interface IFileOperationsRequestResponse {
   }]
   successCount: number
 }
+
+export interface ICreateFileOrFolderRequestResponse {
+  success: boolean
+}

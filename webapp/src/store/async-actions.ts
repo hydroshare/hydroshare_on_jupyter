@@ -22,6 +22,7 @@ import {
     setUserInfo,
 } from './actions/user';
 import {
+  ICreateFileOrFolderRequestResponse,
   IFile,
   IFileOperationsRequestResponse,
   IFolder,
@@ -37,13 +38,40 @@ const BACKEND_URL = '//localhost:8080';
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
     return axios.get<T>(BACKEND_URL + endpoint);
 }
+
+function patchToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
+  return axios.patch<T>(BACKEND_URL + endpoint, data);
+}
 /*
+function postToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
+  return axios.post<T>(BACKEND_URL + endpoint, data);
+}
+*/
 function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
   return axios.put<T>(BACKEND_URL + endpoint, data);
 }
-*/
-function patchToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
-  return axios.patch<T>(BACKEND_URL + endpoint, data);
+
+export function createNewFile(resource: IJupyterResource, filename: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    try {
+      const data = {
+        request_type: 'new_file',
+        new_filename: filename,
+      };
+      const response = await putToBackend<ICreateFileOrFolderRequestResponse>(`/resources/${resource.id}/local-files`, data);
+      const {
+        success,
+      } = response.data;
+      if (success) {
+        dispatch(getResourceLocalFiles(resource));
+      } else {
+        // TODO: Display the error message (start by sending one from the server)
+      }
+    } catch (e) {
+      console.error(e);
+      dispatch(pushNotification('error', 'An error occurred when attempting to create the file.'));
+    }
+  };
 }
 
 export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {

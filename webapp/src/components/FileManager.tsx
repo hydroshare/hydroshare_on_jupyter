@@ -35,6 +35,7 @@ interface IFileManagerProps {
   copyFileOrFolder: (src: IFile, dest: IFolder) => any
   moveFileOrFolder: (src: IFile, dest: IFolder) => any
   openFile: (file: IFile) => any
+  promptCreateNewFileOrFolder: () => any
 }
 
 // For converting file paths back into IFiles and IFolders
@@ -148,7 +149,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
               type="text"
               value={filterByName}
             />
-            <button>New</button>
+            <button onClick={this.props.promptCreateNewFileOrFolder}>New</button>
             <button>Upload</button>
             <button>Delete</button>
           </div>
