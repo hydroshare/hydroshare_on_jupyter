@@ -1,4 +1,4 @@
-[//]: # (SPIFFY (Vicky) pretty sure this file is outdated - do we want to update or remove?)
+[//]: # (TODO: update this file - potentially make is describe the backend)
 
 # How to use the backend
 ## Running the server
