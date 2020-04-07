@@ -36,6 +36,7 @@ interface IFileManagerProps {
   moveFileOrFolder: (src: IFile, dest: IFolder) => any
   openFile: (file: IFile) => any
   promptCreateNewFileOrFolder: () => any
+  promptDeleteFilesOrFolders: (paths: string[]) => any
 }
 
 // For converting file paths back into IFiles and IFolders
@@ -114,10 +115,11 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
   setSelectedHydroShareFilesAndFolders = (items: Set<string>) => this.setState({selectedHydroShareFilesAndFolders: items});
   setSelectedLocalFilesAndFolders = (items: Set<string>) => this.setState({selectedLocalFilesAndFolders: items});
 
-  promptDeleteSelectedHydroShareFiles = () => {
-    console.log("Requested deletion of:");
-    console.log(Array.from(this.state.selectedHydroShareFilesAndFolders.values()));
-  };
+  promptDeleteSelectedHydroShareFiles = () =>
+    this.props.promptDeleteFilesOrFolders(Array.from(this.state.selectedHydroShareFilesAndFolders));
+
+  promptDeleteSelectedLocalFiles = () =>
+    this.props.promptDeleteFilesOrFolders(Array.from(this.state.selectedLocalFilesAndFolders));
 
   render() {
     const {
@@ -151,7 +153,11 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             />
             <button onClick={this.props.promptCreateNewFileOrFolder}>New</button>
             <button>Upload</button>
-            <button>Delete</button>
+            <button
+              onClick={this.promptDeleteSelectedLocalFiles}
+              disabled={this.state.selectedLocalFilesAndFolders.size === 0}>
+              Delete
+            </button>
           </div>
         </div>;
       jupyterHubFilePane =
@@ -198,7 +204,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
           onSelectedFilesAndFoldersChange={this.setSelectedHydroShareFilesAndFolders}
         />;
     }
-    ;
+
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
         <div className="FileManager content-row">

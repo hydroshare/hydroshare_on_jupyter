@@ -35,6 +35,10 @@ import {
 // TODO: Remove this hardcoding
 const BACKEND_URL = '//localhost:8080';
 
+function deleteToBackend<T>(endpoint: string, params: any): Promise<AxiosResponse<T>> {
+    return axios.delete<T>(BACKEND_URL + endpoint, {params});
+}
+
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
     return axios.get<T>(BACKEND_URL + endpoint);
 }
@@ -70,6 +74,45 @@ export function createNewFile(resource: IJupyterResource, filename: string): Thu
     } catch (e) {
       console.error(e);
       dispatch(pushNotification('error', 'An error occurred when attempting to create the file.'));
+    }
+  };
+}
+
+export function deleteResourceFilesOrFolders(resource: IJupyterResource, paths: string[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    let localFiles: string[] = [];
+    let hsFiles: string[] = [];
+    paths.forEach(p => {
+      let [prefix, pathRelRoot] = p.split(':');
+      if (prefix === 'local') {
+        localFiles.push(pathRelRoot);
+      } else if (prefix === 'hs') {
+        hsFiles.push(pathRelRoot);
+      }
+    });
+    if (localFiles.length > 0) {
+      deleteToBackend(`/resources/${resource.id}/local-files`, {
+        filepaths: localFiles,
+      })
+      .then(() => {
+        dispatch(getResourceLocalFiles(resource));
+      })
+      .catch((error) => {
+        console.error(error);
+        dispatch(pushNotification('error', 'Could not delete files in JupyterHub.'));
+      });
+    }
+    if (hsFiles.length > 0) {
+      deleteToBackend(`/resources/${resource.id}/hs-files`, {
+        filepaths: hsFiles,
+      })
+      .then(() => {
+        dispatch(getResourceHydroShareFiles(resource));
+      })
+      .catch((error) => {
+        console.error(error);
+        dispatch(pushNotification('error', 'Could not delete files in HydroShare.'));
+      });
     }
   };
 }

@@ -5,7 +5,7 @@ import '../styles/Modal.scss';
 interface IModalProps {
   cancelText?: string
   close: () => any
-  children: React.ReactElement
+  children: React.ReactNode
   title: string
   submit: () => any
   submitText?: string

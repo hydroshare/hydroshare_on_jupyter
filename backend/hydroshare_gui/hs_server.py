@@ -122,8 +122,7 @@ class FileHandlerJH(BaseRequestHandler):
         self.write({'rootDir': jh_files})
 
     def delete(self, res_id):
-        body = json.loads(self.request.body.decode('utf-8'))
-        filepaths = body.get("filepaths")
+        filepaths = self.get_argument("filepaths[]")
         if filepaths is not None:
             for filepath in filepaths:
                 resource = Resource(res_id, resource_handler)
@@ -176,8 +175,7 @@ class FileHandlerHS(BaseRequestHandler):
         self.write({'rootDir': root_dir})
 
     def delete(self, res_id):
-        body = json.loads(self.request.body.decode('utf-8'))
-        filepaths = body.get("filepaths")
+        filepaths = self.get_argument("filepaths[]")
         if filepaths is not None:
             resource = Resource(res_id, resource_handler)
             for filepath in filepaths:
