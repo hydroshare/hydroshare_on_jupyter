@@ -1,10 +1,10 @@
-'''
+"""
 This file sets up the local folder class for getting the files stored within
 the local jupyterhub folder and the size of that folder.
 
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Email: vickymmcd@gmail.com
-'''
+"""
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
@@ -16,8 +16,8 @@ from pathlib import *
 
 
 class LocalFolder:
-''' Class that defines a Local Folder so we can access attributes of it.
-'''
+    """ Class that defines a Local Folder so we can access attributes of it.
+    """
     def get_size(self, folderpath):
         """ Gets the size of the contents of a folder stored locally
         """

@@ -1,11 +1,11 @@
-'''
+"""
 This file sets up the resource handler for working with resources in
 HydroShare & JupyterHub.
 
 # TODO: put our full names in these files
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Email: vickymmcd@gmail.com
-'''
+"""
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
@@ -46,36 +46,33 @@ import shutil
 
 
 class ResourceHandler:
-""" Class that defines a handler for working with all of a user's resources.
-This is where they will be able to delete a resource, create a new one, or
-just get the list of a user's resources in hydroshare or jupyterhub.
-"""
+    """ Class that defines a handler for working with all of a user's resources.
+    This is where they will be able to delete a resource, create a new one, or
+    just get the list of a user's resources in hydroshare or jupyterhub.
+    """
     def __init__(self):
         # TODO: block comments should be triple " not triple ' (per PEP style guide)
-        '''Makes an output folder for storing HS files locally, if none exists,
+        """Makes an output folder for storing HS files locally, if none exists,
         and sets up authentication on hydroshare API.
-        '''
+        """
         # authentication for using Hydroshare API
         auth = HydroShareAuthBasic(username=username, password=password)
         # TODO (Vicky): specify hostname as a parameter to this function
         self.hs = HydroShare(auth=auth, hostname='www.hydroshare.org')
         # Get path to this file's location
-        # TODO: get rid of path_set variable, you could also do self.output_folder = None and then check if it's still None later
-        path_set = False
+        self.output_folder = None
         # TODO: also, we may want to call it something that doesn't presume they're using JupyterHub. Once we figure
         # out what we're calling this thing, maybe <name>_DATA_PATH? Like HS_SYNC_DATA_PATH
         if os.getenv("JH_FOLDER_PATH") is not None:
             self.output_folder = os.environ.get("JH_FOLDER_PATH")
-            path_set = True
             if not os.path.exists(self.output_folder):
-                # spiffy: prefer not using "JH" (maybe just "Invalid data path specified. Could not find directory."
+                # TODO: when you change env name, also make this msg not JH specific
                 print("Invalid JH folder path set, path does not exist.")
-                # spiffy: then set self.output_folder back to None
-                path_set = False
-        if not path_set:
+                self.output_folder = None
+        if self.output_folder is None:
             current_path = os.path.dirname(os.path.realpath(__file__))
             self.output_folder = current_path + "/hydroshare_gui/local_hs_resources"
-            # spiffy: prefer not using "JH"
+            # TODO: get rid of "JH" reference
             print("No valid JH folder path set, using default: " + self.output_folder)
             print("To set a different JH folder path, please set the JH_FOLDER_PATH environment variable.")
             # Make directory if it doesn't exist
@@ -84,9 +81,8 @@ just get the list of a user's resources in hydroshare or jupyterhub.
                 logging.info("Made {} folder for new resources".format(self.output_folder))
 
     def get_user_info(self):
-        # spiffy: probably should not abbreviate HydroShare in docstrings
-        '''Gets information about the user currently logged into HS
-        '''
+        """Gets information about the user currently logged into HydroShare
+        """
         user_info = None
         error = None
         try:
@@ -109,9 +105,9 @@ just get the list of a user's resources in hydroshare or jupyterhub.
         return error
 
     def get_local_JH_resources(self):
-        '''Gets dictionary of jupyterhub resources by resource id that are
+        """Gets dictionary of jupyterhub resources by resource id that are
         saved locally.
-        '''
+        """
         resource_folders = glob.glob(os.path.join(self.output_folder, '*'))
         # TODO (Emily): Use a filesystem-independent way of this
         mp_by_res_id = {}
@@ -123,13 +119,13 @@ just get the list of a user's resources in hydroshare or jupyterhub.
         return res_ids
 
     def get_list_of_user_resources(self):
-        '''Gets list of all the resources for the logged in user, including
+        """Gets list of all the resources for the logged in user, including
         those stored on hydroshare and those stored locally on jupyterhub
         and information about each one including whether HS ones are stored
         locally.
 
         Assumes there are no local resources that don't exist in HS
-        '''
+        """
         error = None
 
         resources = {}
@@ -191,13 +187,12 @@ just get the list of a user's resources in hydroshare or jupyterhub.
 
         # Type errors for resource_title and creators
         if not isinstance(resource_title, str):
-            # spiffy: should be whitespaces after all colons in strings (per PEP8 -- a linter helps with reminders)
-            error = {'type':'IncorrectType',
-                    'msg':'Resource title should be a string.'}
+            error = {'type': 'IncorrectType',
+                    'msg': 'Resource title should be a string.'}
             return resource_id, error
         if not isinstance(creators, list) or not all(isinstance(creator, str) for creator in creators):
-            error = {'type':'IncorrectType',
-                    'msg':'"Creators" object should be a list of strings.'}
+            error = {'type': 'IncorrectType',
+                    'msg': '"Creators" object should be a list of strings.'}
             return resource_id, error
 
         # Formatting creators for metadata['metadata']:
@@ -231,18 +226,15 @@ just get the list of a user's resources in hydroshare or jupyterhub.
                     'msg':'Unable to create resource.'}
         return resource_id, error
 
-    # spiffy: can we please get a docstring explaining what this function does?
+    # TODO: can we please get a docstring explaining what this function does?
     def copy_HS_resource(self, og_res_id):
         response = self.hs.resource(og_res_id).copy()
         new_id = response.content.decode("utf-8") # b'id'
 
         # TODO: before doing this should we rename any existing local version to have the new ID??
-        # SPIFFY (Emily) is_local is never used, so are these necessary?
-        # spiffy; is_local = new_id in self.local_res_ids also works (but do we even need is_local?)
-        if new_id in self.local_res_ids:
-            is_local = True
-        else:
-            is_local = False
+        # TODO (Vicky): vicky needs to actually do her task that involves copying an hs resource & linking
+        # it with existing local resource so is_local will probs be used when I do that!
+        is_local = new_id in self.local_res_ids
 
         # Change name to 'Copy of []'
         title = self.hs.getScienceMetadata(new_id)['title']

@@ -1,10 +1,10 @@
-'''
+"""
 This file sets up the remote folder class for getting the files stored within
 the remote hydroshare folder.
 
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Email: vickymmcd@gmail.com
-'''
+"""
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import hs_restclient
@@ -17,11 +17,11 @@ import pathlib
 
 # TODO (Vicky): rename remoteFolder -> HydroShareFolder
 class RemoteFolder:
-''' Class that defines a Remote Folder so we can access attributes of it.
-'''
+    """ Class that defines a Remote Folder so we can access attributes of it.
+    """
     def __init__(self, hs, res_id):
-        '''Authenticates Hydroshare & sets up class variables.
-        '''
+        """Authenticates Hydroshare & sets up class variables.
+        """
         self.res_id = res_id
         self.hs = hs
 
@@ -94,9 +94,9 @@ class RemoteFolder:
         return folder_time, folder_size, contents
 
     def rename_or_move_file(self, old_filepath, new_filepath):
-        '''Renames the hydroshare version of the file from old_filename to
+        """Renames the hydroshare version of the file from old_filename to
         new_filename by using the HS API.
-        '''
+        """
 
         options = {
                  "source_path": old_filepath,
@@ -110,7 +110,7 @@ class RemoteFolder:
         # TODO: Charlie, send message to frontend
         try:
             resource_id = self.hs.deleteResourceFile(self.res_id, filepath)
-        # spiffy: where does "exceptions" come from? My IDE isn't recognizing it. Doesn't it need to be imported?
+        # TODO: import expections? My IDE isn't recognizing it.
         except exceptions.HydroShareNotAuthorized:
             # print("Not authorized")
             logging.info("Not authorized to delete file in "+self.res_id)
