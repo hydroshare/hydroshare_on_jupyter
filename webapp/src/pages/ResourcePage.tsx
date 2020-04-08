@@ -154,6 +154,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           moveFileOrFolder={moveFileOrFolder}
           promptCreateNewFileOrFolder={() => this.displayModal(MODAL_TYPES.NEW)}
           promptDeleteFilesOrFolders={this.displayDeleteConfirmationModal}
+          resourceId={resource.id}
         />
         {modal}
       </div>
