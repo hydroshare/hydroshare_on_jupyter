@@ -4,9 +4,9 @@ import {
   Form,
 } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
-import { ICreateResourceRequest } from '../store/types';
+import { ICreateResourceRequest } from '../../store/types';
 
-import '../styles/NewResourceModal.scss';
+import '../../styles/NewResourceModal.scss';
 
 interface INewResourceModalProps {
     show: boolean
