@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import '../styles/Modal.scss';
+import '../../styles/Modal.scss';
 
 interface IModalProps {
   cancelText?: string

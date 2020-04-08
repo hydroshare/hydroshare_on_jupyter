@@ -1,5 +1,4 @@
 import * as React from 'react';
-// import ContextMenu from 'react-context-menu';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/ResourceList.scss';
@@ -8,9 +7,9 @@ import {
   IJupyterResource,
   SortByOptions,
 } from '../store/types';
-import Modal from "./Modal";
+import Modal from "./modals/Modal";
 
-import NewResourceModal from './NewResourceModal';
+import NewResourceModal from './modals/NewResourceModal';
 import { ICreateResourceRequest } from '../store/types';
 
 interface IResourceListProps {
@@ -165,7 +164,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       <div className={classNames.join(' ')}>
         <div className="ResourceList-header">
           <h2>My Resources</h2>
-          <span>Here is a list of your HydroShare resources. To open one, simply click on it.</span>
+          <span>Here is a list of your HydroShare resources. To open one, simply click on its name.</span>
         </div>
         <div className="actions-row">
           <input type="text" placeholder="Search"/>

@@ -6,8 +6,8 @@ import { push } from 'connected-react-router';
 import '../styles/ResourcePage.scss';
 
 import FileManager from "../components/FileManager";
-import Modal from "../components/Modal";
-import NewFileModal from "../components/NewFileModal";
+import Modal from "../components/modals/Modal";
+import NewFileModal from "../components/modals/NewFileModal";
 import ResourceMetadata from '../components/ResourceMetadata';
 
 import * as resourcePageActions from '../store/actions/ResourcePage';

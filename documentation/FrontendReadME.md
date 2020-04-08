@@ -19,9 +19,7 @@ A Typescript component has a state and props. [This blog post](https://codeburst
 
 Below is a quick description of each file and the components they define:
 
- - `FileList.tsx` displays the list of files in a resource. Converts the way the files are received from the backend into elements for the material table library (it's a 3rd party library that has a specific format for displaying items in a table. We're reconsidering using this library, just fyi)
- - `FilterBar.tsx` old file that contains search bar for resource page. Not currently in use
- - `FilterBarResource.tsx` filter bar for list page
+ - `FileManager.tsx` allows the user to drag and drop files between JupyterHub and HydroShare
  - `Header.tsx` header bar for page. Contains the image of CUAHSI logo as well as "welcome, x user"
  - `NewResourceModal.tsx` modal that pops up to create a new project
 
