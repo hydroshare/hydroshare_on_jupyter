@@ -259,35 +259,23 @@ class Resource:
         else:
             logging.info('Missing inputs for old and new filepath')
 
-    def delete_file_or_folder_from_JH(self, filepath):
+    def delete_file_or_folder_from_JH(self, item_path):
         """ Deletes a file or folder from the local filesystem.
-            :param filepath the full path to the file or folder on the local filesystem
-            :type filepath str | PosixPath
+            :param item_path the full path to the file or folder on the local filesystem
+            :type item_path str | PosixPath
         """
-        if isinstance(filepath, str):
-            filepath = Path(filepath)
+        # Remove any leading /
+        if item_path.startswith('/'):
+            item_path = item_path[1:]
 
-        if filepath.is_dir():
-            self.local_folder.delete_folder(filepath)
+        item_full_path = self.path_prefix / item_path
 
-            # check if after deleting this folder, the parent directory is empty
-            # if so this will delete that parent directory
-            # spiffy: if we're keeping this, we should explain why
-            # TODO: Do we really want to do this?
-            # SPIFFY (vicky): woa do we?
-            # SPIFFY (Emily) the reason we currently do this is to make the behavior consistent with HS
-            # but we could decide not to
-            if filepath.parent != self.path_prefix:
-                self.delete_JH_folder_if_empty(filepath.parent)
+        if item_full_path.is_dir():
+            self.local_folder.delete_folder(item_full_path)
+            return 'folder'
         else:
-            self.local_folder.delete_file(self.path_prefix+filepath)
-
-            # check if after deleting this file, the parent directory is empty
-            # if so this will delete that parent directory
-            # spiffy: if we're keeping this, we should explain why
-            # SPIFFY (Vicky) hmm
-            if "/" in filepath:
-                self.delete_JH_folder_if_empty(filepath.rsplit('/', 1)[0])
+            self.local_folder.delete_file(item_full_path)
+            return 'file'
 
     def delete_JH_folder_if_empty(self, filepath):
         """ deletes JH folder if it is empty
