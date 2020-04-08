@@ -37,6 +37,7 @@ interface IFileManagerProps {
   openFile: (file: IFile) => any
   promptCreateNewFileOrFolder: () => any
   promptDeleteFilesOrFolders: (paths: string[]) => any
+  resourceId: string
 }
 
 // For converting file paths back into IFiles and IFolders
@@ -173,6 +174,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     }
     let hydroShareFilePane;
     if (hydroShareResourceRootDir) {
+      const openInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resourceId}/`, '_blank');
       const header =
         <div>
           <div className="title-row">
@@ -192,6 +194,11 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
               onClick={this.promptDeleteSelectedHydroShareFiles}>
               Delete
             </button>
+          <button
+            onClick={openInHydroShare}
+            title="Open the page for this resource in HydroShare">
+            Open in HydroShare
+          </button>
           </div>
         </div>;
       hydroShareFilePane =

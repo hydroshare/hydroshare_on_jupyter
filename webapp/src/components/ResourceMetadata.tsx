@@ -13,11 +13,9 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
 
   public render() {
     const {
-      id,
       title,
       hydroShareResource,
     } = this.props.resource;
-    const hydroShareUrl = `https://www.hydroshare.org/resource/${id}/`;
     const hsResourceMeta = hydroShareResource ? (
         <div className="resource-info">
             <div className="info-wrapping">
@@ -41,7 +39,6 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
         <h1 className="title">{title}</h1>
         <div className="resource-meta-container">
           {hsResourceMeta}
-          <a className="btn btn-info" href={hydroShareUrl} title="Open the page for this resource in HydroShare" target="_blank">Locate in HydroShare</a>
         </div>
       </div>
     )
