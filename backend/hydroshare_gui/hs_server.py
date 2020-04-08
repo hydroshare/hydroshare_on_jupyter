@@ -55,31 +55,20 @@ class BundleHandler(BaseRequestHandler):
         self.render('bundle.js')
 
 
-class ResourcesHandler(BaseRequestHandler):
-    """ Class that handles geting a list of a user's resources (with metadata), creating
-     a new resource for that user, and deleting a resource """
+class ResourcesRootHandler(BaseRequestHandler):
+    """ Handles /resources. Gets a user's resources (with metadata) and creates new resources. """
+
+    def options(self):
+        # web browsers make an OPTIONS request to check what methods (line 31) are allowed at/for an endpoint.
+        # We just need to respond with the header set on line 31.
+        self.set_status(204)  # No content
+        self.finish()
 
     def get(self):
         resources, error = resource_handler.get_list_of_user_resources()
 
         self.write({'resources': resources,
                     'success': error is None,
-                    'error': error})
-
-    def delete(self):
-        success = False
-
-        body = json.loads(self.request.body.decode('utf-8'))
-        res_id = body.get("res_id")
-        if res_id is not None:
-            error = resource_handler.delete_resource_JH(res_id)
-            if not error:
-                success = True
-        else:
-            error = {'type':'MissingResourceID',
-                    'msg':'Please specify resource id to delete'}
-
-        self.write({'success': success,
                     'error': error})
 
     def post(self):
@@ -98,18 +87,35 @@ class ResourcesHandler(BaseRequestHandler):
         body = json.loads(self.request.body.decode('utf-8'))
         resource_title = body.get("resource title") # string
         creators = body.get("creators") # list of names (strings)
+        # TODO: Use this
+        privacy = body.get("privacy")  # Public or private
 
         if resource_title is not None and creators is not None:
             resource_id, error = resource_handler.create_HS_resource(resource_title, creators)
             if not error:
                 success = True
         else:
-            error = {'type':'MissingInput',
-                    'msg':'Please specify title and creators to make new resource'}
+            error = {
+                'type': 'MissingInput',
+                'message': 'Please specify title and creators to make a new resource.'
+            }
 
         self.write({'resource_id':resource_id,
                     'success':success,
                     'error': error})
+
+
+class ResourceHandler(BaseRequestHandler):
+    """ Handles resource-specific requests made to /resources/<resource_id> """
+
+    def delete(self, res_id):
+        local_del_error = resource_handler.delete_resource_JH(res_id)
+        # TODO: Delete the resource from HydroShare if the user owns it
+        if local_del_error:
+            self.set_status(500)
+        else:
+            self.set_status(200)
+        self.finish()
 
 
 class FileHandlerJH(BaseRequestHandler):
@@ -311,7 +317,8 @@ def make_app():
         (r"/", WebAppHandler),
         (r"/bundle.js", BundleHandler),
         (r"/user", UserInfoHandler),
-        (r"/resources", ResourcesHandler),
+        (r"/resources", ResourcesRootHandler),
+        (r"/resources/([^/]+)", ResourceHandler),
         (r"/resources/([^/]+)/hs-files", FileHandlerHS),
         (r"/resources/([^/]+)/local-files", FileHandlerJH),
         (r"/resources/([^/]+)/move-copy-files", MoveCopyFiles),

@@ -1,9 +1,4 @@
-import { action } from 'typesafe-actions';
 import {
-    ResourcesActions,
-} from './action-names';
-import {
-    ICreateResourceRequest,
     IFile,
     IFolder,
     IJupyterResource,
@@ -21,12 +16,9 @@ export function openFileInJupyterHub(jupyterResource: IJupyterResource, file: IF
             const userName = state.user.username;
             const resourceId = jupyterResource.id;
             const filePath = `${file.name}.${file.type}`;
+            // TODO: Remove this hardcoded value
             const url = `https://jupyter.cuahsi.org/user/${userName}/notebooks/notebooks/data/${resourceId}/${resourceId}/data/contents/${filePath}`;
             window.open(url, '_blank');
         }
     };
-}
-
-export function createNewResource(newResource: ICreateResourceRequest) {
-  return action(ResourcesActions.NEW_RESOURCE, newResource);
 }

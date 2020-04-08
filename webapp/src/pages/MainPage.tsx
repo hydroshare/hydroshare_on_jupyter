@@ -6,8 +6,8 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from "redux-thunk";
 
 import * as AppActions from '../store/actions/App';
-import * as resourcePageActions from '../store/actions/ResourcePage';
 import {
+  createNewResource,
   deleteResources,
 } from '../store/async-actions';
 import {
@@ -26,7 +26,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
     deleteResources: (resources: IJupyterResource[]) => dispatch(deleteResources(resources)),
     viewResource: (resource: IJupyterResource) => dispatch(AppActions.viewResource(resource)),
-    newResource: (newResource: ICreateResourceRequest) => dispatch(resourcePageActions.createNewResource(newResource))
+    newResource: (newResource: ICreateResourceRequest) => dispatch(createNewResource(newResource))
   }
 };
 

@@ -42,7 +42,7 @@ export default class NewResourceModal extends React.Component<INewResourceModalP
             formValidated: true
         })
         this.props.newResource({
-            name: form.elements.formBasicName.value,
+            title: form.elements.formBasicName.value,
             privacy: form.elements.formBasicPrivacy.value
         })
         this.props.onHide()
