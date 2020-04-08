@@ -200,7 +200,7 @@ type RDCModalProps = {
 
 const ResourceDeleteConfirmationModal: React.FC<RDCModalProps> = (props: RDCModalProps) => {
   return (
-    <Modal close={props.close} title="Confirm Deletion" submit={props.submit} isValid={true} submitText="Delete">
+    <Modal close={props.close} title="Confirm Deletion" submit={props.submit} isValid={true} submitText="Delete" isWarning={true}>
       <p>Are you sure you want to delete the following resources?</p>
       {props.resources.map(r => <p>{r.title}</p>)}
     </Modal>

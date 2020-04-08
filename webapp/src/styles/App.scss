@@ -43,6 +43,7 @@ button {
   align-items: center;
   cursor: pointer;
   display: flex;
+  min-height: 2em;
   transition: background-color 0.3s ease;
 
   &:hover:not(:disabled) {
@@ -52,6 +53,11 @@ button {
   &:disabled {
     background-color: #eeeeee;
     color: gray;
+  }
+
+  &.warn {
+    background-color: $red;
+    color: white;
   }
 }
 
