@@ -104,20 +104,16 @@ class RemoteFolder:
                           }
         self.hs.resource(self.res_id).functions.move_or_rename(options)
 
-
-    def delete_file(self, filepath):
-        """ deletes file in HS, if file is only item in directory, remove that parent directory"""
-        # TODO: Charlie, send message to frontend
+    def delete_file_or_folder(self, item_path):
+        """ Attempts to delete a file or folder in HydroShare. """
+        # First try deleting this as if it were a file
         try:
-            resource_id = self.hs.deleteResourceFile(self.res_id, filepath)
-        # TODO: import expections? My IDE isn't recognizing it.
-        except exceptions.HydroShareNotAuthorized:
-            # print("Not authorized")
-            logging.info("Not authorized to delete file in "+self.res_id)
-        except exceptions.HydroShareNotFound:
-            logging.info("{} does not exist in {}".format(filepath, self.res_id))
-        except:
-            logging.info("Unknown error while deleting file from "+self.res_id)
+            self.hs.deleteResourceFile(self.res_id, item_path)
+            return 'file'
+        except hs_restclient.exceptions.HydroShareNotFound:
+            # Either it's a folder (not a file) or it actually doesn't exist. Let's try assuming the former.
+            self.hs.deleteResourceFolder(self.res_id, item_path)
+            return 'folder'
 
     def delete_folder(self, filepath):
         """ deletes folder in HS, if folder is only item in directory, remove that parent directory"""
