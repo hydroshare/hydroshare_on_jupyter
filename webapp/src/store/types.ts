@@ -139,7 +139,7 @@ export enum FileOrFolderTypes {
 }
 
 export interface ICreateResourceRequest {
-  name: string,
+  title: string,
   privacy: string
 }
 
@@ -160,4 +160,9 @@ export interface IFileOperationsRequestResponse {
 
 export interface ICreateFileOrFolderRequestResponse {
   success: boolean
+}
+
+export interface ICreateResourceRequestResponse {
+  success: boolean
+  error?: IServerError
 }

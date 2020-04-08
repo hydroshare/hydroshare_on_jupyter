@@ -23,12 +23,15 @@ import {
 } from './actions/user';
 import {
   ICreateFileOrFolderRequestResponse,
+  ICreateResourceRequest,
+  ICreateResourceRequestResponse,
   IFile,
   IFileOperationsRequestResponse,
   IFolder,
   IJupyterResource,
   IResourceFilesData,
   IResourcesData,
+  IRootState,
   IUserInfoDataResponse,
 } from './types';
 
@@ -46,11 +49,11 @@ function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
 function patchToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
   return axios.patch<T>(BACKEND_URL + endpoint, data);
 }
-/*
+
 function postToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
   return axios.post<T>(BACKEND_URL + endpoint, data);
 }
-*/
+
 function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
   return axios.put<T>(BACKEND_URL + endpoint, data);
 }
@@ -70,6 +73,37 @@ export function createNewFile(resource: IJupyterResource, filename: string): Thu
         dispatch(getResourceLocalFiles(resource));
       } else {
         // TODO: Display the error message (start by sending one from the server)
+      }
+    } catch (e) {
+      console.error(e);
+      dispatch(pushNotification('error', 'An error occurred when attempting to create the file.'));
+    }
+  };
+}
+
+export function createNewResource(details: ICreateResourceRequest): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
+    const { user } = getState();
+    try {
+      const data = {
+        "resource title": details.title,
+        privacy: details.privacy,
+        creators: [user?.name],
+      };
+      const response = await postToBackend<ICreateResourceRequestResponse>(`/resources`, data);
+      const {
+        success,
+        error,
+      } = response.data;
+      if (success) {
+        dispatch(getResources());
+      } else {
+        if (error) {
+          console.error(error);
+          dispatch(pushNotification('error', error.message));
+        } else {
+          pushNotification('error', 'Could not create resource.');
+        }
       }
     } catch (e) {
       console.error(e);
