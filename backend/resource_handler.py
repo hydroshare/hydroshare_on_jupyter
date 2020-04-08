@@ -51,7 +51,6 @@ class ResourceHandler:
     just get the list of a user's resources in hydroshare or jupyterhub.
     """
     def __init__(self):
-        # TODO: block comments should be triple " not triple ' (per PEP style guide)
         """Makes an output folder for storing HS files locally, if none exists,
         and sets up authentication on hydroshare API.
         """
@@ -226,15 +225,20 @@ class ResourceHandler:
                     'msg':'Unable to create resource.'}
         return resource_id, error
 
-    # TODO: can we please get a docstring explaining what this function does?
+
     def copy_HS_resource(self, og_res_id):
+        """makes a copy of existing HS resource and links it to an existing local
+        resource (we then change the res id on that local resource)"""
         response = self.hs.resource(og_res_id).copy()
         new_id = response.content.decode("utf-8") # b'id'
 
-        # TODO: before doing this should we rename any existing local version to have the new ID??
-        # TODO (Vicky): vicky needs to actually do her task that involves copying an hs resource & linking
-        # it with existing local resource so is_local will probs be used when I do that!
-        is_local = new_id in self.local_res_ids
+        is_local = og_res_id in self.local_res_ids
+
+        # if a local version exists under the old resource ID, rename it to involve the new one
+        if is_local:
+            og_path = Path(self.output_folder) / og_res_id / og_res_id
+            new_path = Path(self.output_folder) / new_id / new_id
+            shutil.move(str(og_path), str(new_path))
 
         # Change name to 'Copy of []'
         title = self.hs.getScienceMetadata(new_id)['title']
