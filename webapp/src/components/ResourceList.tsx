@@ -1,3 +1,4 @@
+import {ChangeEvent} from "react";
 import * as React from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -113,17 +114,17 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     });
   };
 
-  public render() {
-    const {
-      resources,
-    } = this.props;
+  getFilteredResources = () => Object.values(this.props.resources).filter(r => r.title.toLowerCase().includes(this.state.filterBy.toLowerCase()));
 
+  filterTextChanged = (e: ChangeEvent<HTMLInputElement>) => this.setState({filterBy: e.target.value});
+
+  public render() {
     const {
       allResourcesSelected,
       selectedResources,
     } = this.state;
 
-    const rowElements = Object.values(resources).map(resource => (
+    const rowElements = this.getFilteredResources().map(resource => (
       <div className="table-row">
         <input
           type="checkbox"
@@ -167,7 +168,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           <span>Here is a list of your HydroShare resources. To open one, simply click on its name.</span>
         </div>
         <div className="actions-row">
-          <input type="text" placeholder="Search"/>
+          <input type="text" placeholder="Search" onChange={this.filterTextChanged}/>
           <button onClick={this.showNewResourceModal}><span>New Resource</span></button>
           <button
             disabled={selectedResources.size === 0}
