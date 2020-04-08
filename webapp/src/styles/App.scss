@@ -31,6 +31,34 @@ h2,
   font-size: 1.4rem;
 }
 
+button,
+input {
+  background: none;
+  border: $border-style;
+  border-radius: 0.25rem;
+
+}
+
+button {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  transition: background-color 0.3s ease;
+
+  &:hover:not(:disabled) {
+    background-color: #dedede;
+  }
+
+  &:disabled {
+    background-color: #eeeeee;
+    color: gray;
+  }
+}
+
+input[type="text"] {
+  padding: 0.25em 0.5em;
+}
+
 .page {
   width: 100%;
   max-width: $content-width;
@@ -42,8 +70,9 @@ h2,
 }
 
 .tile {
-  box-shadow: $drop-shadow;
   background-color: white;
+  box-shadow: $drop-shadow;
+  border-radius: 0.25rem;
 }
 
 .table {
@@ -56,46 +85,14 @@ h2,
     font-size: 0.8em;
   }
 
-  .input-row {
-    $row-border-style: 5px solid $hydroshare-blue;
-
-    background-color: $hydroshare-blue;
-    border-left: $row-border-style;
-    border-right: $row-border-style;
+  .actions-row {
+    border-bottom: $border-style;
+    border-top: $border-style;
     display: flex;
-    flex-direction: row;
-    font-size: 0.9em;
+    padding: 0.5em;
 
-    & > * {
-      padding: 0.5em 0.75em;
-    }
-
-    input[type="text"] {
-      border-top: $row-border-style;
-      border-right: none;
-      border-bottom: $row-border-style;
-      border-left: none;
-    }
-
-    button {
-      align-items: center;
-      border: none;
-      background: none;
-      cursor: pointer;
-      display: flex;
-      transition: background-color 0.3s ease;
-
-      &:hover:not(:disabled) {
-        background-color: darken($hydroshare-blue, 10);
-      }
-
-      &:disabled {
-        color: gray;
-      }
-
-      span {
-        color: white;
-      }
+    & > *:not(:first-child) {
+      margin-left: 0.5em;
     }
   }
 

@@ -167,7 +167,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           <h2>My Resources</h2>
           <span>Here is a list of your HydroShare resources. To open one, simply click on it.</span>
         </div>
-        <div className="input-row">
+        <div className="actions-row">
           <input type="text" placeholder="Search"/>
           <button onClick={this.showNewResourceModal}><span>New Resource</span></button>
           <button
