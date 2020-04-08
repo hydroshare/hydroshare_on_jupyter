@@ -38,8 +38,8 @@ import {
 // TODO: Remove this hardcoding
 const BACKEND_URL = '//localhost:8080';
 
-function deleteToBackend<T>(endpoint: string, params: any = undefined): Promise<AxiosResponse<T>> {
-    return axios.delete<T>(BACKEND_URL + endpoint, {params});
+function deleteToBackend<T>(endpoint: string, data: any = undefined): Promise<AxiosResponse<T>> {
+    return axios.delete<T>(BACKEND_URL + endpoint, {data});
 }
 
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
@@ -147,7 +147,7 @@ export function deleteResourceFilesOrFolders(resource: IJupyterResource, paths: 
     });
     if (localFiles.length > 0) {
       deleteToBackend(`/resources/${resource.id}/local-files`, {
-        filepaths: localFiles,
+        files: localFiles,
       })
       .then(() => {
         dispatch(getResourceLocalFiles(resource));
@@ -159,7 +159,7 @@ export function deleteResourceFilesOrFolders(resource: IJupyterResource, paths: 
     }
     if (hsFiles.length > 0) {
       deleteToBackend(`/resources/${resource.id}/hs-files`, {
-        filepaths: hsFiles,
+        files: hsFiles,
       })
       .then(() => {
         dispatch(getResourceHydroShareFiles(resource));

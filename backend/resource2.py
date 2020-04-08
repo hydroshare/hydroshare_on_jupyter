@@ -302,30 +302,9 @@ class Resource:
         """ is a file in JH """
         return path.isfile(filepath)
 
-    def delete_file_or_folder_from_HS(self, filepath):
+    def delete_file_or_folder_from_HS(self, item_path):
         """ deletes file or folder from HS """
-        # if file path does not contain file (ie: we want to delete folder)
-        if not isinstance(filepath, PosixPath):
-            filepath = Path(filepath)
-        # TODO (Emily) fix this function to make it cleaner
-        # FIXME: This will not work if the directory has a . in it (which is valid in UNIX)
-        # Check if there is a suffix/extension (indicating we're deleting a folder)
-        if filepath.suffix:
-            self.remote_folder.delete_folder(str(filepath)+"/")
-            # check if after deleting this folder, the parent directory is empty
-            # if so this will delete that parent directory
-            # TODO: Delete this or make it recursive and use pathlib
-            # TODO (Emily) figure out why below is commented & uncomment or remove
-            # if "/" in filepath:
-            #     self.delete_HS_folder_if_empty(filepath.split('/', 1)[0], filepath.rsplit('/', 1)[1])
-        else:
-            self.remote_folder.delete_file(filepath)
-            # check if after deleting this file, the parent directory is empty
-            # if so this will delete that parent directory
-            if "/" in filepath:
-                # TODO: can we get some comments explaining what this is doing? Maybe assign the output of rsplit to
-                # some temporary variables with helpful names
-                self.delete_HS_folder_if_empty(filepath.rsplit('/', 1)[0], filepath.rsplit('/', 1)[1].split(".")[0])
+        return self.remote_folder.delete_file_or_folder(item_path)
 
     def delete_HS_folder_if_empty(self, folderpath, acceptable_name):
         """ deletes folder from HS if it is empty
