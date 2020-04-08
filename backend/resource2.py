@@ -377,16 +377,16 @@ class Resource:
         return False
 
 
-    def overwrite_JH_with_file_from_HS(self, filepath):
+    def overwrite_JH_with_file_from_HS(self, filepath, dest_path):
         """ overwrites JH file with one from HS """
-        if self.is_file_or_folder_in_JH(filepath):
-            self.delete_file_or_folder_from_JH(filepath)
+        if self.is_file_or_folder_in_JH(dest_path):
+            self.delete_file_or_folder_from_JH(dest_path)
         if "/" in filepath:
-            # spiffy: ick rsplit. What is this doing?
-            outputPath = filepath.rsplit('/', 1)[0]
-            if self.is_file_or_folder_in_JH(outputPath) == False:
-                os.makedirs(str(self.path_prefix) + "/" + outputPath + "/")
-        self.remote_folder.download_file_to_JH(filepath, self.path_prefix)
+            # create local folders that lead to dest_path if they don't exist
+            output_path, filename = dest_path.rsplit('/', 1)
+            if self.is_file_or_folder_in_JH(output_path) == False:
+                os.makedirs(str(self.path_prefix) + "/" + output_path + "/")
+        self.remote_folder.download_file_to_JH(filepath, str(self.path_prefix) + "/" + dest_path)
         # SPIFFY (Vicky) prob shouldn't be calling an upon init thing? so maybe make an update function?
         self.JH_files = self.get_files_upon_init_JH()
 

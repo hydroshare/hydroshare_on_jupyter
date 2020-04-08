@@ -19,13 +19,17 @@
 
 `pip install notebook`
 
-5. Next, you'll need to modify the jupyter config file. Do this by opening it with your editor of choice (here I use gedit):
+5. Next, you'll need to generate the jupyter config file. You can do this by running this command:
+
+`jupyter notebook --generate-config`
+
+Now, you will need to modify the jupyter config file. You can do this by opening it with your editor of choice (here I use gedit):
 
 `gedit ~/.jupyter/jupyter_notebook_config.py`
 
-Find the line that begins with `c.NotebookApp.nbserver_extensions` and change it to `c.NotebookApp.nbserver_extensions = {'backend.hydroshare_gui': True}`
+Find the line that begins with `#c.NotebookApp.nbserver_extensions` and change it to `c.NotebookApp.nbserver_extensions = {'backend.hydroshare_gui': True}`
 
-6. Navigate to back to hydroshare_jupyter_gui and run the following:
+6. Navigate back to the hydroshare_jupyter_gui folder and run the following:
 
 [//]: # (TODO: make this persistent)
 

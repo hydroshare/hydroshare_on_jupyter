@@ -255,7 +255,7 @@ class MoveCopyFiles(BaseRequestHandler):
             elif src_fs == HS_PREFIX and dest_fs == LOCAL_PREFIX:  # Move/copy from HydroShare to the local filesystem
                 # Transfer the file regardless of if we're moving or copying
                 # TODO (Vicky): Support moving from one HS folder to a different one locally
-                resource.overwrite_JH_with_file_from_HS(src_path)
+                resource.overwrite_JH_with_file_from_HS(src_path, dest_path)
                 if method == MOVE:
                     # Delete the HS copy of the file
                     resource.delete_file_or_folder_from_HS(src_path)
