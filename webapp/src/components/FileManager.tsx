@@ -149,6 +149,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
               className="search"
               onChange={this.filterByNameChanged}
               placeholder="Filter"
+              title="Filter the files and folders by name"
               type="text"
               value={filterByName}
             />
@@ -156,7 +157,9 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             <button>Upload</button>
             <button
               onClick={this.promptDeleteSelectedLocalFiles}
-              disabled={this.state.selectedLocalFilesAndFolders.size === 0}>
+              disabled={this.state.selectedLocalFilesAndFolders.size === 0}
+              title="Delete the selected files and/or folders"
+            >
               Delete
             </button>
           </div>
@@ -186,12 +189,15 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
               className="search"
               onChange={this.filterByNameChanged}
               placeholder="Filter"
+              title="Filter the files and folders by name"
               type="text"
               value={filterByName}
             />
             <button
               disabled={this.state.selectedHydroShareFilesAndFolders.size === 0}
-              onClick={this.promptDeleteSelectedHydroShareFiles}>
+              onClick={this.promptDeleteSelectedHydroShareFiles}
+              title="Delete the selected files and/or folders"
+            >
               Delete
             </button>
           <button
