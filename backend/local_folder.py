@@ -82,13 +82,11 @@ class LocalFolder:
                 })
         return files2
 
-    def delete_file(self, filepath):
-        os.remove(filepath)
+    def delete_file(self, file_path):
+        os.remove(file_path)
 
-    def delete_folder(self, filepath):
-        if isinstance(filepath, PosixPath):
-            filepath = str(filepath)
-        shutil.rmtree(filepath)
+    def delete_folder(self, folder_path):
+        shutil.rmtree(str(folder_path))
 
     def create_folder(self, folderpath):
         """TODO (Emily): make a docstring for this function; check that it creates intermediate folders
