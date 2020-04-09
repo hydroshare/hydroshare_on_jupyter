@@ -65,9 +65,9 @@ class MetadataParser:
         return elem.text if elem is not None else None
 
 if __name__ == '__main__':
-    filepath = os.path.abspath('hydroshare_gui/local_hs_resources')
-    filepath = '/home/charlie/Documents/hydroshare-jupyter-gui/backend/hydroshare_gui/local_hs_resources/8b826c43f55043f583c85ae312a8894f/8b826c43f55043f583c85ae312a8894f/data/resourcemap.xml'
-    # filepath = '/home/charlie/Documents/hydroshare-jupyter-gui/backend/hydroshare_gui/local_hs_resources/8b826c43f55043f583c85ae312a8894f/8b826c43f55043f583c85ae312a8894f/tagmanifest-md5.txt'
+    filepath = os.path.abspath('local_hs_resources')
+    filepath = '/home/charlie/Documents/hydroshare-jupyter-gui/backend/hydroshare_jupyter_sync_pkg/local_hs_resources/8b826c43f55043f583c85ae312a8894f/8b826c43f55043f583c85ae312a8894f/data/resourcemap.xml'
+    # filepath = '/home/charlie/Documents/hydroshare-jupyter-gui/backend/hydroshare_jupyter_sync_pkg/local_hs_resources/8b826c43f55043f583c85ae312a8894f/8b826c43f55043f583c85ae312a8894f/tagmanifest-md5.txt'
     parser = MetadataParser(filepath)
     thing = parser.get_title()
     print(thing)

@@ -10,7 +10,6 @@ Email: vickymmcd@gmail.com
 # -*- coding: utf-8 -*-
 
 from hs_restclient import HydroShare, HydroShareAuthBasic
-from metadata_parser import MetadataParser
 from getpass import getpass
 from pathlib import Path
 import base64
@@ -43,7 +42,6 @@ except ModuleNotFoundError:
 import logging
 import glob
 import os
-import json
 import shutil
 
 
@@ -73,7 +71,7 @@ class ResourceHandler:
                 self.output_folder = None
         if self.output_folder is None:
             current_path = os.path.dirname(os.path.realpath(__file__))
-            self.output_folder = current_path + "/hydroshare_gui/local_hs_resources"
+            self.output_folder = current_path + "/local_hs_resources"
             # TODO: get rid of "JH" reference
             print("No valid JH folder path set, using default: " + self.output_folder)
             print("To set a different JH folder path, please set the JH_FOLDER_PATH environment variable.")

@@ -4,7 +4,7 @@ This file sets up tornado unit tests to test the hydroshare server
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Email: vickymmcd@gmail.com
 '''
-from hydroshare_gui.hs_server import make_app
+from hydroshare_jupyter_sync_pkg.hs_server import make_app
 from tornado.testing import AsyncHTTPTestCase, gen_test
 import unittest
 

@@ -8,7 +8,7 @@ $ gedit ~/.jupyter/jupyter_notebook_config.py
 
 becomes
 
-c.NotebookApp.nbserver_extensions = {'backend.hydroshare_gui': True}
+c.NotebookApp.nbserver_extensions = {'backend.hydroshare_jupyter_sync_pkg': True}
 
 go to backend folder
 sudo python3 setup.py install
@@ -20,7 +20,7 @@ attempted:
 - jupyter notebookin hydroshare-jupyter-gui
 - commenting out the c.NotebookApp line thing
 - jupyter serverextension enable --py backend
-- {'backend':True, 'hydroshare_gui':True}
+- {'backend':True, 'hydroshare_jupyter_sync_pkg':True}
 - changing setup.py tool
 - making sure jupyter notebook in python3
 - pip3 install jupyter_contrib_nbextensions && jupyter contrib nbextensions install

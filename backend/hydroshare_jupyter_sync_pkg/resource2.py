@@ -10,18 +10,15 @@ Email: vickymmcd@gmail.com
 # -*- coding: utf-8 -*-
 
 # TODO: remove unused imports
-from local_folder import LocalFolder
-from remote_folder import RemoteFolder
+from hydroshare_jupyter_sync_pkg.local_folder import LocalFolder
+from hydroshare_jupyter_sync_pkg.remote_folder import RemoteFolder
 import logging
 import os
 from os import path
 from dateutil.parser import parse
 import datetime
-import re
-import pathlib
 # note from Kyle for Charlie: you mean change to import pathlib as pl?
 from pathlib import * # TODO: Charlie, change to pl for readability
-import hs_restclient
 import shutil
 
 # TODO: we should probably rename all "JH" to "local" or just "jupyter" or something like that, since this is supposed
