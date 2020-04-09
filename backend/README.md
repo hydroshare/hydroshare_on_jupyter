@@ -1,26 +1,68 @@
-[//]: # (TODO: update this file - potentially make is describe the backend)
+# Setting up your environment
 
-# How to use the backend
-## Running the server
-### Setup
-1. Navigate to hydroshare-jupyter-gui/backend/hydroshare_jupyter_sync_pkg
-2. If there is a login.py file, make sure the username and password are correct. If not, create one with the lines:
+## Linux/UNIX
+
+Python 3 and pip3 are required to run the server code. If you don't have those for some reason, run the following in a
+terminal:
+
+```bash
+    $ sudo apt install python3 python3-pip
+```
+
+Once you have Python 3 and pip3, we need to install our dependencies and add a line to your `.bashrc` so your
+computer always knows where the server files are. To do that, run the following:
+
+```bash
+    $ cd backend
+    $ pip3 install -r requirements.txt
+    $ echo "export PYTHONPATH=$PYTHONPATH:$(pwd)" >> ~/.bashrc
+    $ source ~/.bashrc
+```
+
+Now we need to tell the Jupyter notebook server to load our extension. To do that, we need to edit the Jupyter notebook
+config file by running
+
+```bash
+    $ gedit ~/.jupyter/jupyter_notebook_config.py
+```
+
+If that file is empty, that means it hasn't been generated yet. So close it and run
+
+```bash
+    $ jupyter notebook --generate-config
+```
+
+Then run the prior command again. Once you have the (non-empty) text file open, go to line 263 (or thereabout) where it
+says `c.NotebookApp.nbserver_extensions = {}` (there may or may not already be anything in between the `{}`). In between
+the `{}`, add `'backend.hydroshare_jupyter_sync_pkg': True`. Assuming it was empty before, it should now look like
 
 ```
-username = "your_username"
-password = "your_password"
+    c.NotebookApp.nbserver_extensions = {'backend.hydroshare_jupyter_sync_pkg': True}
 ```
-3. TODO: Getting local resources
 
-### Actual running
+Once that is done, save the file (Ctrl+S) and close it.
 
-1. Navigate to hydroshare-jupyter-gui/backend/hydroshare_jupyter_sync_pkg
-2. Run `python3 hs_server.py` and open localhost:8080
-3. To run the server with logging output, specify the level of output when you
-run the file. For example, `python3 hs_server.py info`. The options for logging
-output level are debug, info, warning, error, or critical.
-4. Available things to check (see [here](https://github.com/kylecombes/hydroshare-jupyter-gui/blob/dev/documentation/API_response_formats.md))
+# Running the server
 
-## Important files (for code review)
-* hs_server.py -- runs the server with get and set functions
-* get_info.py -- obtains and formats information for the server (is imported by hs_server.py)
+In a terminal, run
+
+```bash
+    $ jupyter notebook
+```
+
+The Jupyter notebook server should start, and one of the lines of output should end with
+
+```bash
+    Successfully loaded hydroshare_jupyter_sync server extension.
+```
+
+Once you see that, go to **[TODO: Insert URL here]**.
+
+# For developers
+
+The file `backend/server.py` can also be run directly using Python (i.e. `$ python server.py`). This is especially
+useful if you are using a debugger and want to step through lines of code.
+
+This file is what runs the Tornado web server to handle all of the requests from the web app client. Documentation on
+the RESTful API endpoints available can be found
+[here](https://github.com/kylecombes/hydroshare-jupyter-gui/blob/dev/documentation/API_response_formats.md).
