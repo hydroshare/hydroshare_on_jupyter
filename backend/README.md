@@ -40,7 +40,9 @@ containing `jupyter` to your PATH:
     $ source ~/.bashrc
 ```
 
-Then run the prior command again. Once you have the (non-empty) text file open, go to line 263 (or thereabout) where it
+Then run `gedit ~/.jupyter/jupyter_notebook_config.py`
+
+Once you have the (non-empty) text file open, go to line 263 (or thereabout) where it
 says `c.NotebookApp.nbserver_extensions = {}` (there may or may not already be anything in between the `{}`). In between
 the `{}`, add `'backend.hydroshare_jupyter_sync': True`. Assuming it was empty before, it should now look like
 
