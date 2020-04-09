@@ -9,7 +9,7 @@ Email: vickymmcd@gmail.com
 # -*- coding: utf-8
 
 import socket
-from .hs_server import start_server, make_app
+from .server import start_server, make_app
 
 
 def _jupyter_server_extension_paths():

@@ -1,4 +1,6 @@
 """
+This file is not currently used, but it does contain code that reads from a resource's metadata.xml file.
+
 Extracts metadata from resourcemetadata.xml files (including 'None')
 Will error if given other filetype (and won't read directory)
 

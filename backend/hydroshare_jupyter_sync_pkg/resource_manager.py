@@ -45,7 +45,7 @@ import os
 import shutil
 
 
-class ResourceHandler:
+class ResourceManager:
     """ Class that defines a handler for working with all of a user's resources.
     This is where they will be able to delete a resource, create a new one, or
     just get the list of a user's resources in hydroshare or jupyterhub.
