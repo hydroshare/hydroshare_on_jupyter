@@ -13,8 +13,8 @@ import logging
 import sys
 import json
 from hs_restclient import exceptions as HSExceptions
-from resource2 import Resource, HS_PREFIX, LOCAL_PREFIX
-from resource_handler import ResourceHandler
+from hydroshare_jupyter_sync_pkg.resource2 import Resource, HS_PREFIX, LOCAL_PREFIX
+from hydroshare_jupyter_sync_pkg.resource_handler import ResourceHandler
 
 import tornado.ioloop
 import tornado.web

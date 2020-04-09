@@ -3,7 +3,7 @@
 # How to use the backend
 ## Running the server
 ### Setup
-1. Navigate to hydroshare-jupyter-gui/backend/hydroshare_gui
+1. Navigate to hydroshare-jupyter-gui/backend/hydroshare_jupyter_sync_pkg
 2. If there is a login.py file, make sure the username and password are correct. If not, create one with the lines:
 
 ```
@@ -14,7 +14,7 @@ password = "your_password"
 
 ### Actual running
 
-1. Navigate to hydroshare-jupyter-gui/backend/hydroshare_gui
+1. Navigate to hydroshare-jupyter-gui/backend/hydroshare_jupyter_sync_pkg
 2. Run `python3 hs_server.py` and open localhost:8080
 3. To run the server with logging output, specify the level of output when you
 run the file. For example, `python3 hs_server.py info`. The options for logging
