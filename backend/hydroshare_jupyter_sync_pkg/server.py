@@ -13,15 +13,15 @@ import logging
 import sys
 import json
 from hs_restclient import exceptions as HSExceptions
-from hydroshare_jupyter_sync_pkg.resource2 import Resource, HS_PREFIX, LOCAL_PREFIX
-from hydroshare_jupyter_sync_pkg.resource_handler import ResourceHandler
+from hydroshare_jupyter_sync_pkg.hydroshare_resource import Resource, HS_PREFIX, LOCAL_PREFIX
+from hydroshare_jupyter_sync_pkg.resource_manager import ResourceManager
 
 import tornado.ioloop
 import tornado.web
 import tornado.options
 
 # Global resource handler variable
-resource_handler = ResourceHandler()
+resource_handler = ResourceManager()
 
 
 class BaseRequestHandler(tornado.web.RequestHandler):
@@ -420,7 +420,7 @@ def make_app():
         (r"/bundle.js", BundleHandler),
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesRootHandler),
-        (r"/resources/([^/]+)", ResourceHandler),
+        (r"/resources/([^/]+)", ResourceManager),
         (r"/resources/([^/]+)/hs-files", ResourceHydroShareFilesRequestHandler),
         (r"/resources/([^/]+)/local-files", ResourceLocalFilesRequestHandler),
         (r"/resources/([^/]+)/move-copy-files", MoveCopyFiles),
