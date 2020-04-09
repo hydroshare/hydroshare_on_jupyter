@@ -8,41 +8,16 @@ Email: vickymmcd@gmail.com
 """
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-from hs_restclient import HydroShare, HydroShareAuthBasic
-from getpass import getpass
-from pathlib import Path
 import base64
-
-# TODO (Vicky): make this read stuff from a file instead of import & also move elsewhere
-# TODO: (Charlie's question) Why is this in this class, vs hs_server?
-# Prompt for username and password if not already saved
-try:
-    #TODO: do a security audit to see if this is valid
-    from login import username, password
-    password = base64.b64decode(password.decode("utf-8"))
-except ModuleNotFoundError:
-    username = input("Hydroshare Username: ")
-    password = getpass()
-    pw = (base64.b64encode(password.encode("utf-8")))
-
-    # TODO (Charlie): Check that password works
-
-    folder = Path(__file__).parent.absolute()
-
-    # TODO: pickle this information, just store as JSON
-    f = open(folder / "login.py", "w+")
-    f.write("username = \"" + username + "\"\n")
-    f.write("password = " + str(pw) + "\n")
-    f.close()
-
-# Check that user and password are valid
-
-
-import logging
 import glob
+import json
+import logging
 import os
 import shutil
+from getpass import getpass
+from pathlib import Path
+
+from hs_restclient import HydroShare, HydroShareAuthBasic
 
 
 class ResourceManager:
@@ -249,3 +224,65 @@ class ResourceManager:
         self.hs.updateScienceMetadata(new_id, {"title": new_title})
 
         return new_id
+
+
+def get_hydroshare_credentials():
+    username = None
+    password = None
+    # Attempt to read the config file from ~/.config/hydroshare_jupyter_sync/config.json
+    config_path = Path.home() / '.config' / 'hydroshare_jupyter_sync' / 'config.json'
+    if config_path.is_file():
+        try:
+            # Read from the file
+            with open(str(config_path), 'r') as f:
+                try:
+                    config = json.load(f)
+                    # Extract the user's HydroShare username and password
+                    username = config.get('u')
+                    password = config.get('p')
+                    if password:
+                        password = base64.b64decode(password).decode('utf-8')
+                    if username and password:
+                        logging.info('Successfully loaded HydroShare credentials from ' + str(config_path))
+                except json.JSONDecodeError:
+                    pass
+        except IOError:
+            logging.error('Found existing config file in ' + str(config_path) + ' but could not open it.')
+            return None, None
+
+    if username is None or password is None:
+        username = input("Please enter your HydroShare username: ")
+        password = getpass()
+
+        # Save the username and password
+        if not config_path.exists():
+            # Create the parent directory if it doesn't exist
+            if not config_path.parent.exists():
+                config_path.parent.mkdir(parents=True)
+        elif not config_path.is_file():  # A folder perhaps?
+            logging.error(str(config_path) + ' exists but is not a file.')
+            return None, None
+
+        # Read from the file
+        try:
+            with open(str(config_path), 'w+') as f:
+                if f:
+                    try:
+                        config = json.load(f)
+                    except json.JSONDecodeError:
+                        config = {}
+                else:
+                    config = {}
+                config['u'] = username
+                config['p'] = str(base64.b64encode(password.encode('utf-8')).decode('utf-8'))
+                json.dump(config, f)
+            logging.info('Successfully saved HydroShare credentials to ' + str(config_path))
+        except IOError:
+            logging.error('Could not write to config file ' + str(config_path))
+            return None, None
+
+    # TODO (Charlie): Check that password works
+    return username, password
+
+
+username, password = get_hydroshare_credentials()
