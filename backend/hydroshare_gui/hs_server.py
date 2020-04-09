@@ -12,6 +12,7 @@ import signal
 import logging
 import sys
 import json
+from hs_restclient import exceptions as HSExceptions
 from resource2 import Resource, HS_PREFIX, LOCAL_PREFIX
 from resource_handler import ResourceHandler
 
@@ -118,8 +119,9 @@ class ResourceHandler(BaseRequestHandler):
         self.finish()
 
 
-class FileHandlerJH(BaseRequestHandler):
-    """ Class that handles DELETEing file in JH """
+class ResourceLocalFilesRequestHandler(BaseRequestHandler):
+    """ Handles requests made to /resources/<res_id>/local-files to get, delete, and upload files to the local copy
+        of a resource. """
     # TODO (Vicky) header comment should be updated
 
     def get(self, res_id):
@@ -128,16 +130,56 @@ class FileHandlerJH(BaseRequestHandler):
         self.write({'rootDir': jh_files})
 
     def delete(self, res_id):
-        filepaths = self.get_argument("filepaths[]")
-        if filepaths is not None:
-            for filepath in filepaths:
-                resource = Resource(res_id, resource_handler)
-                # TODO: wrap this in try except and handle error messages for deletion (including path issue & permissions)
-                resource.delete_file_or_folder_from_JH(filepath)
-        else:
-            # TODO: the format of this should be updated (the response code should also be something other than 200)
-            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-            self.write("Please specify list of filepaths to delete")
+        body = json.loads(self.request.body.decode('utf-8'))
+        file_and_folder_paths = body.get('files')
+        if file_and_folder_paths is None:
+            self.set_status(400)  # Bad Request
+            self.write('Could not find "files" in request body.')
+            return
+
+        resource = Resource(res_id, resource_handler)
+        success_count = 0
+        failure_count = 0
+
+        # Keep track of the folders that have been deleted so we don't try to delete child files that have already
+        # been deleted
+        deleted_folders = []
+
+        results = []
+        for item_path in file_and_folder_paths:
+            # Remove any leading /
+            if item_path.startswith('/'):
+                item_path = item_path[1:]
+            try:
+                for deleted_folder in deleted_folders:
+                    # Check if this file is in a folder that was deleted (a slash is appended to ensure that a file in,
+                    # say, '/My data 2' is not skipped because '/My data' was deleted)
+                    if item_path.startswith(deleted_folder + '/'):
+                        # We can skip deleting this file because it was already deleted with its parent folder
+                        break
+                else:  # Only runs if the break statement above is never hit (yes, the indentation is right here)
+                    # Try to delete this item
+                    deleted_type = resource.delete_file_or_folder_from_JH(item_path)
+                    if deleted_type == 'folder':
+                        deleted_folders.append(item_path)
+                success_count += 1
+                results.append({'success': True})
+            except Exception as e:
+                logging.error(e)
+                results.append({
+                    'success': False,
+                    'error': {
+                        'type': 'UnknownError',
+                        'message': f'An unknown error occurred when attempting to delete {item_path}.'
+                    }
+                })
+                failure_count += 1
+
+        self.write({
+            'results': results,
+            'successCount': success_count,
+            'failureCount': failure_count,
+        })
 
     def put(self, res_id):
         """create new file in JH"""
@@ -170,7 +212,7 @@ class FileHandlerJH(BaseRequestHandler):
                     'JH_files': jh_files})
 
 
-class FileHandlerHS(BaseRequestHandler):
+class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
     """ Class that handles GETing list of a files that are in a user's HydroShare instance of a resource """
     # TODO (Vicky) Header comment should be updated - no creating or uploading on HS side
 
@@ -181,15 +223,75 @@ class FileHandlerHS(BaseRequestHandler):
         self.write({'rootDir': root_dir})
 
     def delete(self, res_id):
-        filepaths = self.get_argument("filepaths[]")
-        if filepaths is not None:
-            resource = Resource(res_id, resource_handler)
-            for filepath in filepaths:
-                resource.delete_file_or_folder_from_HS(filepath)
-                resource.update_hs_files()
-            self.write({"rootDir": resource.hs_files})
-        else:
-            self.write("Please specify list of filepaths to delete")
+        data = json.loads(self.request.body.decode('utf-8'))
+        file_and_folder_paths = data.get('files')
+        if file_and_folder_paths is None:
+            self.set_status(400)  # Bad Request
+            self.write('Could not find "files" in request body.')
+            return
+
+        resource = Resource(res_id, resource_handler)
+        success_count = 0
+        failure_count = 0
+
+        # Keep track of the folders that have been deleted so we don't try to delete child files that have already
+        # been deleted
+        deleted_folders = []
+
+        results = []
+        for item_path in file_and_folder_paths:
+            # Remove any leading /
+            if item_path.startswith('/'):
+                item_path = item_path[1:]
+            try:
+                for deleted_folder in deleted_folders:
+                    # Check if this file is in a folder that was deleted (a slash is appended to ensure that a file in,
+                    # say, '/My data 2' is not skipped because '/My data' was deleted)
+                    if item_path.startswith(deleted_folder + '/'):
+                        # We can skip deleting this file because it was already deleted with its parent folder
+                        break
+                else:  # Only runs if the break statement above is never hit (yes, the indentation is right here)
+                    # Try to delete this item
+                    deleted_type = resource.delete_file_or_folder_from_HS(item_path)
+                    if deleted_type == 'folder':
+                        deleted_folders.append(item_path)
+                success_count += 1
+                results.append({'success': True})
+            except HSExceptions.HydroShareNotFound:
+                results.append({
+                    'success': False,
+                    'error': {
+                        'type': 'NotFoundError',
+                        'message': f'Could not find {item_path} in HydroShare.',
+                    },
+                })
+            except HSExceptions.HydroShareNotAuthorized:
+                results.append({
+                    'success': False,
+                    'error': {
+                        'type': 'NotAuthorizedError',
+                        'message': f'Could not delete {item_path}. Do you have write access to the resource?',
+                    },
+                })
+            except Exception as e:
+                logging.error(e)
+                results.append({
+                    'success': False,
+                    'error': {
+                        'type': 'UnknownError',
+                        'message': f'An unknown error occurred when attempting to delete {item_path}.'
+                    }
+                })
+                failure_count += 1
+
+        if success_count > 0:
+            resource.update_hs_files()
+
+        self.write({
+            'results': results,
+            'successCount': success_count,
+            'failureCount': failure_count,
+        })
 
 
 MOVE = 'move'
@@ -319,8 +421,8 @@ def make_app():
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesRootHandler),
         (r"/resources/([^/]+)", ResourceHandler),
-        (r"/resources/([^/]+)/hs-files", FileHandlerHS),
-        (r"/resources/([^/]+)/local-files", FileHandlerJH),
+        (r"/resources/([^/]+)/hs-files", ResourceHydroShareFilesRequestHandler),
+        (r"/resources/([^/]+)/local-files", ResourceLocalFilesRequestHandler),
         (r"/resources/([^/]+)/move-copy-files", MoveCopyFiles),
     ])
 
