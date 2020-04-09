@@ -397,8 +397,7 @@ class UserInfoHandler(BaseRequestHandler):
                     'error': error})
 
 
-# TODO: should rename this once we have our name
-class HydroShareGUI(tornado.web.Application):
+class HydroShareJupyterSync(tornado.web.Application):
     """ Class for setting up the server & making sure it can exit cleanly """
 
     is_closing = False
@@ -415,7 +414,7 @@ class HydroShareGUI(tornado.web.Application):
 
 def make_app():
     """Returns an instance of the server with the appropriate endpoints"""
-    return HydroShareGUI([
+    return HydroShareJupyterSync([
         (r"/", WebAppHandler),
         (r"/bundle.js", BundleHandler),
         (r"/user", UserInfoHandler),
