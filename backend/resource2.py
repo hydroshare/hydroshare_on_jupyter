@@ -256,35 +256,23 @@ class Resource:
         else:
             logging.info('Missing inputs for old and new filepath')
 
-    def delete_file_or_folder_from_JH(self, filepath):
+    def delete_file_or_folder_from_JH(self, item_path):
         """ Deletes a file or folder from the local filesystem.
-            :param filepath the full path to the file or folder on the local filesystem
-            :type filepath str | PosixPath
+            :param item_path the full path to the file or folder on the local filesystem
+            :type item_path str | PosixPath
         """
-        if isinstance(filepath, str):
-            filepath = Path(filepath)
+        # Remove any leading /
+        if item_path.startswith('/'):
+            item_path = item_path[1:]
 
-        if filepath.is_dir():
-            self.local_folder.delete_folder(filepath)
+        item_full_path = self.path_prefix / item_path
 
-            # check if after deleting this folder, the parent directory is empty
-            # if so this will delete that parent directory
-            # spiffy: if we're keeping this, we should explain why
-            # TODO: Do we really want to do this?
-            # SPIFFY (vicky): woa do we?
-            # SPIFFY (Emily) the reason we currently do this is to make the behavior consistent with HS
-            # but we could decide not to
-            if filepath.parent != self.path_prefix:
-                self.delete_JH_folder_if_empty(filepath.parent)
+        if item_full_path.is_dir():
+            self.local_folder.delete_folder(item_full_path)
+            return 'folder'
         else:
-            self.local_folder.delete_file(self.path_prefix+filepath)
-
-            # check if after deleting this file, the parent directory is empty
-            # if so this will delete that parent directory
-            # spiffy: if we're keeping this, we should explain why
-            # SPIFFY (Vicky) hmm
-            if "/" in filepath:
-                self.delete_JH_folder_if_empty(filepath.rsplit('/', 1)[0])
+            self.local_folder.delete_file(item_full_path)
+            return 'file'
 
     def delete_JH_folder_if_empty(self, filepath):
         """ deletes JH folder if it is empty
@@ -299,30 +287,9 @@ class Resource:
         """ is a file in JH """
         return path.isfile(filepath)
 
-    def delete_file_or_folder_from_HS(self, filepath):
+    def delete_file_or_folder_from_HS(self, item_path):
         """ deletes file or folder from HS """
-        # if file path does not contain file (ie: we want to delete folder)
-        if not isinstance(filepath, PosixPath):
-            filepath = Path(filepath)
-        # TODO (Emily) fix this function to make it cleaner
-        # FIXME: This will not work if the directory has a . in it (which is valid in UNIX)
-        # Check if there is a suffix/extension (indicating we're deleting a folder)
-        if filepath.suffix:
-            self.remote_folder.delete_folder(str(filepath)+"/")
-            # check if after deleting this folder, the parent directory is empty
-            # if so this will delete that parent directory
-            # TODO: Delete this or make it recursive and use pathlib
-            # TODO (Emily) figure out why below is commented & uncomment or remove
-            # if "/" in filepath:
-            #     self.delete_HS_folder_if_empty(filepath.split('/', 1)[0], filepath.rsplit('/', 1)[1])
-        else:
-            self.remote_folder.delete_file(filepath)
-            # check if after deleting this file, the parent directory is empty
-            # if so this will delete that parent directory
-            if "/" in filepath:
-                # TODO: can we get some comments explaining what this is doing? Maybe assign the output of rsplit to
-                # some temporary variables with helpful names
-                self.delete_HS_folder_if_empty(filepath.rsplit('/', 1)[0], filepath.rsplit('/', 1)[1].split(".")[0])
+        return self.remote_folder.delete_file_or_folder(item_path)
 
     def delete_HS_folder_if_empty(self, folderpath, acceptable_name):
         """ deletes folder from HS if it is empty
