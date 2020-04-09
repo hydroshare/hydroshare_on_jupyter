@@ -102,6 +102,7 @@ class LocalFolder:
             print("Directory " , folderpath ,  " already exists")
 
     def upload_file_to_JH(self, file_info, file_destination):
+        #TODO: check that this does same thing as one in Resouce2
 
         filename, content_type = file_info["filename"], file_info["content_type"]
         body = file_info["body"]
