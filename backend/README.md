@@ -32,12 +32,20 @@ If that file is empty, that means it hasn't been generated yet. So close it and 
     $ jupyter notebook --generate-config
 ```
 
+If the above command fails because it cannot find the command `jupyter`, try running the following to add the directory
+containing `jupyter` to your PATH:
+
+```bash
+    $ echo "export PATH=$PATH:$HOME/.local/bin" >> ~/.bashrc
+    $ source ~/.bashrc
+```
+
 Then run the prior command again. Once you have the (non-empty) text file open, go to line 263 (or thereabout) where it
 says `c.NotebookApp.nbserver_extensions = {}` (there may or may not already be anything in between the `{}`). In between
-the `{}`, add `'backend.hydroshare_jupyter_sync_pkg': True`. Assuming it was empty before, it should now look like
+the `{}`, add `'backend.hydroshare_jupyter_sync': True`. Assuming it was empty before, it should now look like
 
 ```
-    c.NotebookApp.nbserver_extensions = {'backend.hydroshare_jupyter_sync_pkg': True}
+    c.NotebookApp.nbserver_extensions = {'hydroshare_jupyter_sync': True}
 ```
 
 Once that is done, save the file (Ctrl+S) and close it.
