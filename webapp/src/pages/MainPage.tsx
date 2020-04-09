@@ -3,45 +3,36 @@
 import * as React from 'react';
 import ResourceList from '../components/ResourceList';
 import { connect } from 'react-redux';
-import {
-  AnyAction,
-  Dispatch,
-} from 'redux';
+import { ThunkDispatch } from "redux-thunk";
 
 import * as AppActions from '../store/actions/App';
-import * as resourcePageActions from '../store/actions/ResourcePage';
+import {
+  createNewResource,
+  deleteResources,
+} from '../store/async-actions';
 import {
   IJupyterResource,
   IRootState,
-  SortByOptions,
   ICreateResourceRequest,
 } from '../store/types';
 
-const mapStateToProps = ({ resources, mainPage }: IRootState) => {
+const mapStateToProps = ({ resources }: IRootState) => {
   return {
     resources: resources.allResources,
-    searchTerm: mainPage.searchTerm,
-    sortByTerm: mainPage.sortBy,
   };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<AnyAction>) => {
+const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
+    deleteResources: (resources: IJupyterResource[]) => dispatch(deleteResources(resources)),
     viewResource: (resource: IJupyterResource) => dispatch(AppActions.viewResource(resource)),
-    searchBy: (searchTerm: string) => dispatch(resourcePageActions.searchBy(searchTerm)),
-    sortBy: (sortByTerm: SortByOptions) => dispatch(resourcePageActions.sortBy(sortByTerm)),
-    newResource: (newResource: ICreateResourceRequest) => dispatch(resourcePageActions.createNewResource(newResource))
+    newResource: (newResource: ICreateResourceRequest) => dispatch(createNewResource(newResource))
   }
 };
 
 type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 class MainPage extends React.Component<ReduxType, never>  {
-
-  public handleSearchChange = (event: any) => {
-    this.props.searchBy(event.target.value)
-  };
-
 
   public handleViewResource = (resource: IJupyterResource) => {
     this.props.viewResource(resource);
@@ -50,9 +41,13 @@ class MainPage extends React.Component<ReduxType, never>  {
   public render() {
     return (
       <div className="page resources">
-        <h1>Welcome to CUAHSI JupyterHub!</h1>
-        <p>Below is the list of resources you have saved in HydroShare and/or JupyterHub.</p>
-        <ResourceList newResource={this.props.newResource} viewResource={this.handleViewResource} resources={this.props.resources} searchTerm={this.props.searchTerm} sortByTerm={this.props.sortByTerm}/>
+        <ResourceList
+          className="tile"
+          deleteResources={this.props.deleteResources}
+          newResource={this.props.newResource}
+          viewResource={this.handleViewResource}
+          resources={this.props.resources}
+        />
       </div>
     )
   }

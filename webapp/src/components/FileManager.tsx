@@ -4,17 +4,14 @@
  * https://egghead.io/lessons/react-customise-the-appearance-of-an-app-during-a-drag-using-react-beautiful-dnd-snapshot-values
  */
 
+// SPIFFY (Emily) Again, frontend overall needs more commenting I think, especially bc HS devs
+// don't know anything about React
 import * as React from 'react';
-import { ReactElement } from 'react';
+import { ChangeEvent } from 'react';
 import {
   DragDropContext,
-  Draggable,
-  DraggableStateSnapshot,
-  Droppable,
-  DroppableStateSnapshot,
   DropResult,
 } from 'react-beautiful-dnd';
-import * as moment from "moment";
 
 import '../styles/FileManager.scss';
 
@@ -22,7 +19,15 @@ import {
   FileOrFolderTypes,
   IFile,
   IFolder,
-} from "../store/types";
+} from '../store/types';
+
+import FilePane from './FilePane';
+
+interface IFileManagerState {
+  filterByName: string
+  selectedLocalFilesAndFolders: Set<string>
+  selectedHydroShareFilesAndFolders: Set<string>
+}
 
 interface IFileManagerProps {
   hydroShareResourceRootDir: IFolder
@@ -30,17 +35,25 @@ interface IFileManagerProps {
   copyFileOrFolder: (src: IFile, dest: IFolder) => any
   moveFileOrFolder: (src: IFile, dest: IFolder) => any
   openFile: (file: IFile) => any
+  promptCreateNewFileOrFolder: () => any
+  promptDeleteFilesOrFolders: (paths: string[]) => any
+  resourceId: string
 }
 
+// For converting file paths back into IFiles and IFolders
 let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
 
-const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
-  const {
-    hydroShareResourceRootDir,
-    jupyterHubResourceRootDir,
-  } = props;
+export default class FileManager extends React.Component<IFileManagerProps, IFileManagerState> {
 
-  const onDragEnd = (result: DropResult) => {
+  state = {
+    allHydroShareFilesAndFoldersSelected: false,
+    allLocalFilesAndFoldersSelected: false,
+    filterByName: '',
+    selectedLocalFilesAndFolders: new Set<string>(),
+    selectedHydroShareFilesAndFolders: new Set<string>(),
+  };
+
+  onDragEnd = (result: DropResult) => {
     const {
       draggableId: srcURI,
       destination: dest,
@@ -67,212 +80,151 @@ const FileManager: React.FC<IFileManagerProps> = (props: IFileManagerProps) => {
     }
     if (srcPrefix === destPrefix) {
       // Move files within HydroShare or the local filesystem
-      props.moveFileOrFolder(srcFileOrFolder, destFolder);
+      this.props.moveFileOrFolder(srcFileOrFolder, destFolder);
     } else {
       // Copy files between HydroShare and the local filesystem
-      props.copyFileOrFolder(srcFileOrFolder, destFolder);
+      this.props.copyFileOrFolder(srcFileOrFolder, destFolder);
     }
     console.log(srcFileOrFolder);
     console.log(destFolder);
   };
 
-  // Clear the lookup table
-  fileOrFolderLookupTable.clear();
+  filterByNameChanged = (e: ChangeEvent<HTMLInputElement>) => this.setState({filterByName: e.target.value});
 
-  const hydroShareFilePane = props.hydroShareResourceRootDir ? (
-    <FilePane droppableId={hydroShareResourceRootDir.path} rootDir={hydroShareResourceRootDir} openFile={props.openFile}/>
-  ) : null;
-  const jupyterHubFilePane = props.jupyterHubResourceRootDir ? (
-    <FilePane droppableId={jupyterHubResourceRootDir.path} rootDir={jupyterHubResourceRootDir} openFile={props.openFile}/>
-  ) : null;
-  return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="FileManager">
-        {jupyterHubFilePane}
-        {hydroShareFilePane}
-      </div>
-    </DragDropContext>
-  );
-};
+  buildLookupTable = () => {
+    fileOrFolderLookupTable.clear();
 
-interface IFilePaneProps {
-  rootDir: IFolder
-  droppableId: string
-  openFile: (f: IFile) => any
-}
-
-const getDroppableStyles = (snapshot: DroppableStateSnapshot, nestLevel: number = 0) => {
-  return {
-    backgroundColor: snapshot.isDraggingOver ? 'red' : undefined,
-    transform: 'none !important',
+    if (this.props.jupyterHubResourceRootDir) {
+      fileOrFolderLookupTable.set(this.props.jupyterHubResourceRootDir.path, this.props.jupyterHubResourceRootDir);
+      this.addFolderContentsToLookupTable(this.props.jupyterHubResourceRootDir);
+    }
+    if (this.props.hydroShareResourceRootDir) {
+      fileOrFolderLookupTable.set(this.props.hydroShareResourceRootDir.path, this.props.hydroShareResourceRootDir);
+      this.addFolderContentsToLookupTable(this.props.hydroShareResourceRootDir);
+    }
   };
-};
 
-const getDraggableStyles = (snapshot: DraggableStateSnapshot, nestLevel: number = 0) => {
-  return {
-    transform: 'none !important',
+  addFolderContentsToLookupTable = (folder: IFolder) => {
+    folder.contents.forEach(item => {
+      fileOrFolderLookupTable.set(item.path, item);
+      if (item.type === FileOrFolderTypes.FOLDER) {
+        this.addFolderContentsToLookupTable(item as IFolder);
+      }
+    });
   };
-};
 
-const generateTableCell = (content: ReactElement | string | number | moment.Moment, nestLevel: number = 0, onClick: any = undefined) => {
-  const style = {
-    paddingLeft: `${nestLevel * 5}px`,
-  };
-  const tooltip = typeof content === 'string' ? content : undefined;
-  const classNames: Array<string> = [];
-  if (onClick) {
-    classNames.push('clickable');
-  }
-  if (moment.isMoment(content)) {
-    return (
-      <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
-        <span style={style}>{content.format('MMM D, YYYY')}</span>
-      </div>
-    );
-  } else {
-    return (
-      <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
-        <span style={style}>{content}</span>
-      </div>
-    );
-  }
-};
+  setSelectedHydroShareFilesAndFolders = (items: Set<string>) => this.setState({selectedHydroShareFilesAndFolders: items});
+  setSelectedLocalFilesAndFolders = (items: Set<string>) => this.setState({selectedLocalFilesAndFolders: items});
 
-const generateCheckBox = () => {
-  return (
-    <input type="checkbox" />
-  );
-};
+  promptDeleteSelectedHydroShareFiles = () =>
+    this.props.promptDeleteFilesOrFolders(Array.from(this.state.selectedHydroShareFilesAndFolders));
 
-const generateFolderElement = (folder: IFolder, index: number, openFile: (f: IFile) => any, nestLevel: number = 0) => {
-  fileOrFolderLookupTable.set(folder.path, folder);
-  const folderLineItem = (
-    <Draggable draggableId={folder.path} index={0} key={folder.path}>
-        {(provided, snapshot) => (
-          <div
-            className="table-row folder-element"
-            style={getDraggableStyles(snapshot, nestLevel)}
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-          >
-            {generateTableCell(generateCheckBox())}
-            {generateTableCell(folder.name, nestLevel)}
-            {generateTableCell('folder')}
-            {generateTableCell(getFormattedSizeString(folder.sizeBytes))}
-            {generateTableCell(folder.lastModified || 'Unknown')}
+  promptDeleteSelectedLocalFiles = () =>
+    this.props.promptDeleteFilesOrFolders(Array.from(this.state.selectedLocalFilesAndFolders));
+
+  render() {
+    const {
+      hydroShareResourceRootDir,
+      jupyterHubResourceRootDir,
+      openFile,
+    } = this.props;
+
+    const {
+      filterByName,
+    } = this.state;
+
+    // Rebuild the lookup table
+    this.buildLookupTable();
+
+    let jupyterHubFilePane;
+    if (jupyterHubResourceRootDir) {
+      const header =
+        <div>
+          <div className="title-row">
+            <span className="title">JupyterHub Files</span>
+            <img src="/JupyterHub-logo.png" alt="JupyterHub logo"/>
           </div>
-        )}
-      </Draggable>
-  );
+          <div className="actions-row">
+            <input
+              className="search"
+              onChange={this.filterByNameChanged}
+              placeholder="Filter"
+              title="Filter the files and folders by name"
+              type="text"
+              value={filterByName}
+            />
+            <button onClick={this.props.promptCreateNewFileOrFolder}>New</button>
+            <button>Upload</button>
+            <button
+              onClick={this.promptDeleteSelectedLocalFiles}
+              disabled={this.state.selectedLocalFilesAndFolders.size === 0}
+              title="Delete the selected files and/or folders"
+            >
+              Delete
+            </button>
+          </div>
+        </div>;
+      jupyterHubFilePane =
+        <FilePane
+          className="tile jupyterhub"
+          droppableId={jupyterHubResourceRootDir.path}
+          filterByName={filterByName}
+          rootDir={jupyterHubResourceRootDir}
+          header={header}
+          openFile={openFile}
+          onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}
+        />;
+    }
+    let hydroShareFilePane;
+    if (hydroShareResourceRootDir) {
+      const openInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resourceId}/`, '_blank');
+      const header =
+        <div>
+          <div className="title-row">
+            <span className="title">HydroShare Files</span>
+            <img src="/HydroShare-logo.png" alt="HydroShare logo"/>
+          </div>
+          <div className="actions-row">
+            <input
+              className="search"
+              onChange={this.filterByNameChanged}
+              placeholder="Filter"
+              title="Filter the files and folders by name"
+              type="text"
+              value={filterByName}
+            />
+            <button
+              disabled={this.state.selectedHydroShareFilesAndFolders.size === 0}
+              onClick={this.promptDeleteSelectedHydroShareFiles}
+              title="Delete the selected files and/or folders"
+            >
+              Delete
+            </button>
+          <button
+            onClick={openInHydroShare}
+            title="Open the page for this resource in HydroShare">
+            Open in HydroShare
+          </button>
+          </div>
+        </div>;
+      hydroShareFilePane =
+        <FilePane
+          className="tile hydroshare"
+          droppableId={hydroShareResourceRootDir.path}
+          filterByName={filterByName}
+          rootDir={hydroShareResourceRootDir}
+          header={header}
+          onSelectedFilesAndFoldersChange={this.setSelectedHydroShareFilesAndFolders}
+        />;
+    }
 
-  const folderContentsLineItems = folder.contents?.map((item, idx) =>
-    generateFileOrFolderElement(item, idx+1, openFile,nestLevel+1));
-
-  return (
-    <Droppable droppableId={folder.path} key={folder.path}>
-      {(provided, snapshot) => (
-      <div
-        style={getDroppableStyles(snapshot, nestLevel)}
-        ref={provided.innerRef}
-        {...provided.droppableProps}
-      >
-        {folderLineItem}
-        {folderContentsLineItems}
-        {provided.placeholder}
-      </div>
-    )}
-    </Droppable>
-  );
-};
-
-const generateFileElement = (item: IFile, index: number, openFile: (f: IFile) => any, nestLevel: number = 0) => {
-  fileOrFolderLookupTable.set(item.path, item);
-  const onClick = () => openFile(item);
-  return (
-    <Draggable draggableId={item.path} index={index} key={item.path}>
-      {(provided, snapshot) => (
-        <div
-          className="table-row file-element"
-          style={getDraggableStyles(snapshot, nestLevel)}
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-        >
-          {generateTableCell(generateCheckBox())}
-          {generateTableCell(item.name, nestLevel, onClick)}
-          {generateTableCell(item.type)}
-          {generateTableCell(getFormattedSizeString(item.sizeBytes))}
-          {generateTableCell(item.lastModified || 'Unknown')}
+    return (
+      <DragDropContext onDragEnd={this.onDragEnd}>
+        <div className="FileManager content-row">
+          {jupyterHubFilePane}
+          {hydroShareFilePane}
         </div>
-      )}
-    </Draggable>
-  );
-};
-
-const generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: (f: IFile) => IFile, nestLevel: number = 0) => {
-  if (item.type === FileOrFolderTypes.FOLDER) {
-    return generateFolderElement(item as IFolder, index, openFile, nestLevel);
-  } else {
-    return generateFileElement(item as IFile, index, openFile, nestLevel);
-  }
-};
-
-// TODO: Put in a different file?
-const FilePane: React.FC<IFilePaneProps> = (props: IFilePaneProps) => {
-  fileOrFolderLookupTable.set(props.rootDir.path, props.rootDir);
-
-  const onAllFilesCheckboxToggled = () => console.log("Checked!");
-
-  return (
-    <div className="FilePane">
-      <div className="FilePane-header table-row">
-        <span>
-          <input type="checkbox" onChange={onAllFilesCheckboxToggled} />
-        </span>
-        <span>Name</span>
-        <span>Type</span>
-        <span>Size</span>
-        <span>Last Modified</span>
-      </div>
-      <Droppable droppableId={props.droppableId}>
-        {(provided, snapshot) => (
-          <div
-            className="FilePane-files-container"
-            style={getDroppableStyles(snapshot)}
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-          >
-            {props.rootDir?.contents.map((item, idx) => generateFileOrFolderElement(item, idx, props.openFile))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </div>
-  );
-};
-
-const HUMAN_READABLE_FILE_SIZES = [
-  'B',
-  'KB',
-  'MB',
-  'GB',
-  'TB',
-  'YB',
-];
-
-// TODO: Write some unit tests
-const getFormattedSizeString = (sizeBytes: number): string => {
-  if (sizeBytes === undefined || sizeBytes === null) {
-    return 'Unknown';
-  }
-  if (sizeBytes === 0) {
-    return '0B';
-  }
-  const log10 = Math.log10(sizeBytes);
-  const labelIndex = Math.floor(log10 / 3);
-  const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, log10));
-  return `${sizeInHumanReadableUnits}${HUMAN_READABLE_FILE_SIZES[labelIndex]}`;
-};
-
-export default FileManager;
+      </DragDropContext>
+    );
+  };
+}

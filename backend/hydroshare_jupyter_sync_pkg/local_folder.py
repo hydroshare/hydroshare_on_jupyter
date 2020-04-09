@@ -1,22 +1,32 @@
-'''
+"""
 This file sets up the local folder class for getting the files stored within
 the local jupyterhub folder and the size of that folder.
 
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Email: vickymmcd@gmail.com
-'''
+"""
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import os
 import glob
 import shutil
+import datetime
 from pathlib import *
 
 
-''' Class that defines a Local Folder so we can access attributes of it.
-'''
 class LocalFolder:
+    """ Class that defines a Local Folder so we can access attributes of it.
+    """
+    def get_size(self, folderpath):
+        """ Gets the size of the contents of a folder stored locally
+        """
+        total_size = 0
+        for path, dirs, files in os.walk(folderpath):
+            for f in files:
+                fp = os.path.join(path, f)
+                total_size += os.path.getsize(fp)
+        return total_size
 
     def get_contents_recursive(self, folderpath, resource_data_root_dir, path_prefix):
         """Uses recursion to get & properly nest contents of folders stored locally
@@ -31,7 +41,7 @@ class LocalFolder:
         for filepath in files:
             # check contents recursively:
             folder_contents = self.get_contents_recursive(filepath, resource_data_root_dir, path_prefix)
-            
+
             # Populate info:
             dirpath = Path(filepath)
             filename = dirpath.stem
@@ -56,7 +66,8 @@ class LocalFolder:
                 files2.append({
                     "name": filename,
                     "path": path_prefix + path_rel_resource_root,
-                    "sizeBytes": dirpath.stat().st_size,
+                    "sizeBytes": self.get_size(filepath),
+                    "modifiedTime": str(datetime.datetime.fromtimestamp(dirpath.stat().st_mtime)),
                     "type": file_type,
                     "contents": folder_contents,
                 })
@@ -65,31 +76,37 @@ class LocalFolder:
                 files2.append({
                     "name": filename,
                     "path": path_prefix + path_rel_resource_root,
-                    "sizeBytes": dirpath.stat().st_size,
+                    "sizeBytes": os.path.getsize(filepath),
+                    "modifiedTime": str(datetime.datetime.fromtimestamp(dirpath.stat().st_mtime)),
                     "type": file_type,
                 })
         return files2
 
-    def delete_file(self, filepath):
-        os.remove(filepath)
+    def delete_file(self, file_path):
+        os.remove(file_path)
 
-    def delete_folder(self, filepath):
-        if isinstance(filepath, PosixPath):
-            filepath = str(filepath)
-        shutil.rmtree(filepath) 
+    def delete_folder(self, folder_path):
+        shutil.rmtree(str(folder_path))
 
     def create_folder(self, folderpath):
+        """TODO (Emily): make a docstring for this function; check that it creates intermediate folders
+        conclusion - it does!
+        """
         try:
             # Create target Directory
             os.makedirs(folderpath)
         except FileExistsError:
+            # TODO: catch this exception in hs_server once we actually call it there
             print("Directory " , folderpath ,  " already exists")
 
     def upload_file_to_JH(self, file_info, file_destination):
-        
+        #TODO: check that this does same thing as one in Resouce2
+
         filename, content_type = file_info["filename"], file_info["content_type"]
         body = file_info["body"]
+        # TODO: should probably deal with the case that the user doesn't have write permission in file_destination
+        # somewhere (either here or in the caller, wherever makes the most sense -- probably the caller if the
+        # exception raised here isn't helpful/descriptive)
         f = open(file_destination+filename, "wb")
         f.write(body)
         f.close()
-

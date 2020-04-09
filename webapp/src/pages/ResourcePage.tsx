@@ -6,12 +6,16 @@ import { push } from 'connected-react-router';
 import '../styles/ResourcePage.scss';
 
 import FileManager from "../components/FileManager";
-import ResourceMetadataDisplay from '../components/ResourceMetadataDisplay';
+import Modal from "../components/modals/Modal";
+import NewFileModal from "../components/modals/NewFileModal";
+import ResourceMetadata from '../components/ResourceMetadata';
 
 import * as resourcePageActions from '../store/actions/ResourcePage';
 import * as resourcesActions from '../store/actions/resources';
 import {
+  createNewFile,
   copyFileOrFolder,
+  deleteResourceFilesOrFolders,
   moveFileOrFolder,
 } from '../store/async-actions';
 import {
@@ -19,7 +23,6 @@ import {
   IFolder,
   IJupyterResource,
   IRootState,
-  SortByOptions,
 } from '../store/types';
 
 const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
@@ -48,27 +51,46 @@ const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
+    createNewFile: (resource: IJupyterResource, filename: string) => dispatch(createNewFile(resource, filename)),
+    deleteResourceFilesOrFolders: (resource: IJupyterResource, paths: string[]) => dispatch(deleteResourceFilesOrFolders(resource, paths)),
     getFilesIfNeeded: (resource: IJupyterResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
-    toggleSelectedAllLocal: (resource: IJupyterResource) => dispatch(resourcePageActions.toggleIsSelectedAllLocal(resource)),
-    toggleSelectedAllHydroShare: (resource: IJupyterResource) => dispatch(resourcePageActions.toggleIsSelectedAllHydroShare(resource)),
-    toggleSelectedOneLocal: (item: IFile | IFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneLocal(item)),
     openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcePageActions.openFileInJupyterHub(resource, file)),
-    toggleSelectedOneHydroShare: (item: IFile | IFolder, isSelected: boolean) => dispatch(resourcePageActions.toggleIsSelectedOneHydroShare(item)),
     copyFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
     moveFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
-    searchResourceBy: (searchTerm: string) => dispatch(resourcePageActions.searchResourceBy(searchTerm)),
-    sortBy: (sortByTerm: SortByOptions) => dispatch(resourcePageActions.sortBy(sortByTerm)),
     goBackToResources: () => dispatch(push('/')),
   }
 };
 
 type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
-class ResourcePage extends React.Component<PropsType, never> {
+type StateType = {
+  filesOrFoldersToConfirmDeleting: string[] | undefined
+  modal: MODAL_TYPES,
+};
 
-  public handleSearchChange = (event: any) => {
-    this.props.searchResourceBy(event.target.value)
-  }
+class ResourcePage extends React.Component<PropsType, StateType> {
+
+  state: StateType = {
+    filesOrFoldersToConfirmDeleting: undefined,
+    modal: MODAL_TYPES.NONE,
+  };
+
+  displayModal = (type: MODAL_TYPES) => this.setState({modal: type});
+
+  displayDeleteConfirmationModal = (paths: string[]) => this.setState({
+    modal: MODAL_TYPES.DELETE,
+    filesOrFoldersToConfirmDeleting: paths,
+  });
+
+  doDeleteSelectedFiles = () => {
+    this.props.deleteResourceFilesOrFolders(this.props.resource!, this.state.filesOrFoldersToConfirmDeleting!);
+    this.setState({
+      filesOrFoldersToConfirmDeleting: undefined,
+      modal: MODAL_TYPES.NONE,
+    });
+  };
+
+  hideModal = () => this.setState({modal: MODAL_TYPES.NONE});
 
   public render() {
     const {
@@ -99,24 +121,79 @@ class ResourcePage extends React.Component<PropsType, never> {
       this.props.moveFileOrFolder(resource, f, dest);
     };
 
+    const createNewFile = (filename: string) => {
+      this.props.createNewFile(resource, filename);
+      this.setState({modal: MODAL_TYPES.NONE});
+    };
+
     const openFile = (file: IFile) => this.props.openFile(resource, file);
+
+    let modal;
+
+    switch (this.state.modal) {
+      case MODAL_TYPES.NEW:
+        modal = <NewFileModal close={this.hideModal} submit={createNewFile}/>;
+        break;
+      case MODAL_TYPES.DELETE:
+        modal = <DeleteConfirmationModal
+          close={this.hideModal}
+          submit={this.doDeleteSelectedFiles}
+          paths={this.state.filesOrFoldersToConfirmDeleting!}
+        />;
+        break;
+    }
 
     return (
       <div className="page resource-details">
-        {/*<a className="go-back" onClick={this.props.goBackToResources}>&lt; Back to resources</a>*/}
-        <ResourceMetadataDisplay resource={resource} />
+        <ResourceMetadata resource={resource} />
         <FileManager
           hydroShareResourceRootDir={resource.hydroShareResource.files}
           jupyterHubResourceRootDir={resource.jupyterHubFiles}
           openFile={openFile}
           copyFileOrFolder={copyFileOrFolder}
           moveFileOrFolder={moveFileOrFolder}
+          promptCreateNewFileOrFolder={() => this.displayModal(MODAL_TYPES.NEW)}
+          promptDeleteFilesOrFolders={this.displayDeleteConfirmationModal}
+          resourceId={resource.id}
         />
+        {modal}
       </div>
     )
   }
 
 }
+
+enum MODAL_TYPES {
+  NONE,
+  NEW,
+  DELETE,
+}
+
+type DeleteConfirmationModalProps = {
+  close: () => any
+  submit: () => any
+  paths: string[]
+};
+
+const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (props: DeleteConfirmationModalProps) => {
+  // Remove the prefix (i.e. hs: or local:) from each path
+  const pathsCleaned = props.paths.map(p => p.split(':')[1]);
+  const count = pathsCleaned.length;
+  const message = `Are you sure you want to delete the following ${count} item${count === 1 ? '' : 's'}?`;
+  return (
+    <Modal
+      close={props.close}
+      title="Confirm Deletion"
+      submit={props.submit}
+      isValid={true}
+      submitText="Delete"
+      isWarning={true}
+    >
+      <p>{message}</p>
+      {pathsCleaned.map(p => <p>{p}</p>)}
+    </Modal>
+  );
+};
 
 export default connect(
   mapStateToProps,

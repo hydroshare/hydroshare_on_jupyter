@@ -4,9 +4,9 @@ import {
   Form,
 } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
-import { ICreateResourceRequest } from '../store/types';
+import { ICreateResourceRequest } from '../../store/types';
 
-import '../styles/NewResourceModal.scss';
+import '../../styles/NewResourceModal.scss';
 
 interface INewResourceModalProps {
     show: boolean
@@ -42,7 +42,7 @@ export default class NewResourceModal extends React.Component<INewResourceModalP
             formValidated: true
         })
         this.props.newResource({
-            name: form.elements.formBasicName.value,
+            title: form.elements.formBasicName.value,
             privacy: form.elements.formBasicPrivacy.value
         })
         this.props.onHide()

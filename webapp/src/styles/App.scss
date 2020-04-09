@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap');
+@import 'variables';
 @import 'Header';
 
 * {
@@ -10,9 +11,14 @@ html,
 body,
 #root,
 .App {
+  background-color: $background-color;
   margin: 0;
   width: 100%;
   height: 100%;
+}
+
+.clickable {
+  cursor: pointer;
 }
 
 h1,
@@ -25,8 +31,95 @@ h2,
   font-size: 1.4rem;
 }
 
+button,
+input {
+  background: none;
+  border: $border-style;
+  border-radius: 0.25rem;
+
+}
+
+button {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  min-height: 2em;
+  transition: background-color 0.3s ease;
+
+  &:hover:not(:disabled) {
+    background-color: #dedede;
+  }
+
+  &:disabled {
+    background-color: #eeeeee;
+    color: gray;
+  }
+
+  &.warn {
+    background-color: $red;
+    color: white;
+  }
+}
+
+input[type="text"] {
+  padding: 0.25em 0.5em;
+}
+
 .page {
   width: 100%;
-  max-width: 1140px;
-  margin: 0 auto;
+  max-width: $content-width;
+  margin: 2em auto 0;
+}
+
+.content-row {
+  margin-top: 3em;
+}
+
+.tile {
+  background-color: white;
+  box-shadow: $drop-shadow;
+  border-radius: 0.25rem;
+}
+
+.table {
+  $column-width-checkbox: 6%;
+  $column-width-other: 24%;
+  $column-padding: 2%;
+
+  .table-header {
+    display: inline-block;
+    font-size: 0.8em;
+  }
+
+  .actions-row {
+    border-bottom: $border-style;
+    border-top: $border-style;
+    display: flex;
+    padding: 0.5em;
+
+    & > *:not(:first-child) {
+      margin-left: 0.5em;
+    }
+  }
+
+  .table-row {
+    align-items: center;
+    border-bottom: $border-style;
+    display: flex;
+    white-space: nowrap;
+  }
+
+  .table-header > *,
+  .table-row > * {
+    display: inline-block;
+    overflow: hidden;
+    padding: 0.5em $column-padding 0.2em;
+    &:first-child {
+      width: $column-width-checkbox;
+    }
+    &:not(:first-child) {
+      width: $column-width-other;
+      border-left: $border-style;
+    }
+  }
 }

@@ -2,6 +2,7 @@ import * as moment from 'moment';
 import { AnyAction } from 'redux';
 
 import {
+  NotificationsActions,
   ResourcePageActions,
   ResourcesActions,
   UserInfoActions,
@@ -10,7 +11,7 @@ import {
   FileOrFolderTypes,
   IFile,
   IFolder,
-  IMainPageState,
+  INotificationsState,
   IResourcePageState,
   IResourcesState,
   IUserInfo,
@@ -18,9 +19,8 @@ import {
   UserActionTypes,
 } from './types';
 
-const initResourceListPageState: IMainPageState = {
-  allResourcesSelected: false,
-  searchTerm: '',
+const initNotificationsState: INotificationsState = {
+  current: [],
 };
 
 const initResourcePageState: IResourcePageState = {
@@ -37,6 +37,29 @@ const initResourcesState: IResourcesState = {
   resourceLocalFilesBeingFetched: new Set<string>(),
   resourceHydroShareFilesBeingFetched: new Set<string>(),
 };
+
+export function notificationsReducer(state: INotificationsState = initNotificationsState, action: AnyAction): INotificationsState {
+  let notifications = [...state.current];
+  switch (action.type) {
+    case NotificationsActions.DISMISS_NOTIFICATION:
+      notifications.splice(action.payload.idx, 1);
+      return {
+        ...state,
+        current: notifications,
+      };
+    case NotificationsActions.PUSH_NOTIFICATION:
+      notifications.push({
+        ...action.payload,
+        time: new Date(),
+      });
+      return {
+        ...state,
+        current: notifications,
+      };
+    default:
+      return state;
+  }
+}
 
 export function resourcePageReducer(state: IResourcePageState = initResourcePageState, action: AnyAction): IResourcePageState {
   let doMakeSelected;
@@ -99,29 +122,13 @@ function toggleFileOrFolderSelected(toggledItem: IFile | IFolder, selectedFilesA
   return recursivelySetSelectedState(selectedFilesAndFolders, toggledItem, !itemWasSelected);
 }
 
-export function mainPageReducer(state: IMainPageState = initResourceListPageState, action: AnyAction): IMainPageState {
-  switch (action.type) {
-    case ResourcePageActions.TOGGLE_IS_SELECTED_ALL_JUPYTER:
-      return {...state, allResourcesSelected: !state.allResourcesSelected};
-    case ResourcePageActions.SEARCH_BY:
-      return {...state, searchTerm: action.payload};
-    case ResourcePageActions.SORT_BY_NAME:
-      return {...state, sortBy: action.payload};
-    case ResourcesActions.NEW_RESOURCE:
-        return state;
-    default:
-      return state;
-  }
-}
-
-
 export function resourcesReducer(state: IResourcesState = initResourcesState, action: ResourcesActionTypes): IResourcesState {
   switch (action.type) {
     case ResourcesActions.SET_RESOURCES:
       const allResources = {};
       action.payload.forEach(jupyterHubResource => {
         if (jupyterHubResource.hydroShareResource) {
-          jupyterHubResource.hydroShareResource.date_last_updated = moment(jupyterHubResource.hydroShareResource.date_last_updated);
+          jupyterHubResource.hydroShareResource.date_last_updated = moment(jupyterHubResource.hydroShareResource.date_last_updated, 'MM-DD-YYYY');
         }
         allResources[jupyterHubResource.hydroShareResource.resource_id] = jupyterHubResource;
       });
