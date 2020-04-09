@@ -56,12 +56,9 @@ class Resource:
     def create_file_JH(self, filename):
         """Creates a new file with the given name in JH
         """
+        # TODO: TEST THIS! & add more error checking to this function, does it exist?
         if filename is not None:
-            with open(self.path_prefix / filename, "w") as fp:
-                # SPIFFY (Vicky): seems a lil weird to have a pass in something final but maybe its finee...
-                # if you wanted you could write to the file here, but we just want to create it
-                pass
-
+            (self.path_prefix / filename).touch()
 
     def save_resource_locally(self, unzip=True):
         """Saves the HS resource locally, if it does not already exist.

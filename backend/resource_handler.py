@@ -19,6 +19,7 @@ import base64
 # TODO: (Charlie's question) Why is this in this class, vs hs_server?
 # Prompt for username and password if not already saved
 try:
+    #TODO: do a security audit to see if this is valid
     from login import username, password
     password = base64.b64decode(password.decode("utf-8"))
 except ModuleNotFoundError:
@@ -30,6 +31,7 @@ except ModuleNotFoundError:
 
     folder = Path(__file__).parent.absolute()
 
+    # TODO: pickle this information, just store as JSON
     f = open(folder / "login.py", "w+")
     f.write("username = \"" + username + "\"\n")
     f.write("password = " + str(pw) + "\n")
@@ -62,6 +64,7 @@ class ResourceHandler:
         self.output_folder = None
         # TODO: also, we may want to call it something that doesn't presume they're using JupyterHub. Once we figure
         # out what we're calling this thing, maybe <name>_DATA_PATH? Like HS_SYNC_DATA_PATH
+        # TODO: get this from a project config file that is read once, maybe same as un/pw one
         if os.getenv("JH_FOLDER_PATH") is not None:
             self.output_folder = os.environ.get("JH_FOLDER_PATH")
             if not os.path.exists(self.output_folder):
@@ -118,6 +121,7 @@ class ResourceHandler:
         return res_ids
 
     def get_list_of_user_resources(self):
+        # TODO: speed this up
         """Gets list of all the resources for the logged in user, including
         those stored on hydroshare and those stored locally on jupyterhub
         and information about each one including whether HS ones are stored
@@ -227,6 +231,7 @@ class ResourceHandler:
 
 
     def copy_HS_resource(self, og_res_id):
+        # TODO: maybe do some user testing of this & see what ppl expect
         """makes a copy of existing HS resource and links it to an existing local
         resource (we then change the res id on that local resource)"""
         response = self.hs.resource(og_res_id).copy()
