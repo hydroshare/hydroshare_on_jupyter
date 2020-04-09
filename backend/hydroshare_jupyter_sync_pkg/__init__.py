@@ -19,7 +19,7 @@ def _jupyter_server_extension_paths():
 
 
 def load_jupyter_server_extension(nbapp):
-    nbapp.log.info("CUAHSI module enabled!")
+    nbapp.log.info("Successfully loaded hydroshare_jupyter_sync server extension.")
 
     app = make_app()
     start_server(app)
