@@ -1,53 +1,18 @@
-# Hydroshare Jupyter GUI Server Extension
+# Syncing Data Between HydroShare and Jupyter
+
+This graphical tool allows you to sync HydroShare resource files between HydroShare and your computer. It can be run
+on its own or as a Jupyter notebook extension. 
 
 ## Setup Instructions
-1. Clone the repository
-2. Navigate to hydroshare-jupyter-gui/backend and run these in the command line:
 
-`python setup.py install`
+The frontend is a React app, and it requires you have [Node](https://nodejs.org/en/download/) and a Node package manager
+(we recommend [Yarn](https://classic.yarnpkg.com/en/docs/install/)) installed. Please ensure that is the case and then
+ run the following in a terminal:
+ 
+ ```bash
+$ cd webapp
+$ yarn install
+$ yarn build
+```
 
-`pip install -r requirements.txt`
-
-3. [Install Node](https://nodejs.org/en/download/), then navigate to hydroshare-jupyter-gui/webapp and run the following in the command line:
-
-`yarn install`
-
-`yarn build`
-
-
-4. To install jupyter notebook, run the following:
-
-`pip install notebook`
-
-5. Next, you'll need to generate the jupyter config file. You can do this by running this command:
-
-`jupyter notebook --generate-config`
-
-Now, you will need to modify the jupyter config file. You can do this by opening it with your editor of choice (here I use gedit):
-
-`gedit ~/.jupyter/jupyter_notebook_config.py`
-
-Find the line that begins with `#c.NotebookApp.nbserver_extensions` and change it to `c.NotebookApp.nbserver_extensions = {'backend.hydroshare_jupyter_sync': True}`
-
-6. Navigate back to the hydroshare_jupyter_gui folder and run the following:
-
-[//]: # (TODO: make this persistent)
-
-`export PYTHONPATH=$PYTHONPATH:$(pwd)/backend`
-
-`export PYTHONPATH=$PYTHONPATH:$(pwd)`
-
-7. Set the path of the folder where your JupyterHub files live on your computer by setting the JH_FOLDER_PATH environment variable. If you are on Ubuntu, you can do this by opening up your `/etc/environment` file and adding the following line:
-
-`JH_FOLDER_PATH="/home/user/my_jh_files"`
-
-Of course, replace "/home/user/my_jh_files" with the path to your JupyterHub files folder. To make sure this path takes effect, you should then log out and log back in (or restart your machine).
-
-
-8. Now run:
-
-`jupyter notebook`
-
-This will prompt you for your HydroShare username and password. Once entered correctly, you should see a message in the terminal that says "CUAHSI module enabled!"
-
-9. In your web browser, go to localhost:8080 and view the beautiful GUI!
+Once that is complete, please refer to [backend/README.md](https://github.com/kylecombes/hydroshare_jupyter_sync/tree/master/backend).
