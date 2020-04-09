@@ -1,3 +1,13 @@
+export enum MainPageActions {
+  SET_SELECTED_RESOURCES = 'MainPageActions/SET_SELECTED_RESOURCES',
+  SET_TABLE_SORT_BY = 'MainPageActions/SET_TABLE_SORT_BY',
+}
+
+export enum NotificationsActions {
+  DISMISS_NOTIFICATION = 'NotificationsActions/DISMISS_NOTIFICATION',
+  PUSH_NOTIFICATION = 'NotificationActions/PUSH_NOTIFICATION',
+}
+
 export enum ResourcePageActions {
   TOGGLE_IS_SELECTED_ALL_JUPYTER = 'ResourcePageActions/TOGGLE_IS_SELECTED_ALL_LOCAL',
   TOGGLE_IS_SELECTED_ALL_HYDROSHARE = 'ResourcePageActions/TOGGLE_IS_SELECTED_ALL_HYDROSHARE',
@@ -14,7 +24,6 @@ export enum ResourcesActions {
   SET_RESOURCES = 'ResourcesActions/SET_RESOURCES',
   SET_RESOURCE_LOCAL_FILES = 'ResourcesActions/SET_RESOURCE_LOCAL_FILES',
   SET_RESOURCE_HYDROSHARE_FILES = 'ResourcesActions/SET_RESOURCE_HYDROSHARE_FILES',
-  NEW_RESOURCE = 'ResourcesActions/NEW_RESOURCE',
 }
 
 export enum UserInfoActions {

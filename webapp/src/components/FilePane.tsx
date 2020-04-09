@@ -1,0 +1,431 @@
+import * as React from 'react';
+import { ReactElement } from 'react';
+import {
+  Draggable,
+  DraggableStateSnapshot,
+  Droppable,
+  DroppableStateSnapshot,
+} from 'react-beautiful-dnd';
+import * as moment from 'moment';
+
+import {
+  FileOrFolderTypes,
+  IFile,
+  IFolder,
+} from '../store/types';
+
+import '../styles/FilePane.scss';
+
+interface IFilePaneState {
+  allFilesAndFoldersSelected: boolean
+  expandedFolders: Set<string>
+  selectedFilesAndFolders: Set<string>
+  sortAscending: boolean
+  sortBy: SORT_BY_OPTIONS
+}
+
+interface IFilePaneProps {
+  className: string
+  rootDir: IFolder
+  droppableId: string
+  filterByName?: string
+  header?: ReactElement
+  openFile?: (f: IFile) => any
+  onSelectedFilesAndFoldersChange?: (items: Set<String>) => any
+}
+
+export default class FilePane extends React.Component<IFilePaneProps, IFilePaneState> {
+
+  state = {
+    allFilesAndFoldersSelected: false,
+    expandedFolders: new Set<string>(),
+    selectedFilesAndFolders: new Set<string>(),
+    sortAscending: true,
+    sortBy: SORT_BY_OPTIONS.NAME,
+  };
+
+  render() {
+    // SPIFFY (Emily) how do the diff classnames render? just curious
+    // maybe we could make this name more descriptive? like cssClassName or something
+    const className = ['FilePane', 'table'];
+    if (this.props.className) {
+      className.push(this.props.className);
+    }
+
+    let filesAndFolders: (IFile | IFolder)[];
+    if (this.props.rootDir) {
+      if (this.props.filterByName) {
+        filesAndFolders = this.filterFilesAndFolders(this.props.rootDir.contents, this.props.filterByName.toLowerCase());
+      } else {
+        filesAndFolders = this.props.rootDir.contents;
+      }
+      filesAndFolders = this.getFolderContentsSorted(filesAndFolders);
+    }
+
+    const sortOrder = this.state.sortAscending ? 'sort-ascending' : 'sort-descending';
+
+    return (
+      <div className={className.join(' ')}>
+        <div className="FilePane-header">
+          {this.props.header}
+        </div>
+        <Droppable droppableId={this.props.droppableId}>
+          {(provided, snapshot) => (
+            <div
+              className={this.getDroppableClasses(snapshot, 'FilePane-files-container')}
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              <div className="table-header table-row">
+                <span className="checkbox">
+                  <input
+                    checked={this.state.allFilesAndFoldersSelected}
+                    onChange={this.toggleAllFilesAndFoldersSelected}
+                    type="checkbox"
+                  />
+                </span>
+                <button
+                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.NAME ? sortOrder : '')}
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.NAME)}>
+                  Name
+                  {this.state.sortBy === SORT_BY_OPTIONS.NAME && sortTriangleSVG}
+                </button>
+                <button
+                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.TYPE ? sortOrder : '')}
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.TYPE)}>
+                  Type
+                  {this.state.sortBy === SORT_BY_OPTIONS.TYPE && sortTriangleSVG}
+                </button>
+                <button
+                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SIZE ? sortOrder : '')}
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}>
+                  Size
+                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE && sortTriangleSVG}
+                </button>
+                <button
+                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED ? sortOrder : '')}
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.LAST_MODIFIED)}>
+                  Last Modified
+                  {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && sortTriangleSVG}
+                </button>
+              </div>
+              {filesAndFolders?.map((item, idx) => this.generateFileOrFolderElement(item, idx, this.props.openFile))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </div>
+    );
+  };
+
+  filterFilesAndFolders = (items: (IFile | IFolder)[], filter: string): (IFile | IFolder)[] => {
+    let filteredItems: (IFile | IFolder)[] = [];
+    items.forEach(item => {
+      // Add the file or folder if the name matches the filter
+      if (item.name.toLowerCase().includes(filter)) {
+        filteredItems.push(item);
+      } else if (item.type === FileOrFolderTypes.FOLDER) {
+        // See if any of the folder's contents match
+        let contents = this.filterFilesAndFolders((item as IFolder).contents, filter);
+        if (contents.length > 0) {
+          // Since some of the contents match, add this folder, but only show the contents that match the filter
+          let filteredFolder = {...item, contents};
+          filteredItems.push(filteredFolder);
+          // TODO: Expand this folder
+        }
+      }
+    });
+    return filteredItems;
+  };
+
+  generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: ((f: IFile) => IFile) | undefined, nestLevel: number = 0) => {
+    if (item.type === FileOrFolderTypes.FOLDER) {
+      return this.generateFolderElement(item as IFolder, index, openFile, nestLevel);
+    } else {
+      return this.generateFileElement(item as IFile, index, openFile, nestLevel);
+    }
+  };
+
+  generateFileElement = (file: IFile, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
+    const onClick = openFile ? () => openFile(file) : undefined;
+    return (
+      <Draggable draggableId={file.path} index={index} key={file.path}>
+        {(provided, snapshot) => (
+          <div
+            className={this.getDraggableClasses(snapshot, 'table-row file-element')}
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+          >
+            {this.generateTableCell(this.generateCheckBox(file))}
+            {this.generateTableCell(file.name, nestLevel, onClick)}
+            {this.generateTableCell(file.type)}
+            {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes))}
+            {this.generateTableCell(file.lastModified || 'Unknown')}
+          </div>
+        )}
+      </Draggable>
+    );
+  };
+
+  generateFolderElement = (folder: IFolder, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
+    const folderLineItem = (
+      <Draggable draggableId={folder.path} index={0} key={folder.path}>
+        {(provided, snapshot) => (
+          <div
+            className={this.getDraggableClasses(snapshot, 'table-row folder-element')}
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+          >
+            {this.generateTableCell(this.generateCheckBox(folder))}
+            {this.generateFolderNameTableCell(folder, nestLevel)}
+            {this.generateTableCell('folder')}
+            {this.generateTableCell(this.getFormattedSizeString(folder.sizeBytes))}
+            {this.generateTableCell(folder.lastModified || 'Unknown')}
+          </div>
+        )}
+      </Draggable>
+    );
+
+    let folderContentsLineItems: ReactElement[];
+    if (folder.contents && this.state.expandedFolders.has(folder.path)) {
+      let contents = [...folder.contents];
+      folderContentsLineItems = this.getFolderContentsSorted(contents).map((item, idx) =>
+        this.generateFileOrFolderElement(item, idx + 1, openFile, nestLevel + 1));
+    }
+
+    return (
+      <Droppable droppableId={folder.path} key={folder.path}>
+        {(provided, snapshot) => (
+          <div
+            className={this.getDroppableClasses(snapshot)}
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+          >
+            {folderLineItem}
+            {folderContentsLineItems}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    );
+  };
+
+  generateTableCell = (content: ReactElement | string | number | moment.Moment, nestLevel: number = 0, onClick: any = undefined) => {
+    const style = {
+      paddingLeft: `${nestLevel * 7}px`,
+    };
+    const tooltip = typeof content === 'string' ? content : undefined;
+    const classNames: Array<string> = [];
+    if (onClick) {
+      classNames.push('clickable');
+    }
+    const text = moment.isMoment(content) ? content.format('MMM D, YYYY') : content;
+    return (
+      <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
+        <span style={style}>{text}</span>
+      </div>
+    );
+  };
+
+  generateFolderNameTableCell = (folder: IFolder, nestLevel: number = 0) => {
+    const style = {
+      paddingLeft: `${nestLevel * 7}px`,
+    };
+    const tooltip = folder.name;
+    const classNames = 'clickable ' + (this.state.expandedFolders.has(folder.path) ? 'expanded' : 'collapsed');
+    const onClick = () => this.toggleFolderExpanded(folder);
+    return (
+      <div title={tooltip} onClick={onClick} className={classNames}>
+        <span style={style}>
+          <div className="icon-container">
+            {sortTriangleSVG}
+          </div>
+          {folder.name}
+        </span>
+      </div>
+    );
+  };
+
+  generateCheckBox = (item: IFile | IFolder) => {
+    const onClick = () => this.toggleSingleFileOrFolderSelected(item);
+    return (
+      <input type="checkbox" onClick={onClick} checked={this.state.selectedFilesAndFolders.has(item.path)}/>
+    );
+  };
+
+  getDroppableClasses = (snapshot: DroppableStateSnapshot, classes: string = '') => {
+    if (snapshot.isDraggingOver) classes += ' draggable-over';
+    return classes;
+  };
+
+  getDraggableClasses = (snapshot: DraggableStateSnapshot, classes: string = '') => {
+    if (snapshot.isDragging) classes += ' dragging';
+    return classes;
+  };
+
+  getFolderContentsSorted = (items: (IFile | IFolder)[]) => items.sort((i1, i2) => {
+    const {
+      sortAscending,
+      sortBy,
+    } = this.state;
+    switch (sortBy) {
+      case SORT_BY_OPTIONS.NAME:
+        if (sortAscending) {
+          return this.getItemNameForSort(i1).localeCompare(this.getItemNameForSort(i2));
+        } else {
+          return this.getItemNameForSort(i2).localeCompare(this.getItemNameForSort(i1));
+        }
+      case SORT_BY_OPTIONS.TYPE:
+        if (sortAscending) {
+          return (i1.type || '').localeCompare(i2.type || '');
+        } else {
+          return (i2.type || '').localeCompare(i1.type || '');
+        }
+      case SORT_BY_OPTIONS.LAST_MODIFIED:
+        if (!i1.lastModified && !i2.lastModified) {
+          // Neither have a defined last modified time, so consider them equal
+          return 0;
+        }
+        if (!i1.lastModified) {
+          // Put i1 second if ascending, i2 if descending
+          return sortAscending ? -1 : 1;
+        }
+        if (!i2.lastModified) {
+          // Put i2 second if ascending, i1 if descending
+          return sortAscending ? 1 : -1;
+        }
+        if (sortAscending) {
+          return i1.lastModified?.diff(i2.lastModified)
+        } else {
+          return i2.lastModified?.diff(i1.lastModified)
+        }
+      case SORT_BY_OPTIONS.SIZE:
+        return (sortAscending ? 1 : -1) * ((i1.sizeBytes || -1) - (i2.sizeBytes || -1));
+      default: // Should never happen, but needed to satisfy TypeScript
+        return 0;
+    }
+  });
+
+  getItemNameForSort = (item: IFile | IFolder): string => {
+    if (item.type === FileOrFolderTypes.FOLDER) {
+      return item.name;
+    }
+    const file = item as IFile;
+    return file.type ? `${file.name}.${file.type}` : file.name;
+  };
+
+  setSortBy = (sortBy: SORT_BY_OPTIONS) => {
+    if (this.state.sortBy === sortBy) {
+      // Already sorted by this column, so reverse sort order
+      this.setState({sortAscending: !this.state.sortAscending});
+    } else {
+      // Otherwise sort by this column
+      this.setState({sortBy});
+    }
+  };
+
+  toggleAllFilesAndFoldersSelected = () => {
+    let selectedFilesAndFolders = new Set<string>();
+    if (!this.state.allFilesAndFoldersSelected) {
+      this.props.rootDir.contents.forEach(item => {
+        if (item.type === FileOrFolderTypes.FILE) {
+          selectedFilesAndFolders.add(item.path);
+        } else {
+          this.setFolderSelected(selectedFilesAndFolders, item as IFolder, true);
+        }
+      });
+    }
+    this.setState({
+      allFilesAndFoldersSelected: !this.state.allFilesAndFoldersSelected,
+      selectedFilesAndFolders: selectedFilesAndFolders,
+    });
+    if (this.props.onSelectedFilesAndFoldersChange) {
+      this.props.onSelectedFilesAndFoldersChange(selectedFilesAndFolders);
+    }
+  };
+
+  toggleFolderExpanded = (folder: IFolder) => {
+    let expandedFolders = new Set(this.state.expandedFolders);
+    if (expandedFolders.has(folder.path)) {
+      expandedFolders.delete(folder.path);
+    } else {
+      expandedFolders.add(folder.path);
+    }
+    this.setState({expandedFolders});
+  };
+
+  toggleSingleFileOrFolderSelected = (item: IFile | IFolder) => {
+    let selectedFilesAndFolders = new Set(this.state.selectedFilesAndFolders);
+    const makeSelected = !selectedFilesAndFolders.has(item.path);
+    if (makeSelected) {
+      selectedFilesAndFolders.add(item.path);
+    } else {
+      selectedFilesAndFolders.delete(item.path);
+    }
+    if (item.type === FileOrFolderTypes.FOLDER) {
+      this.setFolderSelected(selectedFilesAndFolders, item as IFolder, makeSelected);
+    }
+    this.setState({
+      allFilesAndFoldersSelected: false, // TODO: Get a count of the number of files to check against
+      selectedFilesAndFolders: selectedFilesAndFolders,
+    });
+    if (this.props.onSelectedFilesAndFoldersChange) {
+      this.props.onSelectedFilesAndFoldersChange(selectedFilesAndFolders);
+    }
+  };
+
+  setFolderSelected = (set: Set<string>, folder: IFolder, isSelected: boolean) => {
+    if (isSelected) {
+      set.add(folder.path);
+    } else {
+      set.delete(folder.path);
+    }
+    folder.contents?.forEach(item => {
+      if (item.type === FileOrFolderTypes.FOLDER) {
+        this.setFolderSelected(set, item as IFolder, isSelected);
+      } else {
+        if (isSelected) {
+          set.add(item.path);
+        } else {
+          set.delete(item.path);
+        }
+      }
+    });
+  };
+
+// TODO: Write some unit tests
+  getFormattedSizeString = (sizeBytes: number): string => {
+    if (sizeBytes === undefined || sizeBytes === null) {
+      return 'Unknown';
+    }
+    if (sizeBytes === 0) {
+      return '0B';
+    }
+    const labelIndex = Math.floor(Math.log10(sizeBytes) / 3);
+    const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, 3*labelIndex));
+    return `${sizeInHumanReadableUnits}${HUMAN_READABLE_FILE_SIZES[labelIndex]}`;
+  };
+
+}
+
+enum SORT_BY_OPTIONS {
+  NAME,
+  TYPE,
+  SIZE,
+  LAST_MODIFIED,
+}
+
+const HUMAN_READABLE_FILE_SIZES = [
+  'B',
+  'KB',
+  'MB',
+  'GB',
+  'TB',
+  'YB',
+];
+
+const sortTriangleSVG = <svg xmlns="http://www.w3.org/2000/svg" className="triangle" width="10" height="10" viewBox="0 0 2.646 2.646">
+    <path d="M0 0l1.323 2.646L2.646 0z"/>
+  </svg>;

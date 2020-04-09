@@ -1,0 +1,113 @@
+@import 'variables';
+
+.FilePane {
+  $gutter-width: 2.5%;
+  $triangle-color: #aaaaaa;
+
+  width: 50% - $gutter-width/2;
+  float: left;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: $border-style;
+  background-color: white;
+
+  .FilePane-header .title-row {
+    align-items: center;
+    border-bottom: $border-style;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6em 1em;
+
+    .title {
+      font-size: 1.2em;
+    }
+
+    img {
+      height: 1.5em;
+    }
+  }
+
+  .table-header {
+    user-select: none;
+    -moz-user-select: none;
+
+    button {
+      background-color: transparent;
+      border: none;
+      text-align: left;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #dddddd;
+      }
+    }
+
+    .sort-ascending,
+    .sort-descending {
+      align-items: center;
+      display: flex;
+      fill: $triangle-color;
+      justify-content: space-between;
+    }
+
+    .sort-descending {
+      svg.triangle {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .table-row {
+    border-bottom: $border-style;
+    display: flex;
+    white-space: nowrap;
+
+    &:not(.dragging) {
+      transform: none !important;
+    }
+
+    &.dragging {
+      background-color: white;
+      border: $border-style;
+    }
+
+    .icon-container {
+      display: inline-block;
+      margin-right: 0.5em;
+
+      svg {
+        fill: $triangle-color;
+      }
+    }
+
+    .collapsed svg {
+      transform: rotate(-90deg);
+    }
+  }
+
+  .FilePane-files-container {
+    flex-grow: 1;
+  }
+
+  $draggable-bg-lighten-amount: 30;
+  &.jupyterhub {
+    .draggable-over {
+      margin: -2px;
+      background-color: lighten($jupyter-orange, $draggable-bg-lighten-amount);
+      border: 2px solid $jupyter-orange;
+    }
+  }
+
+  &.hydroshare {
+    .draggable-over {
+      margin: -2px;
+      background-color: lighten($hydroshare-blue, $draggable-bg-lighten-amount);
+      border: 2px solid $hydroshare-blue;
+    }
+  }
+
+  .clickable {
+    cursor: pointer;
+  }
+}

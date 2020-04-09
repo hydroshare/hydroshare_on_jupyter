@@ -1,7 +1,8 @@
-@import 'colors';
+@import 'variables';
 
 .ResourceInfo {
   margin-bottom: 1em;
+  padding: $container-padding;
 
   .title {
     margin-bottom: 0.5em;

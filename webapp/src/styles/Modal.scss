@@ -1,0 +1,68 @@
+@import 'variables';
+
+.Modal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .content {
+    background-color: white;
+    border-radius: 0.25rem;
+    z-index: 1010;
+
+    .header {
+      align-items: center;
+      border-bottom: $border-style;
+      display: flex;
+      font-size: 1.4em;
+      justify-content: space-between;
+      padding: 0.5em 1em;
+
+      .title {
+        margin-top: 0.25em;
+      }
+
+      button.close {
+        border: none;
+        min-height: unset;
+        padding: 0;
+
+        &:hover {
+          background: none;
+
+          svg {
+            stroke: black;
+          }
+        }
+
+        svg {
+          height: 1em;
+          stroke: #444444;
+          transition: stroke 0.3s ease;
+        }
+      }
+    }
+
+    .body {
+      padding: 1em;
+    }
+
+    .footer {
+      border-top: $border-style;
+      display: flex;
+      justify-content: flex-end;
+      padding: 0.5em;
+
+      *:not(:last-child) {
+        margin-right: 0.5em;
+      }
+    }
+  }
+}

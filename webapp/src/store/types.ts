@@ -10,8 +10,12 @@ export type ResourcePageActionTypes = ActionType<typeof resourcePageActions>;
 export type ResourcesActionTypes = ActionType<typeof resourcesActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
 
+export interface INotificationsState {
+  current: INotification[]
+}
+
 export interface IRootState {
-  mainPage: IMainPageState
+  notifications: INotificationsState
   resources: IResourcesState
   resourcePage: IResourcePageState
   router: RouterState
@@ -25,12 +29,6 @@ export interface IResourcePageState {
   selectedHydroShareFilesAndFolders: Set<string>
   searchTerm: string
   sortBy?: SortByOptions
-}
-
-export interface IMainPageState {
-  allResourcesSelected: boolean
-  sortBy?: SortByOptions
-  searchTerm: string
 }
 
 export interface IFile {
@@ -54,6 +52,12 @@ export interface IJupyterResource {
   hydroShareResource: IHydroShareResourceInfo
 }
 
+export interface INotification {
+  message: string
+  time: Date
+  type: 'error' | 'warning'
+}
+
 // TODO: Rename this (and its associated reducer) to something better
 export interface IResourcesState {
   allResources: {
@@ -65,17 +69,21 @@ export interface IResourcesState {
   searchTerm: string,
 }
 
-export interface IUserInfoData {
-  email: string
-  first_name: string
-  id: number
-  last_name: string
-  organization: string
-  title: string
-  username: string
-  zip: {
-    fire: string
+export interface IUserInfoDataResponse {
+  data: {
+    email: string
+    first_name: string
+    id: number
+    last_name: string
+    organization: string
+    title: string
+    username: string
+    zip: {
+      fire: string
+    }
   }
+  error?: IServerError
+  success: boolean
 }
 
 export interface IResourcesData {
@@ -131,15 +139,30 @@ export enum FileOrFolderTypes {
 }
 
 export interface ICreateResourceRequest {
-  name: string,
+  title: string,
   privacy: string
+}
+
+export interface IServerError {
+  type: string
+  message: string
 }
 
 export interface IFileOperationsRequestResponse {
   failureCount: number
   results: [{
     success: boolean
-    error?: string
+    error?: IServerError
+    message?: string
   }]
   successCount: number
+}
+
+export interface ICreateFileOrFolderRequestResponse {
+  success: boolean
+}
+
+export interface ICreateResourceRequestResponse {
+  success: boolean
+  error?: IServerError
 }
