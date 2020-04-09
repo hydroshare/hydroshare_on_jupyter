@@ -10,8 +10,8 @@ Email: vickymmcd@gmail.com
 # -*- coding: utf-8 -*-
 
 # TODO: remove unused imports
-from hydroshare_jupyter_sync_pkg.local_folder import LocalFolder
-from hydroshare_jupyter_sync_pkg.hydroshare_folder import RemoteFolder
+from hydroshare_jupyter_sync.local_folder import LocalFolder
+from hydroshare_jupyter_sync.hydroshare_folder import RemoteFolder
 import logging
 import os
 from os import path

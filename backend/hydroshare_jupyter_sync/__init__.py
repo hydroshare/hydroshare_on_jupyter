@@ -14,7 +14,7 @@ from .server import start_server, make_app
 
 def _jupyter_server_extension_paths():
     return [{
-        "module": "hydroshare_jupyter_sync_pkg"
+        "module": "hydroshare_jupyter_sync"
     }]
 
 
