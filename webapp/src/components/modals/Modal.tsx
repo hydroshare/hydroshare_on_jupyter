@@ -59,6 +59,7 @@ const CloseXSVG = (
 type TextInputProps = {
   title: string
   onChange: (newValue: string) => any
+  pattern?: string
   placeholder?: string
   value: string
 };
@@ -71,7 +72,34 @@ export const TextInput: React.FC<TextInputProps> = (props: TextInputProps) => {
     <div className="TextInput group">
       <h2 className="title">{props.title}</h2>
       <div className="group-content">
-        <input type="text" value={props.value} onChange={textInputChange} placeholder={props.placeholder}/>
+        <input type="text" value={props.value} onChange={textInputChange} placeholder={props.placeholder} pattern={props.pattern}/>
+      </div>
+    </div>
+  )
+};
+
+type RadioInputProps = {
+  default?: string
+  choices: string[]
+  onChange: (newValue: string) => any
+  selected: string
+  title: string
+};
+
+export const RadioInput: React.FC<RadioInputProps> = (props: RadioInputProps) => {
+
+  const onSelectionChange = (e: React.ChangeEvent<HTMLInputElement>) => props.onChange(e.target.value);
+
+  return (
+    <div className="RadioInput group">
+      <h2 className="title">{props.title}</h2>
+      <div className="group-content">
+        {props.choices.map(c => (
+          <label>
+            <input onChange={onSelectionChange} type="radio" value={c} checked={props.selected === c}/>
+            {c}
+          </label>
+        ))}
       </div>
     </div>
   )

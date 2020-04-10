@@ -138,6 +138,12 @@ export enum FileOrFolderTypes {
   FILE = 'file',
 }
 
+export const NEW_FILE_OR_FOLDER_TYPES = {
+  FOLDER: 'Folder',
+  JUPYTER_NOTEBOOK: 'Jupyter Notebook (.ipynb)',
+  OTHER_FILE: 'Other File',
+};
+
 export interface ICreateResourceRequest {
   title: string,
   privacy: string
@@ -160,6 +166,7 @@ export interface IFileOperationsRequestResponse {
 
 export interface ICreateFileOrFolderRequestResponse {
   success: boolean
+  error?: IServerError
 }
 
 export interface ICreateResourceRequestResponse {

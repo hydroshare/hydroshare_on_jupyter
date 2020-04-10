@@ -13,7 +13,7 @@ import ResourceMetadata from '../components/ResourceMetadata';
 import * as resourcePageActions from '../store/actions/ResourcePage';
 import * as resourcesActions from '../store/actions/resources';
 import {
-  createNewFile,
+  createNewFileOrFolder,
   copyFileOrFolder,
   deleteResourceFilesOrFolders,
   moveFileOrFolder,
@@ -51,7 +51,7 @@ const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
-    createNewFile: (resource: IJupyterResource, filename: string) => dispatch(createNewFile(resource, filename)),
+    createNewFile: (resource: IJupyterResource, filename: string, type: string) => dispatch(createNewFileOrFolder(resource, filename, type)),
     deleteResourceFilesOrFolders: (resource: IJupyterResource, paths: string[]) => dispatch(deleteResourceFilesOrFolders(resource, paths)),
     getFilesIfNeeded: (resource: IJupyterResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
     openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcePageActions.openFileInJupyterHub(resource, file)),
@@ -121,8 +121,8 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       this.props.moveFileOrFolder(resource, f, dest);
     };
 
-    const createNewFile = (filename: string) => {
-      this.props.createNewFile(resource, filename);
+    const createNewFile = (filename: string, type: string) => {
+      this.props.createNewFile(resource, filename, type);
       this.setState({modal: MODAL_TYPES.NONE});
     };
 
