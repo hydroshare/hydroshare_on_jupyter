@@ -33,6 +33,7 @@ import {
   IResourcesData,
   IRootState,
   IUserInfoDataResponse,
+  NEW_FILE_OR_FOLDER_TYPES,
 } from './types';
 
 // TODO: Remove this hardcoding
@@ -58,25 +59,45 @@ function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>>
   return axios.put<T>(BACKEND_URL + endpoint, data);
 }
 
-export function createNewFile(resource: IJupyterResource, filename: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+export function createNewFileOrFolder(resource: IJupyterResource, name: string, type: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     try {
+      let itemType;
+      switch (type) {
+        case NEW_FILE_OR_FOLDER_TYPES.FOLDER:
+          itemType = 'folder';
+          break;
+        case NEW_FILE_OR_FOLDER_TYPES.JUPYTER_NOTEBOOK:
+          if (!name.endsWith('.ipynb')) {
+            name += '.ipynb';
+          }
+          itemType = 'file';
+          break;
+        case NEW_FILE_OR_FOLDER_TYPES.OTHER_FILE:
+          itemType = 'file';
+          break;
+      }
       const data = {
-        request_type: 'new_file',
-        new_filename: filename,
+        type: itemType,
+        name,
       };
       const response = await putToBackend<ICreateFileOrFolderRequestResponse>(`/resources/${resource.id}/local-files`, data);
       const {
         success,
+        error,
       } = response.data;
       if (success) {
         dispatch(getResourceLocalFiles(resource));
       } else {
-        // TODO: Display the error message (start by sending one from the server)
+        if (error && error.message) {
+          dispatch(pushNotification('error', error.message));
+        } else {
+          dispatch(pushNotification('error', 'An error occurred when attempting to create the file or folder.'));
+        }
       }
     } catch (e) {
       console.error(e);
-      dispatch(pushNotification('error', 'An error occurred when attempting to create the file.'));
+      dispatch(pushNotification('error', 'An error occurred when attempting to create the file or folder.'));
     }
   };
 }
