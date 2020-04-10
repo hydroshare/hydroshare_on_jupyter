@@ -1,4 +1,3 @@
-# TODO: rename this file! (maybe to hydroshare_resource or hs_resource?)
 """
 This file sets up the resource class for getting and updating files &
 information associated with a given resource in Jupyterhub & Hydroshare.
