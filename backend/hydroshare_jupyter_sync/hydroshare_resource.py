@@ -368,7 +368,8 @@ class Resource:
         if metadata["type"] == "folder":
             for sub_dicts in metadata.get("contents"):
                 new_src = sub_dicts.get("path").strip("hs:/")
-                self.overwrite_JH_with_file_from_HS(new_src, dest_path)
+                new_dest = src_path
+                self.overwrite_JH_with_file_from_HS(new_src, new_dest)
         else:
             # at this point we know source is referring to a file, not folder
             # get the source filename & path to source file
@@ -379,20 +380,23 @@ class Resource:
                 src_path_to_file = None
 
             # delete existing file at destination, if applicable
-            if self.is_file_or_folder_in_JH(str(self.path_prefix) + "/" + dest_path + src_path):
-                self.delete_file_or_folder_from_JH(dest_path + src_path)
+            if self.is_file_or_folder_in_JH(str(self.path_prefix) + "/" + dest_path + src_filename):
+                self.delete_file_or_folder_from_JH(dest_path + src_filename)
 
             output_path = dest_path
 
             print("SRC PATH TO FILE", src_path_to_file)
-            if src_path_to_file is not None:
-                output_path = output_path + "/" + src_path_to_file
+            # if src_path_to_file is not None:
+            #     output_path = output_path + "/" + src_path_to_file
             if self.is_file_or_folder_in_JH(str(self.path_prefix) + "/" + output_path) == False:
                 print("Making tha folders - or attempting!")
                 # create local folders that lead to output_path if they don't exist
                 os.makedirs(str(self.path_prefix) + "/" + output_path + "/")
 
-            self.remote_folder.download_file_to_JH(src_path, str(self.path_prefix) + "/" + dest_path)
+            if src_path_to_file is not None:
+                self.remote_folder.download_file_to_JH(src_path, str(self.path_prefix) + "/" + dest_path.strip(src_path_to_file))
+            else:
+                self.remote_folder.download_file_to_JH(src_path, str(self.path_prefix) + "/" + dest_path)
             # SPIFFY (Vicky) feels weird to be calling an upon init thing?
             self.JH_files = self.get_files_upon_init_JH()
 
