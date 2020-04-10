@@ -283,7 +283,7 @@ class Resource:
     # TODO: use 'exists' in this function name
     def is_file_or_folder_in_JH(self, filepath):
         """ is a file in JH """
-        return path.isfile(filepath)
+        return path.exists(filepath)
 
     def delete_file_or_folder_from_HS(self, item_path):
         """ deletes file or folder from HS """
@@ -338,19 +338,63 @@ class Resource:
 
         return False
 
+    def find_file_or_folder_metadata_HS(self, path, metadata_dict):
+        """ Recursively gets and returns the metadata dictionary that is
+        nested within metadata dict for the file or folder at specified path.
+        """
+        if metadata_dict is None:
+            raise Exception("File or folder not found.")
+        if "/" in path:
+            first_level, rest_of_path = path.split("/", 1)
+            for dicts in metadata_dict:
+                if dicts["name"] == first_level:
+                    return self.find_file_or_folder_metadata_HS(rest_of_path, dicts.get("contents"))
+        else:
+            for dicts in metadata_dict:
+                name = dicts.get("name")
+                if "." in path:
+                    path_no_extension, extension = path.rsplit(".", 1)
+                else:
+                    path_no_extension = None
+                if name == path or name == path_no_extension:
+                    return dicts
 
-    def overwrite_JH_with_file_from_HS(self, filepath, dest_path):
-        """ overwrites JH file with one from HS """
-        if self.is_file_or_folder_in_JH(dest_path):
-            self.delete_file_or_folder_from_JH(dest_path)
-        if "/" in filepath:
-            # create local folders that lead to dest_path if they don't exist
-            output_path, filename = dest_path.rsplit('/', 1)
-            if self.is_file_or_folder_in_JH(output_path) == False:
+
+    def overwrite_JH_with_file_from_HS(self, src_path, dest_path):
+        """ Recursively overwrites JH files located at the specified dest_path
+        with files from the given src_path in HS """
+        metadata = self.find_file_or_folder_metadata_HS(src_path,
+                                                    self.hs_files["contents"])
+        if metadata["type"] == "folder":
+            for sub_dicts in metadata.get("contents"):
+                new_src = sub_dicts.get("path").strip("hs:/")
+                self.overwrite_JH_with_file_from_HS(new_src, dest_path)
+        else:
+            # at this point we know source is referring to a file, not folder
+            # get the source filename & path to source file
+            if "/" in src_path:
+                src_path_to_file, src_filename = src_path.rsplit("/", 1)
+            else:
+                src_filename = src_path
+                src_path_to_file = None
+
+            # delete existing file at destination, if applicable
+            if self.is_file_or_folder_in_JH(str(self.path_prefix) + "/" + dest_path + src_path):
+                self.delete_file_or_folder_from_JH(dest_path + src_path)
+
+            output_path = dest_path
+
+            print("SRC PATH TO FILE", src_path_to_file)
+            if src_path_to_file is not None:
+                output_path = output_path + "/" + src_path_to_file
+            if self.is_file_or_folder_in_JH(str(self.path_prefix) + "/" + output_path) == False:
+                print("Making tha folders - or attempting!")
+                # create local folders that lead to output_path if they don't exist
                 os.makedirs(str(self.path_prefix) + "/" + output_path + "/")
-        self.remote_folder.download_file_to_JH(filepath, str(self.path_prefix) + "/" + dest_path)
-        # SPIFFY (Vicky) prob shouldn't be calling an upon init thing? so maybe make an update function?
-        self.JH_files = self.get_files_upon_init_JH()
+
+            self.remote_folder.download_file_to_JH(src_path, str(self.path_prefix) + "/" + dest_path)
+            # SPIFFY (Vicky) feels weird to be calling an upon init thing?
+            self.JH_files = self.get_files_upon_init_JH()
 
     def overwrite_HS_with_file_from_JH(self, file_path):
         """ overwrites HS file with one from JH """
