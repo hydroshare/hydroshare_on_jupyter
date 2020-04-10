@@ -16,6 +16,8 @@ computer always knows where the server files are. To do that, run the following:
     $ cd backend
     $ pip3 install -r requirements.txt
     $ echo "export PYTHONPATH=$PYTHONPATH:$(pwd)" >> ~/.bashrc
+    $ cd ..
+    $ echo "export PYTHONPATH=$PYTHONPATH:$(pwd)" >> ~/.bashrc
     $ source ~/.bashrc
 ```
 
@@ -47,7 +49,7 @@ says `c.NotebookApp.nbserver_extensions = {}` (there may or may not already be a
 the `{}`, add `'backend.hydroshare_jupyter_sync': True`. Assuming it was empty before, it should now look like
 
 ```
-    c.NotebookApp.nbserver_extensions = {'hydroshare_jupyter_sync': True}
+    c.NotebookApp.nbserver_extensions = {'backend.hydroshare_jupyter_sync': True}
 ```
 
 Once that is done, save the file (Ctrl+S) and close it.
