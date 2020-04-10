@@ -177,24 +177,26 @@ class Resource:
         for f in folders_final:
             rootsize += (f["sizeBytes"])
 
-        folder_time = datetime.datetime.min
-        for f in folders_final:
-            if f.get("modifiedTime"):
-                curr_time = parse(f.get("modifiedTime"))
-                if curr_time > folder_time:
-                    folder_time = curr_time
-
-        # spiffy: could we not just set it to None to start?
-        if folder_time == datetime.datetime.min:
-            folder_time = None
-        else:
-            folder_time = str(folder_time)
+        # TODO: Decide if using resource modified time for '/' folder works
+        # if so, remove everything below!
+        # folder_time = datetime.datetime.min
+        # for f in folders_final:
+        #     if f.get("modifiedTime"):
+        #         curr_time = parse(f.get("modifiedTime"))
+        #         if curr_time > folder_time:
+        #             folder_time = curr_time
+        #
+        # # spiffy: could we not just set it to None to start?
+        # if folder_time == datetime.datetime.min:
+        #     folder_time = None
+        # else:
+        #     folder_time = str(folder_time)
 
         root_dir = {
             "name": "",
             "path": HS_PREFIX + ":/",
             "sizeBytes": rootsize,
-            "modifiedTime": folder_time,
+            "modifiedTime": str(self.get_resource_last_modified_time_HS()),
             "type": "folder",
             "contents": folders_final,
         }
@@ -371,38 +373,19 @@ class Resource:
         self.remote_folder.upload_file_to_HS(full_src_path, full_file_path_rel_resource_root)
         self.hs_files = self.get_files_upon_init_HS()
 
-    # TODO (Vicky): pretty sure I have a task for this
     def get_resource_last_modified_time_HS(self):
-        # TODO: (Charlie): This may not be necessary -- it's more specific than the dates provided in
-        # the get resources func in resource_handler, but we might not care
         """
         Gets dates from the resource science metadata and returns the
         most recent modified time in datetime.datetime format
-
-        Notes:
-        metadata['dates'] gives array of two dicts with key 'start_date'
-        that contains a time. One is creation and the other is last modified
-        Need to compare and return the most recent time.
-        Ex:
-        'dates': [{'end_date': None,
-            'start_date': '2019-05-15T19:31:38.201061Z',
-            'type': 'created'},
-           {'end_date': None,
-            'start_date': '2019-05-15T19:32:36.139858Z',
-            'type': 'modified'}],
         """
         metadata = self.hs.getScienceMetadata(self.res_id)
         # Obtain dates
         dates = []
         for date in metadata['dates']:
-            temp = date['start_date']
-            # SPIFFY (Emily) I get an "undefined variable dateutil" warning here
-            temp = dateutil.parser.parse(temp)
-            dates.append(temp)
-        # Compare dates to get most recent one (normally it's the first, but
-        # it messes up if it's 'day of' for some reason)
-        most_recent = max(dates)
-        return most_recent # datetime.datetime
+            if date['type'] == 'modified':
+                modified_time = date['start_date']
+        modified_time = parse(modified_time)
+        return modified_time # datetime.datetime
 
     def upload_file_to_JH(self, file_info):
         if self.is_file_or_folder_in_JH(self.path_prefix+file_info["filename"]) == False:
