@@ -361,17 +361,23 @@ class Resource:
                     return dicts
 
     def overwrite_JH_with_file_from_HS(self, src_path, dest_path):
-        self.overwrite_JH_with_file_from_HS_recursive(src_path, dest_path, src_path)
-        self.local_folder.delete_folder(str(self.path_prefix).strip("/contents") + "/temp/")
+        # find a temp folder location that does not exist
+        temp_location = "/temp/"
+        i = 1
+        while Path(str(self.path_prefix).strip("/contents") + "/temp/").exists():
+            temp_location = "/temp" + str(i) + "/"
+            i += 1
+        self.overwrite_JH_with_file_from_HS_recursive(src_path, dest_path, src_path, temp_location)
+        self.local_folder.delete_folder(str(self.path_prefix).strip("/contents") + temp_location)
 
-    def overwrite_JH_with_file_from_HS_recursive(self, src_path, dest_path, og_src):
+    def overwrite_JH_with_file_from_HS_recursive(self, src_path, dest_path, og_src, temp_location):
         """ Recursively overwrites JH files located at the specified dest_path
         with files from the given src_path in HS """
         metadata = self.find_file_or_folder_metadata_HS(src_path, self.hs_files["contents"])
         if metadata["type"] == "folder":
             for sub_dicts in metadata.get("contents"):
                 new_src = sub_dicts.get("path").strip("hs:/")
-                self.overwrite_JH_with_file_from_HS_recursive(new_src, dest_path, og_src)
+                self.overwrite_JH_with_file_from_HS_recursive(new_src, dest_path, og_src, temp_location)
         else:
             # at this point we know source is referring to a file, not folder
             # get the source filename & path to source file
@@ -382,8 +388,8 @@ class Resource:
                 src_path_to_file = None
 
             # delete existing file at destination, if applicable
-            if self.is_file_or_folder_in_JH(str(self.path_prefix).strip("/contents") + "/temp/" + dest_path + src_path):
-                self.local_folder.delete_file(str(self.path_prefix).strip("/contents") + "/temp/" + dest_path + src_path)
+            if self.is_file_or_folder_in_JH(str(self.path_prefix).strip("/contents") + temp_location + dest_path + src_path):
+                self.local_folder.delete_file(str(self.path_prefix).strip("/contents") + temp_location + dest_path + src_path)
 
             output_path = dest_path
 
@@ -391,11 +397,11 @@ class Resource:
                 if output_path == "": output_path = src_path_to_file
                 else: output_path = output_path + "/" + src_path_to_file
 
-            if not (Path(str(self.path_prefix).strip("/contents") + "/temp/" + output_path)).exists():
+            if not (Path(str(self.path_prefix).strip("/contents") + temp_location + output_path)).exists():
                 # create local folders that lead to output_path if they don't exist
                 os.makedirs(str(self.path_prefix).strip("/contents") + "/temp/" + output_path + "/")
 
-            self.remote_folder.download_file_to_JH(src_path, str(self.path_prefix).strip("/contents") + "/temp/" + dest_path)
+            self.remote_folder.download_file_to_JH(src_path, str(self.path_prefix).strip("/contents") + temp_location + dest_path)
 
             if "/" in og_src:
                 ignore_me, most_specific = og_src.rsplit("/", 1)
@@ -406,10 +412,10 @@ class Resource:
 
             if dest_path == "":
                 dest_full_path = Path(str(self.path_prefix) + "/" + src_path[idx:end_idx])
-                src_full_path = Path(str(self.path_prefix).strip("/contents") + "/temp/" + src_path)
+                src_full_path = Path(str(self.path_prefix).strip("/contents") + temp_location + src_path)
             else:
                 dest_full_path = Path(str(self.path_prefix) + "/" + dest_path + "/" + src_path[idx:end_idx])
-                src_full_path = Path(str(self.path_prefix).strip("/contents") + "/temp/" + dest_path + "/" + src_path)
+                src_full_path = Path(str(self.path_prefix).strip("/contents") + temp_location + dest_path + "/" + src_path)
 
             if not (dest_full_path).exists():
                 # create local folders that lead to dest_full_path if they don't exist
