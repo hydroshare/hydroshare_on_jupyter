@@ -65,7 +65,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       )
     }
 
-    let filesAndFolders: (IFile | IFolder)[];
+    let filesAndFolders: (IFile | IFolder)[] | undefined = undefined;
     if (this.props.rootDir) {
       if (this.props.filterByName) {
         filesAndFolders = this.filterFilesAndFolders(this.props.rootDir.contents, this.props.filterByName.toLowerCase());
@@ -76,6 +76,17 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     }
 
     const sortOrder = this.state.sortAscending ? 'sort-ascending' : 'sort-descending';
+
+    let content: React.ReactNode;
+    if (filesAndFolders && filesAndFolders.length > 0) {
+      content = filesAndFolders?.map((item, idx) => this.generateFileOrFolderElement(item, idx, this.props.openFile));
+    } else {
+      content = (
+        <div className="no-files">
+          No files
+        </div>
+      )
+    }
 
     return (
       <div className={className.join(' ')}>
@@ -122,7 +133,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && sortTriangleSVG}
                 </button>
               </div>
-              {filesAndFolders?.map((item, idx) => this.generateFileOrFolderElement(item, idx, this.props.openFile))}
+              {content}
               {provided.placeholder}
             </div>
           )}
