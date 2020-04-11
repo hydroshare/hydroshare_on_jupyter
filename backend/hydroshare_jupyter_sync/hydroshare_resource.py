@@ -238,19 +238,23 @@ class Resource:
 
         return False
 
-    def rename_or_move_file_JH(self, old_filepath, new_filepath):
+    def rename_or_move_file_JH(self, old_filepath, new_filepath, full_paths=False):
         """Renames the jupyterhub version of the file from old_filename to
         new_filename.
         """
         # TODO: should probably throw an exception if this is not true
         if old_filepath is not None and new_filepath is not None:
-            src_full_path = self.path_prefix / old_filepath
-            dest_full_path = self.path_prefix / new_filepath
+            if not full_paths:
+                src_full_path = self.path_prefix / old_filepath
+                dest_full_path = self.path_prefix / new_filepath
+            else:
+                src_full_path = old_filepath
+                dest_full_path = new_filepath
             if src_full_path.exists():
                 shutil.move(str(src_full_path), str(dest_full_path))
-                self.delete_JH_folder_if_empty(src_full_path.parent)
+                self.delete_JH_folder_if_empty(str(src_full_path.parent))
             else:  # TODO: also an exception
-                logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
+                logging.info('Trying to rename or move file that does not exist: ' + str(old_filepath))
         else:
             logging.info('Missing inputs for old and new filepath')
 
@@ -359,17 +363,18 @@ class Resource:
                 if name == path or name == path_no_extension:
                     return dicts
 
-
     def overwrite_JH_with_file_from_HS(self, src_path, dest_path):
+        self.overwrite_JH_with_file_from_HS_recursive(src_path, dest_path, src_path)
+        self.local_folder.delete_folder(str(self.path_prefix).strip("/contents") + "/temp/")
+
+    def overwrite_JH_with_file_from_HS_recursive(self, src_path, dest_path, og_src):
         """ Recursively overwrites JH files located at the specified dest_path
         with files from the given src_path in HS """
-        metadata = self.find_file_or_folder_metadata_HS(src_path,
-                                                    self.hs_files["contents"])
+        metadata = self.find_file_or_folder_metadata_HS(src_path, self.hs_files["contents"])
         if metadata["type"] == "folder":
             for sub_dicts in metadata.get("contents"):
                 new_src = sub_dicts.get("path").strip("hs:/")
-                new_dest = src_path
-                self.overwrite_JH_with_file_from_HS(new_src, new_dest)
+                self.overwrite_JH_with_file_from_HS_recursive(new_src, dest_path, og_src)
         else:
             # at this point we know source is referring to a file, not folder
             # get the source filename & path to source file
@@ -380,23 +385,46 @@ class Resource:
                 src_path_to_file = None
 
             # delete existing file at destination, if applicable
-            if self.is_file_or_folder_in_JH(str(self.path_prefix) + "/" + dest_path + src_filename):
-                self.delete_file_or_folder_from_JH(dest_path + src_filename)
+            if self.is_file_or_folder_in_JH(str(self.path_prefix).strip("/contents") + "/temp/" + dest_path + src_path):
+                self.local_folder.delete_file(str(self.path_prefix).strip("/contents") + "/temp/" + dest_path + src_path)
 
             output_path = dest_path
 
-            print("SRC PATH TO FILE", src_path_to_file)
-            # if src_path_to_file is not None:
-            #     output_path = output_path + "/" + src_path_to_file
-            if self.is_file_or_folder_in_JH(str(self.path_prefix) + "/" + output_path) == False:
-                print("Making tha folders - or attempting!")
-                # create local folders that lead to output_path if they don't exist
-                os.makedirs(str(self.path_prefix) + "/" + output_path + "/")
-
             if src_path_to_file is not None:
-                self.remote_folder.download_file_to_JH(src_path, str(self.path_prefix) + "/" + dest_path.strip(src_path_to_file))
+                if output_path == "": output_path = src_path_to_file
+                else: output_path = output_path + "/" + src_path_to_file
+
+            if not (Path(str(self.path_prefix).strip("/contents") + "/temp/" + output_path)).exists():
+                # create local folders that lead to output_path if they don't exist
+                os.makedirs(str(self.path_prefix).strip("/contents") + "/temp/" + output_path + "/")
+
+            self.remote_folder.download_file_to_JH(src_path, str(self.path_prefix).strip("/contents") + "/temp/" + dest_path)
+
+            if "/" in og_src:
+                ignore_me, most_specific = og_src.rsplit("/", 1)
             else:
-                self.remote_folder.download_file_to_JH(src_path, str(self.path_prefix) + "/" + dest_path)
+                most_specific = og_src
+            idx = src_path.find(most_specific)
+            end_idx = src_path.find(src_filename)
+
+            if dest_path == "":
+                dest_full_path = Path(str(self.path_prefix) + "/" + src_path[idx:end_idx])
+                src_full_path = Path(str(self.path_prefix).strip("/contents") + "/temp/" + src_path)
+            else:
+                dest_full_path = Path(str(self.path_prefix) + "/" + dest_path + "/" + src_path[idx:end_idx])
+                src_full_path = Path(str(self.path_prefix).strip("/contents") + "/temp/" + dest_path + "/" + src_path)
+
+            if not (dest_full_path).exists():
+                # create local folders that lead to dest_full_path if they don't exist
+                os.makedirs(str(dest_full_path) + "/")
+
+            if Path(str(dest_full_path) + "/" + src_filename).exists():
+                self.local_folder.delete_file(str(dest_full_path) + "/" + src_filename)
+
+            # move the file to its proper location
+            if src_full_path.exists():
+                shutil.move(str(src_full_path), str(dest_full_path))
+
             # SPIFFY (Vicky) feels weird to be calling an upon init thing?
             self.JH_files = self.get_files_upon_init_JH()
 
