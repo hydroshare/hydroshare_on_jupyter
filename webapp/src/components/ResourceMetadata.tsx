@@ -21,7 +21,7 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
             <div className="info-wrapping">
                 <div className="info-group">
                     <span className="info-header">Author</span>
-                    <p>{hydroShareResource.author}</p>
+                    <p>{hydroShareResource.creator}</p>
                 </div>
                 <div className="info-group">
                     <span className="info-header">Last Modified</span>
