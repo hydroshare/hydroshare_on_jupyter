@@ -56,6 +56,18 @@ class Resource:
         if filename is not None:
             (self.path_prefix / filename).touch()
 
+    def create_local_folder(self, folder_name):
+        """Creates a new file with the given name in JH
+        """
+        folder_path = self.path_prefix / folder_name
+        if folder_path.exists():
+            if folder_path.is_dir():
+                return  # Directory exists, so just ignore the request
+            else:
+                raise IOError(f'Directory {str(folder_path)} exists')
+
+        folder_path.mkdir()
+
     def save_resource_locally(self, unzip=True):
         """Saves the HS resource locally, if it does not already exist.
         """

@@ -32,6 +32,14 @@ export function getFilesIfNeeded(resource: IJupyterResource): ThunkAction<Promis
     };
 }
 
+export function notifyGettingResources() {
+  return action(ResourcesActions.NOTIFY_GETTING_RESOURCES);
+}
+
+export function notifyGettingResourcesFailed() {
+  return action(ResourcesActions.NOTIFY_GETTING_RESOURCES_FAILED);
+}
+
 export function notifyGettingResourceHydroShareFiles(resource: IJupyterResource) {
   return action(ResourcesActions.NOTIFY_GETTING_RESOURCE_HYDROSHARE_FILES, { resourceId: resource.id });
 }

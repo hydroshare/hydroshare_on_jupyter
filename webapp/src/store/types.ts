@@ -63,10 +63,9 @@ export interface IResourcesState {
   allResources: {
     [resourceId: string]: IJupyterResource
   }
+  fetchingResources: boolean
   resourceLocalFilesBeingFetched: Set<string>
   resourceHydroShareFilesBeingFetched: Set<string>
-  // TODO: Figure out where this is used and move it to that reducer
-  searchTerm: string,
 }
 
 export interface IUserInfoDataResponse {
@@ -105,7 +104,7 @@ export interface IUserInfo {
 
 export interface IHydroShareResourceInfo {
   resource_id: string
-  author: string
+  creator: string
   files: IFolder
   date_last_updated: moment.Moment
   status: string
@@ -138,6 +137,12 @@ export enum FileOrFolderTypes {
   FILE = 'file',
 }
 
+export const NEW_FILE_OR_FOLDER_TYPES = {
+  FOLDER: 'Folder',
+  JUPYTER_NOTEBOOK: 'Jupyter Notebook (.ipynb)',
+  OTHER_FILE: 'Other File',
+};
+
 export interface ICreateResourceRequest {
   title: string,
   privacy: string
@@ -160,6 +165,7 @@ export interface IFileOperationsRequestResponse {
 
 export interface ICreateFileOrFolderRequestResponse {
   success: boolean
+  error?: IServerError
 }
 
 export interface ICreateResourceRequestResponse {
