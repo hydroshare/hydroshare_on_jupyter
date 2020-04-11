@@ -127,9 +127,6 @@ class RemoteFolder:
 
     def download_file_to_JH(self, HS_filepath, JH_filepath):
         """ download HS file to JH"""
-        print("HELLO")
-        print(HS_filepath)
-        print(JH_filepath)
         self.hs.getResourceFile(self.res_id, HS_filepath, destination=JH_filepath)
 
     def upload_file_to_HS(self, JHfilepath, HSfilepath):
