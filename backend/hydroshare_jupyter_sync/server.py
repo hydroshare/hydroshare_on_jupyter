@@ -430,7 +430,7 @@ def make_app():
         (r"/bundle.js", BundleHandler),
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesRootHandler),
-        (r"/resources/([^/]+)", ResourceManager),
+        (r"/resources/([^/]+)", ResourceHandler),
         (r"/resources/([^/]+)/hs-files", ResourceHydroShareFilesRequestHandler),
         (r"/resources/([^/]+)/local-files", ResourceLocalFilesRequestHandler),
         (r"/resources/([^/]+)/move-copy-files", MoveCopyFiles),
