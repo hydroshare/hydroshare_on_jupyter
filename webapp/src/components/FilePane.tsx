@@ -15,6 +15,7 @@ import {
 } from '../store/types';
 
 import '../styles/FilePane.scss';
+import Loading from "./Loading";
 
 interface IFilePaneState {
   allFilesAndFoldersSelected: boolean
@@ -30,6 +31,7 @@ interface IFilePaneProps {
   droppableId: string
   filterByName?: string
   header?: ReactElement
+  loading?: boolean
   openFile?: (f: IFile) => any
   onSelectedFilesAndFoldersChange?: (items: Set<String>) => any
 }
@@ -50,6 +52,17 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     const className = ['FilePane', 'table'];
     if (this.props.className) {
       className.push(this.props.className);
+    }
+
+    if (this.props.loading) {
+      return (
+        <div className={className.join(' ')}>
+          <div className="FilePane-header">
+            {this.props.header}
+          </div>
+          <Loading />
+        </div>
+      )
     }
 
     let filesAndFolders: (IFile | IFolder)[];

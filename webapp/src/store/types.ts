@@ -63,10 +63,9 @@ export interface IResourcesState {
   allResources: {
     [resourceId: string]: IJupyterResource
   }
+  fetchingResources: boolean
   resourceLocalFilesBeingFetched: Set<string>
   resourceHydroShareFilesBeingFetched: Set<string>
-  // TODO: Figure out where this is used and move it to that reducer
-  searchTerm: string,
 }
 
 export interface IUserInfoDataResponse {

@@ -17,6 +17,8 @@ import {
   setResourceLocalFiles,
   setResourceHydroShareFiles,
   setResources,
+  notifyGettingResources,
+  notifyGettingResourcesFailed,
 } from './actions/resources';
 import {
     setUserInfo,
@@ -225,14 +227,20 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
 // TODO: Display an error message on failed request
 export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-      const response = await getFromBackend<IResourcesData>('/resources');
-      const {
+      dispatch(notifyGettingResources());
+      try {
+        const response = await getFromBackend<IResourcesData>('/resources');
+        const {
           data: {
-              resources,
+            resources,
           },
-      } = response;
-
-      dispatch(setResources(resources));
+        } = response;
+        dispatch(setResources(resources));
+      } catch (e) {
+        console.error(e);
+        dispatch(notifyGettingResourcesFailed());
+        dispatch(pushNotification('error', 'Could not get resources from the server.'));
+      }
     };
 }
 

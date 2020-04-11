@@ -8,6 +8,7 @@ import {
   IJupyterResource,
   SortByOptions,
 } from '../store/types';
+import Loading from "./Loading";
 import Modal from "./modals/Modal";
 
 import NewResourceModal from './modals/NewResourceModal';
@@ -139,6 +140,11 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       )
     );
 
+    let loading;
+    if (rowElements.length === 0) {
+      loading = <Loading/>;
+    }
+
     let modal;
     switch (this.state.modal) {
       case MODAL_TYPES.NEW_RESOURCE:
@@ -185,6 +191,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           <span className="clickable">Size</span>
           <span className="clickable">Last Modified</span>
         </div>
+        {loading}
         {rowElements}
         {modal}
         </div>

@@ -19,6 +19,7 @@ import {
 const mapStateToProps = ({ resources }: IRootState) => {
   return {
     resources: resources.allResources,
+    fetchingResources: resources.fetchingResources,
   };
 };
 

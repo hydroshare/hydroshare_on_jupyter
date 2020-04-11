@@ -32,8 +32,8 @@ const initResourcePageState: IResourcePageState = {
 };
 
 const initResourcesState: IResourcesState = {
-  searchTerm: '',
   allResources: {},
+  fetchingResources: false,
   resourceLocalFilesBeingFetched: new Set<string>(),
   resourceHydroShareFilesBeingFetched: new Set<string>(),
 };
@@ -124,6 +124,8 @@ function toggleFileOrFolderSelected(toggledItem: IFile | IFolder, selectedFilesA
 
 export function resourcesReducer(state: IResourcesState = initResourcesState, action: ResourcesActionTypes): IResourcesState {
   switch (action.type) {
+    case ResourcesActions.NOTIFY_GETTING_RESOURCES:
+      return {...state, fetchingResources: true};
     case ResourcesActions.SET_RESOURCES:
       const allResources = {};
       action.payload.forEach(jupyterHubResource => {
@@ -132,14 +134,18 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
         }
         allResources[jupyterHubResource.hydroShareResource.resource_id] = jupyterHubResource;
       });
-      return {...state, allResources };
+      return {
+        ...state,
+        allResources,
+        fetchingResources: false,
+      };
     case ResourcesActions.SET_RESOURCE_LOCAL_FILES:
       const {
         resourceId,
         rootDir,
       } = action.payload;
       rootDir.contents = recursivelyConvertDatesToMoment(rootDir.contents);
-      let resourceLocFilesBeingFetched = new Set(Array.from(state.resourceHydroShareFilesBeingFetched));
+      let resourceLocFilesBeingFetched = new Set(Array.from(state.resourceLocalFilesBeingFetched));
       resourceLocFilesBeingFetched.delete(action.payload.resourceId);
       return {
         ...state,
@@ -173,7 +179,7 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
             },
           },
         },
-        resourceLocalFilesBeingFetched: resourceHSFilesBeingFetched,
+        resourceHydroShareFilesBeingFetched: resourceHSFilesBeingFetched,
       };
     case ResourcesActions.NOTIFY_GETTING_RESOURCE_HYDROSHARE_FILES:
       let resourceHydroShareFilesBeingFetched = new Set(Array.from(state.resourceHydroShareFilesBeingFetched));

@@ -6,6 +6,7 @@ import { push } from 'connected-react-router';
 import '../styles/ResourcePage.scss';
 
 import FileManager from "../components/FileManager";
+import Loading from "../components/Loading";
 import Modal from "../components/modals/Modal";
 import NewFileModal from "../components/modals/NewFileModal";
 import ResourceMetadata from '../components/ResourceMetadata';
@@ -25,13 +26,14 @@ import {
   IRootState,
 } from '../store/types';
 
-const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
+const mapStateToProps = ({ resources, router }: IRootState) => {
   // Extract the resource ID from the URL
   // @ts-ignore object possibly undefined
   const regexMatch = router.location.pathname.split('/').pop().match(/^\w+/);
   let resourceForPage;
+  let resourceId = undefined;
   if (regexMatch) {
-    const resourceId = regexMatch.pop();
+    resourceId = regexMatch.pop() as string;
     if (resourceId) {
       resourceForPage = resources.allResources[resourceId]
     } else {
@@ -39,13 +41,10 @@ const mapStateToProps = ({ resources, resourcePage, router }: IRootState) => {
     }
   }
   return {
+    fetchingHydroShareFiles: resourceId ? resources.resourceHydroShareFilesBeingFetched.has(resourceId) : false,
+    fetchingLocalFiles: resourceId ? resources.resourceLocalFilesBeingFetched.has(resourceId) : false,
+    fetchingResourceMetadata: resources.fetchingResources,
     resource: resourceForPage,
-    allJupyterSelected: resourcePage.allJupyterSelected,
-    allHydroShareSelected: resourcePage.allHydroShareSelected,
-    selectedLocalFilesAndFolders: resourcePage.selectedLocalFilesAndFolders,
-    selectedHydroShareFilesAndFolders: resourcePage.selectedHydroShareFilesAndFolders,
-    searchTerm: resourcePage.searchTerm,
-    sortByTerm: resourcePage.sortBy
   };
 };
 
@@ -94,8 +93,19 @@ class ResourcePage extends React.Component<PropsType, StateType> {
 
   public render() {
     const {
+      fetchingHydroShareFiles,
+      fetchingLocalFiles,
+      fetchingResourceMetadata,
       resource,
     } = this.props;
+
+    if (fetchingResourceMetadata) {
+      return (
+        <div className="page resource-details">
+          <Loading/>
+        </div>
+      );
+    }
 
     if (!resource) {
       return (
@@ -147,6 +157,8 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       <div className="page resource-details">
         <ResourceMetadata resource={resource} />
         <FileManager
+          fetchingHydroShareFiles={fetchingHydroShareFiles}
+          fetchingLocalFiles={fetchingLocalFiles}
           hydroShareResourceRootDir={resource.hydroShareResource.files}
           jupyterHubResourceRootDir={resource.jupyterHubFiles}
           openFile={openFile}
