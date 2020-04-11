@@ -104,7 +104,7 @@ export interface IUserInfo {
 
 export interface IHydroShareResourceInfo {
   resource_id: string
-  author: string
+  creator: string
   files: IFolder
   date_last_updated: moment.Moment
   status: string
