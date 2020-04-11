@@ -189,21 +189,6 @@ class Resource:
         for f in folders_final:
             rootsize += (f["sizeBytes"])
 
-        # TODO: Decide if using resource modified time for '/' folder works
-        # if so, remove everything below!
-        # folder_time = datetime.datetime.min
-        # for f in folders_final:
-        #     if f.get("modifiedTime"):
-        #         curr_time = parse(f.get("modifiedTime"))
-        #         if curr_time > folder_time:
-        #             folder_time = curr_time
-        #
-        # # spiffy: could we not just set it to None to start?
-        # if folder_time == datetime.datetime.min:
-        #     folder_time = None
-        # else:
-        #     folder_time = str(folder_time)
-
         root_dir = {
             "name": "",
             "path": HS_PREFIX + ":/",
