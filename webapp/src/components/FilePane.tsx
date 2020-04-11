@@ -15,6 +15,7 @@ import {
 } from '../store/types';
 
 import '../styles/FilePane.scss';
+import Loading from "./Loading";
 
 interface IFilePaneState {
   allFilesAndFoldersSelected: boolean
@@ -30,6 +31,7 @@ interface IFilePaneProps {
   droppableId: string
   filterByName?: string
   header?: ReactElement
+  loading?: boolean
   openFile?: (f: IFile) => any
   onSelectedFilesAndFoldersChange?: (items: Set<String>) => any
 }
@@ -52,7 +54,18 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       className.push(this.props.className);
     }
 
-    let filesAndFolders: (IFile | IFolder)[];
+    if (this.props.loading) {
+      return (
+        <div className={className.join(' ')}>
+          <div className="FilePane-header">
+            {this.props.header}
+          </div>
+          <Loading />
+        </div>
+      )
+    }
+
+    let filesAndFolders: (IFile | IFolder)[] | undefined = undefined;
     if (this.props.rootDir) {
       if (this.props.filterByName) {
         filesAndFolders = this.filterFilesAndFolders(this.props.rootDir.contents, this.props.filterByName.toLowerCase());
@@ -63,6 +76,17 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     }
 
     const sortOrder = this.state.sortAscending ? 'sort-ascending' : 'sort-descending';
+
+    let content: React.ReactNode;
+    if (filesAndFolders && filesAndFolders.length > 0) {
+      content = filesAndFolders?.map((item, idx) => this.generateFileOrFolderElement(item, idx, this.props.openFile));
+    } else {
+      content = (
+        <div className="no-files">
+          No files
+        </div>
+      )
+    }
 
     return (
       <div className={className.join(' ')}>
@@ -109,7 +133,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && sortTriangleSVG}
                 </button>
               </div>
-              {filesAndFolders?.map((item, idx) => this.generateFileOrFolderElement(item, idx, this.props.openFile))}
+              {content}
               {provided.placeholder}
             </div>
           )}

@@ -15,6 +15,7 @@
   .content {
     background-color: white;
     border-radius: 0.25rem;
+    min-width: 30em;
     z-index: 1010;
 
     .header {
@@ -52,6 +53,31 @@
 
     .body {
       padding: 1em;
+
+      .group {
+        &:not(:first-child) {
+          margin-top: 1em;
+        }
+
+        .group-content {
+
+          label {
+            display: flex;
+
+            input {
+              margin-right: 0.5em;
+            }
+          }
+
+          input[type="text"] {
+            flex-grow: 1;
+          }
+        }
+
+        &.TextInput .group-content {
+          display: flex;
+        }
+      }
     }
 
     .footer {

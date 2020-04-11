@@ -8,6 +8,7 @@ import {
   IJupyterResource,
   SortByOptions,
 } from '../store/types';
+import Loading from "./Loading";
 import Modal from "./modals/Modal";
 
 import NewResourceModal from './modals/NewResourceModal';
@@ -132,12 +133,17 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           onChange={() => this.toggleSingleResourceSelected(resource)}
         />
         <span onClick={() => this.props.viewResource(resource)} className="clickable">{resource.title}</span>
-        <span>{resource.hydroShareResource.author || 'Unknown'}</span>
+        <span>{resource.hydroShareResource.creator || 'Unknown'}</span>
         <span>Unknown</span>
-        <span>Unknown</span>
+        <span>{resource.hydroShareResource.date_last_updated.format('MMMM D, YYYY')}</span>
       </div>
       )
     );
+
+    let loading;
+    if (rowElements.length === 0) {
+      loading = <Loading/>;
+    }
 
     let modal;
     switch (this.state.modal) {
@@ -185,6 +191,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           <span className="clickable">Size</span>
           <span className="clickable">Last Modified</span>
         </div>
+        {loading}
         {rowElements}
         {modal}
         </div>

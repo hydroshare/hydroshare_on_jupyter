@@ -12,6 +12,7 @@ import signal
 import logging
 import sys
 import json
+import re
 from hs_restclient import exceptions as HSExceptions
 from hydroshare_jupyter_sync.hydroshare_resource import Resource, HS_PREFIX, LOCAL_PREFIX
 from hydroshare_jupyter_sync.resource_manager import ResourceManager
@@ -185,15 +186,25 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
         """create new file in JH"""
         body = json.loads(self.request.body.decode('utf-8'))
         resource = Resource(res_id, resource_handler)
-        request_type = body.get("request_type")
-        if request_type == "new_file":
-            resource.create_file_JH(body.get("new_filename"))
-            self.write({
-                'success': True,
-            })
-        else:
-            # TODO: the format of this should be updated (the response code should also be something other than 200)
-            self.write("Please specify valid request type for PUT")
+        item_type = body.get('type')
+        name = body.get('name')
+        if item_type is None or name is None:
+            self.set_status(400)  # Invalid Syntax
+            self.write('Request must include both "type" and "name" attributes.')
+            return
+        if not (item_type == 'file' or item_type == 'folder'):
+            self.set_status(400)  # Invalid Syntax
+            self.write('"type" attribute must be either "file" or "folder".')
+            return
+
+        if item_type == 'file':
+            resource.create_file_JH(name)
+        elif item_type == 'folder':
+            resource.create_local_folder(name)
+
+        self.write({
+            'success': True,
+        })
 
     def post(self, res_id):
         """upload file to JH"""
@@ -419,7 +430,7 @@ def make_app():
         (r"/bundle.js", BundleHandler),
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesRootHandler),
-        (r"/resources/([^/]+)", ResourceManager),
+        (r"/resources/([^/]+)", ResourceHandler),
         (r"/resources/([^/]+)/hs-files", ResourceHydroShareFilesRequestHandler),
         (r"/resources/([^/]+)/local-files", ResourceLocalFilesRequestHandler),
         (r"/resources/([^/]+)/move-copy-files", MoveCopyFiles),

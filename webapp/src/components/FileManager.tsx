@@ -30,6 +30,8 @@ interface IFileManagerState {
 }
 
 interface IFileManagerProps {
+  fetchingHydroShareFiles: boolean
+  fetchingLocalFiles: boolean
   hydroShareResourceRootDir: IFolder
   jupyterHubResourceRootDir: IFolder
   copyFileOrFolder: (src: IFile, dest: IFolder) => any
@@ -126,6 +128,8 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     const {
       hydroShareResourceRootDir,
       jupyterHubResourceRootDir,
+      fetchingLocalFiles,
+      fetchingHydroShareFiles,
       openFile,
     } = this.props;
 
@@ -136,93 +140,86 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     // Rebuild the lookup table
     this.buildLookupTable();
 
-    let jupyterHubFilePane;
-    if (jupyterHubResourceRootDir) {
-      const header =
-        <div>
-          <div className="title-row">
-            <span className="title">JupyterHub Files</span>
-            <img src="/JupyterHub-logo.png" alt="JupyterHub logo"/>
-          </div>
-          <div className="actions-row">
-            <input
-              className="search"
-              onChange={this.filterByNameChanged}
-              placeholder="Filter"
-              title="Filter the files and folders by name"
-              type="text"
-              value={filterByName}
-            />
-            <button onClick={this.props.promptCreateNewFileOrFolder}>New</button>
-            <button>Upload</button>
-            <button
-              onClick={this.promptDeleteSelectedLocalFiles}
-              disabled={this.state.selectedLocalFilesAndFolders.size === 0}
-              title="Delete the selected files and/or folders"
-            >
-              Delete
-            </button>
-          </div>
-        </div>;
-      jupyterHubFilePane =
-        <FilePane
-          className="tile jupyterhub"
-          droppableId={jupyterHubResourceRootDir.path}
-          filterByName={filterByName}
-          rootDir={jupyterHubResourceRootDir}
-          header={header}
-          openFile={openFile}
-          onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}
-        />;
-    }
-    let hydroShareFilePane;
-    if (hydroShareResourceRootDir) {
-      const openInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resourceId}/`, '_blank');
-      const header =
-        <div>
-          <div className="title-row">
-            <span className="title">HydroShare Files</span>
-            <img src="/HydroShare-logo.png" alt="HydroShare logo"/>
-          </div>
-          <div className="actions-row">
-            <input
-              className="search"
-              onChange={this.filterByNameChanged}
-              placeholder="Filter"
-              title="Filter the files and folders by name"
-              type="text"
-              value={filterByName}
-            />
-            <button
-              disabled={this.state.selectedHydroShareFilesAndFolders.size === 0}
-              onClick={this.promptDeleteSelectedHydroShareFiles}
-              title="Delete the selected files and/or folders"
-            >
-              Delete
-            </button>
+    const localFilesHeader =
+      <div>
+        <div className="title-row">
+          <span className="title">JupyterHub Files</span>
+          <img src="/JupyterHub-logo.png" alt="JupyterHub logo"/>
+        </div>
+        <div className="actions-row">
+          <input
+            className="search"
+            onChange={this.filterByNameChanged}
+            placeholder="Filter"
+            title="Filter the files and folders by name"
+            type="text"
+            value={filterByName}
+          />
+          <button onClick={this.props.promptCreateNewFileOrFolder}>New</button>
+          <button>Upload</button>
           <button
-            onClick={openInHydroShare}
-            title="Open the page for this resource in HydroShare">
-            Open in HydroShare
+            onClick={this.promptDeleteSelectedLocalFiles}
+            disabled={this.state.selectedLocalFilesAndFolders.size === 0}
+            title="Delete the selected files and/or folders"
+          >
+            Delete
           </button>
-          </div>
-        </div>;
-      hydroShareFilePane =
-        <FilePane
-          className="tile hydroshare"
-          droppableId={hydroShareResourceRootDir.path}
-          filterByName={filterByName}
-          rootDir={hydroShareResourceRootDir}
-          header={header}
-          onSelectedFilesAndFoldersChange={this.setSelectedHydroShareFilesAndFolders}
-        />;
-    }
+        </div>
+      </div>;
+
+    const openInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resourceId}/`, '_blank');
+    const hydroShareHeader =
+      <div>
+        <div className="title-row">
+          <span className="title">HydroShare Files</span>
+          <img src="/HydroShare-logo.png" alt="HydroShare logo"/>
+        </div>
+        <div className="actions-row">
+          <input
+            className="search"
+            onChange={this.filterByNameChanged}
+            placeholder="Filter"
+            title="Filter the files and folders by name"
+            type="text"
+            value={filterByName}
+          />
+          <button
+            disabled={this.state.selectedHydroShareFilesAndFolders.size === 0}
+            onClick={this.promptDeleteSelectedHydroShareFiles}
+            title="Delete the selected files and/or folders"
+          >
+            Delete
+          </button>
+        <button
+          onClick={openInHydroShare}
+          title="Open the page for this resource in HydroShare">
+          Open in HydroShare
+        </button>
+        </div>
+      </div>;
 
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
         <div className="FileManager content-row">
-          {jupyterHubFilePane}
-          {hydroShareFilePane}
+          <FilePane
+            className="tile jupyterhub"
+            droppableId={jupyterHubResourceRootDir?.path || 'loading'}
+            filterByName={filterByName}
+            loading={fetchingLocalFiles}
+            rootDir={jupyterHubResourceRootDir}
+            header={localFilesHeader}
+            openFile={openFile}
+            onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}
+          />
+          <FilePane
+            className="tile hydroshare"
+            droppableId={hydroShareResourceRootDir?.path || 'loading'}
+            filterByName={filterByName}
+            loading={fetchingHydroShareFiles}
+            rootDir={hydroShareResourceRootDir}
+            header={hydroShareHeader}
+            onSelectedFilesAndFoldersChange={this.setSelectedHydroShareFilesAndFolders}
+          />
         </div>
       </DragDropContext>
     );
