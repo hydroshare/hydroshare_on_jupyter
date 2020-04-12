@@ -144,7 +144,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
       <div>
         <div className="title-row">
           <span className="title">JupyterHub Files</span>
-          <img src="/JupyterHub-logo.png" alt="JupyterHub logo"/>
+          <img src="/assets/JupyterHub-logo.png" alt="JupyterHub logo"/>
         </div>
         <div className="actions-row">
           <input
@@ -172,7 +172,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
       <div>
         <div className="title-row">
           <span className="title">HydroShare Files</span>
-          <img src="/HydroShare-logo.png" alt="HydroShare logo"/>
+          <img src="/assets/HydroShare-logo.png" alt="HydroShare logo"/>
         </div>
         <div className="actions-row">
           <input

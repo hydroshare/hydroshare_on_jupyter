@@ -15,7 +15,8 @@ def get_index_html():
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <title>CUAHSI JupyterHub</title>
+    <link rel="shortcut icon" href="/assets/favicon.ico">
+    <title>CUAHSI Compute Sync</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -23,7 +24,7 @@ def get_index_html():
     <script>
       window.SERVER_NOTEBOOK_DIR = "{server_notebook_dir}";
     </script>
-    <script type="text/javascript" src="/bundle.js"></script>
+    <script type="text/javascript" src="/assets/bundle.js"></script>
   </body>
 </html>
 """
