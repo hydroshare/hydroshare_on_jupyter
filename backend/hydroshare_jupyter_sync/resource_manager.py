@@ -17,6 +17,7 @@ import shutil
 from getpass import getpass
 from pathlib import Path
 
+from hydroshare_jupyter_sync.config_reader_writer import get_config_values, set_config_values
 from hs_restclient import HydroShare, HydroShareAuthBasic
 
 
@@ -30,30 +31,33 @@ class ResourceManager:
         and sets up authentication on hydroshare API.
         """
         # authentication for using Hydroshare API
+        # TODO: Don't do this every time we create a new instance of this class (very slow)
+        # TODO: Move this somewhere else
         auth = HydroShareAuthBasic(username=username, password=password)
-        # TODO (Vicky): specify hostname as a parameter to this function
-        self.hs = HydroShare(auth=auth, hostname='www.hydroshare.org')
-        # Get path to this file's location
-        self.output_folder = None
-        # TODO: also, we may want to call it something that doesn't presume they're using JupyterHub. Once we figure
-        # out what we're calling this thing, maybe <name>_DATA_PATH? Like HS_SYNC_DATA_PATH
-        # TODO: get this from a project config file that is read once, maybe same as un/pw one
-        if os.getenv("JH_FOLDER_PATH") is not None:
-            self.output_folder = os.environ.get("JH_FOLDER_PATH")
-            if not os.path.exists(self.output_folder):
-                # TODO: when you change env name, also make this msg not JH specific
-                print("Invalid JH folder path set, path does not exist.")
-                self.output_folder = None
-        if self.output_folder is None:
-            current_path = os.path.dirname(os.path.realpath(__file__))
-            self.output_folder = current_path + "/local_hs_resources"
-            # TODO: get rid of "JH" reference
-            print("No valid JH folder path set, using default: " + self.output_folder)
-            print("To set a different JH folder path, please set the JH_FOLDER_PATH environment variable.")
-            # Make directory if it doesn't exist
-            if not os.path.exists(self.output_folder):
-                os.makedirs(self.output_folder)
-                logging.info("Made {} folder for new resources".format(self.output_folder))
+        # TODO: Load these with the username and password
+        config = get_config_values(['dataPath', 'hydroShareHostname'])
+        hostname = 'www.hydroshare.org'
+        data_path = Path(os.path.dirname(os.path.realpath(__file__))) / 'local_hs_resources'
+        if config:
+            hostname = config.get('hydroShareHostname', hostname)
+            if config.get('dataPath'):
+                data_path = Path(config['dataPath'])
+        if not data_path.is_dir():
+            # Let any exceptions that occur bubble up
+            data_path.mkdir(parents=True)
+
+        # Create a symlink in the current directory to point to data_path
+        self.output_folder = Path(os.path.dirname(os.path.realpath(__file__))) / 'resources'
+        if self.output_folder.exists():
+            if self.output_folder.is_symlink():
+                if self.output_folder.resolve() != data_path.resolve():
+                    # Perhaps the user changed their config file. Update the symlink.
+                    self.output_folder.unlink()
+                    self.output_folder.symlink_to(data_path, target_is_directory=True)
+        else:
+            self.output_folder.symlink_to(data_path, target_is_directory=True)
+
+        self.hs = HydroShare(auth=auth, hostname=hostname)
 
     def get_user_info(self):
         """Gets information about the user currently logged into HydroShare
@@ -227,62 +231,24 @@ class ResourceManager:
 
 
 def get_hydroshare_credentials():
-    username = None
-    password = None
-    # Attempt to read the config file from ~/.config/hydroshare_jupyter_sync/config.json
-    config_path = Path.home() / '.config' / 'hydroshare_jupyter_sync' / 'config.json'
-    if config_path.is_file():
-        try:
-            # Read from the file
-            with open(str(config_path), 'r') as f:
-                try:
-                    config = json.load(f)
-                    # Extract the user's HydroShare username and password
-                    username = config.get('u')
-                    password = config.get('p')
-                    if password:
-                        password = base64.b64decode(password).decode('utf-8')
-                    if username and password:
-                        logging.info('Successfully loaded HydroShare credentials from ' + str(config_path))
-                except json.JSONDecodeError:
-                    pass
-        except IOError:
-            logging.error('Found existing config file in ' + str(config_path) + ' but could not open it.')
-            return None, None
-
-    if username is None or password is None:
-        username = input("Please enter your HydroShare username: ")
-        password = getpass()
+    loaded_credentials = get_config_values(['u', 'p'])
+    if loaded_credentials and 'u' in loaded_credentials and 'p' in loaded_credentials:
+        user_name = loaded_credentials['u']
+        pw = base64.b64decode(loaded_credentials['p']).decode('utf-8')
+    else:
+        user_name = input("Please enter your HydroShare username: ")
+        pw = getpass()
 
         # Save the username and password
-        if not config_path.exists():
-            # Create the parent directory if it doesn't exist
-            if not config_path.parent.exists():
-                config_path.parent.mkdir(parents=True)
-        elif not config_path.is_file():  # A folder perhaps?
-            logging.error(str(config_path) + ' exists but is not a file.')
-            return None, None
-
-        # Read from the file
-        try:
-            with open(str(config_path), 'w+') as f:
-                if f:
-                    try:
-                        config = json.load(f)
-                    except json.JSONDecodeError:
-                        config = {}
-                else:
-                    config = {}
-                config['u'] = username
-                config['p'] = str(base64.b64encode(password.encode('utf-8')).decode('utf-8'))
-                json.dump(config, f)
-            logging.info('Successfully saved HydroShare credentials to ' + str(config_path))
-        except IOError:
-            logging.error('Could not write to config file ' + str(config_path))
-            return None, None
+        saved_successfully = set_config_values({
+            'u': user_name,
+            'p': str(base64.b64encode(pw.encode('utf-8')).decode('utf-8')),
+        })
+        if saved_successfully:
+            logging.info('Successfully saved HydroShare credentials to config file.')
 
     # TODO (Charlie): Check that password works
-    return username, password
+    return user_name, pw
 
 
 username, password = get_hydroshare_credentials()

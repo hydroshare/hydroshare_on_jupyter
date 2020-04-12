@@ -12,10 +12,10 @@ import signal
 import logging
 import sys
 import json
-import re
 from hs_restclient import exceptions as HSExceptions
 from hydroshare_jupyter_sync.hydroshare_resource import Resource, HS_PREFIX, LOCAL_PREFIX
 from hydroshare_jupyter_sync.resource_manager import ResourceManager
+from hydroshare_jupyter_sync.index_html import get_index_html
 
 import tornado.ioloop
 import tornado.web
@@ -48,7 +48,8 @@ class BaseRequestHandler(tornado.web.RequestHandler):
 class WebAppHandler(BaseRequestHandler):
     """ Handles starting up the frontend for our web app """
     def get(self):
-        self.render('index.html')
+        index_html = get_index_html()
+        self.write(index_html)
 
 
 class BundleHandler(BaseRequestHandler):
@@ -447,7 +448,6 @@ def start_server(app):
 
 
 if __name__ == '__main__':
-    # TODO (kyle) configure ArgParse class also accept hs hostname
     LEVELS = {'debug': logging.DEBUG,
               'info': logging.INFO,
               'warning': logging.WARNING,
