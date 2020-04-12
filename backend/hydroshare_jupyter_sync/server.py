@@ -428,7 +428,7 @@ def make_app():
     """Returns an instance of the server with the appropriate endpoints"""
     return HydroShareJupyterSync([
         (r"/", WebAppHandler),
-        (r"/bundle.js", BundleHandler),
+        (r"/assets/(.*)", tornado.web.StaticFileHandler, {'path': 'assets'}),
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesRootHandler),
         (r"/resources/([^/]+)", ResourceHandler),
