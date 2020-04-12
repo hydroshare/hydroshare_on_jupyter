@@ -12,6 +12,7 @@ import {
 } from "../async-actions";
 
 import {
+  IFile,
   IFolder,
   IJupyterResource,
   IRootState,
@@ -46,6 +47,20 @@ export function notifyGettingResourceHydroShareFiles(resource: IJupyterResource)
 
 export function notifyGettingResourceJupyterHubFiles(resource: IJupyterResource) {
   return action(ResourcesActions.NOTIFY_GETTING_RESOURCE_JUPYTERHUB_FILES, { resourceId: resource.id });
+}
+
+export function openFileInJupyter(jupyterResource: IJupyterResource, file: IFile | IFolder) {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
+        const state = getState();
+        if (state.user) {
+            const resourceId = jupyterResource.id;
+            const filePath = `${file.name}.${file.type}`;
+            // TODO: Remove this hardcoded value
+            // @ts-ignore
+            const url = `${window.SERVER_NOTEBOOK_DIR}/${resourceId}/${resourceId}/data/contents/${filePath}`;
+            window.open(url, '_blank');
+        }
+    };
 }
 
 export function setResources(resources: IJupyterResource[]) {

@@ -11,7 +11,6 @@ import Modal from "../components/modals/Modal";
 import NewFileModal from "../components/modals/NewFileModal";
 import ResourceMetadata from '../components/ResourceMetadata';
 
-import * as resourcePageActions from '../store/actions/ResourcePage';
 import * as resourcesActions from '../store/actions/resources';
 import {
   createNewFileOrFolder,
@@ -53,7 +52,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     createNewFile: (resource: IJupyterResource, filename: string, type: string) => dispatch(createNewFileOrFolder(resource, filename, type)),
     deleteResourceFilesOrFolders: (resource: IJupyterResource, paths: string[]) => dispatch(deleteResourceFilesOrFolders(resource, paths)),
     getFilesIfNeeded: (resource: IJupyterResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
-    openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcePageActions.openFileInJupyterHub(resource, file)),
+    openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcesActions.openFileInJupyter(resource, file)),
     copyFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
     moveFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
     goBackToResources: () => dispatch(push('/')),

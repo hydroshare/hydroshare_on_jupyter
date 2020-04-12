@@ -4,9 +4,7 @@ import {ActionType} from 'typesafe-actions';
 
 import * as resourcesActions from './actions/resources';
 import * as userActions from './actions/user';
-import * as resourcePageActions from './actions/ResourcePage';
 
-export type ResourcePageActionTypes = ActionType<typeof resourcePageActions>;
 export type ResourcesActionTypes = ActionType<typeof resourcesActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
 
