@@ -9,6 +9,7 @@ import FileManager from "../components/FileManager";
 import Loading from "../components/Loading";
 import Modal from "../components/modals/Modal";
 import NewFileModal from "../components/modals/NewFileModal";
+import EditPrivacyModal from "../components/modals/EditPrivacyModal";
 import ResourceMetadata from '../components/ResourceMetadata';
 
 import * as resourcesActions from '../store/actions/resources';
@@ -135,6 +136,11 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       this.setState({modal: MODAL_TYPES.NONE});
     };
 
+    const editPrivacy = () => {
+      window.location.replace(`https://www.hydroshare.org/resource/${resource.id}/`)
+      this.setState({modal: MODAL_TYPES.NONE});
+    };
+
     const openFile = (file: IFile) => this.props.openFile(resource, file);
 
     let modal;
@@ -150,11 +156,19 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           paths={this.state.filesOrFoldersToConfirmDeleting!}
         />;
         break;
+      case MODAL_TYPES.EDITPRIVACY:
+        modal = <EditPrivacyModal 
+          close = {this.hideModal}
+          submit = {editPrivacy}
+        />;
+        break
     }
 
     return (
       <div className="page resource-details">
-        <ResourceMetadata resource={resource} />
+        <ResourceMetadata 
+          resource={resource} 
+          promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDITPRIVACY)}/>
         <FileManager
           fetchingHydroShareFiles={fetchingHydroShareFiles}
           fetchingLocalFiles={fetchingLocalFiles}
@@ -178,6 +192,7 @@ enum MODAL_TYPES {
   NONE,
   NEW,
   DELETE,
+  EDITPRIVACY,
 }
 
 type DeleteConfirmationModalProps = {
