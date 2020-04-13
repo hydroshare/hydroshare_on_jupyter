@@ -145,6 +145,8 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       loading = <Loading/>;
     }
 
+    const deleteButtonClassName = selectedResources.size === 0 ? "button-disabled": "button-enabled";
+
     let modal;
     switch (this.state.modal) {
       case MODAL_TYPES.NEW_RESOURCE:
@@ -178,9 +180,10 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           <p>To begin, click the New Resource button to create a new resource or click on an existing resource in the list to view files in that resource.</p> 
         </div>
         <div className="actions-row">
-          <input type="text" placeholder="Search" onChange={this.filterTextChanged}/>
-          <button onClick={this.showNewResourceModal}><span>New Resource</span></button>
+          <input className="search" type="text" placeholder="Search" onChange={this.filterTextChanged}/>
+          <button className="button-enabled" onClick={this.showNewResourceModal}><span>New Resource</span></button>
           <button
+            className={deleteButtonClassName}
             disabled={selectedResources.size === 0}
             onClick={this.showConfirmResourceDeletionModal}>
             <span>Delete</span>
