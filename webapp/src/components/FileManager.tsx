@@ -147,7 +147,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
           <span className="title">JupyterHub Files</span>
           <img src="/assets/JupyterHub-logo.png" alt="JupyterHub logo"/>
         </div>
-        <div className="actions-row">
+        <div className="actions-row local">
           <input
             className="search"
             onChange={this.filterByNameChanged}
