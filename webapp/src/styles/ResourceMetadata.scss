@@ -19,6 +19,7 @@
 
     .info-header {
       font-size: 0.9em;
+      color: rgb(125, 122, 122);
     }
 
     .info-wrapping {
@@ -28,6 +29,19 @@
       div:not(:last-child) {
         margin-right: 2em;
       }
+    }
+
+    .info-read-more {
+      color: $medium-blue;
+    }
+
+    .info-content {
+      float: left;
+    }
+
+    .info-edit {
+      float: right;
+      color: #2586a6;
     }
   }
 
