@@ -171,7 +171,11 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       <div className={classNames.join(' ')}>
         <div className="ResourceList-header">
           <h2>My Resources</h2>
-          <span>Here is a list of your HydroShare resources. To open one, simply click on its name.</span>
+          <p>Here is a list of your HydroShare resources. To open one, simply click on its name.</p>
+          <p>A resource is a collection of files on HydroShare, a place for sharing code and water data. These files can be code (e.g. Python or R), data (e.g. .csv, .xlsx, .geojson), or any other type of file.</p>
+          <p>The list below shows the resources that exist in HydroShare and in JupyterHub. Resources only in HydroShare can be synced to JupyterHub, and then you can run code and edit data. All changes should be made
+             in JupyterHub and then synced to HydroShare. Think of JupyterHub as your workspace and HydroShare are your sharing or archival space. </p>
+          <p>To begin, click the New Resource button to create a new resource or click on an existing resource in the list to view files in that resource.</p> 
         </div>
         <div className="actions-row">
           <input type="text" placeholder="Search" onChange={this.filterTextChanged}/>
