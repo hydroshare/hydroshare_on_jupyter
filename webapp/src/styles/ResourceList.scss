@@ -4,4 +4,16 @@
     .ResourceList-header {
         padding: 1em;
     }
+
+    .actions-row {
+        background: #2D9CDB;
+
+        .search {
+            background: white;
+        }
+
+        .button-enabled {
+            background: white;
+        }
+    }
 }
