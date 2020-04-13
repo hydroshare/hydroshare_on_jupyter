@@ -140,6 +140,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     // Rebuild the lookup table
     this.buildLookupTable();
 
+    const localFilesDeleteClassName = this.state.selectedLocalFilesAndFolders.size === 0 ? "button-disabled" : "button-enabled"
     const localFilesHeader =
       <div>
         <div className="title-row">
@@ -155,9 +156,10 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             type="text"
             value={filterByName}
           />
-          <button onClick={this.props.promptCreateNewFileOrFolder}>New</button>
-          <button>Upload</button>
+          <button className = "button-enabled" onClick={this.props.promptCreateNewFileOrFolder}>New</button>
+          <button className = "button-enabled">Upload</button>
           <button
+            className = {localFilesDeleteClassName}
             onClick={this.promptDeleteSelectedLocalFiles}
             disabled={this.state.selectedLocalFilesAndFolders.size === 0}
             title="Delete the selected files and/or folders"
@@ -167,6 +169,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
         </div>
       </div>;
 
+    const hydroShareDeleteClassName = this.state.selectedHydroShareFilesAndFolders.size === 0 ? "button-disabled" : "button-enabled"
     const openInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resourceId}/`, '_blank');
     const hydroShareHeader =
       <div>
@@ -184,6 +187,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             value={filterByName}
           />
           <button
+            className ={hydroShareDeleteClassName}
             disabled={this.state.selectedHydroShareFilesAndFolders.size === 0}
             onClick={this.promptDeleteSelectedHydroShareFiles}
             title="Delete the selected files and/or folders"
@@ -191,6 +195,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             Delete
           </button>
         <button
+          className = "button-enabled"
           onClick={openInHydroShare}
           title="Open the page for this resource in HydroShare">
           Open in HydroShare
