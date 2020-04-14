@@ -38,11 +38,14 @@ def set_config_values(d):
         return False
 
     try:
-        with open(str(config_path), 'w+') as f:
+        with open(str(config_path), 'r+') as f:
             if f:
                 try:
                     config = json.load(f)
-                except json.JSONDecodeError:
+                    f.seek(0)  # Point back to the beginning of the file
+                except json.JSONDecodeError as e:
+                    logging.error(e)
+                    logging.warning('Could not parse config file')
                     config = {}
             else:
                 config = {}
@@ -50,6 +53,7 @@ def set_config_values(d):
                 config[k] = v
             json.dump(config, f)
             return True
-    except IOError:
+    except IOError as e:
         logging.error('Could not write to config file ' + str(config_path))
+        logging.error(e)
         return False
