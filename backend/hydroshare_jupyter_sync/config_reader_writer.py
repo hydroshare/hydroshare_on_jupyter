@@ -24,12 +24,13 @@ def get_config_values(keys):
             logging.error('Found existing config file in ' + str(config_path) + ' but could not open it.')
             return None
     else:
-        logging.error('Could not locate config file at ' + str(config_path))
+        logging.info('Could not locate config file at ' + str(config_path))
         return None
 
 
 def set_config_values(d):
-    if not config_path.exists():
+    config_exists = config_path.exists()
+    if not config_exists:
         # Create the parent directory if it doesn't exist
         if not config_path.parent.exists():
             config_path.parent.mkdir(parents=True)
@@ -37,9 +38,10 @@ def set_config_values(d):
         logging.error(str(config_path) + ' exists but is not a file.')
         return False
 
+    mode = 'r+' if config_exists else 'w+'
     try:
-        with open(str(config_path), 'r+') as f:
-            if f:
+        with open(str(config_path), mode) as f:
+            if config_exists:
                 try:
                     config = json.load(f)
                     f.seek(0)  # Point back to the beginning of the file
