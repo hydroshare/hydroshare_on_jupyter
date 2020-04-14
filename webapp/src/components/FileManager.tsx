@@ -4,8 +4,7 @@
  * https://egghead.io/lessons/react-customise-the-appearance-of-an-app-during-a-drag-using-react-beautiful-dnd-snapshot-values
  */
 
-// SPIFFY (Emily) Again, frontend overall needs more commenting I think, especially bc HS devs
-// don't know anything about React
+// TODO: add documentation
 import * as React from 'react';
 import { ChangeEvent } from 'react';
 import {
