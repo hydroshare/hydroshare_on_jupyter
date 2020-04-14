@@ -80,7 +80,6 @@ const Notification: React.FC<NotificationProps> = (props: NotificationProps) => 
     </div>
   )
 };
-// SPIFFY (Emily) what is this long path?
 const ErrorIcon = (
   <svg xmlns="http://www.w3.org/2000/svg" className="icon error" width="10" height="10" viewBox="0 0 10 10">
     <path d="M5 0a5 5 0 00-5 5 5 5 0 005 5 5 5 0 005-5 5 5 0 00-5-5zm-.603 2.125H5.6l-.133 3.941h-.938l-.132-3.941zm.601 4.559c.19 0 .342.056.457.168a.568.568 0 01.176.43.564.564 0 01-.176.425.625.625 0 01-.457.168.635.635 0 01-.457-.168.57.57 0 01-.172-.426.57.57 0 01.172-.426.627.627 0 01.457-.171z"/>

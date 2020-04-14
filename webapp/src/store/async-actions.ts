@@ -1,4 +1,4 @@
-// SPIFFY (Emily) should this file be moved into the actions folder?
+// TODO (kyle): get rid of actions altogether & move contents to other files
 import axios, { AxiosResponse } from 'axios';
 import {
     AnyAction,

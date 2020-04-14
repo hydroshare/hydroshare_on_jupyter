@@ -139,7 +139,6 @@ class ResourceManager:
 
         return list(resources.values()), error
 
-    # spiffy: do we need to include HS in the function name?
     def create_HS_resource(self, resource_title, creators):
         """
         Creates a hydroshare resource from the metadata specified in a dict
@@ -176,8 +175,8 @@ class ResourceManager:
             return resource_id, error
 
         # Formatting creators for metadata['metadata']:
-        # spiffy: should these dates really be hardcoded?
-        # spiffy: also, it'd probably make errors less likely to crop up if this was a dictionary that was turned into JSON using the json module
+        # TODO (Vicky): ask Tony if this is something that should be required of us
+        # TODO (Vicky): if it is, use a dictionary and convert to json
         meta_metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}'
         for creator in creators:
             creator_string = ', {"creator":{"name":"'+creator+'"}}'

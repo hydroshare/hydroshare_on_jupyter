@@ -39,11 +39,10 @@ class Resource:
         self.output_folder = self.resource_handler.output_folder
         self.hs = self.resource_handler.hs
 
-        # SPIFFY (Emily) I wonder, should we rename RemoteFolder to HSFolder or something?
+        # TODO: rename REmoteFolder class
         self.remote_folder = RemoteFolder(self.hs, self.res_id)
         self.local_folder = LocalFolder()
 
-        # SPIFFY (Emily) this is for me and my path task, but is this the right way of doing Path stuff?
         self.path_prefix = Path(self.output_folder) / self.res_id / self.res_id / 'data' / 'contents'
         self.hs_files = self.get_files_upon_init_HS()
         self.JH_files = self.get_files_upon_init_JH()
@@ -78,8 +77,7 @@ class Resource:
             self.hs.getResource(self.res_id, destination=self.output_folder, unzip=unzip)
 
     def get_files_JH(self):
-        # SPIFFY (Vicky): do we want it to update if someone creates a file not on our app but in their JH folder?
-        # SPIFFY (Emily) maybe but how do we check that that occurs? Have a cron that periodically refreshes?
+        # TODO (kyle): cache nonsense
         return self.JH_files
 
     def get_files_upon_init_JH(self):
@@ -103,9 +101,7 @@ class Resource:
         return root_dir
 
     def update_hs_files(self):
-        # SPIFFY (Vicky) interesting.. do we want an update for HS? when is this called?
-        # SPIFFY (Emily) maybe but how do we check that that occurs? Have a cron that periodically refreshes?
-        # looks like it is only called in delete.. in which case, this won't update if you make changes on HS?
+        # TODO (Kyle): evaluate cache and remove if not used
         self.hs_files = self.get_files_upon_init_HS()
 
     def get_files_HS(self):
@@ -118,7 +114,7 @@ class Resource:
 
         # TODO (Vicky) fix this function & break it out into multiple functions
         # get the file information for all files in the HS resource in json
-        # spiffy: can we remove this?
+        # TODO (Vicky): remove this?
         #print(self.hs.resource(self.res_id).files.all().json())
         # testing = (self.hs.getResourceFileList(self.res_id))
         # for test in testing:
@@ -174,7 +170,7 @@ class Resource:
                                                                                          nested_files, HS_PREFIX+':')
                 if folder_time:
                     folder_time = str(folder_time)
-                # spiffy: use folder_size and folder_contents instead of key[i]
+                # TODO (vicky): use name and path instead of key[i]
                 folders_final.append({
                     "name": key[1],
                     "path": HS_PREFIX + ':/' + key[2].strip('/'),
@@ -209,11 +205,10 @@ class Resource:
         if old_filepath is not None and new_filepath is not None:
             if self.is_file_in_HS(old_filepath):
                 self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
-                # spiffy: what is this doing and how is it working?
+                # TODO (Emily): make comments
                 if len(old_filepath.rsplit("/", 1)) > 1:
                     folderpath, filename = old_filepath.rsplit("/", 1)
-                    # SPIFFY (vicky): is the whole deleting thing possibly related to breaking resources?
-                    # SPIFFY (Emily) before we did this, if we deleted an element from an empty folder and then tried to
+                    #TODO (Emily): potentially remove
                     # create that folder again (bc HS wouldn't tell us that that folder still existed), the resource would break. so maybe this stopped working?
                     self.delete_HS_folder_if_empty(folderpath, filename)
             else:
@@ -323,7 +318,6 @@ class Resource:
         if not isinstance(item_path, PosixPath):
             item_path = Path(item_path)
         current_dir_contents = self.hs_files.get('contents')
-        # SPIFFY (Emily) sigh why does HS have to be so chaotic? I wrote this, but it doesn't seem super elegant
         for current_path_part in item_path.parts:
             found_next_part = False
             for file_or_folder in current_dir_contents:
@@ -428,7 +422,7 @@ class Resource:
             if src_full_path.exists():
                 shutil.move(str(src_full_path), str(dest_full_path))
 
-            # SPIFFY (Vicky) feels weird to be calling an upon init thing?
+            # TODO (kyle): figure out what is going on here
             self.JH_files = self.get_files_upon_init_JH()
 
     def overwrite_HS_with_file_from_JH(self, file_path):
@@ -440,7 +434,7 @@ class Resource:
         path_without_extension = str(full_file_path_rel_resource_root)[:-len(file_extension)]
         # Drop the leading . from the file extension
         file_extension = file_extension[1:]
-        # SPIFFY (Vicky): based on things Kyle was seeing, is below not working?
+        # TODO (Vicky): make this work
         if self.is_file_or_folder_in_HS(path_without_extension, file_extension):
             self.delete_file_or_folder_from_HS(full_file_path_rel_resource_root)
         folder_path = full_file_path_rel_resource_root.parent
@@ -471,5 +465,5 @@ class Resource:
             self.local_folder.upload_file_to_JH(file_info, self.path_prefix)
             return True
         else:
-            # spiffy: probably throw an exception here instead
+            # TODO (Kyle): throw an exception
             return "Error: a file " + file_info["filename"] +" already exists in JupyterHub at that location, cannot upload"
