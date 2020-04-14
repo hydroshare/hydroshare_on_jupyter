@@ -231,7 +231,7 @@ class ResourceManager:
 
 def get_hydroshare_credentials():
     loaded_credentials = get_config_values(['u', 'p'])
-    if loaded_credentials and 'u' in loaded_credentials and 'p' in loaded_credentials:
+    if loaded_credentials and loaded_credentials['u'] and loaded_credentials['p']:
         user_name = loaded_credentials['u']
         pw = base64.b64decode(loaded_credentials['p']).decode('utf-8')
     else:
