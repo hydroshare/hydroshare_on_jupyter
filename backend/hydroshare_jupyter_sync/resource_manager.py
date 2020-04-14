@@ -39,9 +39,9 @@ class ResourceManager:
         hostname = 'www.hydroshare.org'
         data_path = Path(os.path.dirname(os.path.realpath(__file__))) / 'local_hs_resources'
         if config:
-            if config.get('hydroShareHostname'):
+            if config['hydroShareHostname'] is not None:
                 hostname = config.get('hydroShareHostname')
-            if config.get('dataPath'):
+            if config['dataPath'] is not None:
                 data_path = Path(config['dataPath'])
         if not data_path.is_dir():
             # Let any exceptions that occur bubble up
