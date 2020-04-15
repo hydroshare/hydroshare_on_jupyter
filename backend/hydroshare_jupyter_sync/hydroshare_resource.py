@@ -8,9 +8,10 @@ Email: vickymmcd@gmail.com
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# TODO: remove unused imports
+from hydroshare_jupyter_sync.config_reader_writer import get_config_values
 from hydroshare_jupyter_sync.local_folder import LocalFolder
 from hydroshare_jupyter_sync.hydroshare_folder import RemoteFolder
+from notebook.services.contents.filemanager import FileContentsManager
 import logging
 import os
 from os import path
@@ -53,7 +54,12 @@ class Resource:
         """
         # TODO: TEST THIS! & add more error checking to this function, does it exist?
         if filename is not None:
-            (self.path_prefix / filename).touch()
+            full_path = self.path_prefix / filename
+            path_rel_cwd = Path(full_path).relative_to(Path.cwd())
+            if filename.lower().endswith('.ipynb'):
+                FileContentsManager().new(path=str(path_rel_cwd))
+            else:
+                full_path.touch()
 
     def create_local_folder(self, folder_name):
         """Creates a new file with the given name in JH
