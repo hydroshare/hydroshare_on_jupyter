@@ -56,6 +56,8 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
 
     showConfirmResourceDeletionModal = () => this.setState({ modal: MODAL_TYPES.CONFIRM_RESOURCE_DELETION });
     showNewResourceModal = () => this.setState({ modal: MODAL_TYPES.NEW_RESOURCE });
+    showConfirmArchiveResourceModal = () => this.setState({ modal: MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE });
+
 
     setSortBy = (sortBy: SORT_BY_OPTIONS) => {
       if (sortBy === this.state.sortBy) {
@@ -162,10 +164,17 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         />;
         break;
       case MODAL_TYPES.CONFIRM_RESOURCE_DELETION:
-        const selectedResources = Array.from(this.state.selectedResources).map(r => this.props.resources[r]);
+        const selectedDelResources = Array.from(this.state.selectedResources).map(r => this.props.resources[r]);
         modal = <ResourceDeleteConfirmationModal
           close={this.closeModal}
-          resources={selectedResources}
+          resources={selectedDelResources}
+          submit={this.deleteSelectedResource}
+        />
+      case MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE:
+        const selectedArchResources = Array.from(this.state.selectedResources).map(r => this.props.resources[r]);
+        modal = <ArchiveResourceConfirmationModal
+          close={this.closeModal}
+          resources={selectedArchResources}
           submit={this.deleteSelectedResource}
         />
     }
@@ -194,6 +203,10 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
             onClick={this.showConfirmResourceDeletionModal}>
             <span>Delete</span>
           </button>
+          <button className={deleteButtonClassName}
+            disabled={selectedResources.size === 0}
+            onClick={this.showConfirmArchiveResourceModal}>
+            <span>Archive resource</span></button>
         </div>
         <div className="table-header table-row">
           <span className="checkbox">
@@ -244,10 +257,27 @@ const ResourceDeleteConfirmationModal: React.FC<RDCModalProps> = (props: RDCModa
   )
 };
 
+type ArchiveModalProps = {
+  close: () => any
+  resources: IJupyterResource[]
+  submit: () => any
+};
+
+const ArchiveResourceConfirmationModal: React.FC<ArchiveModalProps> = (props: ArchiveModalProps) => {
+  return (
+    <Modal close={props.close} title="Archive Resource" submit={props.submit} isValid={true} submitText="Archive" isConfirm={true}>
+      <p className="archive-header">Are you sure you want to archive the following resources?</p>
+      {props.resources.map(r => <p className="archive-resource-list">{r.title}</p>)}
+      <p>Please manually transfer from JupyterHub any remaining files you'd like to save to HydroShare.</p>
+    </Modal>
+  )
+};
+
 enum MODAL_TYPES {
   NONE,
   NEW_RESOURCE,
   CONFIRM_RESOURCE_DELETION,
+  CONFIRM_ARCHIVE_RESOURCE,
 }
 
 enum SORT_BY_OPTIONS {
