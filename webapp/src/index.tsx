@@ -17,6 +17,8 @@ import MainPage from './pages/MainPage';
 import NotificationBanner from "./components/NotificationBanner";
 import ResourcePage from './pages/ResourcePage';
 
+// @ts-ignore
+const URL_PREFIX = window.FRONTEND_URL || '';
 
 ReactDOM.render(
   <Provider store={store}>
@@ -24,10 +26,10 @@ ReactDOM.render(
       <Header />
       <NotificationBanner/>
       <Switch>
-        <Route exact={true} path="/">
+        <Route exact={true} path={`${URL_PREFIX}/`}>
           <MainPage />
         </Route>
-        <Route path="/resources/:resourceId">
+        <Route path={`${URL_PREFIX}/resources/:resourceId`}>
           <ResourcePage />
         </Route>
       </Switch>

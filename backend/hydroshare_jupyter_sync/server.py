@@ -16,6 +16,8 @@ from hs_restclient import exceptions as HSExceptions
 from hydroshare_jupyter_sync.hydroshare_resource import Resource, HS_PREFIX, LOCAL_PREFIX
 from hydroshare_jupyter_sync.resource_manager import ResourceManager
 from hydroshare_jupyter_sync.index_html import get_index_html
+from notebook.base.handlers import IPythonHandler
+from notebook.utils import url_path_join
 from pathlib import Path
 
 import tornado.ioloop
@@ -27,8 +29,13 @@ resource_handler = ResourceManager()
 
 assets_path = Path(__file__).parent / 'assets'
 
+# If we're running this file directly with Python, we'll be firing up a full Tornado web server, so use Tornado's
+# RequestHandler as our base class. Otherwise (i.e. if this is being run by a Jupyter notebook server) we want to use
+# IPythonHandler as our base class. (See the code at the bottom of this file for the server launching.)
+BaseHandler = tornado.web.RequestHandler if __name__ == '__main__' else IPythonHandler
 
-class BaseRequestHandler(tornado.web.RequestHandler):
+
+class BaseRequestHandler(BaseHandler):
     """ Sets the headers for all the request handlers that extend this class """
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")  # TODO: change from * (any server) to our specific url
@@ -412,7 +419,7 @@ class UserInfoHandler(BaseRequestHandler):
                     'error': error})
 
 
-class HydroShareJupyterSync(tornado.web.Application):
+class TestApp(tornado.web.Application):
     """ Class for setting up the server & making sure it can exit cleanly """
 
     is_closing = False
@@ -427,27 +434,17 @@ class HydroShareJupyterSync(tornado.web.Application):
             logging.info('exit success')
 
 
-def make_app():
-    """Returns an instance of the server with the appropriate endpoints"""
-    return HydroShareJupyterSync([
-        (r"/", WebAppHandler),
-        (r"/assets/(.*)", tornado.web.StaticFileHandler, {'path': str(assets_path)}),
-        (r"/user", UserInfoHandler),
-        (r"/resources", ResourcesRootHandler),
-        (r"/resources/([^/]+)", ResourceHandler),
-        (r"/resources/([^/]+)/hs-files", ResourceHydroShareFilesRequestHandler),
-        (r"/resources/([^/]+)/local-files", ResourceLocalFilesRequestHandler),
-        (r"/resources/([^/]+)/move-copy-files", MoveCopyFiles),
-    ])
-
-
-def start_server(app):
-    """ Starts running the server """
-    tornado.options.parse_command_line()
-    signal.signal(signal.SIGINT, app.signal_handler)
-    app.listen(8080)
-    tornado.ioloop.PeriodicCallback(app.try_exit, 100).start()
-    tornado.ioloop.IOLoop.instance().start()
+def get_route_handlers(frontend_url, backend_url):
+    return [
+        (frontend_url, WebAppHandler),
+        (url_path_join(frontend_url, r"/assets/(.*)"), tornado.web.StaticFileHandler, {'path': str(assets_path)}),
+        (url_path_join(backend_url, r"/user"), UserInfoHandler),
+        (url_path_join(backend_url, r"/resources"), ResourcesRootHandler),
+        (url_path_join(backend_url, r"/resources/([^/]+)"), ResourceHandler),
+        (url_path_join(backend_url, r"/resources/([^/]+)/hs-files"), ResourceHydroShareFilesRequestHandler),
+        (url_path_join(backend_url, r"/resources/([^/]+)/local-files"), ResourceLocalFilesRequestHandler),
+        (url_path_join(backend_url, r"/resources/([^/]+)/move-copy-files"), MoveCopyFiles),
+    ]
 
 
 if __name__ == '__main__':
@@ -462,6 +459,10 @@ if __name__ == '__main__':
         level = LEVELS.get(level_name, logging.NOTSET)
         logging.basicConfig(level=level)
 
-    application = make_app()
+    app = TestApp(get_route_handlers('/', '/syncApi'))
     print("Starting server at localhost:8080")
-    start_server(application)
+    tornado.options.parse_command_line()
+    signal.signal(signal.SIGINT, app.signal_handler)
+    app.listen(8080)
+    tornado.ioloop.PeriodicCallback(app.try_exit, 100).start()
+    tornado.ioloop.IOLoop.instance().start()

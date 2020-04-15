@@ -39,7 +39,8 @@ import {
 } from './types';
 
 // TODO: Remove this hardcoding
-const BACKEND_URL = '//localhost:8080';
+// @ts-ignore
+const BACKEND_URL = window.BACKEND_API_URL || '//localhost:8080/syncApi';
 
 function deleteToBackend<T>(endpoint: string, data: any = undefined): Promise<AxiosResponse<T>> {
     return axios.delete<T>(BACKEND_URL + endpoint, {data});

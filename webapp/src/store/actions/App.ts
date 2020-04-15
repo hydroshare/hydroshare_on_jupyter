@@ -13,6 +13,9 @@ import {
   IJupyterResource,
 } from '../types';
 
+// @ts-ignore
+const URL_PREFIX = window.FRONTEND_URL || '';
+
 export function loadInitData(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(getResources());
@@ -21,5 +24,5 @@ export function loadInitData(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
 }
 
 export function viewResource(resource: IJupyterResource) {
-  return push('/resources/' + resource.id);
+  return push(URL_PREFIX + '/resources/' + resource.id);
 }
