@@ -14,6 +14,7 @@ import json
 import logging
 import os
 import shutil
+import json
 from getpass import getpass
 from pathlib import Path
 
@@ -140,27 +141,11 @@ class ResourceManager:
 
         return list(resources.values()), error
 
-    def create_HS_resource(self, resource_title, creators):
+    def create_HS_resource(self, resource_title, creators, abstract="", privacy="Private"):
         """
         Creates a hydroshare resource from the metadata specified in a dict
+        using the given resource_title and specified creators
 
-        The metadata should be given in the format:
-        {'abstract': '',
-        'title': '',
-        'keywords': (),
-        'rtype': 'GenericResource',
-        'fpath': '',
-        'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}]',
-        'extra_metadata': ''}
-
-        Example with information:
-        {'abstract': 'My abstract',
-        'title': 'My resource',
-        'keywords': ('my keyword 1', 'my keyword 2'),
-        'rtype': 'GenericResource',
-        'fpath': 'test_delete.md',
-        'metadata': '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"Charlie"}}, {"creator":{"name":"Charlie2"}}]',
-        'extra_metadata': '{"key-1": "value-1", "key-2": "value-2"}'}
         """
         error = None
         resource_id = None
@@ -175,16 +160,21 @@ class ResourceManager:
                     'msg': '"Creators" object should be a list of strings.'}
             return resource_id, error
 
-        # Formatting creators for metadata['metadata']:
-        # TODO (Vicky): ask Tony if this is something that should be required of us
-        # TODO (Vicky): if it is, use a dictionary and convert to json
-        meta_metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}'
-        for creator in creators:
-            creator_string = ', {"creator":{"name":"'+creator+'"}}'
-            meta_metadata = meta_metadata + creator_string
-        meta_metadata = meta_metadata + ']'
+        if abstract is None:
+            abstract = ""
 
-        metadata = {'abstract': '',
+        if privacy == "Public":
+            public = True
+        else:
+            public = False
+
+        meta_metadata = []
+
+        for creator in creators:
+            meta_metadata.append({"creator": {"name": creator}})
+        meta_metadata = json.dumps(meta_metadata)
+
+        metadata = {'abstract': abstract,
                     'title': resource_title,
                     'keywords': (),
                     'rtype': 'GenericResource',
@@ -201,6 +191,8 @@ class ResourceManager:
                                             abstract = metadata['abstract'],
                                             metadata = metadata['metadata'],
                                             extra_metadata=metadata['extra_metadata'])
+
+            self.hs.setAccessRules(resource_id, public=public)
         except:
             error = {'type':'UnknownError',
                     'msg':'Unable to create resource.'}
