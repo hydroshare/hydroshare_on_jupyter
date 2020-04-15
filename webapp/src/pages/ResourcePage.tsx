@@ -11,6 +11,7 @@ import Modal from "../components/modals/Modal";
 import NewFileModal from "../components/modals/NewFileModal";
 import EditPrivacyModal from "../components/modals/EditPrivacyModal";
 import ResourceMetadata from '../components/ResourceMetadata';
+import FilePermanencyInfo from '../components/FilePermanencyInfo';
 
 import * as resourcesActions from '../store/actions/resources';
 import {
