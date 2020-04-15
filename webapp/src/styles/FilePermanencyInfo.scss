@@ -17,12 +17,6 @@
 
   .permanency-info {
 
-    .info-header {
-      font-size: 0.9em;
-      color: rgb(125, 122, 122);
-      margin-bottom: 0em;
-    }
-
     .info-wrapping {
       display: flex;
       flex-wrap: wrap;
@@ -34,20 +28,38 @@
       .info-group {
         width: 21em;
         text-align: center;
+        border-radius: 0.5rem;
+        padding-top:1em;
+        opacity: 0.75;
 
         .info-img {
           height: 2em;
           margin-bottom: 0.5em;
         }
+
+        .info-header {
+          font-size: 1em;
+          font-weight: bold;
+          color: rgb(107, 107, 107);
+          margin-bottom: 0em;
+        }
+
+        .info-content {
+          float: left;
+          width: 16em;
+          margin-left: 2.5em;
+          margin-top: 0.5em;
+        }
+      }
+
+      .info-group.selected {
+        box-shadow: 0.2em 0.2em 0.5em rgba(58, 87, 113, 0.5);
+        opacity: 1;
       }
     }
 
     .info-read-more {
       color: $medium-blue;
-    }
-
-    .info-content {
-      float: left;
     }
 
     .info-edit {
@@ -57,11 +69,7 @@
 
     .info-title {
       text-align:center;
-      border-bottom: #dfdbdb;
-      border-style: none none solid none;
-      border-width: 2px;
-      margin-bottom: 0.5em;
-      padding-bottom: 0.25em;
+      margin-bottom: 1em;
     }
   }
 
