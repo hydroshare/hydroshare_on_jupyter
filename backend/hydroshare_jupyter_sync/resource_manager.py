@@ -40,10 +40,8 @@ class ResourceManager:
         hostname = 'www.hydroshare.org'
         data_path = Path(os.path.dirname(os.path.realpath(__file__))) / 'local_hs_resources'
         if config:
-            if config['hydroShareHostname'] is not None:
-                hostname = config.get('hydroShareHostname')
-            if config['dataPath'] is not None:
-                data_path = Path(config['dataPath'])
+            hostname = config.get('hydroShareHostname', hostname)
+            data_path = Path(config.get('dataPath'), data_path)
         if not data_path.is_dir():
             # Let any exceptions that occur bubble up
             data_path.mkdir(parents=True)
@@ -224,7 +222,7 @@ class ResourceManager:
 
 def get_hydroshare_credentials():
     loaded_credentials = get_config_values(['u', 'p'])
-    if loaded_credentials and loaded_credentials['u'] and loaded_credentials['p']:
+    if loaded_credentials and 'u' in loaded_credentials and 'p' in loaded_credentials:
         user_name = loaded_credentials['u']
         pw = base64.b64decode(loaded_credentials['p']).decode('utf-8')
     else:

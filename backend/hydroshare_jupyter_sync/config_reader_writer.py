@@ -6,7 +6,6 @@ config_path = Path.home() / '.config' / 'hydroshare_jupyter_sync' / 'config.json
 
 
 def get_config_values(keys):
-    # Attempt to read the config file from ~/.config/hydroshare_jupyter_sync/config.json
     if config_path.is_file():
         try:
             # Read from the file
@@ -15,7 +14,8 @@ def get_config_values(keys):
                     config = json.load(f)
                     res = {}
                     for k in keys:
-                        res[k] = config.get(k)
+                        if k in config:
+                            res[k] = config[k]
                     return res
                 except json.JSONDecodeError:
                     logging.error('Could not decode ' + str(config_path))
