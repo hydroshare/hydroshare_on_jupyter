@@ -27,11 +27,6 @@ export default class NewResourceModal extends React.Component<INewResourceModalP
       }
     }
 
-    // TODO (emily): remove some deletes somewhere
-    public deleteClick =() => {
-        console.log("Send message to backend to delete")
-    }
-
     public createNewResource =(event: any) => {
         const form = event.target
         if (form.checkValidity() === false) {
