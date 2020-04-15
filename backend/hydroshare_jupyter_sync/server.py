@@ -16,6 +16,7 @@ from hs_restclient import exceptions as HSExceptions
 from hydroshare_jupyter_sync.hydroshare_resource import Resource, HS_PREFIX, LOCAL_PREFIX
 from hydroshare_jupyter_sync.resource_manager import ResourceManager
 from hydroshare_jupyter_sync.index_html import get_index_html
+from pathlib import Path
 
 import tornado.ioloop
 import tornado.web
@@ -23,6 +24,8 @@ import tornado.options
 
 # Global resource handler variable
 resource_handler = ResourceManager()
+
+assets_path = Path(__file__).parent / 'assets'
 
 
 class BaseRequestHandler(tornado.web.RequestHandler):
@@ -55,7 +58,7 @@ class WebAppHandler(BaseRequestHandler):
 class BundleHandler(BaseRequestHandler):
     """ Serves the web app JavaScript file """
     def get(self):
-        self.render('bundle.js')
+        self.render(assets_path / 'bundle.js')
 
 
 class ResourcesRootHandler(BaseRequestHandler):
@@ -428,7 +431,7 @@ def make_app():
     """Returns an instance of the server with the appropriate endpoints"""
     return HydroShareJupyterSync([
         (r"/", WebAppHandler),
-        (r"/assets/(.*)", tornado.web.StaticFileHandler, {'path': 'assets'}),
+        (r"/assets/(.*)", tornado.web.StaticFileHandler, {'path': str(assets_path)}),
         (r"/user", UserInfoHandler),
         (r"/resources", ResourcesRootHandler),
         (r"/resources/([^/]+)", ResourceHandler),
