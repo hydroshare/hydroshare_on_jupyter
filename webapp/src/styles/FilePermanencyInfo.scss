@@ -1,0 +1,78 @@
+@import 'variables';
+
+.PermanencyInfo {
+  margin-bottom: 1em;
+  padding: $container-padding;
+
+  .title {
+    margin-bottom: 0.5em;
+  }
+
+  .permanency-info-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .permanency-info {
+
+    .info-header {
+      font-size: 0.9em;
+      color: rgb(125, 122, 122);
+      margin-bottom: 0em;
+    }
+
+    .info-wrapping {
+      display: flex;
+      flex-wrap: wrap;
+
+      div:not(:last-child) {
+        margin-right: 2em;
+      }
+
+      .info-group {
+        width: 21em;
+        text-align: center;
+
+        .info-img {
+          height: 2em;
+          margin-bottom: 0.5em;
+        }
+      }
+    }
+
+    .info-read-more {
+      color: $medium-blue;
+    }
+
+    .info-content {
+      float: left;
+    }
+
+    .info-edit {
+      float: right;
+      color: #2586a6;
+    }
+
+    .info-title {
+      text-align:center;
+      border-bottom: #dfdbdb;
+      border-style: none none solid none;
+      border-width: 2px;
+      margin-bottom: 0.5em;
+      padding-bottom: 0.25em;
+    }
+  }
+
+  .locate-in-hs {
+    background-color: $medium-blue;
+    border-radius: 0.25em;
+    color: white;
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+.PermanencyInfo.content-row {
+  margin-top: 1em;
+}
