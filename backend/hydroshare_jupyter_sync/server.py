@@ -93,11 +93,11 @@ class ResourcesRootHandler(BaseRequestHandler):
         body = json.loads(self.request.body.decode('utf-8'))
         resource_title = body.get("resource title") # string
         creators = body.get("creators") # list of names (strings)
-        # TODO: Use this
+        abstract = body.get("abstract")
         privacy = body.get("privacy")  # Public or private
 
         if resource_title is not None and creators is not None:
-            resource_id, error = resource_handler.create_HS_resource(resource_title, creators)
+            resource_id, error = resource_handler.create_HS_resource(resource_title, creators, abstract, privacy)
             if not error:
                 success = True
         else:
