@@ -54,9 +54,10 @@ export function openFileInJupyter(jupyterResource: IJupyterResource, file: IFile
         const state = getState();
         if (state.user) {
             const resourceId = jupyterResource.id;
-            const filePath = `${file.name}.${file.type}`;
+            // Discard the path prefix
+            const filePath = file.path.split(':')[1];
             // @ts-ignore
-            const url = `${window.NOTEBOOK_URL_PATH_PREFIX}/${resourceId}/${resourceId}/data/contents/${filePath}`;
+            const url = `${window.NOTEBOOK_URL_PATH_PREFIX}/${resourceId}/${resourceId}/data/contents${filePath}`;
             window.open(url, '_blank');
         }
     };
