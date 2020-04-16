@@ -120,11 +120,35 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
   setSelectedHydroShareFilesAndFolders = (items: Set<string>) => this.setState({selectedHydroShareFilesAndFolders: items});
   setSelectedLocalFilesAndFolders = (items: Set<string>) => this.setState({selectedLocalFilesAndFolders: items});
 
-  promptDeleteSelectedHydroShareFiles = () =>
-    this.props.promptDeleteFilesOrFolders(Array.from(this.state.selectedHydroShareFilesAndFolders));
+  promptDeleteSelectedHydroShareFiles = () => {
+    // This would ideally be done when we get a new list of file from the server, but since the only way to do that
+    // would be to filter on a re-render, this is probably the fastest approach (though definitely not the cleanest)
+    const selectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.hydroShareResourceRootDir, this.state.selectedHydroShareFilesAndFolders);
+    this.props.promptDeleteFilesOrFolders(selectedItems);
+  };
 
-  promptDeleteSelectedLocalFiles = () =>
-    this.props.promptDeleteFilesOrFolders(Array.from(this.state.selectedLocalFilesAndFolders));
+  promptDeleteSelectedLocalFiles = () => {
+    // This would ideally be done when we get a new list of file from the server, but since the only way to do that
+    // would be to filter on a re-render, this is probably the fastest approach (though definitely not the cleanest)
+    const selectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.jupyterHubResourceRootDir, this.state.selectedLocalFilesAndFolders);
+    this.props.promptDeleteFilesOrFolders(selectedItems);
+  };
+
+  removeInvalidChoicesFromSelectedSet = (folder: IFolder, selectedSet: Set<string>) => {
+    const validChoices = this.getFlatListOfFolderContents(folder);
+    return validChoices.filter(c => selectedSet.has(c));
+  };
+
+  getFlatListOfFolderContents = (folder: IFolder): string[] => {
+    let list: string[] = [];
+    folder.contents.forEach(f => {
+      list.push(f.path);
+      if (f.type === FileOrFolderTypes.FOLDER) {
+        this.getFlatListOfFolderContents(f as IFolder).forEach(childPath => list.push(childPath));
+      }
+    });
+    return list;
+  };
 
   render() {
     const {
