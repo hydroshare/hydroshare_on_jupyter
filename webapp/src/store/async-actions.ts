@@ -38,28 +38,41 @@ import {
   NEW_FILE_OR_FOLDER_TYPES,
 } from './types';
 
-// TODO: Remove this hardcoding
 // @ts-ignore
 const BACKEND_URL = window.BACKEND_API_URL || '//localhost:8080/syncApi';
 
+function _get_cookie(name: string) {
+  // from tornado docs: http://www.tornadoweb.org/en/stable/guide/security.html
+  const r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+  return r ? r[1] : undefined;
+}
+
+const XSRF_TOKEN = _get_cookie('_xsrf')
+
+const backendApi = axios.create({
+    headers: {
+      'X-XSRFToken': XSRF_TOKEN,
+    },
+});
+
 function deleteToBackend<T>(endpoint: string, data: any = undefined): Promise<AxiosResponse<T>> {
-    return axios.delete<T>(BACKEND_URL + endpoint, {data});
+    return backendApi.delete<T>(BACKEND_URL + endpoint, {data});
 }
 
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
-    return axios.get<T>(BACKEND_URL + endpoint);
+    return backendApi.get<T>(BACKEND_URL + endpoint);
 }
 
 function patchToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
-  return axios.patch<T>(BACKEND_URL + endpoint, data);
+  return backendApi.patch<T>(BACKEND_URL + endpoint, data);
 }
 
 function postToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
-  return axios.post<T>(BACKEND_URL + endpoint, data);
+  return backendApi.post<T>(BACKEND_URL + endpoint, data);
 }
 
 function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
-  return axios.put<T>(BACKEND_URL + endpoint, data);
+  return backendApi.put<T>(BACKEND_URL + endpoint, data);
 }
 
 export function createNewFileOrFolder(resource: IJupyterResource, name: string, type: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
