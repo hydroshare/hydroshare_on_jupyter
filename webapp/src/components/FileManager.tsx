@@ -44,6 +44,9 @@ interface IFileManagerProps {
 // For converting file paths back into IFiles and IFolders
 let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
 
+// @ts-ignore
+const ASSETS_URL = window.FRONTEND_URL + '/assets';
+
 export default class FileManager extends React.Component<IFileManagerProps, IFileManagerState> {
 
   state = {
@@ -144,7 +147,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
       <div>
         <div className="title-row">
           <span className="title">JupyterHub Files</span>
-          <img src="/assets/JupyterHub-logo.png" alt="JupyterHub logo"/>
+          <img src={ASSETS_URL+'/JupyterHub-logo.png'} alt="JupyterHub logo"/>
         </div>
         <div className="actions-row local">
           <input
@@ -174,7 +177,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
       <div>
         <div className="title-row">
           <span className="title">HydroShare Files</span>
-          <img src="/assets/HydroShare-logo.png" alt="HydroShare logo"/>
+          <img src={ASSETS_URL+'/HydroShare-logo.png'} alt="HydroShare logo"/>
         </div>
         <div className="actions-row">
           <input
