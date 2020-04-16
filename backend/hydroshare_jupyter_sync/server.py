@@ -49,11 +49,6 @@ class BaseRequestHandler(BaseHandler):
         self.set_status(204)  # No content
         self.finish()
 
-    def data_received():
-        pass
-        # required by standard tornado.web.RequestHandler
-        #TODO implement me
-
 
 class WebAppHandler(BaseRequestHandler):
     """ Handles starting up the frontend for our web app """
