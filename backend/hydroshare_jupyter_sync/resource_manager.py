@@ -73,7 +73,7 @@ class ResourceManager:
 
     def delete_resource_JH(self, res_id):
         error = None
-        JH_resource_path = self.output_folder + "/" + res_id
+        JH_resource_path = self.output_folder / res_id
 
         try:
             shutil.rmtree(JH_resource_path)
