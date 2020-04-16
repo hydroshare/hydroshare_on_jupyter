@@ -39,11 +39,11 @@ class BaseRequestHandler(BaseHandler):
     """ Sets the headers for all the request handlers that extend this class """
     def set_default_headers(self):
         self.set_header("Access-Control-Allow-Origin", "*")  # TODO: change from * (any server) to our specific url
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, content-type")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with, content-type, x-xsrftoken")
         # TODO: Do this on a per-handler basis (not all of them allow all of these requests)
         self.set_header('Access-Control-Allow-Methods', 'POST, PUT, GET, DELETE, OPTIONS')
 
-    def options(self, _):
+    def options(self, _=None):
         # web browsers make an OPTIONS request to check what methods (line 31) are allowed at/for an endpoint.
         # We just need to respond with the header set on line 31.
         self.set_status(204)  # No content
