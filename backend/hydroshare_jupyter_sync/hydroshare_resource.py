@@ -8,9 +8,10 @@ Email: vickymmcd@gmail.com
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# TODO: remove unused imports
+from hydroshare_jupyter_sync.config_reader_writer import get_config_values
 from hydroshare_jupyter_sync.local_folder import LocalFolder
 from hydroshare_jupyter_sync.hydroshare_folder import RemoteFolder
+from notebook.services.contents.filemanager import FileContentsManager
 import logging
 import os
 from os import path
@@ -53,7 +54,12 @@ class Resource:
         """
         # TODO: TEST THIS! & add more error checking to this function, does it exist?
         if filename is not None:
-            (self.path_prefix / filename).touch()
+            full_path = self.path_prefix / filename
+            path_rel_cwd = Path(full_path).relative_to(Path.cwd())
+            if filename.lower().endswith('.ipynb'):
+                FileContentsManager().new(path=str(path_rel_cwd))
+            else:
+                full_path.touch()
 
     def create_local_folder(self, folder_name):
         """Creates a new file with the given name in JH
@@ -248,7 +254,6 @@ class Resource:
                 dest_full_path = new_filepath
             if src_full_path.exists():
                 shutil.move(str(src_full_path), str(dest_full_path))
-                self.delete_JH_folder_if_empty(str(src_full_path.parent))
             else:  # TODO: also an exception
                 logging.info('Trying to rename or move file that does not exist: ' + str(old_filepath))
         else:
@@ -271,14 +276,6 @@ class Resource:
         else:
             self.local_folder.delete_file(item_full_path)
             return 'file'
-
-    def delete_JH_folder_if_empty(self, filepath):
-        """ deletes JH folder if it is empty
-        calls delete_file_or_folder_from JH to check if
-        parent directory needs to be deleted """
-
-        if len(list((self.path_prefix / filepath).iterdir())) == 0:
-            self.delete_file_or_folder_from_JH(filepath)
 
     # TODO: use 'exists' in this function name
     def is_file_or_folder_in_JH(self, filepath):

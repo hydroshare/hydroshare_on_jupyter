@@ -5,30 +5,23 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/ResourceList.scss';
 
 import {
-  IJupyterResource,
-  SortByOptions,
+  IResource,
 } from '../store/types';
 import Loading from "./Loading";
 import Modal from "./modals/Modal";
+import { SortTriangleSVG } from './FilePane';
 
 import NewResourceModal from './modals/NewResourceModal';
 import { ICreateResourceRequest } from '../store/types';
 
 interface IResourceListProps {
   className?: string
-  deleteResources: (resources: IJupyterResource[]) => any
+  deleteResources: (resources: IResource[]) => any
   viewResource: any
   resources: {
-      [resourceId: string]: IJupyterResource
+      [resourceId: string]: IResource
   }
   newResource: (newResource: ICreateResourceRequest) => any
-}
-
-interface ITableResourceInfo {
-  Name: string,
-  // Status: string,
-  Id: string,
-  Location: string,
 }
 
 interface IStateTypes {
@@ -36,7 +29,8 @@ interface IStateTypes {
   filterBy: string
   modal: MODAL_TYPES
   selectedResources: Set<string>
-  sortBy?: SortByOptions
+  sortAscending: boolean
+  sortBy: SORT_BY_OPTIONS
 }
 
 export default class ResourceList extends React.Component<IResourceListProps, IStateTypes> {
@@ -47,6 +41,8 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       resourceToMaybeDelete: undefined,
       modal: MODAL_TYPES.NONE,
       selectedResources: new Set<string>(),
+      sortAscending: true,
+      sortBy: SORT_BY_OPTIONS.TITLE,
     };
 
     deleteSelectedResource = () => {
@@ -57,37 +53,17 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     showConfirmResourceDeletionModal = () => this.setState({ modal: MODAL_TYPES.CONFIRM_RESOURCE_DELETION });
     showNewResourceModal = () => this.setState({ modal: MODAL_TYPES.NEW_RESOURCE });
 
-    closeModal = () => this.setState({ modal: MODAL_TYPES.NONE });
+    setSortBy = (sortBy: SORT_BY_OPTIONS) => {
+      if (sortBy === this.state.sortBy) {
+        // If the user clicked the header of the column we're already sorted by, toggle sorting ascending/descending
+        this.setState({sortAscending: !this.state.sortAscending});
+      } else {
+        // Otherwise change the the column we're sorted by
+        this.setState({sortBy});
+      }
+    };
 
-  public convertToTableStructure(resources: {[resourceId: string]: IJupyterResource}): ITableResourceInfo[] {
-    const tableList: ITableResourceInfo[] = [];
-    Object.values(resources).map((resource: IJupyterResource, i: number) => {
-        const locations = ['HydroShare'];
-        const {
-          id,
-          // hydroShareResource,
-          localCopyExists,
-          title,
-        } = resource;
-        if (localCopyExists) {
-            locations.push('JupyterHub');
-        }
-        let locationString;
-        if (locations.length > 1) {
-            const lastLocation = locations.splice(locations.length - 1, 1);
-            locationString = locations.join(', ') + ' & ' + lastLocation;
-        } else {
-            locationString = locations[0];
-        }
-        tableList.push({
-          Name: title,
-          // Status: hydroShareResource.status,
-          Location: locationString,
-          Id: id,
-        })
-    });
-    return tableList;
-  }
+    closeModal = () => this.setState({ modal: MODAL_TYPES.NONE });
 
   toggleAllResourcesSelected = () => {
     let selectedResources;
@@ -102,7 +78,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     });
   };
 
-  toggleSingleResourceSelected = (resource: IJupyterResource) => {
+  toggleSingleResourceSelected = (resource: IResource) => {
     let selectedResources = new Set(this.state.selectedResources);
     if (selectedResources.has(resource.id)) {
       selectedResources.delete(resource.id);
@@ -115,7 +91,32 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     });
   };
 
-  getFilteredResources = () => Object.values(this.props.resources).filter(r => r.title.toLowerCase().includes(this.state.filterBy.toLowerCase()));
+  getFilteredSortedResources = () => Object.values(this.props.resources)
+    .filter(r => r.title.toLowerCase().includes(this.state.filterBy.toLowerCase()))
+    .sort((r1, r2) => {
+      switch (this.state.sortBy) {
+        case SORT_BY_OPTIONS.TITLE:
+          if (this.state.sortAscending) {
+            return r1.title.localeCompare(r2.title);
+          } else {
+            return r2.title.localeCompare(r1.title);
+          }
+        case SORT_BY_OPTIONS.LAST_MODIFIED:
+          if (this.state.sortAscending) {
+            return r1.lastUpdated?.diff(r2.lastUpdated)
+          } else {
+            return r2.lastUpdated?.diff(r1.lastUpdated)
+          }
+        case SORT_BY_OPTIONS.OWNER:
+          if (this.state.sortAscending) {
+            return r1.title.localeCompare(r2.title);
+          } else {
+            return r2.title.localeCompare(r1.title);
+          }
+        default: // Should never happen, but needed to satisfy TypeScript
+          return 0;
+      }
+    });
 
   filterTextChanged = (e: ChangeEvent<HTMLInputElement>) => this.setState({filterBy: e.target.value});
 
@@ -123,9 +124,11 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     const {
       allResourcesSelected,
       selectedResources,
+      sortAscending,
+      sortBy,
     } = this.state;
 
-    const rowElements = this.getFilteredResources().map(resource => (
+    const rowElements = this.getFilteredSortedResources().map(resource => (
       <div className="table-row">
         <input
           type="checkbox"
@@ -133,9 +136,8 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           onChange={() => this.toggleSingleResourceSelected(resource)}
         />
         <span onClick={() => this.props.viewResource(resource)} className="clickable">{resource.title}</span>
-        <span>{resource.hydroShareResource.creator || 'Unknown'}</span>
-        <span>Unknown</span>
-        <span>{resource.hydroShareResource.date_last_updated.format('MMMM D, YYYY')}</span>
+        <span>{resource.lastUpdated.format('MMMM D, YYYY')}</span>
+        <span>{resource.creator || 'Unknown'}</span>
       </div>
       )
     );
@@ -169,6 +171,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     if (this.props.className) {
       classNames.push(this.props.className);
     }
+    const sortOrder = sortAscending ? 'sort-ascending' : 'sort-descending';
     return (
       <div className={classNames.join(' ')}>
         <div className="ResourceList-header">
@@ -193,10 +196,27 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           <span className="checkbox">
             <input type="checkbox" checked={allResourcesSelected} onChange={this.toggleAllResourcesSelected}/>
           </span>
-          <span className="clickable">Name</span>
-          <span className="clickable">Owner</span>
-          <span className="clickable">Size</span>
-          <span className="clickable">Last Modified</span>
+          <button
+            className={'clickable ' + (sortBy === SORT_BY_OPTIONS.TITLE ? sortOrder : '')}
+            onClick={() => this.setSortBy(SORT_BY_OPTIONS.TITLE)}
+          >
+            Name
+            {sortBy === SORT_BY_OPTIONS.TITLE && SortTriangleSVG}
+          </button>
+          <button
+            className={'clickable ' + (sortBy === SORT_BY_OPTIONS.LAST_MODIFIED ? sortOrder : '')}
+            onClick={() => this.setSortBy(SORT_BY_OPTIONS.LAST_MODIFIED)}
+          >
+            Last Modified on HydroShare
+            {sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && SortTriangleSVG}
+          </button>
+          <button
+            className={'clickable ' + (sortBy === SORT_BY_OPTIONS.OWNER ? sortOrder : '')}
+            onClick={() => this.setSortBy(SORT_BY_OPTIONS.OWNER)}
+          >
+            Owner
+            {sortBy === SORT_BY_OPTIONS.OWNER && SortTriangleSVG}
+          </button>
         </div>
         {loading}
         {rowElements}
@@ -208,7 +228,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
 
 type RDCModalProps = {
   close: () => any
-  resources: IJupyterResource[]
+  resources: IResource[]
   submit: () => any
 };
 
@@ -225,4 +245,10 @@ enum MODAL_TYPES {
   NONE,
   NEW_RESOURCE,
   CONFIRM_RESOURCE_DELETION,
+}
+
+enum SORT_BY_OPTIONS {
+  TITLE,
+  LAST_MODIFIED,
+  OWNER,
 }

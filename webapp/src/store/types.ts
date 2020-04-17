@@ -8,26 +8,42 @@ import * as userActions from './actions/user';
 export type ResourcesActionTypes = ActionType<typeof resourcesActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
 
-export interface INotificationsState {
-  current: INotification[]
+/** ---------- Enums ---------- **/
+
+export enum FileOrFolderTypes {
+  FOLDER = 'folder',
+  FILE = 'file',
 }
+
+export const NEW_FILE_OR_FOLDER_TYPES = {
+  FOLDER: 'Folder',
+  JUPYTER_NOTEBOOK: 'Jupyter Notebook (.ipynb)',
+  OTHER_FILE: 'Other File',
+};
+
+/** ---------- Redux State ---------- **/
 
 export interface IRootState {
   notifications: INotificationsState
   resources: IResourcesState
-  resourcePage: IResourcePageState
   router: RouterState
   user: IUserInfo | null
 }
 
-export interface IResourcePageState {
-  allJupyterSelected: boolean
-  allHydroShareSelected: boolean
-  selectedLocalFilesAndFolders: Set<string>
-  selectedHydroShareFilesAndFolders: Set<string>
-  searchTerm: string
-  sortBy?: SortByOptions
+export interface INotificationsState {
+  current: INotification[]
 }
+
+export interface IResourcesState {
+  allResources: {
+    [resourceId: string]: IResource
+  }
+  fetchingResources: boolean
+  resourceLocalFilesBeingFetched: Set<string>
+  resourceHydroShareFilesBeingFetched: Set<string>
+}
+
+/** --------- Data Models --------- **/
 
 export interface IFile {
   path: string // If a folder, no trailing forward slash
@@ -41,13 +57,23 @@ export interface IFolder extends IFile {
   contents: (IFile | IFolder)[]
 }
 
-export interface IJupyterResource {
+export interface IResource {
+  abstract?: string
+  authors: string[]
+  creator: string
+  created: moment.Moment
+  lastUpdated: moment.Moment
+  hydroShareFiles: IFolder
   id: string
   localCopyExists: boolean
-  jupyterHubFiles: IFolder
-  title: string
+  localFiles: IFolder
+  public: boolean
+  published: boolean
   readmeMarkdown?: string
-  hydroShareResource: IHydroShareResourceInfo
+  status: string
+  title: string
+  resource_title: string
+  resource_url: string
 }
 
 export interface INotification {
@@ -56,14 +82,48 @@ export interface INotification {
   type: 'error' | 'warning'
 }
 
-// TODO: Rename this (and its associated reducer) to something better
-export interface IResourcesState {
-  allResources: {
-    [resourceId: string]: IJupyterResource
-  }
-  fetchingResources: boolean
-  resourceLocalFilesBeingFetched: Set<string>
-  resourceHydroShareFilesBeingFetched: Set<string>
+export interface IResourcesData {
+  resources: IResource[]
+}
+
+export interface IResourceFilesData {
+  rootDir: IFolder
+}
+
+export interface IUserInfo {
+  email: string
+  id: number
+  name: string
+  organization: string
+  title: string
+  username: string
+}
+
+/** --------- Backend Server Communication ---------- **/
+
+export interface ICreateFileOrFolderRequestResponse {
+  success: boolean
+  error?: IServerError
+}
+
+export interface ICreateResourceRequest {
+  title: string,
+  privacy: string
+}
+
+export interface ICreateResourceRequestResponse {
+  success: boolean
+  error?: IServerError
+}
+
+export interface IFileOperationsRequestResponse {
+  failureCount: number
+  results: [{
+    success: boolean
+    error?: IServerError
+    message?: string
+  }]
+  successCount: number
 }
 
 export interface IUserInfoDataResponse {
@@ -83,90 +143,7 @@ export interface IUserInfoDataResponse {
   success: boolean
 }
 
-export interface IResourcesData {
-  resources: IJupyterResource[]
-}
-
-export interface IResourceFilesData {
-  rootDir: IFolder
-}
-
-export interface IUserInfo {
-  email: string
-  id: number
-  name: string
-  organization: string
-  title: string
-  username: string
-}
-
-export interface IHydroShareResourceInfo {
-  resource_id: string
-  creator: string
-  files: IFolder
-  date_last_updated: moment.Moment
-  status: string
-  resource_type: string
-  resource_title: string
-  abstract?: string
-  authors: string[]
-  doi?: string
-  date_created: string
-  public: boolean
-  discoverable: boolean
-  shareable: boolean
-  immutable: boolean
-  published: boolean
-  bag_url: string
-  science_metadata_url: string
-  resource_url: string
-}
-
-export enum SortByOptions {
-  Name = 'NAME',
-  Date = 'DATE',
-  Status = 'STATUS',
-  Author = 'AUTHOR',
-  Type = 'TYPE'
-}
-
-export enum FileOrFolderTypes {
-  FOLDER = 'folder',
-  FILE = 'file',
-}
-
-export const NEW_FILE_OR_FOLDER_TYPES = {
-  FOLDER: 'Folder',
-  JUPYTER_NOTEBOOK: 'Jupyter Notebook (.ipynb)',
-  OTHER_FILE: 'Other File',
-};
-
-export interface ICreateResourceRequest {
-  title: string,
-  privacy: string
-}
-
 export interface IServerError {
   type: string
   message: string
-}
-
-export interface IFileOperationsRequestResponse {
-  failureCount: number
-  results: [{
-    success: boolean
-    error?: IServerError
-    message?: string
-  }]
-  successCount: number
-}
-
-export interface ICreateFileOrFolderRequestResponse {
-  success: boolean
-  error?: IServerError
-}
-
-export interface ICreateResourceRequestResponse {
-  success: boolean
-  error?: IServerError
 }

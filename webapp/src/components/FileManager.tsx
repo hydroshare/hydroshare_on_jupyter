@@ -32,7 +32,7 @@ interface IFileManagerProps {
   fetchingHydroShareFiles: boolean
   fetchingLocalFiles: boolean
   hydroShareResourceRootDir: IFolder
-  jupyterHubResourceRootDir: IFolder
+  localFilesRootDir: IFolder
   copyFileOrFolder: (src: IFile, dest: IFolder) => any
   moveFileOrFolder: (src: IFile, dest: IFolder) => any
   openFile: (file: IFile) => any
@@ -43,6 +43,9 @@ interface IFileManagerProps {
 
 // For converting file paths back into IFiles and IFolders
 let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
+
+// @ts-ignore
+const ASSETS_URL = (window.FRONTEND_URL || '') + '/assets';
 
 export default class FileManager extends React.Component<IFileManagerProps, IFileManagerState> {
 
@@ -95,9 +98,9 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
   buildLookupTable = () => {
     fileOrFolderLookupTable.clear();
 
-    if (this.props.jupyterHubResourceRootDir) {
-      fileOrFolderLookupTable.set(this.props.jupyterHubResourceRootDir.path, this.props.jupyterHubResourceRootDir);
-      this.addFolderContentsToLookupTable(this.props.jupyterHubResourceRootDir);
+    if (this.props.localFilesRootDir) {
+      fileOrFolderLookupTable.set(this.props.localFilesRootDir.path, this.props.localFilesRootDir);
+      this.addFolderContentsToLookupTable(this.props.localFilesRootDir);
     }
     if (this.props.hydroShareResourceRootDir) {
       fileOrFolderLookupTable.set(this.props.hydroShareResourceRootDir.path, this.props.hydroShareResourceRootDir);
@@ -117,16 +120,40 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
   setSelectedHydroShareFilesAndFolders = (items: Set<string>) => this.setState({selectedHydroShareFilesAndFolders: items});
   setSelectedLocalFilesAndFolders = (items: Set<string>) => this.setState({selectedLocalFilesAndFolders: items});
 
-  promptDeleteSelectedHydroShareFiles = () =>
-    this.props.promptDeleteFilesOrFolders(Array.from(this.state.selectedHydroShareFilesAndFolders));
+  promptDeleteSelectedHydroShareFiles = () => {
+    // This would ideally be done when we get a new list of file from the server, but since the only way to do that
+    // would be to filter on a re-render, this is probably the fastest approach (though definitely not the cleanest)
+    const selectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.hydroShareResourceRootDir, this.state.selectedHydroShareFilesAndFolders);
+    this.props.promptDeleteFilesOrFolders(selectedItems);
+  };
 
-  promptDeleteSelectedLocalFiles = () =>
-    this.props.promptDeleteFilesOrFolders(Array.from(this.state.selectedLocalFilesAndFolders));
+  promptDeleteSelectedLocalFiles = () => {
+    // This would ideally be done when we get a new list of file from the server, but since the only way to do that
+    // would be to filter on a re-render, this is probably the fastest approach (though definitely not the cleanest)
+    const selectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.localFilesRootDir, this.state.selectedLocalFilesAndFolders);
+    this.props.promptDeleteFilesOrFolders(selectedItems);
+  };
+
+  removeInvalidChoicesFromSelectedSet = (folder: IFolder, selectedSet: Set<string>) => {
+    const validChoices = this.getFlatListOfFolderContents(folder);
+    return validChoices.filter(c => selectedSet.has(c));
+  };
+
+  getFlatListOfFolderContents = (folder: IFolder): string[] => {
+    let list: string[] = [];
+    folder.contents.forEach(f => {
+      list.push(f.path);
+      if (f.type === FileOrFolderTypes.FOLDER) {
+        this.getFlatListOfFolderContents(f as IFolder).forEach(childPath => list.push(childPath));
+      }
+    });
+    return list;
+  };
 
   render() {
     const {
       hydroShareResourceRootDir,
-      jupyterHubResourceRootDir,
+      localFilesRootDir,
       fetchingLocalFiles,
       fetchingHydroShareFiles,
       openFile,
@@ -144,7 +171,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
       <div>
         <div className="title-row">
           <span className="title">JupyterHub Files</span>
-          <img src="/assets/JupyterHub-logo.png" alt="JupyterHub logo"/>
+          <img src={ASSETS_URL+'/JupyterHub-logo.png'} alt="JupyterHub logo"/>
         </div>
         <div className="actions-row local">
           <input
@@ -174,7 +201,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
       <div>
         <div className="title-row">
           <span className="title">HydroShare Files</span>
-          <img src="/assets/HydroShare-logo.png" alt="HydroShare logo"/>
+          <img src={ASSETS_URL+'/HydroShare-logo.png'} alt="HydroShare logo"/>
         </div>
         <div className="actions-row">
           <input
@@ -207,10 +234,10 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
         <div className="FileManager content-row">
           <FilePane
             className="tile jupyterhub"
-            droppableId={jupyterHubResourceRootDir?.path || 'loading'}
+            droppableId={localFilesRootDir?.path || 'loading'}
             filterByName={filterByName}
             loading={fetchingLocalFiles}
-            rootDir={jupyterHubResourceRootDir}
+            rootDir={localFilesRootDir}
             header={localFilesHeader}
             openFile={openFile}
             onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}

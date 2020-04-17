@@ -40,10 +40,8 @@ class ResourceManager:
         hostname = 'www.hydroshare.org'
         data_path = Path(os.path.dirname(os.path.realpath(__file__))) / 'local_hs_resources'
         if config:
-            if config['hydroShareHostname'] is not None:
-                hostname = config.get('hydroShareHostname')
-            if config['dataPath'] is not None:
-                data_path = Path(config['dataPath'])
+            hostname = config.get('hydroShareHostname', hostname)
+            data_path = Path(config.get('dataPath'), data_path)
         if not data_path.is_dir():
             # Let any exceptions that occur bubble up
             data_path.mkdir(parents=True)
@@ -75,7 +73,7 @@ class ResourceManager:
 
     def delete_resource_JH(self, res_id):
         error = None
-        JH_resource_path = self.output_folder + "/" + res_id
+        JH_resource_path = self.output_folder / res_id
 
         try:
             shutil.rmtree(JH_resource_path)
@@ -111,7 +109,6 @@ class ResourceManager:
         error = None
 
         resources = {}
-        is_local = False # referenced later when checking if res is local
 
         # Get local res_ids
         self.local_res_ids = self.get_local_JH_resources()
@@ -128,15 +125,20 @@ class ResourceManager:
         for res in test_generator:
             res_id = res['resource_id']
 
-            # check if local
-            if res_id in self.local_res_ids:
-                is_local = True
-
             resources[res_id] = {
+                'abstract': res.get('abstract'),
+                'authors': res.get('authors'),
+                'creator': res.get('creator'),
+                'created': res.get('date_created'),
+                'lastUpdated': res.get('date_last_updated'),
+                'localCopyExists': res_id in self.local_res_ids,
+                'localFiles': res.get('localFiles'),
                 'id': res_id,
-                'title': res['resource_title'],
-                'hydroShareResource': res, # includes privacy info under 'public'
-                'localCopyExists': is_local,
+                'isPublic': res.get('public'),
+                'published': res.get('published'),
+                'status': res.get('status'),
+                'title': res.get('resource_title'),
+                'url': res.get('resource_url'),
             }
 
         return list(resources.values()), error
@@ -224,7 +226,7 @@ class ResourceManager:
 
 def get_hydroshare_credentials():
     loaded_credentials = get_config_values(['u', 'p'])
-    if loaded_credentials and loaded_credentials['u'] and loaded_credentials['p']:
+    if loaded_credentials and 'u' in loaded_credentials and 'p' in loaded_credentials:
         user_name = loaded_credentials['u']
         pw = base64.b64decode(loaded_credentials['p']).decode('utf-8')
     else:

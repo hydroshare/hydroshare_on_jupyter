@@ -30,7 +30,7 @@ import {
   IFile,
   IFileOperationsRequestResponse,
   IFolder,
-  IJupyterResource,
+  IResource,
   IResourceFilesData,
   IResourcesData,
   IRootState,
@@ -38,31 +38,44 @@ import {
   NEW_FILE_OR_FOLDER_TYPES,
 } from './types';
 
-// TODO: Remove this hardcoding
 // @ts-ignore
 const BACKEND_URL = window.BACKEND_API_URL || '//localhost:8080/syncApi';
 
+function _get_cookie(name: string) {
+  // from tornado docs: http://www.tornadoweb.org/en/stable/guide/security.html
+  const r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+  return r ? r[1] : undefined;
+}
+
+const XSRF_TOKEN = _get_cookie('_xsrf')
+
+const backendApi = axios.create({
+    headers: {
+      'X-XSRFToken': XSRF_TOKEN,
+    },
+});
+
 function deleteToBackend<T>(endpoint: string, data: any = undefined): Promise<AxiosResponse<T>> {
-    return axios.delete<T>(BACKEND_URL + endpoint, {data});
+    return backendApi.delete<T>(BACKEND_URL + endpoint, {data});
 }
 
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
-    return axios.get<T>(BACKEND_URL + endpoint);
+    return backendApi.get<T>(BACKEND_URL + endpoint);
 }
 
 function patchToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
-  return axios.patch<T>(BACKEND_URL + endpoint, data);
+  return backendApi.patch<T>(BACKEND_URL + endpoint, data);
 }
 
 function postToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
-  return axios.post<T>(BACKEND_URL + endpoint, data);
+  return backendApi.post<T>(BACKEND_URL + endpoint, data);
 }
 
 function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
-  return axios.put<T>(BACKEND_URL + endpoint, data);
+  return backendApi.put<T>(BACKEND_URL + endpoint, data);
 }
 
-export function createNewFileOrFolder(resource: IJupyterResource, name: string, type: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+export function createNewFileOrFolder(resource: IResource, name: string, type: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     try {
       let itemType;
@@ -136,7 +149,7 @@ export function createNewResource(details: ICreateResourceRequest): ThunkAction<
   };
 }
 
-export function deleteResources(resources: IJupyterResource[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+export function deleteResources(resources: IResource[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     let completedRequests = 0;
     let successfulRequests = 0;
@@ -157,7 +170,7 @@ export function deleteResources(resources: IJupyterResource[]): ThunkAction<Prom
   };
 }
 
-export function deleteResourceFilesOrFolders(resource: IJupyterResource, paths: string[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+export function deleteResourceFilesOrFolders(resource: IResource, paths: string[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     let localFiles: string[] = [];
     let hsFiles: string[] = [];
@@ -245,7 +258,7 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
     };
 }
 
-export function getResourceLocalFiles(resource: IJupyterResource) {
+export function getResourceLocalFiles(resource: IResource) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(notifyGettingResourceJupyterHubFiles(resource));
     const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/local-files`);
@@ -259,7 +272,7 @@ export function getResourceLocalFiles(resource: IJupyterResource) {
   };
 }
 
-export function getResourceHydroShareFiles(resource: IJupyterResource) {
+export function getResourceHydroShareFiles(resource: IResource) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(notifyGettingResourceHydroShareFiles(resource));
     const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/hs-files`);
@@ -273,15 +286,15 @@ export function getResourceHydroShareFiles(resource: IJupyterResource) {
   };
 }
 
-export function copyFileOrFolder(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder) {
+export function copyFileOrFolder(resource: IResource, source: IFile | IFolder, destination: IFolder) {
   return performFileOperation(resource, source, destination, 'copy');
 }
 
-export function moveFileOrFolder(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder) {
+export function moveFileOrFolder(resource: IResource, source: IFile | IFolder, destination: IFolder) {
   return performFileOperation(resource, source, destination, 'move');
 }
 
-function performFileOperation(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder, method: 'move' | 'copy') {
+function performFileOperation(resource: IResource, source: IFile | IFolder, destination: IFolder, method: 'move' | 'copy') {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     // Make the network request to perform the operation
     const data = {
