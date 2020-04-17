@@ -171,15 +171,8 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       <div className="page resource-details">
         <ResourceMetadata 
           resource={resource} 
-<<<<<<< master
           promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDIT_PRIVACY)}/>
-=======
-          promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDITPRIVACY)}/>
         {this.props.archiveMessage !== "" ? <ArchiveMessage message={this.props.archiveMessage}/> : <div></div>}
-<<<<<<< HEAD
->>>>>>> Added archive message
-=======
->>>>>>> topfrontend2
         <FileManager
           fetchingHydroShareFiles={fetchingHydroShareFiles}
           fetchingLocalFiles={fetchingLocalFiles}
