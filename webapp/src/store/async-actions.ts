@@ -17,6 +17,7 @@ import {
   setResourceLocalFiles,
   setResourceHydroShareFiles,
   setResources,
+  setArchiveMessage,
   notifyGettingResources,
   notifyGettingResourcesFailed,
 } from './actions/resources';
@@ -246,9 +247,11 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
         const {
           data: {
             resources,
+            archive_message,
           },
         } = response;
         dispatch(setResources(resources));
+        dispatch(setArchiveMessage(archive_message));
       } catch (e) {
         console.error(e);
         dispatch(notifyGettingResourcesFailed());
