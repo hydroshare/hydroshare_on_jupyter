@@ -2,7 +2,6 @@
 
 .FilePane {
   $gutter-width: 2.5%;
-  $triangle-color: #aaaaaa;
 
   width: 50% - $gutter-width/2;
   float: left;
@@ -47,20 +46,6 @@
         background-color: #dddddd;
       }
     }
-
-    .sort-ascending,
-    .sort-descending {
-      align-items: center;
-      display: flex;
-      fill: $triangle-color;
-      justify-content: space-between;
-    }
-
-    .sort-descending {
-      svg.triangle {
-        transform: rotate(180deg);
-      }
-    }
   }
 
   .table-row {
@@ -75,15 +60,6 @@
     &.dragging {
       background-color: white;
       border: $border-style;
-    }
-
-    .icon-container {
-      display: inline-block;
-      margin-right: 0.5em;
-
-      svg {
-        fill: $triangle-color;
-      }
     }
 
     .collapsed svg {

@@ -110,25 +110,25 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.NAME ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.NAME)}>
                   Name
-                  {this.state.sortBy === SORT_BY_OPTIONS.NAME && sortTriangleSVG}
+                  {this.state.sortBy === SORT_BY_OPTIONS.NAME && SortTriangleSVG}
                 </button>
                 <button
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.TYPE ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.TYPE)}>
                   Type
-                  {this.state.sortBy === SORT_BY_OPTIONS.TYPE && sortTriangleSVG}
+                  {this.state.sortBy === SORT_BY_OPTIONS.TYPE && SortTriangleSVG}
                 </button>
                 <button
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SIZE ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}>
                   Size
-                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE && sortTriangleSVG}
+                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE && SortTriangleSVG}
                 </button>
                 <button
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.LAST_MODIFIED)}>
                   Last Modified
-                  {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && sortTriangleSVG}
+                  {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && SortTriangleSVG}
                 </button>
               </div>
               {content}
@@ -262,7 +262,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       <div title={tooltip} onClick={onClick} className={classNames}>
         <span style={style}>
           <div className="icon-container">
-            {sortTriangleSVG}
+            {SortTriangleSVG}
           </div>
           {folder.name}
         </span>
@@ -448,6 +448,6 @@ const HUMAN_READABLE_FILE_SIZES = [
   'YB',
 ];
 
-const sortTriangleSVG = <svg xmlns="http://www.w3.org/2000/svg" className="triangle" width="10" height="10" viewBox="0 0 2.646 2.646">
+export const SortTriangleSVG = <svg xmlns="http://www.w3.org/2000/svg" className="triangle" width="10" height="10" viewBox="0 0 2.646 2.646">
     <path d="M0 0l1.323 2.646L2.646 0z"/>
   </svg>;
