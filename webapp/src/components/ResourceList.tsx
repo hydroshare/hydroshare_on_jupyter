@@ -259,7 +259,7 @@ const ResourceDeleteConfirmationModal: React.FC<RDCModalProps> = (props: RDCModa
 
 type ArchiveModalProps = {
   close: () => any
-  resources: IJupyterResource[]
+  resources: IResource[]
   submit: () => any
 };
 

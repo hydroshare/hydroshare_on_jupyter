@@ -41,6 +41,7 @@ export interface IResourcesState {
   fetchingResources: boolean
   resourceLocalFilesBeingFetched: Set<string>
   resourceHydroShareFilesBeingFetched: Set<string>
+  archiveMessage: string
 }
 
 /** --------- Data Models --------- **/
@@ -84,6 +85,7 @@ export interface INotification {
 
 export interface IResourcesData {
   resources: IResource[]
+  archive_message: string
 }
 
 export interface IResourceFilesData {
