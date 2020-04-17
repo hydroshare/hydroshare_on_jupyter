@@ -22,7 +22,7 @@ import {
 import {
   IFile,
   IFolder,
-  IJupyterResource,
+  IResource,
   IRootState,
 } from '../store/types';
 
@@ -50,12 +50,12 @@ const mapStateToProps = ({ resources, router }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
-    createNewFile: (resource: IJupyterResource, filename: string, type: string) => dispatch(createNewFileOrFolder(resource, filename, type)),
-    deleteResourceFilesOrFolders: (resource: IJupyterResource, paths: string[]) => dispatch(deleteResourceFilesOrFolders(resource, paths)),
-    getFilesIfNeeded: (resource: IJupyterResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
-    openFile: (resource: IJupyterResource, file: IFile | IFolder) => dispatch(resourcesActions.openFileInJupyter(resource, file)),
-    copyFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
-    moveFileOrFolder: (resource: IJupyterResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
+    createNewFile: (resource: IResource, filename: string, type: string) => dispatch(createNewFileOrFolder(resource, filename, type)),
+    deleteResourceFilesOrFolders: (resource: IResource, paths: string[]) => dispatch(deleteResourceFilesOrFolders(resource, paths)),
+    getFilesIfNeeded: (resource: IResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
+    openFile: (resource: IResource, file: IFile | IFolder) => dispatch(resourcesActions.openFileInJupyter(resource, file)),
+    copyFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
+    moveFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
     goBackToResources: () => dispatch(push('/')),
   }
 };
@@ -156,7 +156,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           paths={this.state.filesOrFoldersToConfirmDeleting!}
         />;
         break;
-      case MODAL_TYPES.EDITPRIVACY:
+      case MODAL_TYPES.EDIT_PRIVACY:
         modal = <EditPrivacyModal 
           close = {this.hideModal}
           submit = {editPrivacy}
@@ -168,12 +168,12 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       <div className="page resource-details">
         <ResourceMetadata 
           resource={resource} 
-          promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDITPRIVACY)}/>
+          promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDIT_PRIVACY)}/>
         <FileManager
           fetchingHydroShareFiles={fetchingHydroShareFiles}
           fetchingLocalFiles={fetchingLocalFiles}
-          hydroShareResourceRootDir={resource.hydroShareResource.files}
-          jupyterHubResourceRootDir={resource.jupyterHubFiles}
+          hydroShareResourceRootDir={resource.hydroShareFiles}
+          localFilesRootDir={resource.localFiles}
           openFile={openFile}
           copyFileOrFolder={copyFileOrFolder}
           moveFileOrFolder={moveFileOrFolder}
@@ -192,7 +192,7 @@ enum MODAL_TYPES {
   NONE,
   NEW,
   DELETE,
-  EDITPRIVACY,
+  EDIT_PRIVACY,
 }
 
 type DeleteConfirmationModalProps = {

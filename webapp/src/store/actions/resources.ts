@@ -14,20 +14,20 @@ import {
 import {
   IFile,
   IFolder,
-  IJupyterResource,
+  IResource,
   IRootState,
 } from '../types';
 
-export function getFilesIfNeeded(resource: IJupyterResource): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+export function getFilesIfNeeded(resource: IResource): ThunkAction<Promise<void>, {}, {}, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
         const {
           resourceLocalFilesBeingFetched,
           resourceHydroShareFilesBeingFetched,
         } = getState().resources;
-        if (resource && !resource.jupyterHubFiles && !resourceLocalFilesBeingFetched.has(resource.id)) {
+        if (resource && !resource.localFiles && !resourceLocalFilesBeingFetched.has(resource.id)) {
             dispatch(getResourceLocalFiles(resource));
         }
-        if (resource && resource.hydroShareResource && !resource.hydroShareResource.files && !resourceHydroShareFilesBeingFetched.has(resource.id)) {
+        if (resource && !resource.hydroShareFiles && !resourceHydroShareFilesBeingFetched.has(resource.id)) {
             dispatch(getResourceHydroShareFiles(resource));
         }
     };
@@ -41,15 +41,15 @@ export function notifyGettingResourcesFailed() {
   return action(ResourcesActions.NOTIFY_GETTING_RESOURCES_FAILED);
 }
 
-export function notifyGettingResourceHydroShareFiles(resource: IJupyterResource) {
+export function notifyGettingResourceHydroShareFiles(resource: IResource) {
   return action(ResourcesActions.NOTIFY_GETTING_RESOURCE_HYDROSHARE_FILES, { resourceId: resource.id });
 }
 
-export function notifyGettingResourceJupyterHubFiles(resource: IJupyterResource) {
+export function notifyGettingResourceJupyterHubFiles(resource: IResource) {
   return action(ResourcesActions.NOTIFY_GETTING_RESOURCE_JUPYTERHUB_FILES, { resourceId: resource.id });
 }
 
-export function openFileInJupyter(jupyterResource: IJupyterResource, file: IFile | IFolder) {
+export function openFileInJupyter(jupyterResource: IResource, file: IFile | IFolder) {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
         const state = getState();
         if (state.user) {
@@ -63,7 +63,7 @@ export function openFileInJupyter(jupyterResource: IJupyterResource, file: IFile
     };
 }
 
-export function setResources(resources: IJupyterResource[]) {
+export function setResources(resources: IResource[]) {
   return action(ResourcesActions.SET_RESOURCES, resources);
 }
 

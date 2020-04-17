@@ -15,7 +15,6 @@ import thunk from 'redux-thunk';
 import {
   notificationsReducer,
   resourcesReducer,
-  resourcePageReducer,
   userDataReducer,
 } from './reducer';
 import {
@@ -31,7 +30,6 @@ const store = createStore<IRootState, any, any, any>(
     combineReducers({
         notifications: notificationsReducer,
         resources: resourcesReducer,
-        resourcePage: resourcePageReducer,
         router: connectRouter(history),
         user: userDataReducer,
     }),

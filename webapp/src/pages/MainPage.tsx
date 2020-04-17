@@ -11,7 +11,7 @@ import {
   deleteResources,
 } from '../store/async-actions';
 import {
-  IJupyterResource,
+  IResource,
   IRootState,
   ICreateResourceRequest,
 } from '../store/types';
@@ -25,8 +25,8 @@ const mapStateToProps = ({ resources }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
-    deleteResources: (resources: IJupyterResource[]) => dispatch(deleteResources(resources)),
-    viewResource: (resource: IJupyterResource) => dispatch(AppActions.viewResource(resource)),
+    deleteResources: (resources: IResource[]) => dispatch(deleteResources(resources)),
+    viewResource: (resource: IResource) => dispatch(AppActions.viewResource(resource)),
     newResource: (newResource: ICreateResourceRequest) => dispatch(createNewResource(newResource))
   }
 };
@@ -35,7 +35,7 @@ type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispa
 
 class MainPage extends React.Component<ReduxType, never>  {
 
-  public handleViewResource = (resource: IJupyterResource) => {
+  public handleViewResource = (resource: IResource) => {
     this.props.viewResource(resource);
   };
 

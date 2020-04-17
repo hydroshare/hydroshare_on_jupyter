@@ -109,7 +109,6 @@ class ResourceManager:
         error = None
 
         resources = {}
-        is_local = False # referenced later when checking if res is local
 
         # Get local res_ids
         self.local_res_ids = self.get_local_JH_resources()
@@ -126,15 +125,20 @@ class ResourceManager:
         for res in test_generator:
             res_id = res['resource_id']
 
-            # check if local
-            if res_id in self.local_res_ids:
-                is_local = True
-
             resources[res_id] = {
+                'abstract': res.get('abstract'),
+                'authors': res.get('authors'),
+                'creator': res.get('creator'),
+                'created': res.get('date_created'),
+                'lastUpdated': res.get('date_last_updated'),
+                'localCopyExists': res_id in self.local_res_ids,
+                'localFiles': res.get('localFiles'),
                 'id': res_id,
-                'title': res['resource_title'],
-                'hydroShareResource': res, # includes privacy info under 'public'
-                'localCopyExists': is_local,
+                'isPublic': res.get('public'),
+                'published': res.get('published'),
+                'status': res.get('status'),
+                'title': res.get('resource_title'),
+                'url': res.get('resource_url'),
             }
 
         return list(resources.values()), error

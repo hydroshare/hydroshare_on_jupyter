@@ -1,5 +1,5 @@
 {
-  "name": "demo-app-ts",
+  "name": "hydroshare_jupyter_sync",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

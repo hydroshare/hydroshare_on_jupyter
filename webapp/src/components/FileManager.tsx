@@ -32,7 +32,7 @@ interface IFileManagerProps {
   fetchingHydroShareFiles: boolean
   fetchingLocalFiles: boolean
   hydroShareResourceRootDir: IFolder
-  jupyterHubResourceRootDir: IFolder
+  localFilesRootDir: IFolder
   copyFileOrFolder: (src: IFile, dest: IFolder) => any
   moveFileOrFolder: (src: IFile, dest: IFolder) => any
   openFile: (file: IFile) => any
@@ -98,9 +98,9 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
   buildLookupTable = () => {
     fileOrFolderLookupTable.clear();
 
-    if (this.props.jupyterHubResourceRootDir) {
-      fileOrFolderLookupTable.set(this.props.jupyterHubResourceRootDir.path, this.props.jupyterHubResourceRootDir);
-      this.addFolderContentsToLookupTable(this.props.jupyterHubResourceRootDir);
+    if (this.props.localFilesRootDir) {
+      fileOrFolderLookupTable.set(this.props.localFilesRootDir.path, this.props.localFilesRootDir);
+      this.addFolderContentsToLookupTable(this.props.localFilesRootDir);
     }
     if (this.props.hydroShareResourceRootDir) {
       fileOrFolderLookupTable.set(this.props.hydroShareResourceRootDir.path, this.props.hydroShareResourceRootDir);
@@ -130,7 +130,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
   promptDeleteSelectedLocalFiles = () => {
     // This would ideally be done when we get a new list of file from the server, but since the only way to do that
     // would be to filter on a re-render, this is probably the fastest approach (though definitely not the cleanest)
-    const selectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.jupyterHubResourceRootDir, this.state.selectedLocalFilesAndFolders);
+    const selectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.localFilesRootDir, this.state.selectedLocalFilesAndFolders);
     this.props.promptDeleteFilesOrFolders(selectedItems);
   };
 
@@ -153,7 +153,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
   render() {
     const {
       hydroShareResourceRootDir,
-      jupyterHubResourceRootDir,
+      localFilesRootDir,
       fetchingLocalFiles,
       fetchingHydroShareFiles,
       openFile,
@@ -234,10 +234,10 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
         <div className="FileManager content-row">
           <FilePane
             className="tile jupyterhub"
-            droppableId={jupyterHubResourceRootDir?.path || 'loading'}
+            droppableId={localFilesRootDir?.path || 'loading'}
             filterByName={filterByName}
             loading={fetchingLocalFiles}
-            rootDir={jupyterHubResourceRootDir}
+            rootDir={localFilesRootDir}
             header={localFilesHeader}
             openFile={openFile}
             onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}
