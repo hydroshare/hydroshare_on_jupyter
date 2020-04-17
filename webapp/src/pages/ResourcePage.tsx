@@ -11,7 +11,7 @@ import Modal from "../components/modals/Modal";
 import NewFileModal from "../components/modals/NewFileModal";
 import EditPrivacyModal from "../components/modals/EditPrivacyModal";
 import ResourceMetadata from '../components/ResourceMetadata';
-import FilePermanencyInfo from '../components/FilePermanencyInfo';
+import ArchiveMessage from '../components/ArchiveMessage';
 
 import * as resourcesActions from '../store/actions/resources';
 import {
@@ -41,11 +41,13 @@ const mapStateToProps = ({ resources, router }: IRootState) => {
       return;
     }
   }
+  const archiveMessage = resources.archiveMessage
   return {
     fetchingHydroShareFiles: resourceId ? resources.resourceHydroShareFilesBeingFetched.has(resourceId) : false,
     fetchingLocalFiles: resourceId ? resources.resourceLocalFilesBeingFetched.has(resourceId) : false,
     fetchingResourceMetadata: resources.fetchingResources,
     resource: resourceForPage,
+    archiveMessage: archiveMessage,
   };
 };
 
@@ -170,7 +172,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
         <ResourceMetadata 
           resource={resource} 
           promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDITPRIVACY)}/>
-        <FilePermanencyInfo/>
+        {this.props.archiveMessage !== "" ? <ArchiveMessage message={this.props.archiveMessage}/> : <div></div>}
         <FileManager
           fetchingHydroShareFiles={fetchingHydroShareFiles}
           fetchingLocalFiles={fetchingLocalFiles}

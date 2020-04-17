@@ -16,6 +16,7 @@
   }
 
   .permanency-info {
+    display: flex;
 
     .info-wrapping {
       display: flex;
@@ -68,8 +69,9 @@
     }
 
     .info-title {
-      text-align:center;
-      margin-bottom: 1em;
+      margin: auto;
+      margin-left: 1em;
+      font-size: 20px;
     }
   }
 
@@ -83,4 +85,13 @@
 
 .PermanencyInfo.content-row {
   margin-top: 1.5em;
+}
+
+.warning-icon-box {
+  margin:auto;
+  margin-left:0.5em;
+}
+
+.warning-icon {
+  color: orange;
 }

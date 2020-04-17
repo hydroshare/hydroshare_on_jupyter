@@ -36,6 +36,7 @@ const initResourcesState: IResourcesState = {
   fetchingResources: false,
   resourceLocalFilesBeingFetched: new Set<string>(),
   resourceHydroShareFilesBeingFetched: new Set<string>(),
+  archiveMessage: "",
 };
 
 export function notificationsReducer(state: INotificationsState = initNotificationsState, action: AnyAction): INotificationsState {
@@ -195,6 +196,12 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
         ...state,
         resourceLocalFilesBeingFetched,
       };
+    case ResourcesActions.SET_ARCHIVE_MESSAGE:
+      let archiveMessage = action.payload
+      return {
+        ... state,
+        archiveMessage,
+      }
     default:
       return state;
   }

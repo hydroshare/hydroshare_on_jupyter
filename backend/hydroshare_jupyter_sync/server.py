@@ -79,8 +79,10 @@ class ResourcesRootHandler(BaseRequestHandler):
 
     def get(self):
         resources, error = resource_handler.get_list_of_user_resources()
+        archive_message = resource_handler.get_archive_message()
 
         self.write({'resources': resources,
+                    'archive_message': archive_message,
                     'success': error is None,
                     'error': error})
 
