@@ -64,6 +64,7 @@ export interface IResourcesState {
   fetchingResources: boolean
   resourceLocalFilesBeingFetched: Set<string>
   resourceHydroShareFilesBeingFetched: Set<string>
+  archiveMessage: string
 }
 
 export interface IUserInfoDataResponse {
@@ -85,6 +86,7 @@ export interface IUserInfoDataResponse {
 
 export interface IResourcesData {
   resources: IJupyterResource[]
+  archive_message: string
 }
 
 export interface IResourceFilesData {

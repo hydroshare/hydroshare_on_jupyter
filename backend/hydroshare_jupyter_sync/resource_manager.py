@@ -221,6 +221,22 @@ class ResourceManager:
 
         return new_id
 
+    def get_archive_message(self):
+        loaded_archive_message = get_config_values(['archiveMessage'])
+        if loaded_archive_message and loaded_archive_message['archiveMessage']:
+            archive_message = loaded_archive_message['archiveMessage']
+        else:
+            archive_message = input("Please enter the archive message: ")
+
+            #Save the archive message
+            saved_successfully = set_config_values({
+                'archiveMessage': archive_message,
+            })
+            if saved_successfully:
+                logging.info('Successfully saved archive message to config file.')
+        
+        return archive_message
+
 
 def get_hydroshare_credentials():
     loaded_credentials = get_config_values(['u', 'p'])
