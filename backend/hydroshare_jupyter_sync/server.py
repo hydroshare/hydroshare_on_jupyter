@@ -93,7 +93,7 @@ class ResourcesRootHandler(BaseRequestHandler):
         resource_id = None
 
         body = json.loads(self.request.body.decode('utf-8'))
-        resource_title = body.get("resource title") # string
+        resource_title = body.get("title")
         creators = body.get("creators") # list of names (strings)
         abstract = body.get("abstract")
         privacy = body.get("privacy")  # Public or private

@@ -123,8 +123,7 @@ export function createNewResource(details: ICreateResourceRequest): ThunkAction<
     const { user } = getState();
     try {
       const data = {
-        "resource title": details.title,
-        privacy: details.privacy,
+        ...details,
         creators: [user?.name],
       };
       const response = await postToBackend<ICreateResourceRequestResponse>(`/resources`, data);

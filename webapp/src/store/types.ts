@@ -107,7 +107,8 @@ export interface ICreateFileOrFolderRequestResponse {
 }
 
 export interface ICreateResourceRequest {
-  title: string,
+  abstract: string
+  title: string
   privacy: string
 }
 

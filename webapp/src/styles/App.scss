@@ -23,6 +23,13 @@ body,
   cursor: pointer;
 }
 
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4 {
+  font-weight: normal;
+}
+
 h1,
 .h1 {
   font-size: 2rem;

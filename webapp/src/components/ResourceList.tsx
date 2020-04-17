@@ -1,7 +1,6 @@
 import {ChangeEvent} from "react";
 import * as React from 'react';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/ResourceList.scss';
 
 import {
@@ -21,7 +20,7 @@ interface IResourceListProps {
   resources: {
       [resourceId: string]: IResource
   }
-  newResource: (newResource: ICreateResourceRequest) => any
+  createResource: (newResource: ICreateResourceRequest) => any
 }
 
 interface IStateTypes {
@@ -44,6 +43,11 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       sortAscending: true,
       sortBy: SORT_BY_OPTIONS.TITLE,
     };
+
+  createResource = (data: ICreateResourceRequest) => {
+    this.props.createResource(data);
+    this.closeModal();
+  };
 
     deleteSelectedResource = () => {
       this.props.deleteResources(Array.from(this.state.selectedResources).map(r => this.props.resources[r]));
@@ -153,9 +157,8 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     switch (this.state.modal) {
       case MODAL_TYPES.NEW_RESOURCE:
         modal = <NewResourceModal
-          show={true}
-          onHide={this.closeModal}
-          newResource={this.props.newResource}
+          close={this.closeModal}
+          createResource={this.createResource}
         />;
         break;
       case MODAL_TYPES.CONFIRM_RESOURCE_DELETION:
