@@ -45,7 +45,7 @@ interface IFileManagerProps {
 let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
 
 // @ts-ignore
-const ASSETS_URL = window.FRONTEND_URL + '/assets';
+const ASSETS_URL = (window.FRONTEND_URL || '') + '/assets';
 
 export default class FileManager extends React.Component<IFileManagerProps, IFileManagerState> {
 

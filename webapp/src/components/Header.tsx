@@ -2,6 +2,7 @@ import * as React from 'react';
 import {connect} from 'react-redux';
 
 import {
+  goHome,
   loadInitData,
 } from "../store/actions/App";
 import {
@@ -11,17 +12,15 @@ import {
   ThunkDispatch,
 } from "redux-thunk";
 
+// @ts-ignore
+const ASSETS_URL = (window.FRONTEND_URL || '') + '/assets';
+
 const mapStateToProps = ({ user }: IRootState) => {
-  if (user) {
-    return {
-      userName: user.name,
-    };
-  } else {
-    return {};
-  }
+  return {};
 };
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => ({
+  goHome: () => dispatch(goHome()),
   loadInitData: () => dispatch(loadInitData()),
 });
 
@@ -40,15 +39,14 @@ class Header extends React.Component<ReduxType, never> {
         <div className="header-content">
           {/*TODO: Host this image ourselves*/}
           <img
-            src="https://cpb-us-e1.wpmucdn.com/blog.umd.edu/dist/8/416/files/2016/10/logo-20nca6f-300x69.png"
+            src={ASSETS_URL + '/CUAHSI-logo-small.png'}
             alt="CUAHSI logo"
           />
-          {/*<button className="btn btn-info">*/}
-          {/*  View Files in Jupyter*/}
-          {/*</button>*/}
-          <span className="welcome-message">
-            Welcome, <span className="user-name">{this.props.userName}</span>
-          </span>
+          <div className="buttons-container">
+            <button className="go-home clickable" onClick={this.props.goHome}>
+              All My Resources
+            </button>
+          </div>
         </div>
       </header>
     )
