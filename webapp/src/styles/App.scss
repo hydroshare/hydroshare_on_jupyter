@@ -2,6 +2,8 @@
 @import 'variables';
 @import 'Header';
 
+$triangle-color: #aaaaaa;
+
 * {
   box-sizing: border-box;
   font-family: Montserrat, sans-serif;
@@ -89,6 +91,24 @@ input[type="text"] {
   .table-header {
     display: inline-block;
     font-size: 0.8em;
+
+    button {
+      text-align: left;
+    }
+
+    .sort-ascending,
+    .sort-descending {
+      align-items: center;
+      display: flex;
+      fill: $triangle-color;
+      justify-content: space-between;
+    }
+
+    .sort-descending {
+      svg.triangle {
+        transform: rotate(180deg);
+      }
+    }
   }
 
   .actions-row {
@@ -107,6 +127,15 @@ input[type="text"] {
     border-bottom: $border-style;
     display: flex;
     white-space: nowrap;
+
+    .icon-container {
+      display: inline-block;
+      margin-right: 0.5em;
+
+      svg {
+        fill: $triangle-color;
+      }
+    }
   }
 
   .table-header > *,

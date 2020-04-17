@@ -30,7 +30,7 @@ import {
   IFile,
   IFileOperationsRequestResponse,
   IFolder,
-  IJupyterResource,
+  IResource,
   IResourceFilesData,
   IResourcesData,
   IRootState,
@@ -75,7 +75,7 @@ function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>>
   return backendApi.put<T>(BACKEND_URL + endpoint, data);
 }
 
-export function createNewFileOrFolder(resource: IJupyterResource, name: string, type: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+export function createNewFileOrFolder(resource: IResource, name: string, type: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     try {
       let itemType;
@@ -149,7 +149,7 @@ export function createNewResource(details: ICreateResourceRequest): ThunkAction<
   };
 }
 
-export function deleteResources(resources: IJupyterResource[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+export function deleteResources(resources: IResource[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     let completedRequests = 0;
     let successfulRequests = 0;
@@ -170,7 +170,7 @@ export function deleteResources(resources: IJupyterResource[]): ThunkAction<Prom
   };
 }
 
-export function deleteResourceFilesOrFolders(resource: IJupyterResource, paths: string[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+export function deleteResourceFilesOrFolders(resource: IResource, paths: string[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     let localFiles: string[] = [];
     let hsFiles: string[] = [];
@@ -258,7 +258,7 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
     };
 }
 
-export function getResourceLocalFiles(resource: IJupyterResource) {
+export function getResourceLocalFiles(resource: IResource) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(notifyGettingResourceJupyterHubFiles(resource));
     const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/local-files`);
@@ -272,7 +272,7 @@ export function getResourceLocalFiles(resource: IJupyterResource) {
   };
 }
 
-export function getResourceHydroShareFiles(resource: IJupyterResource) {
+export function getResourceHydroShareFiles(resource: IResource) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(notifyGettingResourceHydroShareFiles(resource));
     const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/hs-files`);
@@ -286,15 +286,15 @@ export function getResourceHydroShareFiles(resource: IJupyterResource) {
   };
 }
 
-export function copyFileOrFolder(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder) {
+export function copyFileOrFolder(resource: IResource, source: IFile | IFolder, destination: IFolder) {
   return performFileOperation(resource, source, destination, 'copy');
 }
 
-export function moveFileOrFolder(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder) {
+export function moveFileOrFolder(resource: IResource, source: IFile | IFolder, destination: IFolder) {
   return performFileOperation(resource, source, destination, 'move');
 }
 
-function performFileOperation(resource: IJupyterResource, source: IFile | IFolder, destination: IFolder, method: 'move' | 'copy') {
+function performFileOperation(resource: IResource, source: IFile | IFolder, destination: IFolder, method: 'move' | 'copy') {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     // Make the network request to perform the operation
     const data = {

@@ -10,7 +10,7 @@ import {
   getUserInfo,
 } from '../async-actions';
 import {
-  IJupyterResource,
+  IResource,
 } from '../types';
 
 // @ts-ignore
@@ -23,7 +23,7 @@ export function loadInitData(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   };
 }
 
-export function viewResource(resource: IJupyterResource) {
+export function viewResource(resource: IResource) {
   return push(URL_PREFIX + '/resources/' + resource.id);
 }
 
