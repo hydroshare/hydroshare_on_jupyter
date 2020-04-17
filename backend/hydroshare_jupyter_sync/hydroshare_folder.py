@@ -97,7 +97,6 @@ class RemoteFolder:
         """Renames the hydroshare version of the file from old_filename to
         new_filename by using the HS API.
         """
-        print("GOTCHA")
         options = {
                  "source_path": old_filepath,
                  "target_path": new_filepath
@@ -147,4 +146,7 @@ class RemoteFolder:
         # Remove the leading /, if one exists
         if filepath.startswith('/'):
             filepath = filepath[1:]
-        self.hs.createResourceFolder(self.res_id, pathname=filepath)
+        try:
+            self.hs.createResourceFolder(self.res_id, pathname=filepath)
+        except IndexError:
+            logging.info("Folder already exists.")
