@@ -16,6 +16,7 @@ import { ICreateResourceRequest } from '../store/types';
 interface IResourceListProps {
   className?: string
   deleteResources: (resources: IResource[]) => any
+  deleteResourcesLocally: (resources: IResource[]) => any
   viewResource: any
   resources: {
       [resourceId: string]: IResource
@@ -51,6 +52,11 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
 
     deleteSelectedResource = () => {
       this.props.deleteResources(Array.from(this.state.selectedResources).map(r => this.props.resources[r]));
+      this.setState({modal: MODAL_TYPES.NONE});
+    };
+
+    deleteSelectedResourceLocally = () => {
+      this.props.deleteResourcesLocally(Array.from(this.state.selectedResources).map(r => this.props.resources[r]));
       this.setState({modal: MODAL_TYPES.NONE});
     };
 
@@ -268,7 +274,7 @@ const ArchiveResourceConfirmationModal: React.FC<ArchiveModalProps> = (props: Ar
     <Modal close={props.close} title="Archive Resource" submit={props.submit} isValid={true} submitText="Archive" isConfirm={true}>
       <p className="archive-header">Are you sure you want to archive the following resources?</p>
       {props.resources.map(r => <p className="archive-resource-list">{r.title}</p>)}
-      <p>Please manually transfer from JupyterHub any remaining files you'd like to save to HydroShare.</p>
+      <p>Please manually transfer from JupyterHub any remaining files you'd like to save to HydroShare before archiving.</p>
     </Modal>
   )
 };

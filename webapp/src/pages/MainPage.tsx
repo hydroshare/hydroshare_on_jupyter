@@ -9,6 +9,7 @@ import * as AppActions from '../store/actions/App';
 import {
   createNewResource,
   deleteResources,
+  deleteResourcesLocally,
 } from '../store/async-actions';
 import {
   IResource,
@@ -26,6 +27,7 @@ const mapStateToProps = ({ resources }: IRootState) => {
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
     deleteResources: (resources: IResource[]) => dispatch(deleteResources(resources)),
+    deleteResourcesLocally: (resources: IResource[]) => dispatch(deleteResourcesLocally(resources)),
     viewResource: (resource: IResource) => dispatch(AppActions.viewResource(resource)),
     createResource: (newResource: ICreateResourceRequest) => dispatch(createNewResource(newResource))
   }
@@ -45,6 +47,7 @@ class MainPage extends React.Component<ReduxType, never>  {
         <ResourceList
           className="tile"
           deleteResources={this.props.deleteResources}
+          deleteResourcesLocally={this.props.deleteResourcesLocally}
           createResource={this.props.createResource}
           viewResource={this.handleViewResource}
           resources={this.props.resources}
