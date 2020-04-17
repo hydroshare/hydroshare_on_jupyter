@@ -26,3 +26,7 @@ export function loadInitData(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
 export function viewResource(resource: IJupyterResource) {
   return push(URL_PREFIX + '/resources/' + resource.id);
 }
+
+export function goHome() {
+  return push(URL_PREFIX + '/');
+}
