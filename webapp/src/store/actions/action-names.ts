@@ -28,6 +28,7 @@ export enum ResourcesActions {
   SET_RESOURCES = 'ResourcesActions/SET_RESOURCES',
   SET_RESOURCE_LOCAL_FILES = 'ResourcesActions/SET_RESOURCE_LOCAL_FILES',
   SET_RESOURCE_HYDROSHARE_FILES = 'ResourcesActions/SET_RESOURCE_HYDROSHARE_FILES',
+  SET_ARCHIVE_MESSAGE = "ResourcesActions/SET_ARCHIVE_MESSAGE",
 }
 
 export enum UserInfoActions {

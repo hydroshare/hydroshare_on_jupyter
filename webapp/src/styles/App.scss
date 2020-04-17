@@ -68,6 +68,11 @@ button {
     background-color: $red;
     color: white;
   }
+
+  &.confirm {
+    background-color: $final-dark-green;
+    color: white;
+  }
 }
 
 input[type="text"] {
