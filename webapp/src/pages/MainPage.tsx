@@ -27,7 +27,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
     deleteResources: (resources: IResource[]) => dispatch(deleteResources(resources)),
     viewResource: (resource: IResource) => dispatch(AppActions.viewResource(resource)),
-    newResource: (newResource: ICreateResourceRequest) => dispatch(createNewResource(newResource))
+    createResource: (newResource: ICreateResourceRequest) => dispatch(createNewResource(newResource))
   }
 };
 
@@ -45,7 +45,7 @@ class MainPage extends React.Component<ReduxType, never>  {
         <ResourceList
           className="tile"
           deleteResources={this.props.deleteResources}
-          newResource={this.props.newResource}
+          createResource={this.props.createResource}
           viewResource={this.handleViewResource}
           resources={this.props.resources}
         />

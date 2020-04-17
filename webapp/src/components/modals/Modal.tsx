@@ -63,6 +63,18 @@ type TextInputProps = {
   placeholder?: string
   value: string
 };
+export const TextArea: React.FC<TextInputProps> = (props: TextInputProps) => {
+  const textareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => props.onChange(e.target.value);
+
+  return (
+    <div className="TextArea group">
+      <h2 className="title">{props.title}</h2>
+      <div className="group-content">
+        <textarea value={props.value} onChange={textareaChange} placeholder={props.placeholder}/>
+      </div>
+    </div>
+  )
+};
 
 export const TextInput: React.FC<TextInputProps> = (props: TextInputProps) => {
 

@@ -77,6 +77,12 @@
         &.TextInput .group-content {
           display: flex;
         }
+
+        textarea {
+          min-height: 5em;
+          resize: vertical;
+          width: 100%;
+        }
       }
     }
 
