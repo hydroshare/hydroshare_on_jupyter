@@ -202,27 +202,91 @@ class Resource:
 
         return root_dir
 
-    def rename_or_move_file_HS(self, old_filepath, new_filepath):
+    def rename_or_move_file_HS(self, src_path, dest_path):
+        self.rename_or_move_file_HS_recursive(src_path, dest_path, src_path)
+
+    def rename_or_move_file_HS_recursive(self, src_path, dest_path, og_src):
         """Renames the hydroshare version of the file from old_filename to
         new_filename.
         """
-        # TODO: throw an exception if either of the parameters are None. Checking the paths is
-        # something the calling function should handle
-        if old_filepath is not None and new_filepath is not None:
-            if self.is_file_in_HS(old_filepath, self.hs_files["contents"]):
-                self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
-                # TODO (Emily): make comments
-                if len(old_filepath.rsplit("/", 1)) > 1:
-                    folderpath, filename = old_filepath.rsplit("/", 1)
-                    #TODO (Emily): potentially remove
-                    # create that folder again (bc HS wouldn't tell us that that folder still existed), the resource would break. so maybe this stopped working?
-                    self.delete_HS_folder_if_empty(folderpath, filename)
-            else:
-                # TODO: probably another exception here so that the calling function knows something went wrong
-                # and can notify the frontend
-                logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
+        metadata = self.find_file_or_folder_metadata(src_path, self.hs_files["contents"])
+        if metadata["type"] == "folder":
+            for sub_dicts in metadata.get("contents"):
+                new_src = sub_dicts.get("path").strip("hs:/")
+                self.rename_or_move_file_HS_recursive(new_src, dest_path, og_src)
+
         else:
-            logging.info('Missing inputs for old and new filepath')
+            # at this point we know source is referring to a file, not folder
+            # get the source filename & path to source file
+            if "/" in src_path:
+                src_path_to_file, src_filename = src_path.rsplit("/", 1)
+            else:
+                src_filename = src_path
+                src_path_to_file = None
+
+            # find the most specific file or folder specified in original source
+            # i.e. is it an upper level folder, a file, etc.
+            if "/" in og_src:
+                ignore_me, most_specific = og_src.rsplit("/", 1)
+            else:
+                most_specific = og_src
+            # destination path should include whatever was specified in og_src
+            # up until right before the src_filename
+            idx = src_path.find(most_specific)
+            end_idx = src_path.find(src_filename)
+
+            # find out if you need a separator between dest_path & src_path
+            # (you don't if dest_path is an empty string)
+            if dest_path == "":
+                dest_full_path = src_path[idx:end_idx-1]
+                dest_plus_file = src_path[idx:]
+                src_full_path = src_path
+            else:
+                if src_path[idx:end_idx] != "":
+                    dest_full_path = dest_path + "/" + src_path[idx:end_idx-1]
+                else:
+                    dest_full_path = dest_path
+                dest_plus_file = dest_path + "/" + src_path[idx:]
+                src_full_path = src_path
+
+            try:
+                print("DEST_FULL", dest_full_path)
+                print("SRC FULL", src_full_path)
+                print("DEST plus file", dest_plus_file)
+                metadata = self.find_file_or_folder_metadata(dest_full_path, self.hs_files["contents"])
+                print("METADATA", metadata)
+                if metadata is None and dest_full_path != "":
+                    self.remote_folder.create_folder(dest_full_path)
+            except Exception:
+                self.remote_folder.create_folder(dest_full_path)
+
+            # remove any existing copy of the file in its destination location
+            if self.is_file_in_HS(dest_plus_file, self.hs_files["contents"]):
+                self.delete_file_or_folder_from_HS(dest_plus_file)
+
+            self.remote_folder.rename_or_move_file(src_full_path, dest_plus_file)
+            self.hs_files = self.get_files_upon_init_HS()
+        # # TODO: throw an exception if either of the parameters are None. Checking the paths is
+        # # something the calling function should handle
+        # if old_filepath is not None and new_filepath is not None:
+        #     print("OLD FILEPATH", old_filepath)
+        #     print("NEW FILEPATH", new_filepath)
+        #     if self.is_file_in_HS(old_filepath, self.hs_files["contents"]):
+        #         print("made it here")
+        #         self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
+        #         # TODO (Emily): make comments
+        #         if len(old_filepath.rsplit("/", 1)) > 1:
+        #             print("herezies")
+        #             folderpath, filename = old_filepath.rsplit("/", 1)
+        #             #TODO (Emily): potentially remove
+        #             # create that folder again (bc HS wouldn't tell us that that folder still existed), the resource would break. so maybe this stopped working?
+        #             self.delete_HS_folder_if_empty(folderpath, filename)
+        #     else:
+        #         # TODO: probably another exception here so that the calling function knows something went wrong
+        #         # and can notify the frontend
+        #         logging.info('Trying to rename or move file that does not exist: ' + old_filepath)
+        # else:
+        #     logging.info('Missing inputs for old and new filepath')
 
     # TODO: probably remove and use is_file_or_folder_in_HS instead
     # or actually maybe remove the other one cause this seems simpler...
@@ -244,6 +308,8 @@ class Resource:
         """Renames the jupyterhub version of the file from old_filename to
         new_filename.
         """
+        print("OLD FILEPARH", old_filepath)
+        print("NEW FILEPARH", new_filepath)
         # TODO: should probably throw an exception if this is not true
         if old_filepath is not None and new_filepath is not None:
             if not full_paths:
@@ -474,15 +540,17 @@ class Resource:
                 src_full_path = Path(str(self.path_prefix) + "/" + src_path)
             else:
                 if src_path[idx:end_idx] != "":
-                    dest_full_path = dest_path + "/" + src_path[idx:end_idx]
+                    dest_full_path = dest_path + "/" + src_path[idx:end_idx-1]
                 else:
                     dest_full_path = dest_path
                 dest_plus_file = dest_path + "/" + src_path[idx:]
                 src_full_path = Path(str(self.path_prefix) + "/" + src_path)
 
             try:
+                print("DEST_FULL", dest_full_path)
                 metadata = self.find_file_or_folder_metadata(dest_full_path, self.hs_files["contents"])
-                if metadata is None:
+                print("METADATA", metadata)
+                if metadata is None and dest_full_path != "":
                     self.remote_folder.create_folder(dest_full_path)
             except Exception:
                 self.remote_folder.create_folder(dest_full_path)
