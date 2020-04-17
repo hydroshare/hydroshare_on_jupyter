@@ -11,6 +11,7 @@ interface IModalProps {
   submitText?: string
   isValid: boolean
   isWarning?: boolean
+  isConfirm?: boolean
 }
 
 const Modal: React.FC<IModalProps> = (props: IModalProps) => {
@@ -18,6 +19,8 @@ const Modal: React.FC<IModalProps> = (props: IModalProps) => {
   let submitButtonClasses = '';
   if (props.isWarning) {
     submitButtonClasses += 'warn ';
+  } else if (props.isConfirm) {
+    submitButtonClasses += 'confirm ';
   }
 
   return (

@@ -74,8 +74,10 @@ class ResourcesRootHandler(BaseRequestHandler):
 
     def get(self):
         resources, error = resource_handler.get_list_of_user_resources()
+        archive_message = resource_handler.get_archive_message()
 
         self.write({'resources': resources,
+                    'archive_message': archive_message,
                     'success': error is None,
                     'error': error})
 
@@ -117,8 +119,13 @@ class ResourceHandler(BaseRequestHandler):
     """ Handles resource-specific requests made to /resources/<resource_id> """
 
     def delete(self, res_id):
-        local_del_error = resource_handler.delete_resource_JH(res_id)
-        # TODO: Delete the resource from HydroShare if the user owns it
+        body = json.loads(self.request.body.decode('utf-8'))
+        del_locally_only = body.get("locallyOnly")
+        if del_locally_only:
+            local_del_error = resource_handler.delete_resource_JH(res_id)
+        else:
+            # TODO: Delete the resource from HydroShare if the user owns it
+            local_del_error = resource_handler.delete_resource_JH(res_id)
         if local_del_error:
             self.set_status(500)
         else:
