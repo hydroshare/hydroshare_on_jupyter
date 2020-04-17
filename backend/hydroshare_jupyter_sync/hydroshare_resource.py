@@ -203,7 +203,7 @@ class Resource:
         # TODO: throw an exception if either of the parameters are None. Checking the paths is
         # something the calling function should handle
         if old_filepath is not None and new_filepath is not None:
-            if self.is_file_in_HS(old_filepath):
+            if self.is_file_in_HS(old_filepath, self.hs_files["contents"]):
                 self.remote_folder.rename_or_move_file(old_filepath, new_filepath)
                 # TODO (Emily): make comments
                 if len(old_filepath.rsplit("/", 1)) > 1:
@@ -220,16 +220,19 @@ class Resource:
 
     # TODO: probably remove and use is_file_or_folder_in_HS instead
     # or actually maybe remove the other one cause this seems simpler...
-    def is_file_in_HS(self, filepath):
+    def is_file_in_HS(self, filepath, files_info):
         """ does a file exist in hs_files """
-        files_info = self.hs_files["contents"]
+        found = False
 
         for file_dict in files_info:
-            # cut out the hs:/ at beginning of path in comparison
-            if filepath == file_dict["path"].strip("hs:/"):
-                return True
+            if file_dict["type"] == "folder":
+                found = found or self.is_file_in_HS(filepath, file_dict["contents"])
+            else:
+                # cut out the hs:/ at beginning of path in comparison
+                if filepath == file_dict["path"].strip("hs:/"):
+                    return True
 
-        return False
+        return found
 
     def rename_or_move_file_JH(self, old_filepath, new_filepath, full_paths=False):
         """Renames the jupyterhub version of the file from old_filename to
@@ -436,9 +439,9 @@ class Resource:
             self.JH_files = self.get_files_upon_init_JH()
 
     def overwrite_HS_with_file_from_JH(self, src_path, dest_path):
-        overwrite_HS_with_file_from_JH_rescursive(src_path, dest_path, src_path)
+        self.overwrite_HS_with_file_from_JH_recursive(src_path, dest_path, src_path)
 
-    def overwrite_HS_with_file_from_JH_rescursive(self, src_path, dest_path, og_src):
+    def overwrite_HS_with_file_from_JH_recursive(self, src_path, dest_path, og_src):
         """ overwrites HS file with one from JH """
         metadata = self.find_file_or_folder_metadata(src_path, self.JH_files["contents"])
         if metadata["type"] == "folder":
@@ -469,32 +472,29 @@ class Resource:
             # find out if you need a separator between dest_path & src_path
             # (you don't if dest_path is an empty string)
             if dest_path == "":
-                dest_full_path = src_path[idx:end_idx]
+                dest_full_path = src_path[idx:end_idx-1]
+                dest_plus_file = src_path[idx:]
                 src_full_path = Path(str(self.path_prefix) + "/" + src_path)
             else:
-                dest_full_path = dest_path + "/" + src_path[idx:end_idx])
+                if src_path[idx:end_idx] != "":
+                    dest_full_path = dest_path + "/" + src_path[idx:end_idx]
+                else:
+                    dest_full_path = dest_path
+                dest_plus_file = dest_path + "/" + src_path[idx:]
                 src_full_path = Path(str(self.path_prefix) + "/" + src_path)
 
-            # if str(src_path).startswith('/'):
-            #     file_path = str(file_path)[1:]
-            # full_file_path_rel_resource_root = Path(src_path)
-            #
-            # dest_path_to_file = Path(dest_path) / full_file_path_rel_resource_root.name
-            #
-            # file_extension = full_file_path_rel_resource_root.suffix
-            # path_without_extension = str(full_file_path_rel_resource_root)[:-len(file_extension)]
-            # # Drop the leading . from the file extension
-            # file_extension = file_extension[1:]
-            # # TODO (Vicky): make this work
-            # if self.is_file_or_folder_in_HS(path_without_extension, file_extension):
-            #     self.delete_file_or_folder_from_HS(full_file_path_rel_resource_root)
-            folder_path = full_file_path_rel_resource_root.parent
-            if str(folder_path) != '.':
-                if not self.is_file_or_folder_in_HS(folder_path):
-                    self.remote_folder.create_folder(folder_path)
+            try:
+                metadata = self.find_file_or_folder_metadata(dest_full_path, self.hs_files["contents"])
+                if metadata is None:
+                    self.remote_folder.create_folder(dest_full_path)
+            except Exception:
+                self.remote_folder.create_folder(dest_full_path)
 
-            full_src_path = self.path_prefix / str(full_file_path_rel_resource_root)
-            self.remote_folder.upload_file_to_HS(full_src_path, full_file_path_rel_resource_root)
+            # remove any existing copy of the file in its destination location
+            if self.is_file_in_HS(dest_plus_file, self.hs_files["contents"]):
+                self.delete_file_or_folder_from_HS(dest_plus_file)
+
+            self.remote_folder.upload_file_to_HS(Path(src_full_path), Path(dest_plus_file))
             self.hs_files = self.get_files_upon_init_HS()
 
     def get_resource_last_modified_time_HS(self):
