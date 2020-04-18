@@ -17,6 +17,7 @@ import {
   setResourceLocalFiles,
   setResourceHydroShareFiles,
   setResources,
+  setArchiveMessage,
   notifyGettingResources,
   notifyGettingResourcesFailed,
 } from './actions/resources';
@@ -123,8 +124,7 @@ export function createNewResource(details: ICreateResourceRequest): ThunkAction<
     const { user } = getState();
     try {
       const data = {
-        "resource title": details.title,
-        privacy: details.privacy,
+        ...details,
         creators: [user?.name],
       };
       const response = await postToBackend<ICreateResourceRequestResponse>(`/resources`, data);
@@ -153,8 +153,35 @@ export function deleteResources(resources: IResource[]): ThunkAction<Promise<voi
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     let completedRequests = 0;
     let successfulRequests = 0;
+    const data = {
+      locallyOnly: false,
+    }
     resources.forEach(resource => {
-      deleteToBackend('/resources/' + resource.id)
+      deleteToBackend('/resources/' + resource.id, data)
+        .then(() => ++successfulRequests)
+        .catch(error => {
+          console.error(error);
+          dispatch(pushNotification('error', `Could not delete resource ${resource.title}.`));
+        })
+        .finally(() => {
+          ++completedRequests;
+          if (completedRequests === resources.length && successfulRequests > 0) {
+            dispatch(getResources());
+          }
+        });
+    });
+  };
+}
+
+export function deleteResourcesLocally(resources: IResource[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    let completedRequests = 0;
+    let successfulRequests = 0;
+    const data ={
+      locallyOnly: true,
+    }
+    resources.forEach(resource => {
+      deleteToBackend('/resources/' + resource.id, data)
         .then(() => ++successfulRequests)
         .catch(error => {
           console.error(error);
@@ -247,9 +274,11 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
         const {
           data: {
             resources,
+            archive_message,
           },
         } = response;
         dispatch(setResources(resources));
+        dispatch(setArchiveMessage(archive_message));
       } catch (e) {
         console.error(e);
         dispatch(notifyGettingResourcesFailed());

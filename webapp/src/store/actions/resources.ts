@@ -67,6 +67,10 @@ export function setResources(resources: IResource[]) {
   return action(ResourcesActions.SET_RESOURCES, resources);
 }
 
+export function setArchiveMessage(archive_message: string) {
+  return action(ResourcesActions.SET_ARCHIVE_MESSAGE, archive_message)
+}
+
 export function setResourceLocalFiles(resourceId: string, rootDir: IFolder) {
   return action(ResourcesActions.SET_RESOURCE_LOCAL_FILES, {
     resourceId,

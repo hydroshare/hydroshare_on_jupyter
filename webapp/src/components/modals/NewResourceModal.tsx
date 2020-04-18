@@ -1,101 +1,54 @@
 import * as React from 'react';
-import {
-  Button,
-  Form,
-} from 'react-bootstrap';
-import Modal from 'react-bootstrap/Modal';
 import { ICreateResourceRequest } from '../../store/types';
+
+import Modal, {
+  RadioInput,
+  TextArea,
+  TextInput,
+} from './Modal';
 
 import '../../styles/NewResourceModal.scss';
 
 interface INewResourceModalProps {
-    show: boolean
-    onHide: () => any
-    newResource: (newResource: ICreateResourceRequest) => any
+  close: () => any
+  createResource: (newResource: ICreateResourceRequest) => any
 }
 
 interface INewResourceModalState {
-    formValidated: boolean
+  abstract: string
+  title: string
+  privacy: string
 }
 
-export default class NewResourceModal extends React.Component<INewResourceModalProps, INewResourceModalState> {
+const initialState: INewResourceModalState = {
+  abstract: '',
+  title: '',
+  privacy: 'Private',
+};
 
-    constructor(props: INewResourceModalProps) {
-      super(props);
-      this.state = {
-        formValidated: false,
-      }
-    }
+const NewResourceModal: React.FC<INewResourceModalProps> = (props: INewResourceModalProps) => {
 
-    // TODO (emily): remove some deletes somewhere
-    public deleteClick =() => {
-        console.log("Send message to backend to delete")
-    }
+  const [state, setState] = React.useState(initialState);
 
-    public createNewResource =(event: any) => {
-        const form = event.target
-        if (form.checkValidity() === false) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        this.setState({
-            formValidated: true
-        })
-        this.props.newResource({
-            title: form.elements.formBasicName.value,
-            privacy: form.elements.formBasicPrivacy.value
-        })
-        this.props.onHide()
-    }
+  const setAbstract = (abstract: string) => setState({...state, abstract});
+  const setPrivacy = (privacy: string) => setState({...state, privacy});
+  const setTitle = (title: string) => setState({...state, title});
+  const createNewResource = () => props.createResource(state);
+  const isValid = state.title.length > 0;
 
-    public cancelNewResource = () => {
-        this.props.onHide()
-    }
+  return (
+    <Modal
+      submit={createNewResource}
+      title="Create New Resource"
+      submitText="Create"
+      close={props.close}
+      isValid={isValid}
+    >
+      <TextInput title="Title" onChange={setTitle} value={state.title}/>
+      <TextArea title="Abstract" onChange={setAbstract} value={state.abstract}/>
+      <RadioInput choices={['Public', 'Private']} onChange={setPrivacy} selected={state.privacy} title="Privacy"/>
+    </Modal>
+  );
+};
 
-
-    public render() {
-
-        // TODO (emily): change note if we can actually rename stuff
-        return (
-            <Modal
-                {...this.props}
-                size="lg"
-                aria-labelledby="contained-modal-title-vcenter"
-                centered = {true}
-                >
-                <Modal.Header closeButton={true}>
-                    <Modal.Title id="contained-modal-title-vcenter">
-                    Create new resource
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form noValidate={false} validated={this.state.formValidated} onSubmit={this.createNewResource}>
-                        <Form.Group controlId="formBasicName">
-                            <Form.Label>Name of resource</Form.Label>
-                            <Form.Text className="text-muted">
-                                Note: You will not be able to rename your resource once created.
-                            </Form.Text>
-                            <Form.Control required={true} type="name" placeholder="Resource name" />
-                            <Form.Control.Feedback type="invalid">
-                                Please choose a resource name.
-                            </Form.Control.Feedback>
-                        </Form.Group>
-                        <Form.Group controlId="formBasicPrivacy">
-                            <Form.Label>Privacy</Form.Label>
-                            <Form.Control as="select">
-                                <option>Private</option>
-                                <option>Public</option>
-                            </Form.Control>
-                        </Form.Group>
-                        <Button variant="primary" type="submit">
-                            Create new resource
-                        </Button>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={this.cancelNewResource}>Cancel</Button>
-                </Modal.Footer>
-            </Modal>
-        );
-    }
-}
+export default NewResourceModal;
