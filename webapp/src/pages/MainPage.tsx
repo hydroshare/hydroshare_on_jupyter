@@ -9,7 +9,6 @@ import * as AppActions from '../store/actions/App';
 import {
   createNewResource,
   deleteResources,
-  deleteResourcesLocally,
 } from '../store/async-actions';
 import {
   IResource,
@@ -26,8 +25,8 @@ const mapStateToProps = ({ resources }: IRootState) => {
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
-    deleteResources: (resources: IResource[]) => dispatch(deleteResources(resources)),
-    deleteResourcesLocally: (resources: IResource[]) => dispatch(deleteResourcesLocally(resources)),
+    deleteResources: (resources: IResource[]) => dispatch(deleteResources(resources, false)),
+    deleteResourcesLocally: (resources: IResource[]) => dispatch(deleteResources(resources, true)),
     viewResource: (resource: IResource) => dispatch(AppActions.viewResource(resource)),
     createResource: (newResource: ICreateResourceRequest) => dispatch(createNewResource(newResource))
   }

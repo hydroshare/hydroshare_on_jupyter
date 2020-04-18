@@ -67,7 +67,7 @@ class ResourceManager:
         try:
             user_info = self.hs.getUserInfo()
         except:
-            error = {'type':'InvalidCredentials', 'msg':'Invalid username or password'}
+            error = {'type':'InvalidCredentials', 'message':'Invalid username or password'}
 
         return user_info, error
 
@@ -78,9 +78,17 @@ class ResourceManager:
         try:
             shutil.rmtree(JH_resource_path)
         except FileNotFoundError:
-            error = {'type':'FileNotFoundError', 'msg':'Resource does not exist in JupyterHub'}
+            error = {'type':'FileNotFoundError', 'message':'Resource does not exist in JupyterHub'}
         except:
-            error = {'type':'UnknownError', 'msg':'Something went wrong. Could not delete resource.'}
+            error = {'type':'UnknownError', 'message':'Something went wrong. Could not delete resource.'}
+        return error
+
+    def delete_resource_HS(self, res_id):
+        error = None
+        try:
+            self.hs.deleteResource(res_id)
+        except:
+            error = {'type': 'UnknownError', 'message': 'Could not delete resource. Perhaps you don\'t have the authorization.'}
         return error
 
     def get_local_JH_resources(self):
@@ -119,7 +127,7 @@ class ResourceManager:
         try:
             test_generator = list(user_hs_resources) # resources can't be listed if auth fails
         except:
-            error = {'type': 'InvalidCredentials', 'msg': 'Invalid username or password'}
+            error = {'type': 'InvalidCredentials', 'message': 'Invalid username or password'}
             return list(resources.values()), error
 
         for res in test_generator:
@@ -155,11 +163,11 @@ class ResourceManager:
         # Type errors for resource_title and creators
         if not isinstance(resource_title, str):
             error = {'type': 'IncorrectType',
-                    'msg': 'Resource title should be a string.'}
+                    'message': 'Resource title should be a string.'}
             return resource_id, error
         if not isinstance(creators, list) or not all(isinstance(creator, str) for creator in creators):
             error = {'type': 'IncorrectType',
-                    'msg': '"Creators" object should be a list of strings.'}
+                    'message': '"Creators" object should be a list of strings.'}
             return resource_id, error
 
         if abstract is None:
@@ -197,7 +205,7 @@ class ResourceManager:
             self.hs.setAccessRules(resource_id, public=public)
         except:
             error = {'type':'UnknownError',
-                    'msg':'Unable to create resource.'}
+                    'message':'Unable to create resource.'}
         return resource_id, error
 
 
