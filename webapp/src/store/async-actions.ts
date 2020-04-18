@@ -154,7 +154,6 @@ export function deleteResources(resources: IResource[], localOnly: boolean): Thu
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     let completedRequests = 0;
     let successfulRequests = 0;
-    console.log(localOnly)
     const data = {
       locallyOnly: localOnly,
     }
