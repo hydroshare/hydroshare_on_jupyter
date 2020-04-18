@@ -176,13 +176,15 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           resources={selectedDelResources}
           submit={this.deleteSelectedResource}
         />
+        break;
       case MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE:
         const selectedArchResources = Array.from(this.state.selectedResources).map(r => this.props.resources[r]);
         modal = <ArchiveResourceConfirmationModal
           close={this.closeModal}
           resources={selectedArchResources}
-          submit={this.deleteSelectedResource}
+          submit={this.deleteSelectedResourceLocally}
         />
+        break;
     }
 
     const classNames = ['ResourceList', 'table'];
