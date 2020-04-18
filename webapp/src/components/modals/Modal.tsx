@@ -11,6 +11,7 @@ interface IModalProps {
   submitText?: string
   isValid: boolean
   isWarning?: boolean
+  isConfirm?: boolean
 }
 
 const Modal: React.FC<IModalProps> = (props: IModalProps) => {
@@ -18,6 +19,8 @@ const Modal: React.FC<IModalProps> = (props: IModalProps) => {
   let submitButtonClasses = '';
   if (props.isWarning) {
     submitButtonClasses += 'warn ';
+  } else if (props.isConfirm) {
+    submitButtonClasses += 'confirm ';
   }
 
   return (
@@ -62,6 +65,18 @@ type TextInputProps = {
   pattern?: string
   placeholder?: string
   value: string
+};
+export const TextArea: React.FC<TextInputProps> = (props: TextInputProps) => {
+  const textareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => props.onChange(e.target.value);
+
+  return (
+    <div className="TextArea group">
+      <h2 className="title">{props.title}</h2>
+      <div className="group-content">
+        <textarea value={props.value} onChange={textareaChange} placeholder={props.placeholder}/>
+      </div>
+    </div>
+  )
 };
 
 export const TextInput: React.FC<TextInputProps> = (props: TextInputProps) => {

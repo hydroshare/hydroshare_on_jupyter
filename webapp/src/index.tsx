@@ -2,7 +2,6 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/App.scss';
 
 import { ConnectedRouter } from 'connected-react-router';

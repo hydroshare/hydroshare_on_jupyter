@@ -23,6 +23,7 @@ export default class EditPrivacyModal extends React.Component<IEditPrivacyModalP
         close={this.props.close}
         title="Edit Privacy"
         isValid={this.isValid()}
+        isConfirm={true}
         submit={this.submit}
         submitText="Edit privacy"
       >
