@@ -216,7 +216,7 @@ class Resource:
         metadata = self.find_file_or_folder_metadata(src_path, self.hs_files["contents"])
         if metadata["type"] == "folder":
             for sub_dicts in metadata.get("contents"):
-                new_src = sub_dicts.get("path").strip("hs:/")
+                new_src = self.remove_prefix(sub_dicts.get("path"), "hs:/")
                 self.rename_or_move_file_HS_recursive(new_src, dest_path, og_src)
 
         else:
@@ -278,10 +278,20 @@ class Resource:
                 found = found or self.is_file_in_HS(filepath, file_dict["contents"])
             else:
                 # cut out the hs:/ at beginning of path in comparison
-                if filepath == file_dict["path"].strip("hs:/"):
+                if filepath == self.remove_prefix(file_dict["path"], "hs:/"):
                     return True
 
         return found
+
+    def remove_prefix(self, text, prefix):
+        if text.startswith(prefix):
+            return text[len(prefix):]
+        return text
+
+    def remove_suffix(self, text, suffix):
+        if not text.endswith(suffix):
+            return text
+        return text[:-len(suffix)]
 
     def rename_or_move_file_JH(self, old_filepath, new_filepath, full_paths=False):
         """Renames the jupyterhub version of the file from old_filename to
@@ -402,13 +412,13 @@ class Resource:
         # find a temp folder location that does not exist
         temp_location = "/temp/"
         i = 1
-        while Path(str(self.path_prefix).strip("/contents") + "/temp/").exists():
+        while Path(self.remove_suffix(str(self.path_prefix), "/contents") + "/temp/").exists():
             temp_location = "/temp" + str(i) + "/"
             i += 1
         # recursively overwrite all nested files from src_path
         self.overwrite_JH_with_file_from_HS_recursive(src_path, dest_path, src_path, temp_location)
         # remove the temporary folder
-        self.local_folder.delete_folder(str(self.path_prefix).strip("/contents") + temp_location)
+        self.local_folder.delete_folder(self.remove_suffix(str(self.path_prefix), "/contents") + temp_location)
 
     def overwrite_JH_with_file_from_HS_recursive(self, src_path, dest_path, og_src, temp_location):
         """ Recursively overwrites JH files located at the specified dest_path
@@ -416,7 +426,7 @@ class Resource:
         metadata = self.find_file_or_folder_metadata(src_path, self.hs_files["contents"])
         if metadata["type"] == "folder":
             for sub_dicts in metadata.get("contents"):
-                new_src = sub_dicts.get("path").strip("hs:/")
+                new_src = self.remove_prefix(sub_dicts.get("path"), "hs:/")
                 self.overwrite_JH_with_file_from_HS_recursive(new_src, dest_path, og_src, temp_location)
         else:
             # at this point we know source is referring to a file, not folder
@@ -428,8 +438,8 @@ class Resource:
                 src_path_to_file = None
 
             # delete existing file at destination, if applicable
-            if self.is_file_or_folder_in_JH(str(self.path_prefix).strip("/contents") + temp_location + dest_path + src_path):
-                self.local_folder.delete_file(str(self.path_prefix).strip("/contents") + temp_location + dest_path + src_path)
+            if self.is_file_or_folder_in_JH(self.remove_suffix(str(self.path_prefix), "/contents") + temp_location + dest_path + src_path):
+                self.local_folder.delete_file(self.remove_suffix(str(self.path_prefix), "/contents") + temp_location + dest_path + src_path)
 
             output_path = dest_path
 
@@ -437,11 +447,11 @@ class Resource:
                 if output_path == "": output_path = src_path_to_file
                 else: output_path = output_path + "/" + src_path_to_file
 
-            if not (Path(str(self.path_prefix).strip("/contents") + temp_location + output_path)).exists():
+            if not (Path(self.remove_suffix(str(self.path_prefix), "/contents") + temp_location + output_path)).exists():
                 # create local folders that lead to output_path if they don't exist
-                os.makedirs(str(self.path_prefix).strip("/contents") + "/temp/" + output_path + "/")
+                os.makedirs(self.remove_suffix(str(self.path_prefix), "/contents") + temp_location + output_path + "/")
 
-            self.remote_folder.download_file_to_JH(src_path, str(self.path_prefix).strip("/contents") + temp_location + dest_path)
+            self.remote_folder.download_file_to_JH(src_path, self.remove_suffix(str(self.path_prefix), "/contents") + temp_location + dest_path)
 
             # find the most specific file or folder specified in original source
             # i.e. is it an upper level folder, a file, etc.
@@ -458,10 +468,10 @@ class Resource:
             # (you don't if dest_path is an empty string)
             if dest_path == "":
                 dest_full_path = Path(str(self.path_prefix) + "/" + src_path[idx:end_idx])
-                src_full_path = Path(str(self.path_prefix).strip("/contents") + temp_location + src_path)
+                src_full_path = Path(self.remove_suffix(str(self.path_prefix), "/contents") + temp_location + src_path)
             else:
                 dest_full_path = Path(str(self.path_prefix) + "/" + dest_path + "/" + src_path[idx:end_idx])
-                src_full_path = Path(str(self.path_prefix).strip("/contents") + temp_location + dest_path + "/" + src_path)
+                src_full_path = Path(self.remove_suffix(str(self.path_prefix), "/contents") + temp_location + dest_path + "/" + src_path)
 
             if not (dest_full_path).exists():
                 # create local folders that lead to dest_full_path if they don't exist
@@ -486,7 +496,7 @@ class Resource:
         metadata = self.find_file_or_folder_metadata(src_path, self.JH_files["contents"])
         if metadata["type"] == "folder":
             for sub_dicts in metadata.get("contents"):
-                new_src = sub_dicts.get("path").strip("local:/")
+                new_src = self.remove_prefix(sub_dicts.get("path"), "local:/")
                 self.overwrite_HS_with_file_from_JH_recursive(new_src, dest_path, og_src)
 
         else:
