@@ -121,16 +121,28 @@ class ResourceHandler(BaseRequestHandler):
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         del_locally_only = body.get("locallyOnly")
+        success_count = 0
+        failure_count = 0
+        results = []
         if del_locally_only:
             local_del_error = resource_handler.delete_resource_JH(res_id)
         else:
-            # TODO: Delete the resource from HydroShare if the user owns it
             local_del_error = resource_handler.delete_resource_JH(res_id)
+            HS_del_error = resource_handler.delete_resource_HS(res_id)
+            if HS_del_error:
+                results.append({"success": False,
+                            "error":HS_del_error})
+            else:
+                results.append({'success': True})
         if local_del_error:
-            self.set_status(500)
+            results.append({"success": False,
+                            "error":local_del_error})
         else:
-            self.set_status(200)
-        self.finish()
+            results.append({'success': True})
+                              
+        self.write({'results': results,
+                    'success_count': success_count,
+                    'failure_count': failure_count})
 
 
 class ResourceLocalFilesRequestHandler(BaseRequestHandler):

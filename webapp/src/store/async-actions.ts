@@ -28,6 +28,7 @@ import {
   ICreateFileOrFolderRequestResponse,
   ICreateResourceRequest,
   ICreateResourceRequestResponse,
+  IDeleteResourceRequestResponse,
   IFile,
   IFileOperationsRequestResponse,
   IFolder,
@@ -139,50 +140,43 @@ export function createNewResource(details: ICreateResourceRequest): ThunkAction<
           console.error(error);
           dispatch(pushNotification('error', error.message));
         } else {
-          pushNotification('error', 'Could not create resource.');
+          dispatch(pushNotification('error', 'Could not create resource.'));
         }
       }
     } catch (e) {
       console.error(e);
-      dispatch(pushNotification('error', 'An error occurred when attempting to create the file.'));
+      dispatch(pushNotification('error', 'An error occurred when attempting to create the resource.'));
     }
   };
 }
 
-export function deleteResources(resources: IResource[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+export function deleteResources(resources: IResource[], localOnly: boolean): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     let completedRequests = 0;
     let successfulRequests = 0;
+    console.log(localOnly)
     const data = {
-      locallyOnly: false,
+      locallyOnly: localOnly,
     }
     resources.forEach(resource => {
-      deleteToBackend('/resources/' + resource.id, data)
-        .then(() => ++successfulRequests)
-        .catch(error => {
-          console.error(error);
-          dispatch(pushNotification('error', `Could not delete resource ${resource.title}.`));
-        })
-        .finally(() => {
-          ++completedRequests;
-          if (completedRequests === resources.length && successfulRequests > 0) {
-            dispatch(getResources());
+      deleteToBackend<IDeleteResourceRequestResponse>('/resources/' + resource.id, data)
+        .then(res => {
+          if (res.data) {
+            const {
+              failureCount,
+              results,
+            } = res.data;
+            if (failureCount !== 0){
+              results.forEach(result => {
+                if (result.success === false && result.error){
+                  console.error(result.error);
+                  dispatch(pushNotification('error', result.error.message))
+                }
+              })
+            }
           }
-        });
-    });
-  };
-}
-
-export function deleteResourcesLocally(resources: IResource[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
-  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-    let completedRequests = 0;
-    let successfulRequests = 0;
-    const data ={
-      locallyOnly: true,
-    }
-    resources.forEach(resource => {
-      deleteToBackend('/resources/' + resource.id, data)
-        .then(() => ++successfulRequests)
+           ++successfulRequests
+          })
         .catch(error => {
           console.error(error);
           dispatch(pushNotification('error', `Could not delete resource ${resource.title}.`));
