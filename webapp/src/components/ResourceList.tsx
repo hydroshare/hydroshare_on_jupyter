@@ -254,7 +254,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
             className={'clickable ' + (sortBy === SORT_BY_OPTIONS.COPIED_LOCALLY ? sortOrder : '')}
             onClick={() => this.setSortBy(SORT_BY_OPTIONS.COPIED_LOCALLY)}
           >
-            Copied locally
+            Copied to workspace
             {sortBy === SORT_BY_OPTIONS.COPIED_LOCALLY && SortTriangleSVG}
           </button>
         </div>

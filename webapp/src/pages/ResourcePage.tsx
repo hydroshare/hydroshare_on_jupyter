@@ -187,7 +187,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           promptDeleteFilesOrFolders={this.displayDeleteConfirmationModal}
           resourceId={resource.id}
         />
-        <ReadMeDisplay localReadMe={this.props.resource? this.props.resource.localReadMe : "# No ReadMe yet"}/>
+        <ReadMeDisplay localReadMe={this.props.resource? this.props.resource.localReadMe : "# No ReadMe yet"} resId={resource.id}/>
         {modal}
       </div>
     )
