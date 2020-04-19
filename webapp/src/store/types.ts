@@ -75,6 +75,8 @@ export interface IResource {
   title: string
   resource_title: string
   resource_url: string
+  localReadMe: string
+  hydroShareReadMe: string
 }
 
 export interface INotification {
@@ -90,6 +92,7 @@ export interface IResourcesData {
 
 export interface IResourceFilesData {
   rootDir: IFolder
+  readMe: string
 }
 
 export interface IUserInfo {

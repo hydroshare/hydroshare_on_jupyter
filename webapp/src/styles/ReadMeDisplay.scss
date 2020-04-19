@@ -1,0 +1,47 @@
+@import 'variables';
+
+.ReadMeDisplay {
+  margin-bottom: 1em;
+  padding: $container-padding;
+
+  .top-row {
+    display: flex;
+    margin-bottom: 0.5em;
+    flex-direction: row;
+    border-bottom-width: 1.5px;
+    border-bottom-style: solid;
+    padding-bottom: 1em;
+    border-bottom-color: lightgray;
+
+    .title {
+      font-size: 20px;
+    }
+
+    .location-selector {
+      margin-left:auto;
+      color: darkgray;
+
+      .selector {
+        margin-left: 1em;
+        font-size: 20px;
+      }
+
+      .selector.selected {
+        font-weight: bold;
+        border-bottom-color: #2D9CDB;
+        border-bottom-width: 3px;
+        border-bottom-style: solid;
+        padding-bottom: 0.7em;
+      }
+
+      .selector.selected.workspace {
+        border-bottom-color: #F2994A;
+      }
+
+      .selector.selected.hydroshare {
+        border-bottom-color: #2D9CDB;
+      }
+
+    }
+  }
+}

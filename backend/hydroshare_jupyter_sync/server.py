@@ -153,7 +153,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
     def get(self, res_id):
         resource = Resource(res_id, resource_handler)
         jh_files = resource.get_files_JH()
-        self.write({'rootDir': jh_files})
+        jh_ReadMe = resource.get_JH_ReadMe()
+        self.write({'rootDir': jh_files, 'readMe': jh_ReadMe})
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
