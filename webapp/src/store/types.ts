@@ -88,6 +88,8 @@ export interface INotification {
 export interface IResourcesData {
   resources: IResource[]
   archive_message: string
+  success: boolean
+  error?: IServerError
 }
 
 export interface IResourceFilesData {

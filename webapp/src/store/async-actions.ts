@@ -260,10 +260,15 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
           data: {
             resources,
             archive_message,
+            error,
           },
         } = response;
-        dispatch(setResources(resources));
-        dispatch(setArchiveMessage(archive_message));
+        if (error) {
+          dispatch(pushNotification('error', error.message));
+        } else {
+          dispatch(setResources(resources));
+          dispatch(setArchiveMessage(archive_message));
+        }
       } catch (e) {
         console.error(e);
         dispatch(notifyGettingResourcesFailed());
