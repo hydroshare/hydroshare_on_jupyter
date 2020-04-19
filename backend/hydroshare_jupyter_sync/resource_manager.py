@@ -10,11 +10,11 @@ Email: vickymmcd@gmail.com
 # -*- coding: utf-8 -*-
 import base64
 import glob
-import json
 import logging
 import os
 import shutil
 import json
+from dateutil.parser import parse
 from getpass import getpass
 from pathlib import Path
 
@@ -38,26 +38,35 @@ class ResourceManager:
         # TODO: Load these with the username and password
         config = get_config_values(['dataPath', 'hydroShareHostname'])
         hostname = 'www.hydroshare.org'
-        data_path = Path(os.path.dirname(os.path.realpath(__file__))) / 'local_hs_resources'
+        # TODO: Rename to hydroshare_resource_data
+        self.output_folder = Path('local_hs_resources')
         if config:
             hostname = config.get('hydroShareHostname', hostname)
-            data_path = Path(config.get('dataPath'), data_path)
-        if not data_path.is_dir():
+            self.output_folder = Path(config.get('dataPath'), self.output_folder)
+        if not self.output_folder.is_dir():
             # Let any exceptions that occur bubble up
-            data_path.mkdir(parents=True)
-
-        # Create a symlink in the current directory to point to data_path
-        self.output_folder = Path(os.path.dirname(os.path.realpath(__file__))) / 'resources'
-        if self.output_folder.exists():
-            if self.output_folder.is_symlink():
-                if self.output_folder.resolve() != data_path.resolve():
-                    # Perhaps the user changed their config file. Update the symlink.
-                    self.output_folder.unlink()
-                    self.output_folder.symlink_to(data_path, target_is_directory=True)
-        else:
-            self.output_folder.symlink_to(data_path, target_is_directory=True)
+            self.output_folder.mkdir(parents=True)
 
         self.hs = HydroShare(auth=auth, hostname=hostname)
+
+    def get_resource_last_modified_in_hydroshare_date(self, res_id):
+        """ Gets the last date (no time) that the resource was modified in HydroShare.
+        :rtype datetime.date
+        """
+        metadata = self.hs.getScienceMetadata(res_id)
+        for date in metadata['dates']:
+            if date['type'] == 'modified':
+                return parse(date['start_date'])
+        return None
+
+    def save_resource_locally(self, res_id, unzip=True):
+        """Saves the HS resource locally, if it does not already exist.
+        """
+        # Get resource from HS if it doesn't already exist locally
+        if not os.path.exists('{}/{}'.format(self.output_folder, res_id)):
+
+            logging.info("Downloading resource from HydroShare...")
+            self.hs.getResource(res_id, destination=self.output_folder, unzip=unzip)
 
     def get_user_info(self):
         """Gets information about the user currently logged into HydroShare
