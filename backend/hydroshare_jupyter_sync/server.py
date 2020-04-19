@@ -13,7 +13,8 @@ import logging
 import sys
 import json
 from hs_restclient import exceptions as HSExceptions
-from hydroshare_jupyter_sync.hydroshare_resource import Resource, HS_PREFIX, LOCAL_PREFIX
+from hydroshare_jupyter_sync.resource_local_data import ResourceLocalData, LOCAL_PREFIX
+from hydroshare_jupyter_sync.resource_hydroshare_data import ResourceHydroShareData, HS_PREFIX
 from hydroshare_jupyter_sync.resource_manager import ResourceManager
 from hydroshare_jupyter_sync.index_html import get_index_html
 from notebook.base.handlers import IPythonHandler
@@ -25,7 +26,7 @@ import tornado.web
 import tornado.options
 
 # Global resource handler variable
-resource_handler = ResourceManager()
+resource_manager = ResourceManager()
 
 assets_path = Path(__file__).parent / 'assets'
 
@@ -73,8 +74,8 @@ class ResourcesRootHandler(BaseRequestHandler):
         self.finish()
 
     def get(self):
-        resources, error = resource_handler.get_list_of_user_resources()
-        archive_message = resource_handler.get_archive_message()
+        resources, error = resource_manager.get_list_of_user_resources()
+        archive_message = resource_manager.get_archive_message()
 
         self.write({'resources': resources,
                     'archive_message': archive_message,
@@ -101,7 +102,7 @@ class ResourcesRootHandler(BaseRequestHandler):
         privacy = body.get("privacy")  # Public or private
 
         if resource_title is not None and creators is not None:
-            resource_id, error = resource_handler.create_HS_resource(resource_title, creators, abstract, privacy)
+            resource_id, error = resource_manager.create_HS_resource(resource_title, creators, abstract, privacy)
             if not error:
                 success = True
         else:
@@ -125,10 +126,10 @@ class ResourceHandler(BaseRequestHandler):
         failure_count = 0
         results = []
         if del_locally_only:
-            local_del_error = resource_handler.delete_resource_JH(res_id)
+            local_del_error = resource_manager.delete_resource_JH(res_id)
         else:
-            local_del_error = resource_handler.delete_resource_JH(res_id)
-            HS_del_error = resource_handler.delete_resource_HS(res_id)
+            local_del_error = resource_manager.delete_resource_JH(res_id)
+            HS_del_error = resource_manager.delete_resource_HS(res_id)
             if HS_del_error:
                 results.append({"success": False,
                             "error":HS_del_error})
@@ -151,10 +152,12 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
     # TODO (Vicky) header comment should be updated
 
     def get(self, res_id):
-        resource = Resource(res_id, resource_handler)
-        jh_files = resource.get_files_JH()
-        jh_ReadMe = resource.get_JH_ReadMe()
-        self.write({'rootDir': jh_files, 'readMe': jh_ReadMe})
+        # TODO: Ensure we have the data (get it otherwise)
+        local_data = ResourceLocalData(res_id)
+        self.write({
+            'readMe': local_data.get_readme(),
+            'rootDir': local_data.get_files_and_folders(),
+        })
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
@@ -164,7 +167,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
             self.write('Could not find "files" in request body.')
             return
 
-        resource = Resource(res_id, resource_handler)
+        local_folder = ResourceLocalData(res_id)
         success_count = 0
         failure_count = 0
 
@@ -186,7 +189,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                         break
                 else:  # Only runs if the break statement above is never hit (yes, the indentation is right here)
                     # Try to delete this item
-                    deleted_type = resource.delete_file_or_folder_from_JH(item_path)
+                    deleted_type = local_folder.delete_file_or_folder(item_path)
                     if deleted_type == 'folder':
                         deleted_folders.append(item_path)
                 success_count += 1
@@ -211,7 +214,6 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
     def put(self, res_id):
         """create new file in JH"""
         body = json.loads(self.request.body.decode('utf-8'))
-        resource = Resource(res_id, resource_handler)
         item_type = body.get('type')
         name = body.get('name')
         if item_type is None or name is None:
@@ -223,30 +225,26 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
             self.write('"type" attribute must be either "file" or "folder".')
             return
 
+        local_data = ResourceLocalData(res_id)
         if item_type == 'file':
-            resource.create_file_JH(name)
+            local_data.create_file(name)
         elif item_type == 'folder':
-            resource.create_local_folder(name)
+            local_data.create_local_folder(name)
 
         self.write({
             'success': True,
         })
 
     def post(self, res_id):
-        """upload file to JH"""
-        resource = Resource(res_id, resource_handler)
-        # TODO: this is normally achieved using different response status codes
-        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-        response_message = "OK"
+        """ Uploads a file from the user's computer to the local filesystem """
+        local_data = ResourceLocalData(res_id)
         for field_name, files in self.request.files.items():
             for info in files:
-                response = resource.upload_file_to_JH(info)
-                if response != True:
-                    response_message = response
-        # TODO (Emily): I don't believe the cached copy of the files has been updated yet...
-        jh_files = resource.get_files_JH()
-        self.write({'response_message': response_message,
-                    'JH_files': jh_files})
+                with open(str(local_data.data_path / info['filename']), "wb") as f:
+                    f.write(info['body'])
+        self.write({
+            'success': True,
+        })
 
 
 class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
@@ -255,8 +253,8 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
 
     def get(self, res_id):
         # TODO: Get folder info
-        resource = Resource(res_id, resource_handler)
-        root_dir = resource.get_files_HS()
+        hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
+        root_dir = hs_data.get_files()
         self.write({'rootDir': root_dir})
 
     def delete(self, res_id):
@@ -267,7 +265,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
             self.write('Could not find "files" in request body.')
             return
 
-        resource = Resource(res_id, resource_handler)
+        hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         success_count = 0
         failure_count = 0
 
@@ -289,7 +287,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                         break
                 else:  # Only runs if the break statement above is never hit (yes, the indentation is right here)
                     # Try to delete this item
-                    deleted_type = resource.delete_file_or_folder_from_HS(item_path)
+                    deleted_type = hs_data.delete_file_or_folder(item_path)
                     if deleted_type == 'folder':
                         deleted_folders.append(item_path)
                 success_count += 1
@@ -321,9 +319,6 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                 })
                 failure_count += 1
 
-        if success_count > 0:
-            resource.update_hs_files()
-
         self.write({
             'results': results,
             'successCount': success_count,
@@ -344,7 +339,8 @@ class MoveCopyFiles(BaseRequestHandler):
 
     def patch(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
-        resource = Resource(res_id, resource_handler)
+        local_data = ResourceLocalData(res_id)
+        hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         file_operations = body['operations']
 
         results = []
@@ -368,36 +364,47 @@ class MoveCopyFiles(BaseRequestHandler):
             # Exactly what operation we perform depends on where the source and destination files/folders are
             if src_fs == HS_PREFIX and dest_fs == HS_PREFIX:  # Move/copy within HydroShare
                 if method == MOVE:  # Move or rename
-                    # TODO: Test how well this works
-                    resource.rename_or_move_file_HS(src_path, dest_path)
-                    results.append({'success': True})
-                    success_count += 1
+                    try:
+                        hs_data.rename_or_move_file(Path(src_path), Path(dest_path))
+                        results.append({'success': True})
+                        success_count += 1
+                    except FileExistsError:
+                        results.append({
+                            'success': False,
+                            'error': {
+                                'type': 'FileOrFolderExists',
+                                'message': f'The file {dest_path} already exists in HydroShare.',
+                            },
+                        })
+                        failure_count += 1
                 else:  # TODO: Copy
+                    # The frontend never requests this, but if one were to add such functionality, you'd handle it here
                     raise NotImplementedError('Copy within HydroShare not implemented')
             elif src_fs == LOCAL_PREFIX and dest_fs == LOCAL_PREFIX:  # Move/copy within the local filesystem
                 # TODO: Move/rename/copy file on local filesystem
                 if method == MOVE:  # Move or rename
-                    resource.rename_or_move_file_JH(src_path, dest_path)
+                    ResourceLocalData(res_id).rename_or_move_item(src_path, dest_path)
                     results.append({'success': True})
                     success_count += 1
                 else:  # Copy
+                    # The frontend never requests this, but if one were to add such functionality, you'd handle it here
                     raise NotImplementedError('Copy within the local filesystem not implemented yet')
             elif src_fs == LOCAL_PREFIX and dest_fs == HS_PREFIX:  # Move/copy from the local filesystem to HydroShare
                 # Transfer the file regardless of if we're moving or copying
                 # TODO (Vicky): Support moving from one local folder to a different one on HS
-                resource.overwrite_HS_with_file_from_JH(src_path, dest_path)
+                hs_data.upload_from_local(local_data, Path(src_path), Path(dest_path))
                 if method == MOVE:
                     # Delete the local copy of the file
-                    resource.delete_file_or_folder_from_JH(src_path)
+                    ResourceLocalData(res_id).delete_file_or_folder(src_path)
                 results.append({'success': True})
                 success_count += 1
             elif src_fs == HS_PREFIX and dest_fs == LOCAL_PREFIX:  # Move/copy from HydroShare to the local filesystem
                 # Transfer the file regardless of if we're moving or copying
                 # TODO (Vicky): Support moving from one HS folder to a different one locally
-                resource.overwrite_JH_with_file_from_HS(src_path, dest_path)
+                hs_data.download_to_local(local_data, Path(src_path), Path(dest_path))
                 if method == MOVE:
                     # Delete the HS copy of the file
-                    resource.delete_file_or_folder_from_HS(src_path)
+                    hs_data.delete_file_or_folder(src_path)
                 results.append({'success': True})
                 success_count += 1
             else:
@@ -425,7 +432,7 @@ class UserInfoHandler(BaseRequestHandler):
 
     def get(self):
         success = False
-        data, error = resource_handler.get_user_info()
+        data, error = resource_manager.get_user_info()
         if not error:
             success = True
 
