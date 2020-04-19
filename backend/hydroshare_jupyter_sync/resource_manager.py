@@ -50,16 +50,6 @@ class ResourceManager:
 
         self.hs_api_conn = HydroShare(auth=auth, hostname=hostname)
 
-    def get_resource_last_modified_in_hydroshare_date(self, res_id):
-        """ Gets the last date (no time) that the resource was modified in HydroShare.
-        :rtype datetime.date
-        """
-        metadata = self.hs_api_conn.getScienceMetadata(res_id)
-        for date in metadata['dates']:
-            if date['type'] == 'modified':
-                return parse(date['start_date'])
-        return None
-
     def save_resource_locally(self, res_id, unzip=True):
         """Saves the HS resource locally, if it does not already exist.
         """
