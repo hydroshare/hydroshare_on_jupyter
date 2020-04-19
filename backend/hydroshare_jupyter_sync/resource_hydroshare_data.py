@@ -27,7 +27,7 @@ class ResourceHydroShareData:
         """Authenticates Hydroshare & sets up class variables.
         """
         self.res_id = res_id
-        self.hs = hs
+        self.hs_api_conn = hs
         self._files = None
 
     def get_file_metadata(self, filepath, long_path, file_info, path_prefix):
@@ -76,7 +76,7 @@ class ResourceHydroShareData:
         if self._files and not force_fetch:
             return self._files
 
-        hs_resource_info = self.hs.getResourceFileList(self.res_id)
+        hs_resource_info = self.hs_api_conn.getResourceFileList(self.res_id)
         url_prefix = 'http://www.hydroshare.org/resource/' + self.res_id + '/data/contents'
         folders_dict = {}
         root_dir_contents = []
@@ -208,7 +208,7 @@ class ResourceHydroShareData:
                 new_src = self.remove_prefix(child_file_or_folder.get("path"), HS_PREFIX + ':/')
                 self.rename_or_move_file(new_src, dest_path)
         else:
-            self.hs.resource(self.res_id).functions.move_or_rename({
+            self.hs_api_conn.resource(self.res_id).functions.move_or_rename({
                 "source_path": str(src_path),
                 "target_path": str(dest_path),
             })
@@ -234,7 +234,7 @@ class ResourceHydroShareData:
         else:
             # Download the file
             with open(str(local_data.data_path / dest_path), 'wb') as f:
-                for chunk in self.hs.getResourceFile(self.res_id, str(src_path)):
+                for chunk in self.hs_api_conn.getResourceFile(self.res_id, str(src_path)):
                     f.write(chunk)
 
     def upload_from_local(self, local_data, src_path, dest_path):
@@ -304,11 +304,11 @@ class ResourceHydroShareData:
         """ Attempts to delete a file or folder in HydroShare. """
         # First try deleting this as if it were a file
         try:
-            self.hs.deleteResourceFile(self.res_id, item_path)
+            self.hs_api_conn.deleteResourceFile(self.res_id, item_path)
             return 'file'
         except hs_restclient.exceptions.HydroShareNotFound:
             # Either it's a folder (not a file) or it actually doesn't exist. Let's try assuming the former.
-            self.hs.deleteResourceFolder(self.res_id, item_path)
+            self.hs_api_conn.deleteResourceFolder(self.res_id, item_path)
             return 'folder'
 
     def copy_file_from_local(self, local_src_path, hs_dest_path):
@@ -318,7 +318,7 @@ class ResourceHydroShareData:
             raise Exception(f'Could not find file: {local_src_path}')
 
         try:
-            self.hs.addResourceFile(self.res_id, str(local_src_path), str(hs_dest_path))
+            self.hs_api_conn.addResourceFile(self.res_id, str(local_src_path), str(hs_dest_path))
         except hs_restclient.HydroShareHTTPException as e:
             logging.error(e)
 
@@ -332,4 +332,4 @@ class ResourceHydroShareData:
         # Remove the leading /, if one exists
         if folder_path.startswith('/'):
             folder_path = folder_path[1:]
-        self.hs.createResourceFolder(self.res_id, pathname=folder_path)
+        self.hs_api_conn.createResourceFolder(self.res_id, pathname=folder_path)
