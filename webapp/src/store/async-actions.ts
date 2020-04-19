@@ -340,8 +340,8 @@ function performFileOperation(resource: IResource, source: IFile | IFolder, dest
     // Display notifications for any errors that occurred
     if (failureCount > 0) {
       results.forEach(res => {
-        if (!res.success && res.message) {
-          dispatch(pushNotification('error', res.message));
+        if (!res.success && res.error && res.error.message) {
+          dispatch(pushNotification('error', res.error.message));
         }
       });
     }

@@ -190,14 +190,18 @@ class ResourceHydroShareData:
             return text[len(prefix):]
         return text
 
-    # FIXME: Don't automatically overwrite existing file at destination
     def rename_or_move_file(self, src_path, dest_path):
-        """ Moves or renames a file. If a file already exists at the destination, the file will be overwritten.
+        """ Moves or renames a file.
+
             :param src_path: the path to the file relative to the resource root
             :type src_path: PosixPath
             :param dest_path: the destination path (including the file name) relative to the resource root
             :type dest_path: PosixPath
+            :raises FileExistsError if a file already exists at the destination
         """
+        if self.find_file_or_folder_metadata(str(dest_path), self.get_files()["contents"]) is not None:
+            raise FileExistsError(f'The file {dest_path} already exists.')
+
         metadata = self.find_file_or_folder_metadata(str(src_path), self.get_files()["contents"])
         if metadata["type"] == "folder":
             for child_file_or_folder in metadata.get("contents"):
@@ -328,7 +332,4 @@ class ResourceHydroShareData:
         # Remove the leading /, if one exists
         if folder_path.startswith('/'):
             folder_path = folder_path[1:]
-        try:
-            self.hs.createResourceFolder(self.res_id, pathname=folder_path)
-        except IndexError:
-            logging.info("Folder already exists.")
+        self.hs.createResourceFolder(self.res_id, pathname=folder_path)

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Markdown from 'react-markdown';
+import * as Markdown from 'react-markdown';
 
 import '../styles/ReadMeDisplay.scss';
 
@@ -39,8 +39,8 @@ export default class ReadMeDisplay extends React.Component<IReadMeDisplayProps, 
           <div className="title">README</div>
           <div className="location-selector">
             Display from
-            <span className={"selector" + workspaceClassName} onClick={event => this.selectReadMe(event)}>Workspace</span>
-            <span className={"selector" + hydroShareClassName} onClick={event => this.selectReadMe(event)}>HydroShare</span>
+            <span className={"clickable selector" + workspaceClassName} onClick={event => this.selectReadMe(event)}>Workspace</span>
+            <span className={"clickable selector" + hydroShareClassName} onClick={event => this.selectReadMe(event)}>HydroShare</span>
           </div>
         </div>
         <div>

@@ -364,10 +364,19 @@ class MoveCopyFiles(BaseRequestHandler):
             # Exactly what operation we perform depends on where the source and destination files/folders are
             if src_fs == HS_PREFIX and dest_fs == HS_PREFIX:  # Move/copy within HydroShare
                 if method == MOVE:  # Move or rename
-                    # TODO: Test how well this works
-                    hs_data.rename_or_move_file(Path(src_path), Path(dest_path))
-                    results.append({'success': True})
-                    success_count += 1
+                    try:
+                        hs_data.rename_or_move_file(Path(src_path), Path(dest_path))
+                        results.append({'success': True})
+                        success_count += 1
+                    except FileExistsError:
+                        results.append({
+                            'success': False,
+                            'error': {
+                                'type': 'FileOrFolderExists',
+                                'message': f'The file {dest_path} already exists in HydroShare.',
+                            },
+                        })
+                        failure_count += 1
                 else:  # TODO: Copy
                     # The frontend never requests this, but if one were to add such functionality, you'd handle it here
                     raise NotImplementedError('Copy within HydroShare not implemented')
