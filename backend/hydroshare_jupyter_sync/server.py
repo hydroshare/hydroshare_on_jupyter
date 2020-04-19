@@ -46,28 +46,27 @@ class BaseRequestHandler(BaseHandler):
 
     def options(self, _=None):
         # web browsers make an OPTIONS request to check what methods (line 31) are allowed at/for an endpoint.
-        # We just need to respond with the header set on line 31.
         self.set_status(204)  # No content
         self.finish()
 
 
 class WebAppHandler(BaseRequestHandler):
-    """ Handles starting up the frontend for our web app """
-    def get(self):
-        index_html = get_index_html()
-        self.write(index_html)
+    """ Serves up the HTML for the React web app """
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
 
-
-class BundleHandler(BaseRequestHandler):
-    """ Serves the web app JavaScript file """
     def get(self):
-        self.render(assets_path / 'bundle.js')
+        self.write(get_index_html())
 
 
 class ResourcesRootHandler(BaseRequestHandler):
     """ Handles /resources. Gets a user's resources (with metadata) and creates new resources. """
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST')
 
-    def options(self):
+    def options(self, _=None):
         # web browsers make an OPTIONS request to check what methods (line 31) are allowed at/for an endpoint.
         # We just need to respond with the header set on line 31.
         self.set_status(204)  # No content
@@ -84,81 +83,69 @@ class ResourcesRootHandler(BaseRequestHandler):
 
     def post(self):
         """
-        Makes a new resource with the bare minimum amount of information--
-        This is enough to create the resource, but not to make it public or private
-        (that should happen on HydroShare)
+        Makes a new resource with the bare minimum amount of information
 
         Expects body:
         {"resource title": string
         "creators": list of strings}
         """
-        success = False
-        resource_id = None
-
         body = json.loads(self.request.body.decode('utf-8'))
         resource_title = body.get("title")
-        creators = body.get("creators") # list of names (strings)
+        creators = body.get("creators")  # list of names (strings)
         abstract = body.get("abstract")
-        privacy = body.get("privacy")  # Public or private
+        privacy = body.get("privacy", 'Private')  # Public or private
 
-        if resource_title is not None and creators is not None:
-            resource_id, error = resource_manager.create_HS_resource(resource_title, creators, abstract, privacy)
-            if not error:
-                success = True
+        if resource_title is None or creators is None:
+            self.set_status(400)
+            self.write({
+                'success': False,
+                'error': {
+                    'type': 'InvalidRequest',
+                    'message': 'The request body must specify "title" and "creators".',
+                },
+            })
         else:
-            error = {
-                'type': 'MissingInput',
-                'message': 'Please specify title and creators to make a new resource.'
-            }
-
-        self.write({'resource_id':resource_id,
-                    'success':success,
-                    'error': error})
+            resource_id, error = resource_manager.create_HS_resource(resource_title, creators, abstract, privacy)
+            self.write({
+                'resource_id': resource_id,
+                'success': error is None,
+                'error': error,
+            })
 
 
 class ResourceHandler(BaseRequestHandler):
     """ Handles resource-specific requests made to /resources/<resource_id> """
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods', 'DELETE, OPTIONS')
 
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
-        del_locally_only = body.get("locallyOnly")
-        success_count = 0
-        failure_count = 0
-        results = []
-        if del_locally_only:
-            local_del_error = resource_manager.delete_resource_JH(res_id)
-        else:
-            local_del_error = resource_manager.delete_resource_JH(res_id)
-            HS_del_error = resource_manager.delete_resource_HS(res_id)
-            if HS_del_error:
-                results.append({"success": False,
-                            "error":HS_del_error})
-            else:
-                results.append({'success': True})
-        if local_del_error:
-            results.append({"success": False,
-                            "error":local_del_error})
-        else:
-            results.append({'success': True})
-                              
-        self.write({'results': results,
-                    'success_count': success_count,
-                    'failure_count': failure_count})
+        del_locally_only = body.get("locallyOnly", True)
+        error = resource_manager.delete_resource_locally(res_id)
+        if not error and not del_locally_only:
+            error = resource_manager.delete_resource_from_hs(res_id)
+
+        self.write({
+            'success': error is None,
+            'error': error,
+        })
 
 
 class ResourceLocalFilesRequestHandler(BaseRequestHandler):
-    """ Handles requests made to /resources/<res_id>/local-files to get, delete, and upload files to the local copy
-        of a resource. """
-    # TODO (Vicky) header comment should be updated
+    """ Facilitates getting, deleting, and uploading to the files contained in a resource on the local disk """
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods', 'DELETE, GET, OPTIONS, POST, PUT')
 
     def get(self, res_id):
-        # TODO: Ensure we have the data (get it otherwise)
         local_data = ResourceLocalData(res_id)
         self.write({
             'readMe': local_data.get_readme(),
             'rootDir': local_data.get_files_and_folders(),
         })
 
+    # TODO (kyle) move some of the logic here outside this file and deduplicate code
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         file_and_folder_paths = body.get('files')
@@ -212,17 +199,28 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
         })
 
     def put(self, res_id):
-        """create new file in JH"""
+        """ Creates a new file in the local copy of the resource
+
+            :param res_id: the resource ID
+            :type res_id: str
+         """
         body = json.loads(self.request.body.decode('utf-8'))
         item_type = body.get('type')
         name = body.get('name')
+        error_msg = None
         if item_type is None or name is None:
-            self.set_status(400)  # Invalid Syntax
-            self.write('Request must include both "type" and "name" attributes.')
-            return
-        if not (item_type == 'file' or item_type == 'folder'):
-            self.set_status(400)  # Invalid Syntax
-            self.write('"type" attribute must be either "file" or "folder".')
+            error_msg = 'Request must include both "type" and "name" attributes.'
+        if not error_msg and not (item_type == 'file' or item_type == 'folder'):
+            error_msg = '"type" attribute must be either "file" or "folder".'
+        if error_msg:
+            self.set_status(400)  # Bad Request
+            self.write({
+                'success': False,
+                'error': {
+                    'type': 'InvalidRequest',
+                    'message': error_msg,
+                },
+            })
             return
 
         local_data = ResourceLocalData(res_id)
@@ -236,7 +234,11 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
         })
 
     def post(self, res_id):
-        """ Uploads a file from the user's computer to the local filesystem """
+        """ Uploads a file from the user's computer to the local filesystem
+
+            :param res_id: the resource ID
+            :type res_id: str
+         """
         local_data = ResourceLocalData(res_id)
         for field_name, files in self.request.files.items():
             for info in files:
@@ -250,6 +252,9 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
 class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
     """ Class that handles GETing list of a files that are in a user's HydroShare instance of a resource """
     # TODO (Vicky) Header comment should be updated - no creating or uploading on HS side
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods', 'DELETE, GET, OPTIONS')
 
     def get(self, res_id):
         # TODO: Get folder info
@@ -257,6 +262,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
         root_dir = hs_data.get_files()
         self.write({'rootDir': root_dir})
 
+    # TODO (kyle): Move the bulk of this function out of this file and deduplicate code
     def delete(self, res_id):
         data = json.loads(self.request.body.decode('utf-8'))
         file_and_folder_paths = data.get('files')
@@ -381,7 +387,6 @@ class MoveCopyFiles(BaseRequestHandler):
                     # The frontend never requests this, but if one were to add such functionality, you'd handle it here
                     raise NotImplementedError('Copy within HydroShare not implemented')
             elif src_fs == LOCAL_PREFIX and dest_fs == LOCAL_PREFIX:  # Move/copy within the local filesystem
-                # TODO: Move/rename/copy file on local filesystem
                 if method == MOVE:  # Move or rename
                     ResourceLocalData(res_id).rename_or_move_item(src_path, dest_path)
                     results.append({'success': True})
@@ -391,16 +396,20 @@ class MoveCopyFiles(BaseRequestHandler):
                     raise NotImplementedError('Copy within the local filesystem not implemented yet')
             elif src_fs == LOCAL_PREFIX and dest_fs == HS_PREFIX:  # Move/copy from the local filesystem to HydroShare
                 # Transfer the file regardless of if we're moving or copying
-                # TODO (Vicky): Support moving from one local folder to a different one on HS
-                hs_data.upload_from_local(local_data, Path(src_path), Path(dest_path))
-                if method == MOVE:
+                error = hs_data.upload_from_local(local_data, Path(src_path), Path(dest_path))
+                if not error and method == MOVE:
                     # Delete the local copy of the file
-                    ResourceLocalData(res_id).delete_file_or_folder(src_path)
-                results.append({'success': True})
-                success_count += 1
+                    error = ResourceLocalData(res_id).delete_file_or_folder(src_path)
+                results.append({
+                    'success': error is None,
+                    'error': error,
+                })
+                if error:
+                    failure_count += 1
+                else:
+                    success_count += 1
             elif src_fs == HS_PREFIX and dest_fs == LOCAL_PREFIX:  # Move/copy from HydroShare to the local filesystem
                 # Transfer the file regardless of if we're moving or copying
-                # TODO (Vicky): Support moving from one HS folder to a different one locally
                 hs_data.download_to_local(local_data, Path(src_path), Path(dest_path))
                 if method == MOVE:
                     # Delete the HS copy of the file
@@ -418,7 +427,6 @@ class MoveCopyFiles(BaseRequestHandler):
                 })
                 failure_count += 1
 
-        # CHARLIE: Example for error message
         self.write({
             'results': results,
             'successCount': success_count,
@@ -429,15 +437,14 @@ class MoveCopyFiles(BaseRequestHandler):
 class UserInfoHandler(BaseRequestHandler):
     """ Class that handles GETing user information on the currently logged
     in user including name, email, username, etc. """
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods', 'DELETE, GET, OPTIONS')
 
     def get(self):
-        success = False
         data, error = resource_manager.get_user_info()
-        if not error:
-            success = True
-
         self.write({'data': data,
-                    'success': success,
+                    'success': error is None,
                     'error': error})
 
 

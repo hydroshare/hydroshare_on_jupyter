@@ -157,16 +157,13 @@ export function deleteResources(resources: IResource[], localOnly: boolean): Thu
         .then(res => {
           if (res.data) {
             const {
-              failureCount,
-              results,
+              error,
             } = res.data;
-            if (failureCount !== 0){
-              results.forEach(result => {
-                if (result.success === false && result.error){
-                  console.error(result.error);
-                  dispatch(pushNotification('error', result.error.message))
-                }
-              })
+            if (error) {
+              console.error(error);
+              if (error.message) {
+                dispatch(pushNotification('error', error.message))
+              }
             }
           }
            ++successfulRequests
