@@ -48,13 +48,13 @@ class ResourceManager:
             # Let any exceptions that occur bubble up
             self.output_folder.mkdir(parents=True)
 
-        self.hs = HydroShare(auth=auth, hostname=hostname)
+        self.hs_api_conn = HydroShare(auth=auth, hostname=hostname)
 
     def get_resource_last_modified_in_hydroshare_date(self, res_id):
         """ Gets the last date (no time) that the resource was modified in HydroShare.
         :rtype datetime.date
         """
-        metadata = self.hs.getScienceMetadata(res_id)
+        metadata = self.hs_api_conn.getScienceMetadata(res_id)
         for date in metadata['dates']:
             if date['type'] == 'modified':
                 return parse(date['start_date'])
@@ -67,7 +67,7 @@ class ResourceManager:
         if not os.path.exists('{}/{}'.format(self.output_folder, res_id)):
 
             logging.info("Downloading resource from HydroShare...")
-            self.hs.getResource(res_id, destination=self.output_folder, unzip=unzip)
+            self.hs_api_conn.getResource(res_id, destination=self.output_folder, unzip=unzip)
 
     def get_user_info(self):
         """Gets information about the user currently logged into HydroShare
@@ -75,7 +75,7 @@ class ResourceManager:
         user_info = None
         error = None
         try:
-            user_info = self.hs.getUserInfo()
+            user_info = self.hs_api_conn.getUserInfo()
         except:
             error = {'type':'InvalidCredentials', 'message':'Invalid username or password'}
 
@@ -96,7 +96,7 @@ class ResourceManager:
     def delete_resource_HS(self, res_id):
         error = None
         try:
-            self.hs.deleteResource(res_id)
+            self.hs_api_conn.deleteResource(res_id)
         except:
             error = {'type': 'UnknownError', 'message': 'Could not delete resource. Perhaps you don\'t have the authorization.'}
         return error
@@ -132,7 +132,7 @@ class ResourceManager:
         self.local_res_ids = self.get_local_JH_resources()
 
         # Get the user's resources from HydroShare
-        user_hs_resources = self.hs.resources(owner=username)
+        user_hs_resources = self.hs_api_conn.resources(owner=username)
 
         try:
             test_generator = list(user_hs_resources) # resources can't be listed if auth fails
@@ -204,15 +204,15 @@ class ResourceManager:
 
         resource_id = ''
         try:
-            resource_id = self.hs.createResource(metadata['rtype'],
-                                            metadata['title'],
-                                            resource_file=metadata['fpath'],
-                                            keywords = metadata['keywords'],
-                                            abstract = metadata['abstract'],
-                                            metadata = metadata['metadata'],
-                                            extra_metadata=metadata['extra_metadata'])
+            resource_id = self.hs_api_conn.createResource(metadata['rtype'],
+                                                          metadata['title'],
+                                                          resource_file=metadata['fpath'],
+                                                          keywords = metadata['keywords'],
+                                                          abstract = metadata['abstract'],
+                                                          metadata = metadata['metadata'],
+                                                          extra_metadata=metadata['extra_metadata'])
 
-            self.hs.setAccessRules(resource_id, public=public)
+            self.hs_api_conn.setAccessRules(resource_id, public=public)
         except:
             error = {'type':'UnknownError',
                     'message':'Unable to create resource.'}
@@ -223,7 +223,7 @@ class ResourceManager:
         # TODO: maybe do some user testing of this & see what ppl expect
         """makes a copy of existing HS resource and links it to an existing local
         resource (we then change the res id on that local resource)"""
-        response = self.hs.resource(og_res_id).copy()
+        response = self.hs_api_conn.resource(og_res_id).copy()
         new_id = response.content.decode("utf-8") # b'id'
 
         is_local = og_res_id in self.local_res_ids
@@ -235,9 +235,9 @@ class ResourceManager:
             shutil.move(str(og_path), str(new_path))
 
         # Change name to 'Copy of []'
-        title = self.hs.getScienceMetadata(new_id)['title']
+        title = self.hs_api_conn.getScienceMetadata(new_id)['title']
         new_title = "Copy of " + title
-        self.hs.updateScienceMetadata(new_id, {"title": new_title})
+        self.hs_api_conn.updateScienceMetadata(new_id, {"title": new_title})
 
         return new_id
 

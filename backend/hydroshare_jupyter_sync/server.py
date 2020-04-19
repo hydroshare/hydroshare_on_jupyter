@@ -253,7 +253,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
 
     def get(self, res_id):
         # TODO: Get folder info
-        hs_data = ResourceHydroShareData(resource_manager.hs, res_id)
+        hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         root_dir = hs_data.get_files()
         self.write({'rootDir': root_dir})
 
@@ -265,7 +265,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
             self.write('Could not find "files" in request body.')
             return
 
-        hs_data = ResourceHydroShareData(resource_manager.hs, res_id)
+        hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         success_count = 0
         failure_count = 0
 
@@ -340,7 +340,7 @@ class MoveCopyFiles(BaseRequestHandler):
     def patch(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         local_data = ResourceLocalData(res_id)
-        hs_data = ResourceHydroShareData(resource_manager.hs, res_id)
+        hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         file_operations = body['operations']
 
         results = []
