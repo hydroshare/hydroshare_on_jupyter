@@ -17,6 +17,7 @@ interface IResourceListProps {
   className?: string
   deleteResources: (resources: IResource[]) => any
   deleteResourcesLocally: (resources: IResource[]) => any
+  fetchingResources: boolean
   viewResource: any
   resources: {
       [resourceId: string]: IResource
@@ -148,24 +149,30 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       sortBy,
     } = this.state;
 
-    const rowElements = this.getFilteredSortedResources().map(resource => (
-      <div className="table-row">
-        <input
-          type="checkbox"
-          checked={selectedResources.has(resource.id)}
-          onChange={() => this.toggleSingleResourceSelected(resource)}
-        />
-        <span onClick={() => this.props.viewResource(resource)} className="clickable">{resource.title}</span>
-        <span>{resource.lastUpdated.format('MMMM D, YYYY')}</span>
-        <span>{resource.creator || 'Unknown'}</span>
-        <span>{resource.localCopyExists ? 'True': 'False'}</span>
-      </div>
-      )
-    );
 
-    let loading;
-    if (rowElements.length === 0) {
-      loading = <Loading/>;
+    let content: React.ReactNode;
+    if (this.props.fetchingResources) {
+      content = <Loading/>;
+    } else {
+      const resourcesToShow = this.getFilteredSortedResources();
+      if (resourcesToShow.length > 0) {
+        content = resourcesToShow.map(resource => (
+            <div className="table-row">
+              <input
+                type="checkbox"
+                checked={selectedResources.has(resource.id)}
+                onChange={() => this.toggleSingleResourceSelected(resource)}
+              />
+              <span onClick={() => this.props.viewResource(resource)} className="clickable">{resource.title}</span>
+              <span>{resource.lastUpdated.format('MMMM D, YYYY')}</span>
+              <span>{resource.creator || 'Unknown'}</span>
+              <span>{resource.localCopyExists ? 'True' : 'False'}</span>
+            </div>
+          )
+        );
+      } else {
+        content = <div className="no-results">No resources</div>;
+      }
     }
 
     const deleteButtonClassName = selectedResources.size === 0 ? "button-disabled": "button-enabled";
@@ -258,8 +265,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
             {sortBy === SORT_BY_OPTIONS.COPIED_LOCALLY && SortTriangleSVG}
           </button>
         </div>
-        {loading}
-        {rowElements}
+        {content}
         {modal}
         </div>
     );

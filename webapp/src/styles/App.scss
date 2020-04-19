@@ -89,6 +89,11 @@ input[type="text"] {
   margin-top: 3em;
 }
 
+.no-results {
+  padding: 2em;
+  text-align: center;
+}
+
 .tile {
   background-color: white;
   box-shadow: $drop-shadow;

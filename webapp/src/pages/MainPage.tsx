@@ -47,6 +47,7 @@ class MainPage extends React.Component<ReduxType, never>  {
           className="tile"
           deleteResources={this.props.deleteResources}
           deleteResourcesLocally={this.props.deleteResourcesLocally}
+          fetchingResources={this.props.fetchingResources}
           createResource={this.props.createResource}
           viewResource={this.handleViewResource}
           resources={this.props.resources}
