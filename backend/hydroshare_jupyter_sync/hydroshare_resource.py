@@ -106,6 +106,16 @@ class Resource:
         }
         return root_dir
 
+    def get_JH_ReadMe(self):
+        contents = "## No ReadMe yet"
+        for resource_file in self.JH_files["contents"]:
+            if resource_file["name"].lower() == "readme" and resource_file["type"] == "md":
+                new_path = self.remove_prefix(resource_file.get("path"), "local:/")
+                file_path = self.path_prefix / new_path
+                with open(file_path) as f:
+                    contents = f.read()
+        return contents
+
     def update_hs_files(self):
         # TODO (Kyle): evaluate cache and remove if not used
         self.hs_files = self.get_files_upon_init_HS()

@@ -71,6 +71,7 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
       const {
         resourceId,
         rootDir,
+        localReadMe,
       } = action.payload;
       rootDir.contents = recursivelyConvertDatesToMoment(rootDir.contents);
       let resourceLocFilesBeingFetched = new Set(Array.from(state.resourceLocalFilesBeingFetched));
@@ -82,6 +83,7 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
           [resourceId]: {
             ...state.allResources[resourceId],
             localFiles: rootDir,
+            localReadMe: localReadMe,
           },
         },
         resourceLocalFilesBeingFetched: resourceLocFilesBeingFetched,

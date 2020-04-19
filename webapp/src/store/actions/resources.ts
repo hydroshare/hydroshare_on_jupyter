@@ -71,10 +71,11 @@ export function setArchiveMessage(archive_message: string) {
   return action(ResourcesActions.SET_ARCHIVE_MESSAGE, archive_message)
 }
 
-export function setResourceLocalFiles(resourceId: string, rootDir: IFolder) {
+export function setResourceLocalFiles(resourceId: string, rootDir: IFolder, localReadMe: string) {
   return action(ResourcesActions.SET_RESOURCE_LOCAL_FILES, {
     resourceId,
     rootDir,
+    localReadMe,
   });
 }
 
