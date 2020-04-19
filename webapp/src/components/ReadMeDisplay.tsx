@@ -1,0 +1,51 @@
+import * as React from 'react';
+import Markdown from 'react-markdown';
+
+import '../styles/ReadMeDisplay.scss';
+
+interface IReadMeDisplayProps {
+  localReadMe: string
+}
+
+interface IReadMeDisplayState {
+  selectedReadMe: string
+}
+
+export default class ReadMeDisplay extends React.Component<IReadMeDisplayProps, IReadMeDisplayState> {
+
+  state: IReadMeDisplayState = {
+    selectedReadMe: "Workspace",
+  };
+
+  selectReadMe = (event : any) => {
+    this.setState({selectedReadMe: event?.currentTarget.textContent});
+  };
+
+  public render() {
+    const workspaceClassName = this.state.selectedReadMe === "Workspace" ? " selected workspace": "";
+    const hydroShareClassName = this.state.selectedReadMe === "HydroShare" ? " selected hydroshare": "";
+    const readmes = this.state.selectedReadMe === "Workspace" ?
+      <div >
+        <Markdown source={this.props.localReadMe}/>
+      </div> :
+      <div >
+        <Markdown source={"# Other markdown"}/>
+      </div>
+    return (
+      <div className="ReadMeDisplay content-row tile">
+        <div className="top-row">
+          <div className="title">README</div>
+          <div className="location-selector">
+            Display from
+            <span className={"selector" + workspaceClassName} onClick={event => this.selectReadMe(event)}>Workspace</span>
+            <span className={"selector" + hydroShareClassName} onClick={event => this.selectReadMe(event)}>HydroShare</span>
+          </div>
+        </div>
+        <div>
+          {readmes}
+        </div>
+      </div>
+    )
+  }
+
+}
