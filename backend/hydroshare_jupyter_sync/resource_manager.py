@@ -112,19 +112,13 @@ class ResourceManager:
             }
         return None  # No error
 
-    def get_local_resources(self):
-        """Gets dictionary of jupyterhub resources by resource id that are
-        saved locally.
-        """
-        resource_folders = glob.glob(os.path.join(self.output_folder, '*'))
-        # TODO (Emily): Use a filesystem-independent way of this
-        mp_by_res_id = {}
-        res_ids = []
-        for folder_path in resource_folders:
-            res_id = folder_path.split('/')[-1] #TODO: regex
-            res_ids.append(res_id)
+    def get_local_resource_ids(self):
+        """ Gets a list of IDs of all the resources saved locally
 
-        return res_ids
+            :return a set of strings containing all of the resource IDs
+            :rtype set<str>
+         """
+        return set(map(lambda p: p.name, self.output_folder.glob('*')))
 
     def get_list_of_user_resources(self):
         # TODO: speed this up
@@ -140,18 +134,20 @@ class ResourceManager:
         resources = {}
 
         # Get local res_ids
-        self.local_res_ids = self.get_local_resources()
+        self.local_res_ids = self.get_local_resource_ids()
 
         # Get the user's resources from HydroShare
         user_hs_resources = self.hs_api_conn.resources(owner=username)
 
         try:
-            test_generator = list(user_hs_resources) # resources can't be listed if auth fails
-        except:
-            error = {'type': 'InvalidCredentials', 'message': 'Invalid username or password'}
-            return list(resources.values()), error
+            hs_resources = list(user_hs_resources)  # Resources can't be listed if auth fails
+        except AttributeError:
+            return None, {
+                'type': 'HydroShareAuthorizationError',
+                'message': 'Could not get resources from HydroShare. Are your username and password correct?',
+            }
 
-        for res in test_generator:
+        for res in hs_resources:
             res_id = res['resource_id']
 
             resources[res_id] = {
