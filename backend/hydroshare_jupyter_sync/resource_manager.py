@@ -42,7 +42,8 @@ class ResourceManager:
         self.output_folder = Path('local_hs_resources')
         if config:
             hostname = config.get('hydroShareHostname', hostname)
-            self.output_folder = Path(config.get('dataPath'), self.output_folder)
+            if 'dataPath' in config:
+                self.output_folder = Path(config.get('dataPath'), self.output_folder)
         if not self.output_folder.is_dir():
             # Let any exceptions that occur bubble up
             self.output_folder.mkdir(parents=True)
