@@ -107,7 +107,7 @@ class Resource:
         return root_dir
 
     def get_JH_ReadMe(self):
-        contents = "## No ReadMe yet"
+        contents = "## No ReadMe.md file has been created for this resource\n Consider creating 'ReadMe.md' in your root folder to explain the details of your work."
         for resource_file in self.JH_files["contents"]:
             if resource_file["name"].lower() == "readme" and resource_file["type"] == "md":
                 new_path = self.remove_prefix(resource_file.get("path"), "local:/")
