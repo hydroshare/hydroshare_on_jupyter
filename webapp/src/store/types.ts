@@ -95,6 +95,7 @@ export interface IResourcesData {
 export interface IResourceFilesData {
   rootDir: IFolder
   readMe: string
+  error?: IServerError
 }
 
 export interface IUserInfo {
