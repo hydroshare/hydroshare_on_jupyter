@@ -13,24 +13,19 @@ from uuid import uuid1
 import hs_restclient
 import datetime
 from dateutil.parser import parse
-import os
-import logging
 from pathlib import Path, PosixPath
 
 HS_PREFIX = 'hs'
 
 
 class ResourceHydroShareData:
-    """ Class that defines a Remote Folder so we can access attributes of it.
-    """
+    """ Represents the copy of a resource on HydroShare """
     def __init__(self, hs, res_id):
-        """Authenticates Hydroshare & sets up class variables.
-        """
         self.res_id = res_id
         self.hs_api_conn = hs
         self._files = None
 
-    def get_file_metadata(self, filepath, long_path, file_info, path_prefix):
+    def _get_file_metadata(self, filepath, long_path, file_info, path_prefix):
         """Gets file definition formatting for returning HS files, given path
         & size. Returns false if the path is a folder & not a file.
         """
@@ -64,14 +59,17 @@ class ResourceHydroShareData:
 
     def get_files(self, force_fetch=False):
         """ Gets all of the files in the resource in HydroShare
-         The result is a dictionary that looks like the following:
-             {
+
+            :param force_fetch: whether to request the files from HydroShare even if a local cache exists
+            :type force_fetch: bool
+            :returns {
                 "name": "",
                 "path": HS_PREFIX + ":/",
                 "sizeBytes": #,
                 "type": "folder",
                 "contents": [list of similar dicts representing files and folders],
             }
+            :rtype dict
          """
         if self._files and not force_fetch:
             return self._files
@@ -85,7 +83,7 @@ class ResourceHydroShareData:
             # extract filepath from url
             filepath = file_info["url"][len(url_prefix)+1:]
             # get proper definition formatting of file if it is a file
-            file_definition_hs = self.get_file_metadata(filepath, filepath, file_info, HS_PREFIX+':')
+            file_definition_hs = self._get_file_metadata(filepath, filepath, file_info, HS_PREFIX + ':')
             # if it is a folder, build up contents
             if not file_definition_hs:
                 nested_files[filepath + "/"] = file_info
@@ -109,8 +107,8 @@ class ResourceHydroShareData:
             # (level 0); folders at levels 1, 2, etc. will be built into the
             # result by means of the recursive calls
             if key[0] == 0:
-                folder_time, folder_size, folder_contents = self.get_contents_recursive(val, folders_dict,
-                                                                                         nested_files, HS_PREFIX+':')
+                folder_time, folder_size, folder_contents = self._get_contents_recursive(val, folders_dict,
+                                                                                         nested_files, HS_PREFIX +':')
                 if folder_time:
                     folder_time = str(folder_time)
                 # TODO (vicky): use name and path instead of key[i]
@@ -164,7 +162,7 @@ class ResourceHydroShareData:
 
         return False
 
-    def find_file_or_folder_metadata(self, path, metadata_dict):
+    def _find_file_or_folder_metadata(self, path, metadata_dict):
         """ Recursively gets and returns the metadata dictionary that is
         nested within metadata dict for the file or folder at specified path.
         """
@@ -174,7 +172,7 @@ class ResourceHydroShareData:
             first_level, rest_of_path = path.split("/", 1)
             for dicts in metadata_dict:
                 if dicts["name"] == first_level:
-                    return self.find_file_or_folder_metadata(rest_of_path, dicts.get("contents"))
+                    return self._find_file_or_folder_metadata(rest_of_path, dicts.get("contents"))
         else:
             for dicts in metadata_dict:
                 name = dicts.get("name")
@@ -185,10 +183,8 @@ class ResourceHydroShareData:
                 if name == path or name == path_no_extension:
                     return dicts
 
-    def remove_prefix(self, text, prefix):
-        if text.startswith(prefix):
-            return text[len(prefix):]
-        return text
+    def _remove_prefix(self, text, prefix):
+        return text[len(prefix):] if text.startswith(prefix) else text
 
     def rename_or_move_file(self, src_path, dest_path):
         """ Moves or renames a file.
@@ -199,13 +195,13 @@ class ResourceHydroShareData:
             :type dest_path: PosixPath
             :raises FileExistsError if a file already exists at the destination
         """
-        if self.find_file_or_folder_metadata(str(dest_path), self.get_files()["contents"]) is not None:
+        if self._find_file_or_folder_metadata(str(dest_path), self.get_files()["contents"]) is not None:
             raise FileExistsError(f'The file {dest_path} already exists.')
 
-        metadata = self.find_file_or_folder_metadata(str(src_path), self.get_files()["contents"])
+        metadata = self._find_file_or_folder_metadata(str(src_path), self.get_files()["contents"])
         if metadata["type"] == "folder":
             for child_file_or_folder in metadata.get("contents"):
-                new_src = self.remove_prefix(child_file_or_folder.get("path"), HS_PREFIX + ':/')
+                new_src = self._remove_prefix(child_file_or_folder.get("path"), HS_PREFIX + ':/')
                 self.rename_or_move_file(new_src, dest_path)
         else:
             self.hs_api_conn.resource(self.res_id).functions.move_or_rename({
@@ -225,11 +221,11 @@ class ResourceHydroShareData:
             :param temp_dir: the temporary directory to use when downloading the file
             :type temp_dir: PosixPath | None
          """
-        metadata = self.find_file_or_folder_metadata(str(src_path), self.get_files()["contents"])
+        metadata = self._find_file_or_folder_metadata(str(src_path), self.get_files()["contents"])
         if metadata["type"] == "folder":
             local_data.create_local_folder(dest_path)  # Does nothing if the folder already exists
             for child_file_or_folder in metadata['contents']:
-                new_src = Path(self.remove_prefix(child_file_or_folder['path'], HS_PREFIX + ':/'))
+                new_src = Path(self._remove_prefix(child_file_or_folder['path'], HS_PREFIX + ':/'))
                 self.download_to_local(local_data, new_src, dest_path / new_src.name, temp_dir)
         else:
             # Download the file
@@ -246,6 +242,8 @@ class ResourceHydroShareData:
             :type src_path: PosixPath
             :param dest_path: the path to the folder to upload to in the resource on HydroShare
             :type dest_path: PosixPath
+            :returns the details of the error encountered as { 'type': str, 'message': str}
+            :rtype dict | None
         """
         filesystem_item = local_data.data_path / src_path
         if filesystem_item.is_dir():
@@ -256,15 +254,26 @@ class ResourceHydroShareData:
             # Upload every child file or folder in this folder
             for child_item in filesystem_item.iterdir():
                 self.upload_from_local(local_data, src_path / child_item.name, dest_path / child_item.name)
-        else:  # It's a file
+        elif filesystem_item.is_file():  # It's a file
             try:  # Remove any existing copy of the file in its destination location
                 self.delete_file_or_folder(dest_path)
             except hs_restclient.HydroShareHTTPException:
                 pass  # File doesn't already exist in HS (that's fine)
+            try:  # Now try to upload the file
+                self.hs_api_conn.addResourceFile(self.res_id, str(filesystem_item), str(dest_path))
+            except hs_restclient.HydroShareHTTPException as e:
+                return {
+                    'type': 'GenericHydroShareHTTPException',
+                    'message': e.status_msg,
+                }
+        else:  # Couldn't find the source file
+            return {
+                'type': 'FileNotFoundError',
+                'message': f'Could not find file: {filesystem_item}',
+            }
+        return None  # No error
 
-            self.copy_file_from_local(filesystem_item, dest_path)
-
-    def get_contents_recursive(self, val, folders_dict, nested_files, path_prefix):
+    def _get_contents_recursive(self, val, folders_dict, nested_files, path_prefix):
         """Recursively build up nested folder structure for HS files
         """
         contents = []
@@ -273,7 +282,7 @@ class ResourceHydroShareData:
         for v in val:
             # TODO (Emily): unpack v
             if v in folders_dict:
-                subfolder_time, subfolder_size, subfolder_contents = self.get_contents_recursive(folders_dict[v], folders_dict, nested_files, path_prefix)
+                subfolder_time, subfolder_size, subfolder_contents = self._get_contents_recursive(folders_dict[v], folders_dict, nested_files, path_prefix)
                 folder_size += subfolder_size
                 if subfolder_time and folder_time and subfolder_time > folder_time:
                     folder_time = subfolder_time
@@ -289,7 +298,7 @@ class ResourceHydroShareData:
                 })
             else:
                 # TODO (Vicky): Comment this code!
-                contents.append(self.get_file_metadata(v[1], v[2], nested_files[v[2]], path_prefix))
+                contents.append(self._get_file_metadata(v[1], v[2], nested_files[v[2]], path_prefix))
                 folder_size += nested_files[v[2]]["size"]
                 if nested_files[v[2]].get("modified_time"):
                     curr_time = parse(nested_files[v[2]].get("modified_time"))
@@ -301,26 +310,21 @@ class ResourceHydroShareData:
         return folder_time, folder_size, contents
 
     def delete_file_or_folder(self, item_path):
-        """ Attempts to delete a file or folder in HydroShare. """
+        """ Attempts to delete a file or folder in HydroShare
+
+            :param item_path: the path to the file or folder to delete (relative to the resource root)
+            :type item_path: PosixPath | str
+            :returns 'file' if the deleted item was a file, 'folder' if it was a folder
+            :rtype str
+         """
         # First try deleting this as if it were a file
         try:
-            self.hs_api_conn.deleteResourceFile(self.res_id, item_path)
+            self.hs_api_conn.deleteResourceFile(self.res_id, str(item_path))
             return 'file'
         except hs_restclient.exceptions.HydroShareNotFound:
             # Either it's a folder (not a file) or it actually doesn't exist. Let's try assuming the former.
-            self.hs_api_conn.deleteResourceFolder(self.res_id, item_path)
+            self.hs_api_conn.deleteResourceFolder(self.res_id, str(item_path))
             return 'folder'
-
-    def copy_file_from_local(self, local_src_path, hs_dest_path):
-        """ upload JH file to HS """
-        # make sure input files exist
-        if not os.path.exists(local_src_path):
-            raise Exception(f'Could not find file: {local_src_path}')
-
-        try:
-            self.hs_api_conn.addResourceFile(self.res_id, str(local_src_path), str(hs_dest_path))
-        except hs_restclient.HydroShareHTTPException as e:
-            logging.error(e)
 
     def create_folder(self, folder_path):
         """ Attempts to create a folder in the HydroShare resource

@@ -150,12 +150,8 @@ export interface IUserInfoDataResponse {
 }
 
 export interface IDeleteResourceRequestResponse{
-  failureCount: number
-  results: [{
-    success: boolean
-    error?: IServerError
-  }]
-  successCount: number
+  success: boolean
+  error?: IServerError
 }
 
 export interface IServerError {

@@ -21,24 +21,8 @@ LOCAL_PREFIX = 'local'
 _root_data_path = None
 
 
-def _get_path_to_resources_data_root():
-    global _root_data_path
-    if _root_data_path is None:
-        config = get_config_values(['dataPath'])
-        if config and 'dataPath' in config:
-            _root_data_path = Path.cwd() / config['dataPath']
-        else:
-            # TODO: Rename to hydroshare_resource_data
-            _root_data_path = Path.cwd() / 'local_hs_resources'
-        if not _root_data_path.is_dir():
-            # Let any exceptions that occur bubble up
-            _root_data_path.mkdir(parents=True)
-    return _root_data_path
-
-
 class ResourceLocalData:
-    """ Class that defines a Local Folder so we can access attributes of it.
-    """
+    """ Represents the copy of a resource on the local filesystem """
 
     def __init__(self, resource_id):
         self.data_path = _get_path_to_resources_data_root() / resource_id / resource_id / 'data' / 'contents'
@@ -199,3 +183,18 @@ class ResourceLocalData:
             "type": "folder",
             "contents": self.get_contents_recursive(self.data_path, self.data_path, path_prefix),
         }
+
+
+def _get_path_to_resources_data_root():
+    global _root_data_path
+    if _root_data_path is None:
+        config = get_config_values(['dataPath'])
+        if config and 'dataPath' in config:
+            _root_data_path = Path.cwd() / config['dataPath']
+        else:
+            # TODO: Rename to hydroshare_resource_data
+            _root_data_path = Path.cwd() / 'local_hs_resources'
+        if not _root_data_path.is_dir():
+            # Let any exceptions that occur bubble up
+            _root_data_path.mkdir(parents=True)
+    return _root_data_path

@@ -14,12 +14,12 @@ import logging
 import os
 import shutil
 import json
-from dateutil.parser import parse
 from getpass import getpass
 from pathlib import Path
 
 from hydroshare_jupyter_sync.config_reader_writer import get_config_values, set_config_values
 from hs_restclient import HydroShare, HydroShareAuthBasic
+from hs_restclient.exceptions import *
 
 
 class ResourceManager:
@@ -32,7 +32,6 @@ class ResourceManager:
         and sets up authentication on hydroshare API.
         """
         # authentication for using Hydroshare API
-        # TODO: Don't do this every time we create a new instance of this class (very slow)
         # TODO: Move this somewhere else
         auth = HydroShareAuthBasic(username=username, password=password)
         # TODO: Load these with the username and password
@@ -50,14 +49,16 @@ class ResourceManager:
 
         self.hs_api_conn = HydroShare(auth=auth, hostname=hostname)
 
-    def save_resource_locally(self, res_id, unzip=True):
-        """Saves the HS resource locally, if it does not already exist.
+    def save_resource_locally(self, res_id):
+        """ Downloads a resource to the local filesystem if a copy does not already exist locally
+
+            :param res_id: the resource ID
+            :type res_id: str
         """
         # Get resource from HS if it doesn't already exist locally
-        if not os.path.exists('{}/{}'.format(self.output_folder, res_id)):
-
-            logging.info("Downloading resource from HydroShare...")
-            self.hs_api_conn.getResource(res_id, destination=self.output_folder, unzip=unzip)
+        if not (self.output_folder / res_id).exists():
+            logging.info(f"Downloading resource {res_id} from HydroShare...")
+            self.hs_api_conn.getResource(res_id, destination=self.output_folder, unzip=True)
 
     def get_user_info(self):
         """Gets information about the user currently logged into HydroShare
@@ -66,32 +67,52 @@ class ResourceManager:
         error = None
         try:
             user_info = self.hs_api_conn.getUserInfo()
-        except:
-            error = {'type':'InvalidCredentials', 'message':'Invalid username or password'}
+        except HydroShareHTTPException as e:
+            if e.status_code == 401:  # Unauthorized
+                error = {
+                    'type': 'HydroShareAuthorizationError',
+                    'message': 'Invalid HydroShare username or password.'
+                }
+            else:
+                error = {
+                    'type': 'GenericHydroShareHTTPException',
+                    'message': e.status_msg,
+                }
 
         return user_info, error
 
-    def delete_resource_JH(self, res_id):
-        error = None
-        JH_resource_path = self.output_folder / res_id
+    def delete_resource_locally(self, res_id):
+        """ Attempts to delete the local copy of the resource files from the disk
 
+            :param res_id: the ID of the resource to delete
+            :type res_id: str
+         """
+        resource_path = self.output_folder / res_id
+        if not resource_path.exists():
+            return {
+                'type': 'FileNotFoundError',
+                'message': f'Could not find a local copy of resource {res_id} to delete.',
+            }
         try:
-            shutil.rmtree(JH_resource_path)
-        except FileNotFoundError:
-            error = {'type':'FileNotFoundError', 'message':'Resource does not exist in JupyterHub'}
-        except:
-            error = {'type':'UnknownError', 'message':'Something went wrong. Could not delete resource.'}
-        return error
+            shutil.rmtree(str(resource_path))
+        except IOError as e:
+            return {
+                'type': 'IOError',
+                'message': f'Something went wrong. Could not delete resource {res_id}.',
+            }
+        return None  # No error
 
-    def delete_resource_HS(self, res_id):
-        error = None
+    def delete_resource_from_hs(self, res_id):
         try:
             self.hs_api_conn.deleteResource(res_id)
-        except:
-            error = {'type': 'UnknownError', 'message': 'Could not delete resource. Perhaps you don\'t have the authorization.'}
-        return error
+        except HydroShareHTTPException as e:
+            return {
+                'type': 'GenericHydroShareHTTPException',
+                'message': e.status_msg,
+            }
+        return None  # No error
 
-    def get_local_JH_resources(self):
+    def get_local_resources(self):
         """Gets dictionary of jupyterhub resources by resource id that are
         saved locally.
         """
@@ -119,7 +140,7 @@ class ResourceManager:
         resources = {}
 
         # Get local res_ids
-        self.local_res_ids = self.get_local_JH_resources()
+        self.local_res_ids = self.get_local_resources()
 
         # Get the user's resources from HydroShare
         user_hs_resources = self.hs_api_conn.resources(owner=username)
@@ -208,20 +229,23 @@ class ResourceManager:
                     'message':'Unable to create resource.'}
         return resource_id, error
 
+    def create_copy_of_resource_in_hs(self, src_res_id):
+        """ Makes a copy of a resource in HydroShare and updates the local copy of the
+            old resource to point to then ew copy.
 
-    def copy_HS_resource(self, og_res_id):
-        # TODO: maybe do some user testing of this & see what ppl expect
-        """makes a copy of existing HS resource and links it to an existing local
-        resource (we then change the res id on that local resource)"""
-        response = self.hs_api_conn.resource(og_res_id).copy()
+            :param src_res_id: the ID of the resource in HydroShare to duplicate
+            :type src_res_id: str
+            :returns the new resource ID
+        """
+        response = self.hs_api_conn.resource(src_res_id).copy()
         new_id = response.content.decode("utf-8") # b'id'
 
-        is_local = og_res_id in self.local_res_ids
+        is_local = src_res_id in self.local_res_ids
 
-        # if a local version exists under the old resource ID, rename it to involve the new one
+        # if a local version exists under the old resource ID, rename it to point to the new one
         if is_local:
-            og_path = Path(self.output_folder) / og_res_id / og_res_id
-            new_path = Path(self.output_folder) / new_id / new_id
+            og_path = self.output_folder / src_res_id / src_res_id
+            new_path = self.output_folder / new_id / new_id
             shutil.move(str(og_path), str(new_path))
 
         # Change name to 'Copy of []'
@@ -232,6 +256,9 @@ class ResourceManager:
         return new_id
 
     def get_archive_message(self):
+        """ Gets the message to display on the resource page prompting the user to archive
+            their resources to HydroShare
+         """
         loaded_archive_message = get_config_values(['archiveMessage'])
         if loaded_archive_message and loaded_archive_message['archiveMessage']:
             archive_message = loaded_archive_message['archiveMessage']
