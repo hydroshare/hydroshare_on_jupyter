@@ -5,6 +5,7 @@ import '../styles/ReadMeDisplay.scss';
 
 interface IReadMeDisplayProps {
   localReadMe: string
+  resId: string
 }
 
 interface IReadMeDisplayState {
@@ -22,6 +23,7 @@ export default class ReadMeDisplay extends React.Component<IReadMeDisplayProps, 
   };
 
   public render() {
+    const resourceLink = `https://www.hydroshare.org/resource/${this.props.resId}/`
     const workspaceClassName = this.state.selectedReadMe === "Workspace" ? " selected workspace": "";
     const hydroShareClassName = this.state.selectedReadMe === "HydroShare" ? " selected hydroshare": "";
     const readmes = this.state.selectedReadMe === "Workspace" ?
@@ -29,7 +31,7 @@ export default class ReadMeDisplay extends React.Component<IReadMeDisplayProps, 
         <Markdown source={this.props.localReadMe}/>
       </div> :
       <div >
-        <Markdown source={"# Other markdown"}/>
+        <a href={resourceLink}>Click here to see the HydroShare resource page.</a>
       </div>
     return (
       <div className="ReadMeDisplay content-row tile">
