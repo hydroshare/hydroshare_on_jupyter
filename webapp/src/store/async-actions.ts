@@ -1,30 +1,25 @@
 // TODO (kyle): get rid of actions altogether & move contents to other files
-import axios, { AxiosResponse } from 'axios';
-import {
-    AnyAction,
-} from 'redux';
+import axios, {AxiosResponse} from 'axios';
+import {AnyAction,} from 'redux';
 import {
   ThunkAction,
   ThunkDispatch,
 } from 'redux-thunk';
 
-import {
-  pushNotification,
-} from "./actions/notifications";
+import {pushNotification,} from "./actions/notifications";
 import {
   notifyGettingResourceHydroShareFiles,
   notifyGettingResourceJupyterHubFiles,
-  setResourceLocalFiles,
-  setResourceHydroShareFiles,
-  setResources,
-  setArchiveMessage,
   notifyGettingResources,
   notifyGettingResourcesFailed,
+  setArchiveMessage,
+  setResourceHydroShareFiles,
+  setResourceLocalFiles,
+  setResources,
 } from './actions/resources';
+import {setUserInfo,} from './actions/user';
 import {
-    setUserInfo,
-} from './actions/user';
-import {
+  FileOrFolderTypes,
   ICreateFileOrFolderRequestResponse,
   ICreateResourceRequest,
   ICreateResourceRequestResponse,
@@ -320,11 +315,19 @@ export function moveFileOrFolder(resource: IResource, source: IFile | IFolder, d
 function performFileOperation(resource: IResource, source: IFile | IFolder, destination: IFolder, method: 'move' | 'copy') {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     // Make the network request to perform the operation
+    let fullDestPath = destination.path;
+    if (!fullDestPath.endsWith('/')) {
+      fullDestPath += '/';
+    }
+    fullDestPath += source.name;
+    if (source.type !== FileOrFolderTypes.FOLDER) {
+      fullDestPath += '.' + (source as IFile).type;
+    }
     const data = {
       operations: [{
         method,
         source: source.path,
-        destination: destination.path,
+        destination: fullDestPath,
       }],
     };
     const response = await patchToBackend<IFileOperationsRequestResponse>(`/resources/${resource.id}/move-copy-files`, data);
@@ -337,8 +340,8 @@ function performFileOperation(resource: IResource, source: IFile | IFolder, dest
     // Display notifications for any errors that occurred
     if (failureCount > 0) {
       results.forEach(res => {
-        if (!res.success && res.message) {
-          dispatch(pushNotification('error', res.message));
+        if (!res.success && res.error && res.error.message) {
+          dispatch(pushNotification('error', res.error.message));
         }
       });
     }
