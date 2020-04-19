@@ -280,29 +280,47 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
 export function getResourceLocalFiles(resource: IResource) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(notifyGettingResourceJupyterHubFiles(resource));
-    const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/local-files`);
-    const {
-      data: {
-        rootDir,
-        readMe,
-      },
-    } = response;
-
-    dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
+    try {
+      const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/local-files`);
+      const {
+        data: {
+          rootDir,
+          readMe,
+          error,
+        },
+      } = response;
+      if (error) {
+        dispatch(pushNotification('error', error.message));
+      } else {
+        dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
+      }
+    } catch (e) {
+      console.error(e);
+      dispatch(pushNotification('error', 'An error occurred when trying to get the workspace files.'));
+    }
   };
 }
 
 export function getResourceHydroShareFiles(resource: IResource) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(notifyGettingResourceHydroShareFiles(resource));
-    const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/hs-files`);
-    const {
-      data: {
-        rootDir,
-      },
-    } = response;
-
-    dispatch(setResourceHydroShareFiles(resource.id, rootDir));
+    try {
+      const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/hs-files`);
+      const {
+        data: {
+          rootDir,
+          error,
+        },
+      } = response;
+      if (error) {
+        dispatch(pushNotification('error', error.message));
+      } else {
+        dispatch(setResourceHydroShareFiles(resource.id, rootDir));
+      }
+    } catch (e) {
+      console.error(e);
+      dispatch(pushNotification('error', 'An error occurred when trying to get the HydroShare files.'));
+    }
   };
 }
 
