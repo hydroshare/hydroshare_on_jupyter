@@ -12,6 +12,8 @@ import NewFileModal from "../components/modals/NewFileModal";
 import EditPrivacyModal from "../components/modals/EditPrivacyModal";
 import ResourceMetadata from '../components/ResourceMetadata';
 import ArchiveMessage from '../components/ArchiveMessage';
+import ReadMeDisplay from '../components/ReadMeDisplay';
+
 
 import * as resourcesActions from '../store/actions/resources';
 import {
@@ -185,6 +187,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           promptDeleteFilesOrFolders={this.displayDeleteConfirmationModal}
           resourceId={resource.id}
         />
+        <ReadMeDisplay localReadMe={this.props.resource? this.props.resource.localReadMe : "# No ReadMe yet"}/>
         {modal}
       </div>
     )

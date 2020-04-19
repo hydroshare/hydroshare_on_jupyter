@@ -287,10 +287,11 @@ export function getResourceLocalFiles(resource: IResource) {
     const {
       data: {
         rootDir,
+        readMe,
       },
     } = response;
 
-    dispatch(setResourceLocalFiles(resource.id, rootDir));
+    dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
   };
 }
 
