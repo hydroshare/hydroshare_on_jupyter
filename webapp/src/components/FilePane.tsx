@@ -80,7 +80,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       content = filesAndFolders?.map((item, idx) => this.generateFileOrFolderElement(item, idx, this.props.openFile));
     } else {
       content = (
-        <div className="no-files">
+        <div className="no-results">
           No files
         </div>
       )
