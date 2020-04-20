@@ -250,8 +250,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
 
 
 class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
-    """ Class that handles GETing list of a files that are in a user's HydroShare instance of a resource """
-    # TODO (Vicky) Header comment should be updated - no creating or uploading on HS side
+    """ Handles getting and deleting the files in a HydroShare resource """
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'DELETE, GET, OPTIONS')
