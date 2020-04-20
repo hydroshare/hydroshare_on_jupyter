@@ -250,7 +250,6 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   }
 }
 
-// TODO: Display an error message on failed request
 export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
       dispatch(notifyGettingResources());
