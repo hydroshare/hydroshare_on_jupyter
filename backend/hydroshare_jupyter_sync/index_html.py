@@ -19,7 +19,7 @@ def get_index_html():
     global _frontend_url
     global _backend_api_url
     config = get_config_values(['dataPath'])
-    notebook_url_path_prefix = '/tree'
+    notebook_url_path_prefix = url_path_join('/tree', 'local_hs_resources')
     if config:
         if 'dataPath' in config:
             notebook_url_path_prefix = url_path_join('/tree', config['dataPath'])
