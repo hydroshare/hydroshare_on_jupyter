@@ -111,17 +111,17 @@ class ResourceHydroShareData:
                                                                                          nested_files, HS_PREFIX +':')
                 if folder_time:
                     folder_time = str(folder_time)
-                # TODO (vicky): use name and path instead of key[i]
+                level, name, path = key
                 root_dir_contents.append({
-                    "name": key[1],
-                    "path": HS_PREFIX + ':/' + key[2].strip('/'),
+                    "name": name,
+                    "path": HS_PREFIX + ':/' + path.strip('/'),
                     "sizeBytes": folder_size,
                     "modifiedTime": folder_time,
                     "type": "folder",
                     "contents": folder_contents,
                 })
 
-        # TODO: probably add some comments explaining what these lines are doing
+        # calculate the size of root folder by summing size of contents
         rootsize = 0
         for f in root_dir_contents:
             rootsize += (f["sizeBytes"])
@@ -280,8 +280,10 @@ class ResourceHydroShareData:
         folder_size = 0
         folder_time = datetime.datetime.min
         for v in val:
-            # TODO (Emily): unpack v
+            level, name, path = v
+            # if it is in the folders dictionary, then it is a folder
             if v in folders_dict:
+                # recursively build up size, most recent modified time, and contents for folders
                 subfolder_time, subfolder_size, subfolder_contents = self._get_contents_recursive(folders_dict[v], folders_dict, nested_files, path_prefix)
                 folder_size += subfolder_size
                 if subfolder_time and folder_time and subfolder_time > folder_time:
@@ -289,21 +291,25 @@ class ResourceHydroShareData:
                 if subfolder_time:
                     subfolder_time = str(subfolder_time)
                 contents.append({
-                    "name": v[1],
-                    "path": path_prefix + '/' + v[2].strip('/'),
+                    "name": name,
+                    "path": path_prefix + '/' + path.strip('/'),
                     "sizeBytes": subfolder_size,
                     "modifiedTime": subfolder_time,
                     "type": "folder",
                     "contents": subfolder_contents,
                 })
             else:
-                # TODO (Vicky): Comment this code!
-                contents.append(self._get_file_metadata(v[1], v[2], nested_files[v[2]], path_prefix))
-                folder_size += nested_files[v[2]]["size"]
-                if nested_files[v[2]].get("modified_time"):
-                    curr_time = parse(nested_files[v[2]].get("modified_time"))
+                # v is not a folder, so must be a file, get its metadata
+                contents.append(self._get_file_metadata(name, path, nested_files[path], path_prefix))
+                # nested_files is a dictionary which stores file info (such as size & modified time)
+                # key is path to the file & value is file info dictionary
+                # update size of folder by adding in size of this file
+                folder_size += nested_files[path]["size"]
+                if nested_files[path].get("modified_time"):
+                    curr_time = parse(nested_files[path].get("modified_time"))
                 else:
                     curr_time = None
+                # update modified time of the folder if this file has been edited more recently
                 if curr_time and folder_time and curr_time > folder_time:
                     folder_time = curr_time
 
@@ -329,7 +335,7 @@ class ResourceHydroShareData:
     def create_folder(self, folder_path):
         """ Attempts to create a folder in the HydroShare resource
             :param folder_path: the path to the folder relative to the resource root
-            :type folder_path: PosixPath 
+            :type folder_path: PosixPath
         """
         if isinstance(folder_path, PosixPath):
             folder_path = str(folder_path)
