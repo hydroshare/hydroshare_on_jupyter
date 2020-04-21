@@ -23,7 +23,7 @@ interface IFilePaneState {
   expandedFolders: Set<string>
   selectedFilesAndFolders: Set<string>
   sortAscending: boolean
-  sortBy: SORT_BY_OPTIONS
+  sortBy: string
 }
 
 interface IFilePaneProps {
@@ -74,8 +74,6 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       filesAndFolders = this.getFolderContentsSorted(filesAndFolders);
     }
 
-    const sortOrder = this.state.sortAscending ? 'sort-ascending' : 'sort-descending';
-
     let content: React.ReactNode;
     if (filesAndFolders && filesAndFolders.length > 0) {
       content = filesAndFolders?.map((item, idx) => this.generateFileOrFolderElement(item, idx, this.props.openFile));
@@ -99,39 +97,22 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
-              <div className="table-header table-row">
-                <span className="checkbox">
-                  <input
-                    checked={this.state.allFilesAndFoldersSelected}
-                    onChange={this.toggleAllFilesAndFoldersSelected}
-                    type="checkbox"
-                  />
-                </span>
-                <button
-                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.NAME ? sortOrder : '')}
-                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.NAME)}>
-                  Name
-                  {this.state.sortBy === SORT_BY_OPTIONS.NAME && SortTriangleSVG}
-                </button>
-                <button
-                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.TYPE ? sortOrder : '')}
-                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.TYPE)}>
-                  Type
-                  {this.state.sortBy === SORT_BY_OPTIONS.TYPE && SortTriangleSVG}
-                </button>
-                <button
-                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SIZE ? sortOrder : '')}
-                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}>
-                  Size
-                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE && SortTriangleSVG}
-                </button>
-                <button
-                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED ? sortOrder : '')}
-                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.LAST_MODIFIED)}>
-                  Last Modified
-                  {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && SortTriangleSVG}
-                </button>
-              </div>
+              <ResizableTableHeader
+                headers={[
+                  {
+                    type: 'checkbox',
+                    onToggle: this.toggleAllFilesAndFoldersSelected,
+                    isChecked: this.state.allFilesAndFoldersSelected,
+                  },
+                  { type: 'text', title: 'Name' },
+                  { type: 'text', title: 'Type' },
+                  { type: 'text', title: 'Size' },
+                  { type: 'text', title: 'Last Modified' },
+                ]}
+                setSortBy={this.setSortBy}
+                sortAscending={this.state.sortAscending}
+                sortBy={this.state.sortBy}
+              />
               {content}
               {provided.placeholder}
             </div>
@@ -353,7 +334,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     return file.type ? `${file.name}.${file.type}` : file.name;
   };
 
-  setSortBy = (sortBy: SORT_BY_OPTIONS) => {
+  setSortBy = (sortBy: string) => {
     if (this.state.sortBy === sortBy) {
       // Already sorted by this column, so reverse sort order
       this.setState({sortAscending: !this.state.sortAscending});
@@ -447,11 +428,11 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
 
 }
 
-enum SORT_BY_OPTIONS {
-  NAME,
-  TYPE,
-  SIZE,
-  LAST_MODIFIED,
+const SORT_BY_OPTIONS = {
+  NAME: 'Name',
+  TYPE: 'Type',
+  SIZE: 'Size',
+  LAST_MODIFIED: 'Last Modified',
 }
 
 const HUMAN_READABLE_FILE_SIZES = [
@@ -466,3 +447,56 @@ const HUMAN_READABLE_FILE_SIZES = [
 export const SortTriangleSVG = <svg xmlns="http://www.w3.org/2000/svg" className="triangle" width="10" height="10" viewBox="0 0 2.646 2.646">
     <path d="M0 0l1.323 2.646L2.646 0z"/>
   </svg>;
+
+interface IResizableTableHeaderProps {
+  headers: ({
+    title: string
+    type: 'text'
+  } | {
+    isChecked: boolean
+    onToggle: () => any
+    type: 'checkbox'
+  })[]
+  setSortBy: (name: string) => any
+  sortAscending: boolean
+  sortBy: string
+}
+const ResizableTableHeader: React.FC<IResizableTableHeaderProps> = (props: IResizableTableHeaderProps) => {
+  // TODO: Get initial component sizes using cash-dom package
+  // Was going off of https://github.com/bjgrosse/react-resize-panel
+  let headings: string[] = [];
+  props.headers.forEach(h => {
+    if (h.type === 'text') {
+      headings.push(h.title);
+    }
+  });
+  const [sizes, setSizes] = React.useState({
+    ...headings.map(key => ({[key]: 0})),
+  });
+
+  const resize = (key: string, delta: number) => setSizes({
+    ...sizes,
+    [key]: sizes[key] + delta,
+  });
+
+  // TODO next: Hook up resize function so it's triggered when a header's edge is dragged
+
+  return (
+    <div className="table-header table-row">
+      {props.headers.map(h => {
+        if (h.type === 'text') {
+          const classNames = 'clickable ' +
+            (props.sortBy === h.title) ? (props.sortAscending ? 'sort-ascending' : 'sort-descending') : '';
+          return <button
+            className={classNames}
+            onClick={() => props.setSortBy(h.title!)}
+          >
+            {h.title}
+          </button>;
+        } else {
+          return <input checked={h.isChecked} onChange={h.onToggle} type="checkbox" />;
+        }
+      })}
+    </div>
+  )
+};
