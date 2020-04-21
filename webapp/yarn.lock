@@ -4450,7 +4450,7 @@ react-beautiful-dnd@^13.0.0:
     redux "^4.0.4"
     use-memo-one "^1.1.1"
 
-react-context-menu@^3.0.1:
+react-context-menu@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/react-context-menu/-/react-context-menu-3.0.2.tgz#0105439f77062a91c87a135a0937979a8aa92220"
   integrity sha512-6NUd0mV05COIatdXom6lQY4MMxnuWLMHm0ZgjinHO04A19MSyajdHYdHI8RDpxC97WZYnkRN8Jemlw8OiydadQ==
