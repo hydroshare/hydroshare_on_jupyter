@@ -6,7 +6,7 @@ import {
   Droppable,
   DroppableStateSnapshot,
 } from 'react-beautiful-dnd';
-import ContextMenu from 'react-context-menu';
+// import ContextMenu from 'react-context-menu';
 import * as moment from 'moment';
 
 import {
@@ -137,7 +137,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             </div>
           )}
         </Droppable>
-        <ContextMenu
+        {/* <ContextMenu
           contextId={"clickable-area"}
           closeOnClick={true}
           items={[
@@ -146,7 +146,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
               onClick: this.renameFileOrFolder,
             }
           ]}
-        />
+        /> */}
       </div>
     );
   };
