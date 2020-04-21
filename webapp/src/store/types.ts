@@ -27,7 +27,7 @@ export interface IRootState {
   notifications: INotificationsState
   resources: IResourcesState
   router: RouterState
-  user: IUserInfo | null
+  user: IUserState
 }
 
 export interface INotificationsState {
@@ -42,6 +42,13 @@ export interface IResourcesState {
   resourceLocalFilesBeingFetched: Set<string>
   resourceHydroShareFilesBeingFetched: Set<string>
   archiveMessage: string
+}
+
+export interface IUserState {
+  attemptingLogin: boolean
+  authenticationFailed: boolean
+  credentialsInvalid: boolean
+  userInfo?: IUserInfo
 }
 
 /** --------- Data Models --------- **/
@@ -108,6 +115,11 @@ export interface IUserInfo {
 }
 
 /** --------- Backend Server Communication ---------- **/
+
+export interface IAttemptHydroShareLoginResponse {
+  success: boolean
+  userInfo: IUserInfo
+}
 
 export interface ICreateFileOrFolderRequestResponse {
   success: boolean

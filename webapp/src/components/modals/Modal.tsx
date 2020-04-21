@@ -59,8 +59,33 @@ const CloseXSVG = (
   </svg>
 );
 
+type CheckboxInputProps = {
+  checked: boolean
+  label: string
+  onChange: (isChecked: boolean) => any
+  title?: string
+};
+
+export const CheckboxInput: React.FC<CheckboxInputProps> = (props: CheckboxInputProps) => {
+
+  const onSelectionChange = (e: React.ChangeEvent<HTMLInputElement>) => props.onChange(e.target.checked);
+
+  return (
+    <div className="CheckboxInput group">
+      <h2 className="title">{props.title || ''}</h2>
+      <div className="group-content">
+        <label>
+          <input onChange={onSelectionChange} type="checkbox" checked={props.checked}/>
+          {props.label}
+        </label>
+      </div>
+    </div>
+  )
+};
+
 type TextInputProps = {
-  title: string
+  isPassword?: boolean
+  title?: string
   onChange: (newValue: string) => any
   pattern?: string
   placeholder?: string
@@ -71,7 +96,7 @@ export const TextArea: React.FC<TextInputProps> = (props: TextInputProps) => {
 
   return (
     <div className="TextArea group">
-      <h2 className="title">{props.title}</h2>
+      <h2 className="title">{props.title || ''}</h2>
       <div className="group-content">
         <textarea value={props.value} onChange={textareaChange} placeholder={props.placeholder}/>
       </div>
@@ -83,11 +108,13 @@ export const TextInput: React.FC<TextInputProps> = (props: TextInputProps) => {
 
   const textInputChange = (e: React.ChangeEvent<HTMLInputElement>) => props.onChange(e.target.value);
 
+  const type = props.isPassword ? 'password' : 'text';
+
   return (
     <div className="TextInput group">
-      <h2 className="title">{props.title}</h2>
+      <h2 className="title">{props.title || ''}</h2>
       <div className="group-content">
-        <input type="text" value={props.value} onChange={textInputChange} placeholder={props.placeholder} pattern={props.pattern}/>
+        <input type={type} value={props.value} onChange={textInputChange} placeholder={props.placeholder} pattern={props.pattern}/>
       </div>
     </div>
   )

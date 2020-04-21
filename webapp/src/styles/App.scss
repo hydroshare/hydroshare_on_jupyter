@@ -40,6 +40,10 @@ h2,
   font-size: 1.4rem;
 }
 
+.error {
+  color: $red;
+}
+
 button,
 input {
   background: none;
@@ -75,7 +79,8 @@ button {
   }
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="password"] {
   padding: 0.25em 0.5em;
 }
 
