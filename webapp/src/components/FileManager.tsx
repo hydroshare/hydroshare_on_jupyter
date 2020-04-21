@@ -170,7 +170,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     const localFilesHeader =
       <div>
         <div className="title-row">
-          <span className="title">JupyterHub Files</span>
+          <span className="title">Workspace Files</span>
           <img src={ASSETS_URL+'/JupyterHub-logo.png'} alt="JupyterHub logo"/>
         </div>
         <div className="actions-row local">

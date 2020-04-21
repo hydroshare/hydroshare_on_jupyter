@@ -44,7 +44,7 @@ class Header extends React.Component<ReduxType, never> {
           />
           <div className="buttons-container">
             <button className="go-home clickable" onClick={this.props.goHome}>
-              All My Resources
+              Back to all my Resources
             </button>
           </div>
         </div>
