@@ -21,6 +21,11 @@ from hydroshare_jupyter_sync.config_reader_writer import get_config_values, set_
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from hs_restclient.exceptions import *
 
+HYDROSHARE_AUTHENTICATION_ERROR = {
+    'type': 'HydroShareAuthenticationError',
+    'message': 'Invalid HydroShare username or password.',
+}
+
 
 class ResourceManager:
     """ Class that defines a handler for working with all of a user's resources.
@@ -31,23 +36,68 @@ class ResourceManager:
         """Makes an output folder for storing HS files locally, if none exists,
         and sets up authentication on hydroshare API.
         """
-        # authentication for using Hydroshare API
-        # TODO: Move this somewhere else
-        auth = HydroShareAuthBasic(username=username, password=password)
-        # TODO: Load these with the username and password
         config = get_config_values(['dataPath', 'hydroShareHostname'])
-        hostname = 'www.hydroshare.org'
+        self.hs_hostname = 'www.hydroshare.org'
         # TODO: Rename to hydroshare_resource_data
         self.output_folder = Path('local_hs_resources')
         if config:
-            hostname = config.get('hydroShareHostname', hostname)
+            if 'hydroShareHostname' in config:
+                self.hs_hostname = config['hydroShareHostname']
             if 'dataPath' in config:
-                self.output_folder = Path(config.get('dataPath'), self.output_folder)
+                self.output_folder = Path(config['dataPath'])
         if not self.output_folder.is_dir():
             # Let any exceptions that occur bubble up
             self.output_folder.mkdir(parents=True)
 
-        self.hs_api_conn = HydroShare(auth=auth, hostname=hostname)
+        self.hs_api_conn = None  # Use 'authenticate' to initialize
+        self.username = None
+
+    def authenticate(self, username=None, password=None, save=False):
+        """ Attempts to authenticate with HydroShare.
+
+        :param username: the user's HydroShare username
+        :type username: str
+        :param password: the user's HydroShare password
+        :type password: str
+        :param save: whether or not to save the credentials to the config file if the authentication succeeds
+        :type save: bool
+        :return: the user's information (name, email, etc) from HydroShare if successful, None otherwise
+        """
+        if not username or not password:
+            # Check the config file for a username and password
+            config = get_config_values(['u', 'p'])
+            if not config or 'u' not in config or 'p' not in config:
+                return None  # No passed credentials and no saved credentials -- can't authenticate
+            username = config['u']
+            password = base64.b64decode(config['p']).decode('utf-8')
+
+        # Try to authenticate
+        auth = HydroShareAuthBasic(username=username, password=password)
+        self.hs_api_conn = HydroShare(auth=auth, hostname=self.hs_hostname)
+        try:
+            user_info = self.hs_api_conn.getUserInfo()
+            self.username = user_info.get('username')
+        except HydroShareHTTPException as e:
+            if e.status_code == 401:  # Unauthorized
+                return None  # Authentication failed
+            raise e  # Some other error -- bubble it up
+
+        # Authentication succeeded
+        if save:
+            # Save the username and password
+            saved_successfully = set_config_values({
+                'u': username,
+                'p': str(base64.b64encode(password.encode('utf-8')).decode('utf-8')),
+            })
+            if saved_successfully:
+                logging.info('Successfully saved HydroShare credentials to config file.')
+
+        return user_info  # Authenticated successfully
+
+    def is_authenticated(self):
+        if self.hs_api_conn is None:
+            self.authenticate()
+        return self.hs_api_conn is not None
 
     def save_resource_locally(self, res_id):
         """ Downloads a resource to the local filesystem if a copy does not already exist locally
@@ -69,10 +119,7 @@ class ResourceManager:
             user_info = self.hs_api_conn.getUserInfo()
         except HydroShareHTTPException as e:
             if e.status_code == 401:  # Unauthorized
-                error = {
-                    'type': 'HydroShareAuthorizationError',
-                    'message': 'Invalid HydroShare username or password.'
-                }
+                error = HYDROSHARE_AUTHENTICATION_ERROR
             else:
                 error = {
                     'type': 'GenericHydroShareHTTPException',
@@ -137,15 +184,12 @@ class ResourceManager:
         self.local_res_ids = self.get_local_resource_ids()
 
         # Get the user's resources from HydroShare
-        user_hs_resources = self.hs_api_conn.resources(owner=username)
+        user_hs_resources = self.hs_api_conn.resources(owner=self.username)
 
         try:
             hs_resources = list(user_hs_resources)  # Resources can't be listed if auth fails
         except AttributeError:
-            return None, {
-                'type': 'HydroShareAuthorizationError',
-                'message': 'Could not get resources from HydroShare. Are your username and password correct?',
-            }
+            return None, HYDROSHARE_AUTHENTICATION_ERROR
 
         for res in hs_resources:
             res_id = res['resource_id']
@@ -269,27 +313,3 @@ class ResourceManager:
                 logging.info('Successfully saved archive message to config file.')
         
         return archive_message
-
-
-def get_hydroshare_credentials():
-    loaded_credentials = get_config_values(['u', 'p'])
-    if loaded_credentials and 'u' in loaded_credentials and 'p' in loaded_credentials:
-        user_name = loaded_credentials['u']
-        pw = base64.b64decode(loaded_credentials['p']).decode('utf-8')
-    else:
-        user_name = input("Please enter your HydroShare username: ")
-        pw = getpass()
-
-        # Save the username and password
-        saved_successfully = set_config_values({
-            'u': user_name,
-            'p': str(base64.b64encode(pw.encode('utf-8')).decode('utf-8')),
-        })
-        if saved_successfully:
-            logging.info('Successfully saved HydroShare credentials to config file.')
-
-    # TODO (Charlie): Check that password works
-    return user_name, pw
-
-
-username, password = get_hydroshare_credentials()

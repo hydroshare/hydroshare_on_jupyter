@@ -5,6 +5,7 @@ import {
   ThunkAction,
   ThunkDispatch,
 } from 'redux-thunk';
+import { loadInitData } from "./actions/App";
 
 import {pushNotification,} from "./actions/notifications";
 import {
@@ -17,9 +18,14 @@ import {
   setResourceLocalFiles,
   setResources,
 } from './actions/resources';
-import {setUserInfo,} from './actions/user';
+import {
+  notifyHydroShareCredentialsInvalid,
+  setUserInfo
+} from "./actions/user";
+import * as UserActions from './actions/user';
 import {
   FileOrFolderTypes,
+  IAttemptHydroShareLoginResponse,
   ICreateFileOrFolderRequestResponse,
   ICreateResourceRequest,
   ICreateResourceRequestResponse,
@@ -31,6 +37,7 @@ import {
   IResourceFilesData,
   IResourcesData,
   IRootState,
+  IServerError,
   IUserInfoDataResponse,
   NEW_FILE_OR_FOLDER_TYPES,
 } from './types';
@@ -72,6 +79,15 @@ function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>>
   return backendApi.put<T>(BACKEND_URL + endpoint, data);
 }
 
+function handleError(error: IServerError, dispatch: ThunkDispatch<{}, {}, AnyAction>) {
+  console.error(error);
+  if (error.type === 'HydroShareAuthenticationError') {
+    dispatch(notifyHydroShareCredentialsInvalid());
+  } else {
+    dispatch(pushNotification('error', error.message));
+  }
+}
+
 export function createNewFileOrFolder(resource: IResource, name: string, type: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     try {
@@ -102,8 +118,8 @@ export function createNewFileOrFolder(resource: IResource, name: string, type: s
       if (success) {
         dispatch(getResourceLocalFiles(resource));
       } else {
-        if (error && error.message) {
-          dispatch(pushNotification('error', error.message));
+        if (error) {
+          handleError(error, dispatch);
         } else {
           dispatch(pushNotification('error', 'An error occurred when attempting to create the file or folder.'));
         }
@@ -117,11 +133,11 @@ export function createNewFileOrFolder(resource: IResource, name: string, type: s
 
 export function createNewResource(details: ICreateResourceRequest): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
-    const { user } = getState();
+    const { user: { userInfo} } = getState();
     try {
       const data = {
         ...details,
-        creators: [user?.name],
+        creators: [userInfo?.name],
       };
       const response = await postToBackend<ICreateResourceRequestResponse>(`/resources`, data);
       const {
@@ -132,8 +148,7 @@ export function createNewResource(details: ICreateResourceRequest): ThunkAction<
         dispatch(getResources());
       } else {
         if (error) {
-          console.error(error);
-          dispatch(pushNotification('error', error.message));
+          handleError(error, dispatch);
         } else {
           dispatch(pushNotification('error', 'Could not create resource.'));
         }
@@ -221,6 +236,23 @@ export function deleteResourceFilesOrFolders(resource: IResource, paths: string[
   };
 }
 
+export function loginToHydroShare(username: string, password: string, remember: boolean): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    dispatch(UserActions.notifyAttemptingHydroShareLogin());
+    try {
+      const response = await postToBackend<IAttemptHydroShareLoginResponse>('/login', {username, password, remember});
+      dispatch(UserActions.notifyReceivedHydroShareLoginResponse(response.data.success));
+      if (response.data.success) {
+        dispatch(loadInitData());
+        dispatch(setUserInfo(response.data.userInfo));
+      }
+    } catch (e) {
+      console.error(e);
+      dispatch(pushNotification('error', 'Could not login.'));
+      dispatch(UserActions.notifyReceivedHydroShareLoginResponse(false));
+    }
+  };
+}
 export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     try {
@@ -230,8 +262,7 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
         error,
       } = response.data;
       if (error) {
-        console.error(error.type + ': ' + error.message);
-        dispatch(pushNotification('error', error.message));
+        handleError(error, dispatch);
       } else {
         const userInfo = {
           email: data.email,
@@ -241,7 +272,7 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
           title: data.title,
           username: data.username,
         };
-        dispatch(setUserInfo(userInfo));
+        dispatch(UserActions.setUserInfo(userInfo));
       }
   } catch (e) {
       console.error(e);
@@ -263,7 +294,7 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
           },
         } = response;
         if (error) {
-          dispatch(pushNotification('error', error.message));
+          handleError(error, dispatch);
         } else {
           dispatch(setResources(resources));
           dispatch(setArchiveMessage(archive_message));
@@ -289,7 +320,7 @@ export function getResourceLocalFiles(resource: IResource) {
         },
       } = response;
       if (error) {
-        dispatch(pushNotification('error', error.message));
+        handleError(error, dispatch);
       } else {
         dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
       }
@@ -312,7 +343,7 @@ export function getResourceHydroShareFiles(resource: IResource) {
         },
       } = response;
       if (error) {
-        dispatch(pushNotification('error', error.message));
+        handleError(error, dispatch);
       } else {
         dispatch(setResourceHydroShareFiles(resource.id, rootDir));
       }
@@ -359,8 +390,8 @@ function performFileOperation(resource: IResource, source: IFile | IFolder, dest
     // Display notifications for any errors that occurred
     if (failureCount > 0) {
       results.forEach(res => {
-        if (!res.success && res.error && res.error.message) {
-          dispatch(pushNotification('error', res.error.message));
+        if (!res.success && res.error) {
+          handleError(res.error, dispatch);
         }
       });
     }

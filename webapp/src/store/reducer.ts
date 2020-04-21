@@ -11,7 +11,7 @@ import {
   IFolder,
   INotificationsState,
   IResourcesState,
-  IUserInfo,
+  IUserState,
   ResourcesActionTypes,
   UserActionTypes,
 } from './types';
@@ -26,6 +26,12 @@ const initResourcesState: IResourcesState = {
   resourceLocalFilesBeingFetched: new Set<string>(),
   resourceHydroShareFilesBeingFetched: new Set<string>(),
   archiveMessage: "",
+};
+
+const initUserState: IUserState = {
+  attemptingLogin: false,
+  authenticationFailed: false,
+  credentialsInvalid: false,
 };
 
 export function notificationsReducer(state: INotificationsState = initNotificationsState, action: AnyAction): INotificationsState {
@@ -142,14 +148,22 @@ function recursivelyConvertDatesToMoment(files: (IFile | IFolder)[]) {
   });
 }
 
-export function userDataReducer(state: IUserInfo, action: UserActionTypes): IUserInfo | null {
+export function userDataReducer(state: IUserState = initUserState, action: UserActionTypes): IUserState {
   switch (action.type) {
+    case UserInfoActions.NOTIFY_ATTEMPTING_HYDROSHARE_LOGIN:
+      return {...state, attemptingLogin: true};
+    case UserInfoActions.NOTIFY_HYDROSHARE_AUTHENTICATION_FAILED:
+      return {...state, authenticationFailed: true};
+    case UserInfoActions.NOTIFY_RECEIVED_HYDROSHARE_LOGIN_RESPONSE:
+      return {
+        ...state,
+        attemptingLogin: false,
+        authenticationFailed: !action.payload.loginSuccess,
+        credentialsInvalid: !action.payload.loginSuccess,
+      };
     case UserInfoActions.SET_USER_INFO:
-      return {...state, ...action.payload};
+      return {...state, userInfo: action.payload};
     default:
-      if (state === undefined) {
-        return null;
-      }
       return state;
   }
 }

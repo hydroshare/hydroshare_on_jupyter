@@ -69,7 +69,8 @@
             }
           }
 
-          input[type="text"] {
+          input[type="text"],
+          input[type="password"] {
             flex-grow: 1;
           }
         }

@@ -12,6 +12,7 @@ import {
 import store, { history } from './store';
 
 import Header from './components/Header';
+import LoginModal from './components/modals/LoginModal';
 import MainPage from './pages/MainPage';
 import NotificationBanner from "./components/NotificationBanner";
 import ResourcePage from './pages/ResourcePage';
@@ -22,6 +23,7 @@ const URL_PREFIX = window.FRONTEND_URL || '';
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
+      <LoginModal/>
       <Header />
       <NotificationBanner/>
       <Switch>

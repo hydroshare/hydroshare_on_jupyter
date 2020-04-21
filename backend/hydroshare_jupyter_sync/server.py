@@ -15,7 +15,7 @@ import json
 from hs_restclient import exceptions as HSExceptions
 from hydroshare_jupyter_sync.resource_local_data import ResourceLocalData, LOCAL_PREFIX
 from hydroshare_jupyter_sync.resource_hydroshare_data import ResourceHydroShareData, HS_PREFIX
-from hydroshare_jupyter_sync.resource_manager import ResourceManager
+from hydroshare_jupyter_sync.resource_manager import ResourceManager, HYDROSHARE_AUTHENTICATION_ERROR
 from hydroshare_jupyter_sync.index_html import get_index_html
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
@@ -60,6 +60,23 @@ class WebAppHandler(BaseRequestHandler):
         self.write(get_index_html())
 
 
+class LoginHandler(BaseRequestHandler):
+    """ Handles authenticating the user with HydroShare """
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST')
+
+    def post(self):
+        credentials = json.loads(self.request.body.decode('utf-8'))
+        do_save = credentials.get('remember', False)
+        user_info = resource_manager.authenticate(credentials['username'], credentials['password'], do_save)
+
+        self.write({
+            'success': user_info is not None,
+            'userInfo': user_info,
+        })
+
+
 class ResourcesRootHandler(BaseRequestHandler):
     """ Handles /resources. Gets a user's resources (with metadata) and creates new resources. """
     def set_default_headers(self):
@@ -73,6 +90,13 @@ class ResourcesRootHandler(BaseRequestHandler):
         self.finish()
 
     def get(self):
+        if not resource_manager.is_authenticated():
+            self.write({
+                'success': False,
+                'error': HYDROSHARE_AUTHENTICATION_ERROR,
+            })
+            return
+
         resources, error = resource_manager.get_list_of_user_resources()
         archive_message = resource_manager.get_archive_message()
 
@@ -89,6 +113,13 @@ class ResourcesRootHandler(BaseRequestHandler):
         {"resource title": string
         "creators": list of strings}
         """
+        if not resource_manager.is_authenticated():
+            self.write({
+                'success': False,
+                'error': HYDROSHARE_AUTHENTICATION_ERROR,
+            })
+            return
+
         body = json.loads(self.request.body.decode('utf-8'))
         resource_title = body.get("title")
         creators = body.get("creators")  # list of names (strings)
@@ -120,6 +151,13 @@ class ResourceHandler(BaseRequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'DELETE, OPTIONS')
 
     def delete(self, res_id):
+        if not resource_manager.is_authenticated():
+            self.write({
+                'success': False,
+                'error': HYDROSHARE_AUTHENTICATION_ERROR,
+            })
+            return
+
         body = json.loads(self.request.body.decode('utf-8'))
         del_locally_only = body.get("locallyOnly", True)
         error = resource_manager.delete_resource_locally(res_id)
@@ -256,6 +294,13 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'DELETE, GET, OPTIONS')
 
     def get(self, res_id):
+        if not resource_manager.is_authenticated():
+            self.write({
+                'success': False,
+                'error': HYDROSHARE_AUTHENTICATION_ERROR,
+            })
+            return
+
         # TODO: Get folder info
         hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         root_dir = hs_data.get_files()
@@ -263,6 +308,13 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
 
     # TODO (kyle): Move the bulk of this function out of this file and deduplicate code
     def delete(self, res_id):
+        if not resource_manager.is_authenticated():
+            self.write({
+                'success': False,
+                'error': HYDROSHARE_AUTHENTICATION_ERROR,
+            })
+            return
+
         data = json.loads(self.request.body.decode('utf-8'))
         file_and_folder_paths = data.get('files')
         if file_and_folder_paths is None:
@@ -362,6 +414,15 @@ class MoveCopyFiles(BaseRequestHandler):
             src_fs, src_path = src_uri.split(':')
             dest_fs, dest_path = dest_uri.split(':')
 
+            # If this operation involves HydroShare, make sure we're authenticated
+            if (src_path == HS_PREFIX or dest_fs == HS_PREFIX) and resource_manager.is_authenticated():
+                results.append({
+                    'success': False,
+                    'error': HYDROSHARE_AUTHENTICATION_ERROR,
+                })
+                failure_count += 1
+                continue
+
             # Remove the leading forward slashes
             src_path = src_path[1:]
             dest_path = dest_path[1:]
@@ -434,14 +495,19 @@ class MoveCopyFiles(BaseRequestHandler):
 
 
 class UserInfoHandler(BaseRequestHandler):
-    """ Class that handles GETing user information on the currently logged
-    in user including name, email, username, etc. """
+    """ Handles getting the user's information (name, email, etc) from HydroShare and storing the user's
+        HydroShare credentials.
+     """
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
-        self.set_header('Access-Control-Allow-Methods', 'DELETE, GET, OPTIONS')
+        self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
 
     def get(self):
-        data, error = resource_manager.get_user_info()
+        """ Gets the user's information (name, email, etc) from HydroShare """
+        if not resource_manager.is_authenticated():
+            data, error = None, HYDROSHARE_AUTHENTICATION_ERROR
+        else:
+            data, error = resource_manager.get_user_info()
         self.write({'data': data,
                     'success': error is None,
                     'error': error})
@@ -465,6 +531,7 @@ class TestApp(tornado.web.Application):
 def get_route_handlers(frontend_url, backend_url):
     return [
         (url_path_join(frontend_url, r"/assets/(.*)"), tornado.web.StaticFileHandler, {'path': str(assets_path)}),
+        (url_path_join(backend_url, "/login"), LoginHandler),
         (url_path_join(backend_url, r"/user"), UserInfoHandler),
         (url_path_join(backend_url, r"/resources"), ResourcesRootHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)"), ResourceHandler),
