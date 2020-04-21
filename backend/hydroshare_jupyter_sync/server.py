@@ -415,7 +415,7 @@ class MoveCopyFiles(BaseRequestHandler):
             dest_fs, dest_path = dest_uri.split(':')
 
             # If this operation involves HydroShare, make sure we're authenticated
-            if (src_path == HS_PREFIX or dest_fs == HS_PREFIX) and resource_manager.is_authenticated():
+            if (src_path == HS_PREFIX or dest_fs == HS_PREFIX) and not resource_manager.is_authenticated():
                 results.append({
                     'success': False,
                     'error': HYDROSHARE_AUTHENTICATION_ERROR,
