@@ -6,6 +6,7 @@ import {
   Droppable,
   DroppableStateSnapshot,
 } from 'react-beautiful-dnd';
+// import ContextMenu from 'react-context-menu';
 import * as moment from 'moment';
 
 import {
@@ -136,9 +137,23 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             </div>
           )}
         </Droppable>
+        {/* <ContextMenu
+          contextId={"clickable-area"}
+          closeOnClick={true}
+          items={[
+            {
+              label: 'Rename',
+              onClick: this.renameFileOrFolder,
+            }
+          ]}
+        /> */}
       </div>
     );
   };
+
+  renameFileOrFolder = (event:any) => {
+    console.log(event?.currentTarget.value)
+  }
 
   filterFilesAndFolders = (items: (IFile | IFolder)[], filter: string): (IFile | IFolder)[] => {
     let filteredItems: (IFile | IFolder)[] = [];

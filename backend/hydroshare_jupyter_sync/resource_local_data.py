@@ -98,8 +98,8 @@ class ResourceLocalData:
         for file in self.data_path.glob('*.*'):
             if file.name.lower() == 'readme.md':
                 with open(str(file)) as f:
-                    return f.read()
-        return None
+                    contents = f.read()
+        return contents
 
     def rename_or_move_item(self, src, dest, overwrite=False):
         """ Renames or moves a local file or folder.
