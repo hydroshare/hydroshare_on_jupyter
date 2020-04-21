@@ -16,8 +16,6 @@ computer always knows where the server files are. To do that, run the following:
     $ cd backend
     $ pip3 install -r requirements.txt
     $ echo "export PYTHONPATH=$PYTHONPATH:$(pwd)" >> ~/.bashrc
-    $ cd ..
-    $ echo "export PYTHONPATH=$PYTHONPATH:$(pwd)" >> ~/.bashrc
     $ source ~/.bashrc
 ```
 
