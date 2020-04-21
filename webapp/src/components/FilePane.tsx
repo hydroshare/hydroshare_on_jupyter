@@ -1,3 +1,5 @@
+
+
 import * as React from 'react';
 import { ReactElement } from 'react';
 import {
@@ -226,7 +228,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     );
 
     let folderContentsLineItems: ReactElement[];
-    if (folder.contents && this.state.expandedFolders.has(folder.path)) {
+    if (folder.contents /*&& this.state.expandedFolders.has(folder.path)*/) {
       let contents = [...folder.contents];
       folderContentsLineItems = this.getFolderContentsSorted(contents).map((item, idx) =>
         this.generateFileOrFolderElement(item, idx + 1, openFile, nestLevel + 1));
@@ -271,7 +273,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       paddingLeft: `${nestLevel * 7}px`,
     };
     const tooltip = folder.name;
-    const classNames = 'clickable ' + (this.state.expandedFolders.has(folder.path) ? 'expanded' : 'collapsed');
+    const classNames = 'clickable ' + /*(this.state.expandedFolders.has(folder.path) ?*/ 'expanded' /*: 'collapsed')*/;
     const onClick = () => this.toggleFolderExpanded(folder);
     return (
       <div title={tooltip} onClick={onClick} className={classNames}>
