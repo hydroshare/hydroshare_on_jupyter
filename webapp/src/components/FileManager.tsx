@@ -246,6 +246,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             header={localFilesHeader}
             openFile={openFile}
             promptRenameFile={this.props.promptRenameFileOrFolderWorkspace}
+            fileLocation={"Workspace"}
             onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}
           />
           <FilePane
@@ -257,6 +258,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             rootDir={hydroShareResourceRootDir}
             header={hydroShareHeader}
             promptRenameFile={this.props.promptRenameFileOrFolderHydroShare}
+            fileLocation = {"HydroShare"}
             onSelectedFilesAndFoldersChange={this.setSelectedHydroShareFilesAndFolders}
           />
         </div>

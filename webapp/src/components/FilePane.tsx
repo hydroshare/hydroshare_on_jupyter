@@ -42,6 +42,7 @@ interface IFilePaneProps {
   openFile?: (f: IFile) => any
   onSelectedFilesAndFoldersChange?: (items: Set<String>) => any
   promptRenameFile: (fileOrFolder: IFile | IFolder) => any
+  fileLocation: string
 }
 
 export default class FilePane extends React.Component<IFilePaneProps, IFilePaneState> {
@@ -194,9 +195,6 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
               Rename
             </MenuItem>
-            <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.DOWNLOAD)}>
-              Download
-            </MenuItem>
           </ContextMenu>
         </div>);
     } else {
@@ -207,9 +205,9 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
               Rename
             </MenuItem>
-            <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.DOWNLOAD)}>
+            {this.props.fileLocation==="Workspace" ? <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.DOWNLOAD)}>
               Download
-            </MenuItem>
+            </MenuItem> : null }
           </ContextMenu>
         </div>);
     }
