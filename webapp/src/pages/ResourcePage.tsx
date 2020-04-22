@@ -7,7 +7,7 @@ import '../styles/ResourcePage.scss';
 
 import FileManager from "../components/FileManager";
 import Loading from "../components/Loading";
-import Modal from "../components/modals/Modal";
+import Modal, {TextInput} from "../components/modals/Modal";
 import NewFileModal from "../components/modals/NewFileModal";
 import EditPrivacyModal from "../components/modals/EditPrivacyModal";
 import ResourceMetadata from '../components/ResourceMetadata';
@@ -299,40 +299,34 @@ type RenameFileModalProps = {
   renameLocation: string
 };
 
-type RenameFileModalState = {
-  renameTextField: string
-}
-
-const RenameFileModal: React.FC<RenameFileModalProps> = (props: RenameFileModalProps, state: RenameFileModalState) => {
-  state = {
-    renameTextField: ""
-  }
+const RenameFileModal: React.FC<RenameFileModalProps> = (props: RenameFileModalProps) => {
+  const [state, setState] = React.useState({
+    renameTextField: '',
+  });
   // Remove the prefix (i.e. hs: or local:) from each path
-  let message = "Rename file"
-  let disable = false
-  if (props.renameLocation === "HydroShare" && props.fileOrFolder?.type === "folder") {
-    message = `To rename a HydroShare folder, please go to the Hydroshare website.`;
-    disable = true;
-  }
+  const disable = props.renameLocation === "HydroShare" && props.fileOrFolder?.type === "folder";
   
-  const renameFile = () => {
-    props.submit(props.fileOrFolder!, state.renameTextField)
-  }
+  const handleChange = (renameTextField: string) => setState({renameTextField});
+  const renameFile = () => props.submit(props.fileOrFolder!, state.renameTextField);
 
-  const handleChange = (event: any) => {
-    state.renameTextField = event.target.value;
-  }
+  let content = disable ? (
+    <p>To rename a HydroShare folder, please click the "Open in HydroShare" button and rename the folder there.</p>
+  ) : (
+    <TextInput onChange={handleChange} value={state.renameTextField} title="Rename file" />
+  );
+
+  const isValid = !disable && state.renameTextField.length > 0;
+
   return (
     <Modal
       close={props.close}
       title="Rename file or folder"
       submit={renameFile}
-      isValid={true}
+      isValid={isValid}
       submitText="Rename"
       isConfirm={true}
     >
-      <p>{message}</p>
-      {disable? null:<input type="text"  onChange={handleChange} />}
+      {content}
     </Modal>
   );
 };
