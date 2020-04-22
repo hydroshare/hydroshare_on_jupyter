@@ -135,8 +135,10 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && SortTriangleSVG}
                 </button>
               </div>
-              {content}
-              {provided.placeholder}
+              <div className="scrollable-container">
+                {content}
+                {provided.placeholder}
+              </div>
             </div>
           )}
         </Droppable>

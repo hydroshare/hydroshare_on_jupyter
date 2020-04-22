@@ -11,6 +11,13 @@
   border: $border-style;
   background-color: white;
 
+  .scrollable-container {
+    flex-grow: 1;
+    max-height: 30em;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
   .FilePane-header .title-row {
     align-items: center;
     border-bottom: $border-style;
@@ -77,6 +84,8 @@
   }
 
   .FilePane-files-container {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
   }
 
