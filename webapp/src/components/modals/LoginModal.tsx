@@ -61,7 +61,7 @@ const LoginModal: React.FC<ComponentPropTypes> = (props: ComponentPropTypes) => 
         title="Login to HydroShare"
         isValid={isValid && !props.attemptingLogin}
         submit={submit}
-        submitText="Login"
+        submitText={props.attemptingLogin ? 'Logging in...' : 'Login'}
       >
         <TextInput placeholder="Username" onChange={usernameChange} value={state.username} pattern="^[\w,\-\.]+$"/>
         <TextInput placeholder="Password" onChange={passwordChange} value={state.password} isPassword={true}/>

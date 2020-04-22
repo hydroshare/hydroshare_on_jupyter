@@ -40,6 +40,7 @@ import {
   IServerError,
   IUserInfoDataResponse,
   NEW_FILE_OR_FOLDER_TYPES,
+  PATH_PREFIXES,
 } from './types';
 
 // @ts-ignore
@@ -374,6 +375,8 @@ export function copyFileOrFolder(resource: IResource, source: IFile | IFolder, d
 
 export function renameFileOrFolder(resource: IResource, source: string, destination: string) {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    const localBeingModified = source.startsWith(PATH_PREFIXES.LOCAL);
+    const hsBeingModified = source.startsWith(PATH_PREFIXES.HYDROSHARE);
     const data = {
       operations: [{
         method: 'move',
@@ -381,6 +384,12 @@ export function renameFileOrFolder(resource: IResource, source: string, destinat
         destination,
       }],
     };
+    if (localBeingModified) {
+      dispatch(notifyGettingResourceJupyterHubFiles(resource));
+    }
+    if (hsBeingModified) {
+      dispatch(notifyGettingResourceHydroShareFiles(resource));
+    }
     const response = await patchToBackend<IFileOperationsRequestResponse>(`/resources/${resource.id}/move-copy-files`, data);
     // Handle the result from the server
     const {
@@ -398,9 +407,11 @@ export function renameFileOrFolder(resource: IResource, source: string, destinat
     }
     // Refresh the file lists if we should
     if (successCount > 0) {
-      // We could check to see if we need to refresh both lists
-      dispatch(getResourceLocalFiles(resource));
-      dispatch(getResourceHydroShareFiles(resource));
+      if (source.startsWith(PATH_PREFIXES.LOCAL)) {
+        dispatch(getResourceLocalFiles(resource));
+      } else {
+        dispatch(getResourceHydroShareFiles(resource));
+      }
     }
   }
 }
@@ -411,6 +422,10 @@ export function moveFileOrFolder(resource: IResource, source: IFile | IFolder, d
 
 function performFileOperation(resource: IResource, source: IFile | IFolder, destination: IFolder, method: 'move' | 'copy') {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    const localBeingModified = destination.path.startsWith(PATH_PREFIXES.LOCAL)
+      || (method === 'move' && source.path.startsWith(PATH_PREFIXES.LOCAL));
+    const hsBeingModified = destination.path.startsWith(PATH_PREFIXES.HYDROSHARE)
+      || (method === 'move' && source.path.startsWith(PATH_PREFIXES.HYDROSHARE));
     // Make the network request to perform the operation
     let fullDestPath = destination.path;
     if (!fullDestPath.endsWith('/')) {
@@ -427,6 +442,12 @@ function performFileOperation(resource: IResource, source: IFile | IFolder, dest
         destination: fullDestPath,
       }],
     };
+    if (localBeingModified) {
+      dispatch(notifyGettingResourceJupyterHubFiles(resource));
+    }
+    if (hsBeingModified) {
+      dispatch(notifyGettingResourceHydroShareFiles(resource));
+    }
     const response = await patchToBackend<IFileOperationsRequestResponse>(`/resources/${resource.id}/move-copy-files`, data);
     // Handle the result from the server
     const {
@@ -444,9 +465,12 @@ function performFileOperation(resource: IResource, source: IFile | IFolder, dest
     }
     // Refresh the file lists if we should
     if (successCount > 0) {
-      // We could check to see if we need to refresh both lists
-      dispatch(getResourceLocalFiles(resource));
-      dispatch(getResourceHydroShareFiles(resource));
+      if (localBeingModified) {
+        dispatch(getResourceLocalFiles(resource));
+      }
+      if (hsBeingModified) {
+        dispatch(getResourceHydroShareFiles(resource));
+      }
     }
   }
 }

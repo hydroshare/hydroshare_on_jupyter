@@ -40,7 +40,8 @@ h2,
   font-size: 1.4rem;
 }
 
-.error {
+p.error,
+span.error {
   color: $red;
 }
 
