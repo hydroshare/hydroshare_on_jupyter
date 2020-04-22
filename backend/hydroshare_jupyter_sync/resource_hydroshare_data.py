@@ -200,6 +200,11 @@ class ResourceHydroShareData:
 
         metadata = self._find_file_or_folder_metadata(str(src_path), self.get_files()["contents"])
         if metadata["type"] == "folder":
+            if len(metadata.get("contents")) == 0:
+                self.hs_api_conn.resource(self.res_id).functions.move_or_rename({
+                    "source_path": str(src_path),
+                    "target_path": str(dest_path),
+                })
             for child_file_or_folder in metadata.get("contents"):
                 new_src = self._remove_prefix(child_file_or_folder.get("path"), HS_PREFIX + ':/')
                 self.rename_or_move_file(new_src, dest_path)

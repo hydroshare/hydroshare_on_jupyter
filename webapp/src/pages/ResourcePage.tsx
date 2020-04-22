@@ -23,6 +23,7 @@ import {
   deleteResourceFilesOrFolders,
   moveFileOrFolder,
   uploadNewFile,
+  renameFileOrFolder,
 } from '../store/async-actions';
 import {
   IFile,
@@ -64,6 +65,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     copyFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
     moveFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
     uploadNewFile: (resource: IResource, file: FormData) => dispatch(uploadNewFile(resource, file)),
+    renameFileOrFolder: (resource: IResource, srcPath: string, destPath: string) => dispatch(renameFileOrFolder(resource, srcPath, destPath)),
     goBackToResources: () => dispatch(push('/')),
   }
 };
@@ -74,6 +76,7 @@ type StateType = {
   filesOrFoldersToConfirmDeleting: string[] | undefined
   modal: MODAL_TYPES,
   selectedFileToUpload: any,
+  selectedFileToRename: IFile | IFolder | null,
 };
 
 class ResourcePage extends React.Component<PropsType, StateType> {
@@ -82,6 +85,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
     filesOrFoldersToConfirmDeleting: undefined,
     modal: MODAL_TYPES.NONE,
     selectedFileToUpload: null,
+    selectedFileToRename: null,
   };
 
   displayModal = (type: MODAL_TYPES) => this.setState({modal: type});
@@ -161,6 +165,22 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       this.props.uploadNewFile(this.props.resource!, formData);
     };
 
+    const displayRenameHydroShareFileModal = (fileOrFolder: IFile | IFolder) => {
+      this.setState({modal: MODAL_TYPES.RENAME_HYDROSHARE_FILE,
+                    selectedFileToRename: fileOrFolder})
+    }
+
+    const displayRenameWorkspaceFileModal = (fileOrFolder: IFile | IFolder) => {
+      this.setState({modal: MODAL_TYPES.RENAME_WORKSPACE_FILE,
+                    selectedFileToRename: fileOrFolder})
+    }
+
+    const renameFileOrFolder = (item: IFile | IFolder, newName: string) => {
+      const destPath = item.path.replace( item.name, newName)
+      console.log(destPath)
+      this.props.renameFileOrFolder(this.props.resource!, item.path, destPath)
+    }
+
     const openFile = (file: IFile) => this.props.openFile(resource, file);
 
     let modal;
@@ -189,6 +209,22 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           onFileChange = {onSelectedFileToUploadChange}
         />
         break
+      case MODAL_TYPES.RENAME_HYDROSHARE_FILE:
+        modal = <RenameFileModal 
+          close = {this.hideModal}
+          submit = {renameFileOrFolder}
+          fileOrFolder = {this.state.selectedFileToRename}
+          renameLocation = {"HydroShare"}
+          />
+        break
+      case MODAL_TYPES.RENAME_WORKSPACE_FILE:
+        modal = <RenameFileModal 
+          close = {this.hideModal}
+          submit = {renameFileOrFolder}
+          fileOrFolder = {this.state.selectedFileToRename}
+          renameLocation = {"Workspace"}
+          />
+        break
     }
 
     return (
@@ -208,6 +244,8 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           promptCreateNewFileOrFolder={() => this.displayModal(MODAL_TYPES.NEW)}
           promptDeleteFilesOrFolders={this.displayDeleteConfirmationModal}
           promptUploadFile = {() => this.displayModal(MODAL_TYPES.UPLOAD_FILE)}
+          promptRenameFileOrFolderHydroShare = {displayRenameHydroShareFileModal}
+          promptRenameFileOrFolderWorkspace= {displayRenameWorkspaceFileModal}
           resourceId={resource.id}
         />
         <ReadMeDisplay localReadMe={this.props.resource? this.props.resource.localReadMe : "# No ReadMe yet"} resId={resource.id}/>
@@ -224,6 +262,8 @@ enum MODAL_TYPES {
   DELETE,
   EDIT_PRIVACY,
   UPLOAD_FILE,
+  RENAME_HYDROSHARE_FILE,
+  RENAME_WORKSPACE_FILE,
 }
 
 type DeleteConfirmationModalProps = {
@@ -248,6 +288,49 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (props: 
     >
       <p>{message}</p>
       {pathsCleaned.map(p => <p>{p}</p>)}
+    </Modal>
+  );
+};
+
+type RenameFileModalProps = {
+  close: () => any
+  submit: (item: IFile | IFolder, destPath: string) => any
+  fileOrFolder: IFile | IFolder |null
+  renameLocation: string
+};
+
+type RenameFileModalState = {
+  renameTextField: string
+}
+
+const RenameFileModal: React.FC<RenameFileModalProps> = (props: RenameFileModalProps, state: RenameFileModalState) => {
+  state = {
+    renameTextField: ""
+  }
+  // Remove the prefix (i.e. hs: or local:) from each path
+  let message = "Rename file"
+  if (props.renameLocation === "HydroShare" && props.fileOrFolder?.type === "folder") {
+    message = `To rename a HydroShare folder, please go to the Hydroshare website.`;
+  }
+  
+  const renameFile = () => {
+    props.submit(props.fileOrFolder!, state.renameTextField)
+  }
+
+  const handleChange = (event: any) => {
+    state.renameTextField = event.target.value;
+  }
+  return (
+    <Modal
+      close={props.close}
+      title="Rename file or folder"
+      submit={renameFile}
+      isValid={true}
+      submitText="Rename"
+      isConfirm={true}
+    >
+      <p>{message}</p>
+      <input type="text"  onChange={handleChange} />
     </Modal>
   );
 };

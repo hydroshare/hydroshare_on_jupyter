@@ -62,6 +62,20 @@
     }
   }
 
+  .context-menu {
+    background-color: #49494a;
+    padding: 1em;
+    padding-bottom: 0.25em;
+    padding-top: 0.75em;
+    box-shadow: 0.2em 0.2em 0.5em rgba(0, 0, 0, 0.2);
+    color: lightgray;
+    font-weight:bold;
+
+    .menu-item {
+      margin-bottom: 0.5em;
+    }
+  }
+
   .FilePane-files-container {
     flex-grow: 1;
   }

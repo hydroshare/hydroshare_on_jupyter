@@ -8,8 +8,7 @@ import {
   Droppable,
   DroppableStateSnapshot,
 } from 'react-beautiful-dnd';
-// import Menu from '@material-ui/core/Menu';
-// import MenuItem from '@material-ui/core/MenuItem';
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import * as moment from 'moment';
 
 import {
@@ -27,8 +26,6 @@ interface IFilePaneState {
   selectedFilesAndFolders: Set<string>
   sortAscending: boolean
   sortBy: SORT_BY_OPTIONS
-  contextMenuXPos: number | undefined
-  contextMenuYPos: number | undefined
 }
 
 interface IFilePaneProps {
@@ -40,6 +37,7 @@ interface IFilePaneProps {
   loading?: boolean
   openFile?: (f: IFile) => any
   onSelectedFilesAndFoldersChange?: (items: Set<String>) => any
+  promptRenameFile: (fileOrFolder: IFile | IFolder) => any
 }
 
 export default class FilePane extends React.Component<IFilePaneProps, IFilePaneState> {
@@ -50,8 +48,6 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     selectedFilesAndFolders: new Set<string>(),
     sortAscending: true,
     sortBy: SORT_BY_OPTIONS.NAME,
-    contextMenuXPos: -10,
-    contextMenuYPos: -10,
   };
 
   render() {
@@ -139,25 +135,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && SortTriangleSVG}
                 </button>
               </div>
-              <div onContextMenu={this.handleRightClick}  style={{ cursor: 'context-menu' }}>
-                {content}
-                {/* <Menu
-                  keepMounted
-                  open={this.state.contextMenuYPos !== null}
-                  onClose={this.handleCloseRightClick}
-                  anchorReference="anchorPosition"
-                  anchorPosition={
-                    (this.state.contextMenuYPos && this.state.contextMenuXPos)
-                      ? { top: this.state.contextMenuYPos, left: this.state.contextMenuXPos}
-                      : undefined
-                  }
-                >
-                  <MenuItem onClick={this.handleCloseRightClick}>Copy</MenuItem>
-                  <MenuItem onClick={this.handleCloseRightClick}>Print</MenuItem>
-                  <MenuItem onClick={this.handleCloseRightClick}>Highlight</MenuItem>
-                  <MenuItem onClick={this.handleCloseRightClick}>Email</MenuItem>
-                </Menu> */}
-              </div>
+              {content}
               {provided.placeholder}
             </div>
           )}
@@ -165,21 +143,6 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       </div>
     );
   };
-
-  handleRightClick = (event: any) => {
-    event.preventDefault();
-    this.setState({
-      contextMenuXPos: event.clientX - 2,
-      contextMenuYPos: event.clientY - 4,
-    });
-  };
-
-  handleCloseRightClick = () => {
-    this.setState({
-      contextMenuXPos: undefined,
-      contextMenuYPos: undefined,
-    })
-  }
 
   renameFileOrFolder = (event:any) => {
     console.log(event?.currentTarget.value)
@@ -205,11 +168,41 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     return filteredItems;
   };
 
+  handleMenuClick = (item: IFile | IFolder, action: CONTEXT_MENU_ACTIONS)=> {
+    switch (action) {
+      case (CONTEXT_MENU_ACTIONS.RENAME):
+        this.props.promptRenameFile(item);
+        break;
+      
+    }
+  }
+
   generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: ((f: IFile) => IFile) | undefined, nestLevel: number = 0) => {
     if (item.type === FileOrFolderTypes.FOLDER) {
-      return this.generateFolderElement(item as IFolder, index, openFile, nestLevel);
+      return (<div>
+          <ContextMenuTrigger id={item.name}>{this.generateFolderElement(item as IFolder, index, openFile, nestLevel)}</ContextMenuTrigger>
+          <ContextMenu  className="context-menu" id={item.name}>
+            <MenuItem className="menu-item" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
+              Rename {item.name}
+            </MenuItem>
+            <MenuItem className="menu-item" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={this.handleMenuClick}>
+              Download
+            </MenuItem>
+          </ContextMenu>
+        </div>);
     } else {
-      return this.generateFileElement(item as IFile, index, openFile, nestLevel);
+      return (
+        <div>
+          <ContextMenuTrigger id={item.name}>{this.generateFileElement(item as IFile, index, openFile, nestLevel)}</ContextMenuTrigger>
+          <ContextMenu  className="context-menu" id={item.name}>
+            <MenuItem className="menu-item" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
+              Rename {item.name}
+            </MenuItem>
+            <MenuItem className="menu-item" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={this.handleMenuClick}>
+              Download
+            </MenuItem>
+          </ContextMenu>
+        </div>);
     }
   };
 
@@ -482,6 +475,12 @@ enum SORT_BY_OPTIONS {
   TYPE,
   SIZE,
   LAST_MODIFIED,
+}
+
+enum CONTEXT_MENU_ACTIONS {
+  RENAME,
+  DOWNLOAD,
+  DELETE,
 }
 
 const HUMAN_READABLE_FILE_SIZES = [
