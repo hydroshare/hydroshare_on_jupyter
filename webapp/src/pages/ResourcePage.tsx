@@ -13,6 +13,7 @@ import EditPrivacyModal from "../components/modals/EditPrivacyModal";
 import ResourceMetadata from '../components/ResourceMetadata';
 import ArchiveMessage from '../components/ArchiveMessage';
 import ReadMeDisplay from '../components/ReadMeDisplay';
+import UploadFileModal from '../components/modals/UploadFileModal';
 
 
 import * as resourcesActions from '../store/actions/resources';
@@ -21,6 +22,7 @@ import {
   copyFileOrFolder,
   deleteResourceFilesOrFolders,
   moveFileOrFolder,
+  uploadNewFile,
 } from '../store/async-actions';
 import {
   IFile,
@@ -61,6 +63,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     openFile: (resource: IResource, file: IFile | IFolder) => dispatch(resourcesActions.openFileInJupyter(resource, file)),
     copyFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
     moveFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
+    uploadNewFile: (resource: IResource, file: FormData) => dispatch(uploadNewFile(resource, file)),
     goBackToResources: () => dispatch(push('/')),
   }
 };
@@ -70,6 +73,7 @@ type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispa
 type StateType = {
   filesOrFoldersToConfirmDeleting: string[] | undefined
   modal: MODAL_TYPES,
+  selectedFileToUpload: any,
 };
 
 class ResourcePage extends React.Component<PropsType, StateType> {
@@ -77,6 +81,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
   state: StateType = {
     filesOrFoldersToConfirmDeleting: undefined,
     modal: MODAL_TYPES.NONE,
+    selectedFileToUpload: null,
   };
 
   displayModal = (type: MODAL_TYPES) => this.setState({modal: type});
@@ -146,6 +151,16 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       this.setState({modal: MODAL_TYPES.NONE});
     };
 
+    const onSelectedFileToUploadChange = (event: any) => {
+      this.setState({selectedFileToUpload: event.target.files[0]})
+    };
+
+    const uploadFile = (file: any) => {
+      const formData = new FormData();
+      formData.append('file', this.state.selectedFileToUpload);
+      this.props.uploadNewFile(this.props.resource!, formData);
+    };
+
     const openFile = (file: IFile) => this.props.openFile(resource, file);
 
     let modal;
@@ -167,6 +182,13 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           submit = {editPrivacy}
         />;
         break
+      case MODAL_TYPES.UPLOAD_FILE:
+        modal = <UploadFileModal
+          close = {this.hideModal}
+          submit = {uploadFile}
+          onFileChange = {onSelectedFileToUploadChange}
+        />
+        break
     }
 
     return (
@@ -185,6 +207,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           moveFileOrFolder={moveFileOrFolder}
           promptCreateNewFileOrFolder={() => this.displayModal(MODAL_TYPES.NEW)}
           promptDeleteFilesOrFolders={this.displayDeleteConfirmationModal}
+          promptUploadFile = {() => this.displayModal(MODAL_TYPES.UPLOAD_FILE)}
           resourceId={resource.id}
         />
         <ReadMeDisplay localReadMe={this.props.resource? this.props.resource.localReadMe : "# No ReadMe yet"} resId={resource.id}/>
@@ -200,6 +223,7 @@ enum MODAL_TYPES {
   NEW,
   DELETE,
   EDIT_PRIVACY,
+  UPLOAD_FILE,
 }
 
 type DeleteConfirmationModalProps = {

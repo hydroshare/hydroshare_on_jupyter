@@ -236,6 +236,21 @@ export function deleteResourceFilesOrFolders(resource: IResource, paths: string[
   };
 }
 
+export function uploadNewFile(resource: IResource, file: FormData): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    try {
+      const response = await postToBackend<IAttemptHydroShareLoginResponse>(`/resources/${resource.id}/local-files`, file);
+      if (response.data.success) {
+        dispatch(loadInitData());
+        console.log("Upload successful")
+      }
+    } catch (e) {
+      console.error(e);
+      dispatch(pushNotification('error', 'Could not login.'));
+    }
+  };
+}
+
 export function loginToHydroShare(username: string, password: string, remember: boolean): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(UserActions.notifyAttemptingHydroShareLogin());
