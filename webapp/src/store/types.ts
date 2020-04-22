@@ -21,6 +21,11 @@ export const NEW_FILE_OR_FOLDER_TYPES = {
   OTHER_FILE: 'Other File',
 };
 
+export const PATH_PREFIXES = {
+  HYDROSHARE: 'hs',
+  LOCAL: 'local',
+}
+
 /** ---------- Redux State ---------- **/
 
 export interface IRootState {
