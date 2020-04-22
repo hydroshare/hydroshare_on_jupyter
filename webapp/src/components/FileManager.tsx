@@ -237,6 +237,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
       <DragDropContext onDragEnd={this.onDragEnd}>
         <div className="FileManager content-row">
           <FilePane
+            resourceId = {this.props.resourceId}
             className="tile jupyterhub"
             droppableId={localFilesRootDir?.path || 'loading'}
             filterByName={filterByName}
@@ -248,6 +249,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}
           />
           <FilePane
+            resourceId = {this.props.resourceId}
             className="tile hydroshare"
             droppableId={hydroShareResourceRootDir?.path || 'loading'}
             filterByName={filterByName}
