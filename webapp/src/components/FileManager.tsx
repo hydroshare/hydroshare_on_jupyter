@@ -74,7 +74,6 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     const destFolder = fileOrFolderLookupTable.get(destURI) as IFolder;
     const srcPrefix = srcURI.split(':')[0];
     const destPrefix = destURI.split(':')[0];
-    console.log(`Received request to move ${srcURI} to ${destURI}.`);
     const srcParentFolderPathComponents = srcFileOrFolder.path.split('/');
     srcParentFolderPathComponents.pop();
     let srcParentFolderPath = srcParentFolderPathComponents.join('/');
