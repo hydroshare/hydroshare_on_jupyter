@@ -2,7 +2,8 @@ import json
 import logging
 from pathlib import Path
 
-config_path = Path.home() / '.config' / 'hydroshare_jupyter_sync' / 'config.json'
+config_path = (Path.home() / '.config' / 'hydroshare_jupyter_sync'
+               / 'config.json')
 
 
 def get_config_values(keys):
@@ -21,7 +22,8 @@ def get_config_values(keys):
                     logging.error('Could not decode ' + str(config_path))
                     return None
         except IOError:
-            logging.error('Found existing config file in ' + str(config_path) + ' but could not open it.')
+            logging.error('Found existing config file in ' + str(config_path) +
+                          ' but could not open it.')
             return None
     else:
         logging.info('Could not locate config file at ' + str(config_path))

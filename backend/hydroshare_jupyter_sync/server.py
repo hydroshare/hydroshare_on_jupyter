@@ -5,7 +5,7 @@ hydroshare gui frontend.
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Email: vickymmcd@gmail.com
 '''
-#!/usr/bin/python
+# !/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import signal
@@ -13,9 +13,15 @@ import logging
 import sys
 import json
 from hs_restclient import exceptions as HSExceptions
-from hydroshare_jupyter_sync.resource_local_data import ResourceLocalData, LOCAL_PREFIX
-from hydroshare_jupyter_sync.resource_hydroshare_data import ResourceHydroShareData, HS_PREFIX
-from hydroshare_jupyter_sync.resource_manager import ResourceManager, HYDROSHARE_AUTHENTICATION_ERROR
+from hydroshare_jupyter_sync.resource_local_data import (ResourceLocalData,
+                                                         LOCAL_PREFIX)
+from hydroshare_jupyter_sync.resource_hydroshare_data import (
+                                                    ResourceHydroShareData,
+                                                    HS_PREFIX)
+from hydroshare_jupyter_sync.resource_manager import (
+                                                ResourceManager,
+                                                HYDROSHARE_AUTHENTICATION_ERROR
+                                                )
 from hydroshare_jupyter_sync.index_html import get_index_html
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
@@ -30,22 +36,31 @@ resource_manager = ResourceManager()
 
 assets_path = Path(__file__).parent / 'assets'
 
-# If we're running this file directly with Python, we'll be firing up a full Tornado web server, so use Tornado's
-# RequestHandler as our base class. Otherwise (i.e. if this is being run by a Jupyter notebook server) we want to use
-# IPythonHandler as our base class. (See the code at the bottom of this file for the server launching.)
-BaseHandler = tornado.web.RequestHandler if __name__ == '__main__' else IPythonHandler
+# If we're running this file directly with Python, we'll be firing up a full
+# Tornado web server, so use Tornado's RequestHandler as our base class.
+# Otherwise (i.e. if this is being run by a Jupyter notebook server) we want to
+# use IPythonHandler as our base class. (See the code at the bottom of this
+# file for the server launching.)
+BaseHandler = (tornado.web.RequestHandler if __name__ == '__main__'
+               else IPythonHandler)
 
 
 class BaseRequestHandler(BaseHandler):
-    """ Sets the headers for all the request handlers that extend this class """
+    """ Sets the headers for all the request handlers that extend
+        this class """
     def set_default_headers(self):
-        self.set_header("Access-Control-Allow-Origin", "*")  # TODO: change from * (any server) to our specific url
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, content-type, x-xsrftoken")
-        # TODO: Do this on a per-handler basis (not all of them allow all of these requests)
-        self.set_header('Access-Control-Allow-Methods', 'POST, PUT, GET, DELETE, OPTIONS')
+        # TODO: change from * (any server) to our specific url
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with, "
+                        "content-type, x-xsrftoken")
+        # TODO: Do this on a per-handler basis (not all of them allow all of
+        # these requests)
+        self.set_header('Access-Control-Allow-Methods',
+                        'POST, PUT, GET, DELETE, OPTIONS')
 
     def options(self, _=None):
-        # web browsers make an OPTIONS request to check what methods (line 31) are allowed at/for an endpoint.
+        # web browsers make an OPTIONS request to check what methods (line 31)
+        # are allowed at/for an endpoint.
         self.set_status(204)  # No content
         self.finish()
 
@@ -69,7 +84,9 @@ class LoginHandler(BaseRequestHandler):
     def post(self):
         credentials = json.loads(self.request.body.decode('utf-8'))
         do_save = credentials.get('remember', False)
-        user_info = resource_manager.authenticate(credentials['username'], credentials['password'], do_save)
+        user_info = resource_manager.authenticate(credentials['username'],
+                                                  credentials['password'],
+                                                  do_save)
 
         self.write({
             'success': user_info is not None,
@@ -78,13 +95,15 @@ class LoginHandler(BaseRequestHandler):
 
 
 class ResourcesRootHandler(BaseRequestHandler):
-    """ Handles /resources. Gets a user's resources (with metadata) and creates new resources. """
+    """ Handles /resources. Gets a user's resources (with metadata) and
+        creates new resources. """
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST')
 
     def options(self, _=None):
-        # web browsers make an OPTIONS request to check what methods (line 31) are allowed at/for an endpoint.
+        # web browsers make an OPTIONS request to check what methods (line 31)
+        # are allowed at/for an endpoint.
         # We just need to respond with the header set on line 31.
         self.set_status(204)  # No content
         self.finish()
@@ -132,11 +151,13 @@ class ResourcesRootHandler(BaseRequestHandler):
                 'success': False,
                 'error': {
                     'type': 'InvalidRequest',
-                    'message': 'The request body must specify "title" and "creators".',
+                    'message': ('The request body must specify '
+                                '"title" and "creators".'),
                 },
             })
         else:
-            resource_id, error = resource_manager.create_HS_resource(resource_title, creators, abstract, privacy)
+            resource_id, error = resource_manager.create_HS_resource(
+                                resource_title, creators, abstract, privacy)
             self.write({
                 'resource_id': resource_id,
                 'success': error is None,
@@ -171,10 +192,12 @@ class ResourceHandler(BaseRequestHandler):
 
 
 class ResourceLocalFilesRequestHandler(BaseRequestHandler):
-    """ Facilitates getting, deleting, and uploading to the files contained in a resource on the local disk """
+    """ Facilitates getting, deleting, and uploading to the files contained in
+        a resource on the local disk """
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
-        self.set_header('Access-Control-Allow-Methods', 'DELETE, GET, OPTIONS, POST, PUT')
+        self.set_header('Access-Control-Allow-Methods', ('DELETE, GET,'
+                                                         'OPTIONS, POST, PUT'))
 
     def get(self, res_id):
         local_data = ResourceLocalData(res_id)
@@ -183,7 +206,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
             'rootDir': local_data.get_files_and_folders(),
         })
 
-    # TODO (kyle) move some of the logic here outside this file and deduplicate code
+    # TODO (kyle) move some of the logic here outside this file and deduplicate
+    # code
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         file_and_folder_paths = body.get('files')
@@ -196,7 +220,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
         success_count = 0
         failure_count = 0
 
-        # Keep track of the folders that have been deleted so we don't try to delete child files that have already
+        # Keep track of the folders that have been deleted so we don't try to
+        # delete child files that have already
         # been deleted
         deleted_folders = []
 
@@ -207,14 +232,19 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                 item_path = item_path[1:]
             try:
                 for deleted_folder in deleted_folders:
-                    # Check if this file is in a folder that was deleted (a slash is appended to ensure that a file in,
-                    # say, '/My data 2' is not skipped because '/My data' was deleted)
+                    # Check if this file is in a folder that was deleted (a
+                    # slash is appended to ensure that a file in,
+                    # say, '/My data 2' is not skipped because '/My data' was
+                    # deleted)
                     if item_path.startswith(deleted_folder + '/'):
-                        # We can skip deleting this file because it was already deleted with its parent folder
+                        # We can skip deleting this file because it was already
+                        # deleted with its parent folder
                         break
-                else:  # Only runs if the break statement above is never hit (yes, the indentation is right here)
+                else:  # Only runs if the break statement above is never hit
+                    # (yes, the indentation is right here)
                     # Try to delete this item
-                    deleted_type = local_folder.delete_file_or_folder(item_path)
+                    deleted_type = local_folder.delete_file_or_folder(
+                        item_path)
                     if deleted_type == 'folder':
                         deleted_folders.append(item_path)
                 success_count += 1
@@ -225,7 +255,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                     'success': False,
                     'error': {
                         'type': 'UnknownError',
-                        'message': f'An unknown error occurred when attempting to delete {item_path}.'
+                        'message': (f'An unknown error occurred when '
+                                    f'attempting to delete {item_path}.')
                     }
                 })
                 failure_count += 1
@@ -247,8 +278,10 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
         name = body.get('name')
         error_msg = None
         if item_type is None or name is None:
-            error_msg = 'Request must include both "type" and "name" attributes.'
-        if not error_msg and not (item_type == 'file' or item_type == 'folder'):
+            error_msg = ('Request must include both "type" and "name" '
+                         'attributes.')
+        if not error_msg and not (item_type == 'file' or
+                                  item_type == 'folder'):
             error_msg = '"type" attribute must be either "file" or "folder".'
         if error_msg:
             self.set_status(400)  # Bad Request
@@ -280,7 +313,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
         local_data = ResourceLocalData(res_id)
         for field_name, files in self.request.files.items():
             for info in files:
-                with open(str(local_data.data_path / info['filename']), "wb") as f:
+                with open(str(local_data.data_path /
+                          info['filename']), "wb") as f:
                     f.write(info['body'])
         self.write({
             'success': True,
@@ -306,7 +340,8 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
         root_dir = hs_data.get_files()
         self.write({'rootDir': root_dir})
 
-    # TODO (kyle): Move the bulk of this function out of this file and deduplicate code
+    # TODO (kyle): Move the bulk of this function out of this file and
+    # deduplicate code
     def delete(self, res_id):
         if not resource_manager.is_authenticated():
             self.write({
@@ -326,7 +361,8 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
         success_count = 0
         failure_count = 0
 
-        # Keep track of the folders that have been deleted so we don't try to delete child files that have already
+        # Keep track of the folders that have been deleted so we don't try to
+        # delete child files that have already
         # been deleted
         deleted_folders = []
 
@@ -337,12 +373,16 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                 item_path = item_path[1:]
             try:
                 for deleted_folder in deleted_folders:
-                    # Check if this file is in a folder that was deleted (a slash is appended to ensure that a file in,
-                    # say, '/My data 2' is not skipped because '/My data' was deleted)
+                    # Check if this file is in a folder that was deleted (a
+                    # slash is appended to ensure that a file in,
+                    # say, '/My data 2' is not skipped because '/My data'
+                    # was deleted)
                     if item_path.startswith(deleted_folder + '/'):
-                        # We can skip deleting this file because it was already deleted with its parent folder
+                        # We can skip deleting this file because it was already
+                        # deleted with its parent folder
                         break
-                else:  # Only runs if the break statement above is never hit (yes, the indentation is right here)
+                else:  # Only runs if the break statement above is never hit
+                    # (yes, the indentation is right here)
                     # Try to delete this item
                     deleted_type = hs_data.delete_file_or_folder(item_path)
                     if deleted_type == 'folder':
@@ -354,7 +394,8 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                     'success': False,
                     'error': {
                         'type': 'NotFoundError',
-                        'message': f'Could not find {item_path} in HydroShare.',
+                        'message': f'Could not find {item_path} in '
+                                   'HydroShare.',
                     },
                 })
             except HSExceptions.HydroShareNotAuthorized:
@@ -362,7 +403,8 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                     'success': False,
                     'error': {
                         'type': 'NotAuthorizedError',
-                        'message': f'Could not delete {item_path}. Do you have write access to the resource?',
+                        'message': (f'Could not delete {item_path}. Do you '
+                                    'have write access to the resource?'),
                     },
                 })
             except Exception as e:
@@ -371,7 +413,8 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                     'success': False,
                     'error': {
                         'type': 'UnknownError',
-                        'message': f'An unknown error occurred when attempting to delete {item_path}.'
+                        'message': (f'An unknown error occurred when'
+                                    ' attempting to delete {item_path}.')
                     }
                 })
                 failure_count += 1
@@ -388,7 +431,8 @@ COPY = 'copy'
 
 
 class MoveCopyFiles(BaseRequestHandler):
-    """ Handles moving (or renaming) files within the local filesystem, on HydroShare, and between the two. """
+    """ Handles moving (or renaming) files within the local filesystem,
+        on HydroShare, and between the two. """
 
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
@@ -409,13 +453,16 @@ class MoveCopyFiles(BaseRequestHandler):
             src_uri = operation['source']
             dest_uri = operation['destination']
 
-            # Split paths into filesystem prefix ('hs' or 'local') and path relative to the resource root on
+            # Split paths into filesystem prefix ('hs' or 'local') and path
+            # relative to the resource root on
             # that filesystem
             src_fs, src_path = src_uri.split(':')
             dest_fs, dest_path = dest_uri.split(':')
 
-            # If this operation involves HydroShare, make sure we're authenticated
-            if (src_path == HS_PREFIX or dest_fs == HS_PREFIX) and not resource_manager.is_authenticated():
+            # If this operation involves HydroShare, make sure we're
+            # authenticated
+            if ((src_path == HS_PREFIX or dest_fs == HS_PREFIX) and
+                    not resource_manager.is_authenticated()):
                 results.append({
                     'success': False,
                     'error': HYDROSHARE_AUTHENTICATION_ERROR,
@@ -427,11 +474,14 @@ class MoveCopyFiles(BaseRequestHandler):
             src_path = src_path[1:]
             dest_path = dest_path[1:]
 
-            # Exactly what operation we perform depends on where the source and destination files/folders are
-            if src_fs == HS_PREFIX and dest_fs == HS_PREFIX:  # Move/copy within HydroShare
+            # Exactly what operation we perform depends on where the source
+            # and destination files/folders are
+            # Move/copy within HydroShare
+            if src_fs == HS_PREFIX and dest_fs == HS_PREFIX:
                 if method == MOVE:  # Move or rename
                     try:
-                        hs_data.rename_or_move_file(Path(src_path), Path(dest_path))
+                        hs_data.rename_or_move_file(Path(src_path),
+                                                    Path(dest_path))
                         results.append({'success': True})
                         success_count += 1
                     except FileExistsError:
@@ -439,27 +489,37 @@ class MoveCopyFiles(BaseRequestHandler):
                             'success': False,
                             'error': {
                                 'type': 'FileOrFolderExists',
-                                'message': f'The file {dest_path} already exists in HydroShare.',
+                                'message': (f'The file {dest_path} already '
+                                            'exists in HydroShare.'),
                             },
                         })
                         failure_count += 1
                 else:  # TODO: Copy
-                    # The frontend never requests this, but if one were to add such functionality, you'd handle it here
-                    raise NotImplementedError('Copy within HydroShare not implemented')
-            elif src_fs == LOCAL_PREFIX and dest_fs == LOCAL_PREFIX:  # Move/copy within the local filesystem
+                    # The frontend never requests this, but if one were to
+                    # add such functionality, you'd handle it here
+                    raise NotImplementedError('Copy within HydroShare '
+                                              'not implemented')
+            # Move/copy within the local filesystem
+            elif src_fs == LOCAL_PREFIX and dest_fs == LOCAL_PREFIX:
                 if method == MOVE:  # Move or rename
-                    ResourceLocalData(res_id).rename_or_move_item(src_path, dest_path)
+                    ResourceLocalData(res_id).rename_or_move_item(src_path,
+                                                                  dest_path)
                     results.append({'success': True})
                     success_count += 1
                 else:  # Copy
-                    # The frontend never requests this, but if one were to add such functionality, you'd handle it here
-                    raise NotImplementedError('Copy within the local filesystem not implemented yet')
-            elif src_fs == LOCAL_PREFIX and dest_fs == HS_PREFIX:  # Move/copy from the local filesystem to HydroShare
+                    # The frontend never requests this, but if one were to
+                    # add such functionality, you'd handle it here
+                    raise NotImplementedError('Copy within the local '
+                                              'filesystem not implemented yet')
+            # Move/copy from the local filesystem to HydroShare
+            elif src_fs == LOCAL_PREFIX and dest_fs == HS_PREFIX:
                 # Transfer the file regardless of if we're moving or copying
-                error = hs_data.upload_from_local(local_data, Path(src_path), Path(dest_path))
+                error = hs_data.upload_from_local(local_data, Path(src_path),
+                                                  Path(dest_path))
                 if not error and method == MOVE:
                     # Delete the local copy of the file
-                    error = ResourceLocalData(res_id).delete_file_or_folder(src_path)
+                    error = (ResourceLocalData(res_id).
+                             delete_file_or_folder(src_path))
                 results.append({
                     'success': error is None,
                     'error': error,
@@ -468,16 +528,19 @@ class MoveCopyFiles(BaseRequestHandler):
                     failure_count += 1
                 else:
                     success_count += 1
-            elif src_fs == HS_PREFIX and dest_fs == LOCAL_PREFIX:  # Move/copy from HydroShare to the local filesystem
+            # Move/copy from HydroShare to the local filesystem
+            elif src_fs == HS_PREFIX and dest_fs == LOCAL_PREFIX:
                 # Transfer the file regardless of if we're moving or copying
-                hs_data.download_to_local(local_data, Path(src_path), Path(dest_path))
+                hs_data.download_to_local(local_data, Path(src_path),
+                                          Path(dest_path))
                 if method == MOVE:
                     # Delete the HS copy of the file
                     hs_data.delete_file_or_folder(src_path)
                 results.append({'success': True})
                 success_count += 1
             else:
-                msg = f'"source" prefix "{src_fs}" and/or destination prefix "{dest_fs} not recognized. Valid options' \
+                msg = f'"source" prefix "{src_fs}" and/or destination ' \
+                      f'prefix "{dest_fs} not recognized. Valid options' \
                       f' are "hs" and "local"'
                 logging.warning(msg)
                 results.append({
@@ -495,7 +558,8 @@ class MoveCopyFiles(BaseRequestHandler):
 
 
 class UserInfoHandler(BaseRequestHandler):
-    """ Handles getting the user's information (name, email, etc) from HydroShare and storing the user's
+    """ Handles getting the user's information (name, email, etc)
+        from HydroShare and storing the user's
         HydroShare credentials.
      """
     def set_default_headers(self):
@@ -530,15 +594,20 @@ class TestApp(tornado.web.Application):
 
 def get_route_handlers(frontend_url, backend_url):
     return [
-        (url_path_join(frontend_url, r"/assets/(.*)"), tornado.web.StaticFileHandler, {'path': str(assets_path)}),
+        (url_path_join(frontend_url, r"/assets/(.*)"),
+            tornado.web.StaticFileHandler, {'path': str(assets_path)}),
         (url_path_join(backend_url, "/login"), LoginHandler),
         (url_path_join(backend_url, r"/user"), UserInfoHandler),
         (url_path_join(backend_url, r"/resources"), ResourcesRootHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)"), ResourceHandler),
-        (url_path_join(backend_url, r"/resources/([^/]+)/hs-files"), ResourceHydroShareFilesRequestHandler),
-        (url_path_join(backend_url, r"/resources/([^/]+)/local-files"), ResourceLocalFilesRequestHandler),
-        (url_path_join(backend_url, r"/resources/([^/]+)/move-copy-files"), MoveCopyFiles),
-        (frontend_url + r".*", WebAppHandler),  # Put this last to catch everything else
+        (url_path_join(backend_url, r"/resources/([^/]+)/hs-files"),
+            ResourceHydroShareFilesRequestHandler),
+        (url_path_join(backend_url, r"/resources/([^/]+)/local-files"),
+            ResourceLocalFilesRequestHandler),
+        (url_path_join(backend_url, r"/resources/([^/]+)/move-copy-files"),
+            MoveCopyFiles),
+        # Put this last to catch everything else
+        (frontend_url + r".*", WebAppHandler),
     ]
 
 
