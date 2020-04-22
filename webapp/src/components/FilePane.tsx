@@ -20,6 +20,9 @@ import {
 import '../styles/FilePane.scss';
 import Loading from "./Loading";
 
+// @ts-ignore
+const DOWNLOAD_URL = (window.FRONTEND_URL || '') + '/download';
+
 interface IFilePaneState {
   allFilesAndFoldersSelected: boolean
   expandedFolders: Set<string>
@@ -29,6 +32,7 @@ interface IFilePaneState {
 }
 
 interface IFilePaneProps {
+  resourceId: string
   className: string
   rootDir: IFolder
   droppableId: string
@@ -38,6 +42,7 @@ interface IFilePaneProps {
   openFile?: (f: IFile) => any
   onSelectedFilesAndFoldersChange?: (items: Set<String>) => any
   promptRenameFile: (fileOrFolder: IFile | IFolder) => any
+  fileLocation: string
 }
 
 export default class FilePane extends React.Component<IFilePaneProps, IFilePaneState> {
@@ -175,6 +180,9 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       case (CONTEXT_MENU_ACTIONS.RENAME):
         this.props.promptRenameFile(item);
         break;
+      case (CONTEXT_MENU_ACTIONS.DOWNLOAD):
+        const itemPath = item.path.split(":")[1];
+        window.open(DOWNLOAD_URL + "/" + this.props.resourceId + "/" + this.props.resourceId + "/data/contents" + itemPath)
       
     }
   }
@@ -185,10 +193,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
           <ContextMenuTrigger id={item.path}>{this.generateFolderElement(item as IFolder, index, openFile, nestLevel)}</ContextMenuTrigger>
           <ContextMenu  className="context-menu" id={item.path}>
             <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
-              Rename {item.name}
-            </MenuItem>
-            <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={this.handleMenuClick}>
-              Download
+              Rename
             </MenuItem>
           </ContextMenu>
         </div>);
@@ -198,11 +203,11 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
           <ContextMenuTrigger id={item.path}>{this.generateFileElement(item as IFile, index, openFile, nestLevel)}</ContextMenuTrigger>
           <ContextMenu  className="context-menu" id={item.path}>
             <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
-              Rename {item.name}
+              Rename
             </MenuItem>
-            <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={this.handleMenuClick}>
+            {this.props.fileLocation==="Workspace" ? <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.DOWNLOAD)}>
               Download
-            </MenuItem>
+            </MenuItem> : null }
           </ContextMenu>
         </div>);
     }
