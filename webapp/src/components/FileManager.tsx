@@ -74,7 +74,6 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     const destFolder = fileOrFolderLookupTable.get(destURI) as IFolder;
     const srcPrefix = srcURI.split(':')[0];
     const destPrefix = destURI.split(':')[0];
-    console.log(`Received request to move ${srcURI} to ${destURI}.`);
     const srcParentFolderPathComponents = srcFileOrFolder.path.split('/');
     srcParentFolderPathComponents.pop();
     let srcParentFolderPath = srcParentFolderPathComponents.join('/');
@@ -238,6 +237,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
       <DragDropContext onDragEnd={this.onDragEnd}>
         <div className="FileManager content-row">
           <FilePane
+            resourceId = {this.props.resourceId}
             className="tile jupyterhub"
             droppableId={localFilesRootDir?.path || 'loading'}
             filterByName={filterByName}
@@ -246,9 +246,11 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             header={localFilesHeader}
             openFile={openFile}
             promptRenameFile={this.props.promptRenameFileOrFolderWorkspace}
+            fileLocation={"Workspace"}
             onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}
           />
           <FilePane
+            resourceId = {this.props.resourceId}
             className="tile hydroshare"
             droppableId={hydroShareResourceRootDir?.path || 'loading'}
             filterByName={filterByName}
@@ -256,6 +258,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             rootDir={hydroShareResourceRootDir}
             header={hydroShareHeader}
             promptRenameFile={this.props.promptRenameFileOrFolderHydroShare}
+            fileLocation = {"HydroShare"}
             onSelectedFilesAndFoldersChange={this.setSelectedHydroShareFilesAndFolders}
           />
         </div>
