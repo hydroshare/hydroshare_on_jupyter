@@ -180,12 +180,12 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
   generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: ((f: IFile) => IFile) | undefined, nestLevel: number = 0) => {
     if (item.type === FileOrFolderTypes.FOLDER) {
       return (<div>
-          <ContextMenuTrigger id={item.name}>{this.generateFolderElement(item as IFolder, index, openFile, nestLevel)}</ContextMenuTrigger>
-          <ContextMenu  className="context-menu" id={item.name}>
-            <MenuItem className="menu-item" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
+          <ContextMenuTrigger id={item.path}>{this.generateFolderElement(item as IFolder, index, openFile, nestLevel)}</ContextMenuTrigger>
+          <ContextMenu  className="context-menu" id={item.path}>
+            <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
               Rename {item.name}
             </MenuItem>
-            <MenuItem className="menu-item" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={this.handleMenuClick}>
+            <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={this.handleMenuClick}>
               Download
             </MenuItem>
           </ContextMenu>
@@ -193,12 +193,12 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     } else {
       return (
         <div>
-          <ContextMenuTrigger id={item.name}>{this.generateFileElement(item as IFile, index, openFile, nestLevel)}</ContextMenuTrigger>
-          <ContextMenu  className="context-menu" id={item.name}>
-            <MenuItem className="menu-item" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
+          <ContextMenuTrigger id={item.path}>{this.generateFileElement(item as IFile, index, openFile, nestLevel)}</ContextMenuTrigger>
+          <ContextMenu  className="context-menu" id={item.path}>
+            <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
               Rename {item.name}
             </MenuItem>
-            <MenuItem className="menu-item" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={this.handleMenuClick}>
+            <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={this.handleMenuClick}>
               Download
             </MenuItem>
           </ContextMenu>
@@ -455,7 +455,6 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     });
   };
 
-// TODO: Write some unit tests
   getFormattedSizeString = (sizeBytes: number): string => {
     if (sizeBytes === undefined || sizeBytes === null) {
       return 'Unknown';
