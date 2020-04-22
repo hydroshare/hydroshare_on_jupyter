@@ -309,8 +309,10 @@ const RenameFileModal: React.FC<RenameFileModalProps> = (props: RenameFileModalP
   }
   // Remove the prefix (i.e. hs: or local:) from each path
   let message = "Rename file"
+  let disable = false
   if (props.renameLocation === "HydroShare" && props.fileOrFolder?.type === "folder") {
     message = `To rename a HydroShare folder, please go to the Hydroshare website.`;
+    disable = true;
   }
   
   const renameFile = () => {
@@ -330,7 +332,7 @@ const RenameFileModal: React.FC<RenameFileModalProps> = (props: RenameFileModalP
       isConfirm={true}
     >
       <p>{message}</p>
-      <input type="text"  onChange={handleChange} />
+      {disable? null:<input type="text"  onChange={handleChange} />}
     </Modal>
   );
 };
