@@ -38,6 +38,7 @@ interface IFileManagerProps {
   openFile: (file: IFile) => any
   promptCreateNewFileOrFolder: () => any
   promptDeleteFilesOrFolders: (paths: string[]) => any
+  promptUploadFile: () => any
   resourceId: string
 }
 
@@ -150,6 +151,8 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     return list;
   };
 
+  
+
   render() {
     const {
       hydroShareResourceRootDir,
@@ -183,7 +186,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             value={filterByName}
           />
           <button className = "button-enabled" onClick={this.props.promptCreateNewFileOrFolder}>New</button>
-          <button className = "button-enabled">Upload</button>
+          <button className = "button-enabled" onClick={this.props.promptUploadFile}>Upload</button>
           <button
             className = {localFilesDeleteClassName}
             onClick={this.promptDeleteSelectedLocalFiles}
