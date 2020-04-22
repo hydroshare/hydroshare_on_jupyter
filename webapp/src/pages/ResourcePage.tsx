@@ -301,13 +301,16 @@ type RenameFileModalProps = {
 
 const RenameFileModal: React.FC<RenameFileModalProps> = (props: RenameFileModalProps) => {
   const [state, setState] = React.useState({
-    renameTextField: '',
+    renameTextField: props.fileOrFolder!.name,
   });
   // Remove the prefix (i.e. hs: or local:) from each path
   const disable = props.renameLocation === "HydroShare" && props.fileOrFolder?.type === "folder";
   
   const handleChange = (renameTextField: string) => setState({renameTextField});
-  const renameFile = () => props.submit(props.fileOrFolder!, state.renameTextField);
+  const renameFile = () => {
+    props.submit(props.fileOrFolder!, state.renameTextField);
+    props.close();
+  };
 
   let content = disable ? (
     <p>To rename a HydroShare folder, please click the "Open in HydroShare" button and rename the folder there.</p>
