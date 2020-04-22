@@ -39,6 +39,8 @@ interface IFileManagerProps {
   promptCreateNewFileOrFolder: () => any
   promptDeleteFilesOrFolders: (paths: string[]) => any
   promptUploadFile: () => any
+  promptRenameFileOrFolderWorkspace: (fileOrFolder: IFile | IFolder ) => any
+  promptRenameFileOrFolderHydroShare: (fileOrFolder: IFile | IFolder ) => any
   resourceId: string
 }
 
@@ -243,6 +245,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             rootDir={localFilesRootDir}
             header={localFilesHeader}
             openFile={openFile}
+            promptRenameFile={this.props.promptRenameFileOrFolderWorkspace}
             onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}
           />
           <FilePane
@@ -252,6 +255,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             loading={fetchingHydroShareFiles}
             rootDir={hydroShareResourceRootDir}
             header={hydroShareHeader}
+            promptRenameFile={this.props.promptRenameFileOrFolderHydroShare}
             onSelectedFilesAndFoldersChange={this.setSelectedHydroShareFilesAndFolders}
           />
         </div>

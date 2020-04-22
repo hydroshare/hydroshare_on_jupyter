@@ -242,11 +242,10 @@ export function uploadNewFile(resource: IResource, file: FormData): ThunkAction<
       const response = await postToBackend<IAttemptHydroShareLoginResponse>(`/resources/${resource.id}/local-files`, file);
       if (response.data.success) {
         dispatch(loadInitData());
-        console.log("Upload successful")
       }
     } catch (e) {
       console.error(e);
-      dispatch(pushNotification('error', 'Could not login.'));
+      dispatch(pushNotification('error', 'Could not upload file.'));
     }
   };
 }
@@ -371,6 +370,39 @@ export function getResourceHydroShareFiles(resource: IResource) {
 
 export function copyFileOrFolder(resource: IResource, source: IFile | IFolder, destination: IFolder) {
   return performFileOperation(resource, source, destination, 'copy');
+}
+
+export function renameFileOrFolder(resource: IResource, source: string, destination: string) {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    const data = {
+      operations: [{
+        method: 'move',
+        source,
+        destination,
+      }],
+    };
+    const response = await patchToBackend<IFileOperationsRequestResponse>(`/resources/${resource.id}/move-copy-files`, data);
+    // Handle the result from the server
+    const {
+      failureCount,
+      results,
+      successCount,
+    } = response.data;
+    // Display notifications for any errors that occurred
+    if (failureCount > 0) {
+      results.forEach(res => {
+        if (!res.success && res.error) {
+          handleError(res.error, dispatch);
+        }
+      });
+    }
+    // Refresh the file lists if we should
+    if (successCount > 0) {
+      // We could check to see if we need to refresh both lists
+      dispatch(getResourceLocalFiles(resource));
+      dispatch(getResourceHydroShareFiles(resource));
+    }
+  }
 }
 
 export function moveFileOrFolder(resource: IResource, source: IFile | IFolder, destination: IFolder) {
