@@ -14,9 +14,9 @@ import nest_asyncio
 nest_asyncio.apply()
 
 
-'''Class to set up and run hs_server so it can be tested
-'''
 class TestHSServer(AsyncHTTPTestCase):
+    '''Class to set up and run hs_server so it can be tested
+    '''
     def get_app(self):
         return make_app()
 
@@ -46,7 +46,8 @@ class TestHSServer(AsyncHTTPTestCase):
     '''
     @gen_test
     def test_localfiles(self):
-        response = self.fetch(r"/resources/8b826c43f55043f583c85ae312a8894f/local-files")
+        response = self.fetch(r"/resources/8b826c43f55043f583c85ae312a8894f"
+                              "/local-files")
         self.assertEqual(response.code, 200)
         # make sure the string "Files" is in the response
         res = 'Files'
@@ -57,12 +58,14 @@ class TestHSServer(AsyncHTTPTestCase):
     '''
     @gen_test
     def test_HSfiles(self):
-        response = self.fetch(r"/resources/8b826c43f55043f583c85ae312a8894f/hs-files")
+        response = self.fetch(r"/resources/8b826c43f55043f583c85ae312a8894f"
+                              "/hs-files")
         self.assertEqual(response.code, 200)
         # make sure the string "Files" is in the response
         res = 'Files'
         res = res.encode('ascii')
         self.assertIn(res, response.body)
+
 
 if __name__ == '__main__':
     unittest.main()
