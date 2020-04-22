@@ -532,7 +532,7 @@ class TestApp(tornado.web.Application):
 def get_route_handlers(frontend_url, backend_url):
     return [
         (url_path_join(frontend_url, r"/assets/(.*)"), tornado.web.StaticFileHandler, {'path': str(assets_path)}),
-        (url_path_join(frontend_url, r"/download/(.*)"), tornado.web.StaticFileHandler, {'path': str(data_path)}),
+        (url_path_join(backend_url, r"/download/(.*)"), tornado.web.StaticFileHandler, {'path': str(data_path)}),
         (url_path_join(backend_url, "/login"), LoginHandler),
         (url_path_join(backend_url, r"/user"), UserInfoHandler),
         (url_path_join(backend_url, r"/resources"), ResourcesRootHandler),

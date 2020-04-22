@@ -21,7 +21,7 @@ import '../styles/FilePane.scss';
 import Loading from "./Loading";
 
 // @ts-ignore
-const DOWNLOAD_URL = (window.FRONTEND_URL || '') + '/download';
+const DOWNLOAD_URL = (window.BACKEND_API_URL) + '/download';
 
 interface IFilePaneState {
   allFilesAndFoldersSelected: boolean
