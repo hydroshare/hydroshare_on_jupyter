@@ -8,7 +8,8 @@ import {
   Droppable,
   DroppableStateSnapshot,
 } from 'react-beautiful-dnd';
-// import ContextMenu from 'react-context-menu';
+// import Menu from '@material-ui/core/Menu';
+// import MenuItem from '@material-ui/core/MenuItem';
 import * as moment from 'moment';
 
 import {
@@ -26,6 +27,8 @@ interface IFilePaneState {
   selectedFilesAndFolders: Set<string>
   sortAscending: boolean
   sortBy: SORT_BY_OPTIONS
+  contextMenuXPos: number | undefined
+  contextMenuYPos: number | undefined
 }
 
 interface IFilePaneProps {
@@ -47,6 +50,8 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     selectedFilesAndFolders: new Set<string>(),
     sortAscending: true,
     sortBy: SORT_BY_OPTIONS.NAME,
+    contextMenuXPos: -10,
+    contextMenuYPos: -10,
   };
 
   render() {
@@ -134,24 +139,47 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && SortTriangleSVG}
                 </button>
               </div>
-              {content}
+              <div onContextMenu={this.handleRightClick}  style={{ cursor: 'context-menu' }}>
+                {content}
+                {/* <Menu
+                  keepMounted
+                  open={this.state.contextMenuYPos !== null}
+                  onClose={this.handleCloseRightClick}
+                  anchorReference="anchorPosition"
+                  anchorPosition={
+                    (this.state.contextMenuYPos && this.state.contextMenuXPos)
+                      ? { top: this.state.contextMenuYPos, left: this.state.contextMenuXPos}
+                      : undefined
+                  }
+                >
+                  <MenuItem onClick={this.handleCloseRightClick}>Copy</MenuItem>
+                  <MenuItem onClick={this.handleCloseRightClick}>Print</MenuItem>
+                  <MenuItem onClick={this.handleCloseRightClick}>Highlight</MenuItem>
+                  <MenuItem onClick={this.handleCloseRightClick}>Email</MenuItem>
+                </Menu> */}
+              </div>
               {provided.placeholder}
             </div>
           )}
         </Droppable>
-        {/* <ContextMenu
-          contextId={"clickable-area"}
-          closeOnClick={true}
-          items={[
-            {
-              label: 'Rename',
-              onClick: this.renameFileOrFolder,
-            }
-          ]}
-        /> */}
       </div>
     );
   };
+
+  handleRightClick = (event: any) => {
+    event.preventDefault();
+    this.setState({
+      contextMenuXPos: event.clientX - 2,
+      contextMenuYPos: event.clientY - 4,
+    });
+  };
+
+  handleCloseRightClick = () => {
+    this.setState({
+      contextMenuXPos: undefined,
+      contextMenuYPos: undefined,
+    })
+  }
 
   renameFileOrFolder = (event:any) => {
     console.log(event?.currentTarget.value)
