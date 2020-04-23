@@ -270,7 +270,7 @@ class ResourceHydroShareData:
 
     def upload_from_local(self, local_data, src_path, dest_path):
         """ Copies a file or folder and its contents from the local filesystem
-        to HydroShare
+            to HydroShare
 
             :param local_data: the local copy of the resource
             :type local_data: LocalFolder
