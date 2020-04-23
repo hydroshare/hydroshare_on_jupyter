@@ -6,20 +6,18 @@ HydroShare & JupyterHub.
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Email: vickymmcd@gmail.com
 """
-#!/usr/bin/python
+# !/usr/bin/python
 # -*- coding: utf-8 -*-
 import base64
-import glob
 import logging
-import os
 import shutil
 import json
-from getpass import getpass
 from pathlib import Path
 
-from hydroshare_jupyter_sync.config_reader_writer import get_config_values, set_config_values
+from hydroshare_jupyter_sync.config_reader_writer import (get_config_values,
+                                                          set_config_values)
 from hs_restclient import HydroShare, HydroShareAuthBasic
-from hs_restclient.exceptions import *
+from hs_restclient.exceptions import HydroShareHTTPException
 
 HYDROSHARE_AUTHENTICATION_ERROR = {
     'type': 'HydroShareAuthenticationError',
@@ -59,15 +57,19 @@ class ResourceManager:
         :type username: str
         :param password: the user's HydroShare password
         :type password: str
-        :param save: whether or not to save the credentials to the config file if the authentication succeeds
+        :param save: whether or not to save the credentials to the config
+        file if the authentication succeeds
         :type save: bool
-        :return: the user's information (name, email, etc) from HydroShare if successful, None otherwise
+        :return: the user's information (name, email, etc) from HydroShare if
+        successful, None otherwise
         """
         if not username or not password:
             # Check the config file for a username and password
             config = get_config_values(['u', 'p'])
             if not config or 'u' not in config or 'p' not in config:
-                return None  # No passed credentials and no saved credentials -- can't authenticate
+                # No passed credentials and no saved credentials --
+                # can't authenticate
+                return None
             username = config['u']
             password = base64.b64decode(config['p']).decode('utf-8')
 
@@ -87,10 +89,12 @@ class ResourceManager:
             # Save the username and password
             saved_successfully = set_config_values({
                 'u': username,
-                'p': str(base64.b64encode(password.encode('utf-8')).decode('utf-8')),
+                'p': str(base64.b64encode(password.encode('utf-8')).decode(
+                                                                    'utf-8')),
             })
             if saved_successfully:
-                logging.info('Successfully saved HydroShare credentials to config file.')
+                logging.info('Successfully saved HydroShare credentials to '
+                             'config file.')
 
         return user_info  # Authenticated successfully
 
@@ -100,7 +104,8 @@ class ResourceManager:
         return self.hs_api_conn is not None
 
     def save_resource_locally(self, res_id):
-        """ Downloads a resource to the local filesystem if a copy does not already exist locally
+        """ Downloads a resource to the local filesystem if a copy does
+            not already exist locally
 
             :param res_id: the resource ID
             :type res_id: str
@@ -108,7 +113,9 @@ class ResourceManager:
         # Get resource from HS if it doesn't already exist locally
         if not (self.output_folder / res_id).exists():
             logging.info(f"Downloading resource {res_id} from HydroShare...")
-            self.hs_api_conn.getResource(res_id, destination=self.output_folder, unzip=True)
+            self.hs_api_conn.getResource(res_id,
+                                         destination=self.output_folder,
+                                         unzip=True)
 
     def get_user_info(self):
         """Gets information about the user currently logged into HydroShare
@@ -129,7 +136,8 @@ class ResourceManager:
         return user_info, error
 
     def delete_resource_locally(self, res_id):
-        """ Attempts to delete the local copy of the resource files from the disk
+        """ Attempts to delete the local copy of the resource files from the
+            disk
 
             :param res_id: the ID of the resource to delete
             :type res_id: str
@@ -138,14 +146,16 @@ class ResourceManager:
         if not resource_path.exists():
             return {
                 'type': 'FileNotFoundError',
-                'message': f'Could not find a local copy of resource {res_id} to delete.',
+                'message': (f'Could not find a local copy of resource {res_id}'
+                            ' to delete.'),
             }
         try:
             shutil.rmtree(str(resource_path))
-        except IOError as e:
+        except IOError:
             return {
                 'type': 'IOError',
-                'message': f'Something went wrong. Could not delete resource {res_id}.',
+                'message': (f'Something went wrong. Could not delete'
+                            f' resourc {res_id}.'),
             }
         return None  # No error
 
@@ -187,7 +197,8 @@ class ResourceManager:
         user_hs_resources = self.hs_api_conn.resources(owner=self.username)
 
         try:
-            hs_resources = list(user_hs_resources)  # Resources can't be listed if auth fails
+            # Resources can't be listed if auth fails
+            hs_resources = list(user_hs_resources)
         except AttributeError:
             return None, HYDROSHARE_AUTHENTICATION_ERROR
 
@@ -212,7 +223,8 @@ class ResourceManager:
 
         return list(resources.values()), error
 
-    def create_HS_resource(self, resource_title, creators, abstract="", privacy="Private"):
+    def create_HS_resource(self, resource_title, creators, abstract="",
+                           privacy="Private"):
         """
         Creates a hydroshare resource from the metadata specified in a dict
         using the given resource_title and specified creators
@@ -224,11 +236,14 @@ class ResourceManager:
         # Type errors for resource_title and creators
         if not isinstance(resource_title, str):
             error = {'type': 'IncorrectType',
-                    'message': 'Resource title should be a string.'}
+                     'message': 'Resource title should be a string.'}
             return resource_id, error
-        if not isinstance(creators, list) or not all(isinstance(creator, str) for creator in creators):
+        if (not isinstance(creators, list) or
+            not all(isinstance(creator, str)
+                    for creator in creators)):
             error = {'type': 'IncorrectType',
-                    'message': '"Creators" object should be a list of strings.'}
+                     'message': '"Creators" object should be a '
+                     'list of strings.'}
             return resource_id, error
 
         if abstract is None:
@@ -255,34 +270,39 @@ class ResourceManager:
 
         resource_id = ''
         try:
-            resource_id = self.hs_api_conn.createResource(metadata['rtype'],
-                                                          metadata['title'],
-                                                          resource_file=metadata['fpath'],
-                                                          keywords = metadata['keywords'],
-                                                          abstract = metadata['abstract'],
-                                                          metadata = metadata['metadata'],
-                                                          extra_metadata=metadata['extra_metadata'])
+            resource_id = (
+                self.hs_api_conn.createResource(
+                                     metadata['rtype'],
+                                     metadata['title'],
+                                     resource_file=metadata['fpath'],
+                                     keywords=metadata['keywords'],
+                                     abstract=metadata['abstract'],
+                                     metadata=metadata['metadata'],
+                                     extra_metadata=metadata[
+                                                        'extra_metadata']))
 
             self.hs_api_conn.setAccessRules(resource_id, public=public)
-        except:
-            error = {'type':'UnknownError',
-                    'message':'Unable to create resource.'}
+        except Exception:
+            error = {'type': 'UnknownError',
+                     'message': 'Unable to create resource.'}
         return resource_id, error
 
     def create_copy_of_resource_in_hs(self, src_res_id):
-        """ Makes a copy of a resource in HydroShare and updates the local copy of the
-            old resource to point to then ew copy.
+        """ Makes a copy of a resource in HydroShare and updates the local copy
+            of the old resource to point to the new copy.
 
-            :param src_res_id: the ID of the resource in HydroShare to duplicate
+            :param src_res_id: the ID of the resource in HydroShare to
+            duplicate
             :type src_res_id: str
             :returns the new resource ID
         """
         response = self.hs_api_conn.resource(src_res_id).copy()
-        new_id = response.content.decode("utf-8") # b'id'
+        new_id = response.content.decode("utf-8")  # b'id'
 
         is_local = src_res_id in self.local_res_ids
 
-        # if a local version exists under the old resource ID, rename it to point to the new one
+        # if a local version exists under the old resource ID, rename it to
+        # point to the new one
         if is_local:
             og_path = self.output_folder / src_res_id / src_res_id
             new_path = self.output_folder / new_id / new_id
@@ -296,8 +316,8 @@ class ResourceManager:
         return new_id
 
     def get_archive_message(self):
-        """ Gets the message to display on the resource page prompting the user to archive
-            their resources to HydroShare
+        """ Gets the message to display on the resource page prompting the user
+            to archive their resources to HydroShare
          """
         loaded_archive_message = get_config_values(['archiveMessage'])
         if loaded_archive_message and loaded_archive_message['archiveMessage']:
@@ -305,11 +325,12 @@ class ResourceManager:
         else:
             archive_message = input("Please enter the archive message: ")
 
-            #Save the archive message
+            # Save the archive message
             saved_successfully = set_config_values({
                 'archiveMessage': archive_message,
             })
             if saved_successfully:
-                logging.info('Successfully saved archive message to config file.')
-        
+                logging.info('Successfully saved archive message to '
+                             'config file.')
+
         return archive_message

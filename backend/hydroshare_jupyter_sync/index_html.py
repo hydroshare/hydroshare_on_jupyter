@@ -22,14 +22,16 @@ def get_index_html():
     notebook_url_path_prefix = url_path_join('/tree', 'local_hs_resources')
     if config:
         if 'dataPath' in config:
-            notebook_url_path_prefix = url_path_join('/tree', config['dataPath'])
+            notebook_url_path_prefix = url_path_join('/tree',
+                                                     config['dataPath'])
 
     return f"""
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <link rel="shortcut icon" href="{_frontend_url}/assets/favicon.ico">
@@ -43,7 +45,8 @@ def get_index_html():
       window.FRONTEND_URL = "{_frontend_url}";
       window.BACKEND_API_URL = "{_backend_api_url}";
     </script>
-    <script type="text/javascript" src="{_frontend_url}/assets/bundle.js"></script>
+    <script type="text/javascript" src="{_frontend_url}/assets/bundle.js">
+    </script>
   </body>
 </html>
 """
