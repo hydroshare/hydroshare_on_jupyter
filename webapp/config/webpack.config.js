@@ -5,10 +5,6 @@ const APP_DIR = path.dirname(__dirname); // webapp
 const BUILD_DIR = path.resolve(APP_DIR, 'build');
 
 module.exports = {
-  devServer: {
-    historyApiFallback: true,
-    contentBase: path.join(APP_DIR, 'public'),
-  },
   entry: path.join(APP_DIR, 'src', 'index.tsx'),
   output: {
     path: BUILD_DIR,
