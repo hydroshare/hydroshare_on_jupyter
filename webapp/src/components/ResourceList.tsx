@@ -3,6 +3,8 @@ import * as React from 'react';
 
 import '../styles/ResourceList.scss';
 
+import ArchiveResourceConfirmationModal from './modals/ArchiveResourceConfirmationModal';
+
 import {
   IResource,
 } from '../store/types';
@@ -216,7 +218,9 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           <p>A resource is a collection of files on HydroShare, a place for sharing code and water data. These files can be code (e.g. Python or R), data (e.g. .csv, .xlsx, .geojson), or any other type of file.</p>
           <p>The list below shows the resources that exist in HydroShare and in JupyterHub. Resources only in HydroShare can be synced to JupyterHub, and then you can run code and edit data. All changes should be made
              in JupyterHub and then synced to HydroShare. Think of JupyterHub as your workspace and HydroShare are your sharing or archival space. </p>
-          <p>To begin, click the New Resource button to create a new resource or click on an existing resource in the list to view files in that resource.</p> 
+          <p>To begin, click the <b>New Resource</b> button to create a new resource or click on an existing resource in the list to view files in that resource.</p> 
+          <p><b>Delete: </b> This will delete a resource from your workspace and from HydroShare. Please save any files you want to your desktop before deleting as all of your work will be lost.</p>
+          <p><b>Archive: </b> This will delete a resource from your workspace but save it in HydroShare. Please manually transfer from your workspace any remaining files you'd like to save to HydroShare before archiving as all of your files in your workspace will be lost.</p>
         </div>
         <div className="actions-row">
           <input className="search" type="text" placeholder="Search" onChange={this.filterTextChanged}/>
@@ -281,27 +285,14 @@ type RDCModalProps = {
 const ResourceDeleteConfirmationModal: React.FC<RDCModalProps> = (props: RDCModalProps) => {
   return (
     <Modal close={props.close} title="Confirm Deletion" submit={props.submit} isValid={true} submitText="Delete" isWarning={true}>
-      <p>Are you sure you want to delete the following resources?</p>
-      {props.resources.map(r => <p>{r.title}</p>)}
+      <p className="delete-header">Are you sure you want to delete the following resources?</p>
+      {props.resources.map(r => <p className="delete-resource-list">{r.title}</p>)}
+      <p>This will delete a resource from your workspace and from HydroShare.</p>
+      <p>Please save any files you want to your desktop before deleting as all of your work will be lost.</p>
     </Modal>
   )
 };
 
-type ArchiveModalProps = {
-  close: () => any
-  resources: IResource[]
-  submit: () => any
-};
-
-const ArchiveResourceConfirmationModal: React.FC<ArchiveModalProps> = (props: ArchiveModalProps) => {
-  return (
-    <Modal close={props.close} title="Archive Resource" submit={props.submit} isValid={true} submitText="Archive" isConfirm={true}>
-      <p className="archive-header">Are you sure you want to archive the following resources?</p>
-      {props.resources.map(r => <p className="archive-resource-list">{r.title}</p>)}
-      <p>Please manually transfer from JupyterHub any remaining files you'd like to save to HydroShare before archiving.</p>
-    </Modal>
-  )
-};
 
 enum MODAL_TYPES {
   NONE,

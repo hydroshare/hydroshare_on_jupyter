@@ -12,6 +12,7 @@ import hs_restclient
 import datetime
 from dateutil.parser import parse
 from pathlib import Path, PosixPath
+import os
 
 HS_PREFIX = 'hs'
 
@@ -27,30 +28,22 @@ class ResourceHydroShareData:
         """Gets file definition formatting for returning HS files, given path
         & size. Returns false if the path is a folder & not a file.
         """
-        # TODO (Emily) fix this function!
+        filepath = Path(filepath)
         modified_time = file_info.get("modified_time")
         if modified_time:
             modified_time = str(parse(modified_time))
         # if it is a file & has an extension then get name & extension
-        if filepath.rfind("/") == -1 and filepath.rfind(".") != -1:
-            file_type = filepath[filepath.rfind(".")+1:]
-            filename = filepath[:filepath.rfind(".")]
+        if len(filepath.parts) == 1:
+            file_type = "file"
+            if filepath.suffix != '':
+                file_type = filepath.suffix[1:]
+            filename = filepath.stem
             return ({
                 "name": filename,
                 "path": path_prefix + '/' + long_path.strip('/'),
                 "sizeBytes": file_info.get("size"),
                 "modifiedTime": modified_time,
                 "type": file_type,
-            })
-        # TODO (Charlie): This might be simpler with pathlib
-        elif filepath.rfind("/") == -1:
-
-            return ({
-                "name": filepath,
-                "path": path_prefix + '/' + long_path.strip('/'),
-                "sizeBytes": file_info.get("size"),
-                "modifiedTime": modified_time,
-                "type": "file",
             })
         else:
             return False
@@ -176,23 +169,26 @@ class ResourceHydroShareData:
         """ Recursively gets and returns the metadata dictionary that is
         nested within metadata dict for the file or folder at specified path.
         """
+        path = Path(path)
         if metadata_dict is None:
             raise Exception("File or folder not found.")
-        if "/" in path:
-            first_level, rest_of_path = path.split("/", 1)
+        if len(path.parts) > 1:
+            first_level = path.parts[0]
+            rest_of_path = os.path.relpath(path, first_level)
             for dicts in metadata_dict:
                 if dicts["name"] == first_level:
                     return self._find_file_or_folder_metadata(
                                                         rest_of_path,
                                                         dicts.get("contents"))
         else:
+            if path.suffix != '':
+                path_no_extension = path.with_suffix('')
+                extension = path.suffix
+            else:
+                path_no_extension = None
             for dicts in metadata_dict:
                 name = dicts.get("name")
-                if "." in path:
-                    path_no_extension, extension = path.rsplit(".", 1)
-                else:
-                    path_no_extension = None
-                if name == path or name == path_no_extension:
+                if name == str(path) or name == str(path_no_extension):
                     return dicts
 
     def _remove_prefix(self, text, prefix):

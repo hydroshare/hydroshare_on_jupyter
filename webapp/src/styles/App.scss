@@ -107,8 +107,9 @@ input[type="password"] {
 }
 
 .table {
-  $column-width-checkbox: 6%;
-  $column-width-other: 24%;
+  $column-width-checkbox: 7%;
+  $column-width-name: 59%;
+  $column-width-other: 17%;
   $column-padding: 2%;
 
   .table-header {
@@ -169,7 +170,11 @@ input[type="password"] {
     &:first-child {
       width: $column-width-checkbox;
     }
-    &:not(:first-child) {
+    &:nth-child(2) {
+      width: $column-width-name;
+      border-left: $border-style;
+    }
+    &:nth-child(n+3) {
       width: $column-width-other;
       border-left: $border-style;
     }

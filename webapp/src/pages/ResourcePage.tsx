@@ -24,6 +24,7 @@ import {
   moveFileOrFolder,
   uploadNewFile,
   renameFileOrFolder,
+  deleteResources,
 } from '../store/async-actions';
 import {
   IFile,
@@ -67,6 +68,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     uploadNewFile: (resource: IResource, file: FormData) => dispatch(uploadNewFile(resource, file)),
     renameFileOrFolder: (resource: IResource, srcPath: string, destPath: string) => dispatch(renameFileOrFolder(resource, srcPath, destPath)),
     goBackToResources: () => dispatch(push('/')),
+    deleteResourcesLocally: (resources: IResource[]) => dispatch(deleteResources(resources, true)),
   }
 };
 
@@ -231,7 +233,9 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       <div className="page resource-details">
         <ResourceMetadata 
           resource={resource} 
-          promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDIT_PRIVACY)}/>
+          promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDIT_PRIVACY)}
+          deleteResourcesLocally={this.props.deleteResourcesLocally}
+          />
         {this.props.archiveMessage !== "" ? <ArchiveMessage message={this.props.archiveMessage}/> : <div></div>}
         <FileManager
           fetchingHydroShareFiles={fetchingHydroShareFiles}
