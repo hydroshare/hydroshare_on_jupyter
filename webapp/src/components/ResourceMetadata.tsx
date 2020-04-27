@@ -25,7 +25,20 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
       title,
     } = this.props.resource;
 
-    const welcomeNotebookLink = `https://jupyter.cuahsi.org/user/${this.props.username}/notebooks/notebooks/Welcome.ipynb`
+    let gettingStartedElement;
+    // @ts-ignore
+    if (window.NOTEBOOK_URL_PATH_PREFIX && window.GETTING_STARTED_NOTEBOOK_PATH) {
+      // @ts-ignore
+      const gettingStartedNotebookPath = window.NOTEBOOK_URL_PATH_PREFIX + '/' + window.GETTING_STARTED_NOTEBOOK_PATH;
+      gettingStartedElement = (
+        <div className="info-group">
+          <span className="info-header">Getting Started</span>
+          <p>
+            <a target="_blank" href={gettingStartedNotebookPath}>Starter notebook</a>
+          </p>
+        </div>
+      );
+    }
 
     return (
       
@@ -57,12 +70,7 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
                       <p className ="info-edit" onClick={this.props.promptEditPrivacy}>edit</p>
                     </div>
                 </div>
-                <div className="info-group">
-                    <span className="info-header">Getting started</span>
-                    <p>
-                      <a className="info-link" href={welcomeNotebookLink}>Starter notebook</a>
-                    </p>
-                </div>
+              {gettingStartedElement}
                 <button className="archive-resource"
                   onClick={this.props.promptDeleteLocally}>
                   <span>Remove from workspace</span>
