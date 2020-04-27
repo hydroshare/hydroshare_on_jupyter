@@ -1,13 +1,5 @@
-# Setting up your environment
+# Installation
 
-## Linux/UNIX
-
-Python 3 and pip3 are required to run the server code. If you don't have those for some reason, run the following in a
-terminal:
-
-```bash
-    $ sudo apt install python3 python3-pip
-```
 
 Install the Sync package 
 
