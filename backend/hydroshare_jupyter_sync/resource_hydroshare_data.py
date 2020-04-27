@@ -34,7 +34,7 @@ class ResourceHydroShareData:
             modified_time = str(parse(modified_time))
         # if it is a file & has an extension then get name & extension
         if len(filepath.parts) == 1:
-            file_type = "file"
+            file_type = "File"
             if filepath.suffix != '':
                 file_type = filepath.suffix[1:]
             filename = filepath.stem
@@ -171,7 +171,8 @@ class ResourceHydroShareData:
         """
         path = Path(path)
         if metadata_dict is None:
-            raise Exception("File or folder not found.")
+            raise FileNotFoundError("File or folder not found.")
+        # checks to see if path is a nested file with folders or not
         if len(path.parts) > 1:
             first_level = path.parts[0]
             rest_of_path = os.path.relpath(path, first_level)
@@ -181,6 +182,7 @@ class ResourceHydroShareData:
                                                         rest_of_path,
                                                         dicts.get("contents"))
         else:
+            # if there exists a file type
             if path.suffix != '':
                 path_no_extension = path.with_suffix('')
                 extension = path.suffix

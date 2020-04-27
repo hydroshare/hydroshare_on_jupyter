@@ -5,33 +5,13 @@ import {
 
 import '../styles/ResourceMetadata.scss';
 
-import Tooltip from '@material-ui/core/Tooltip';
-import { Theme, withStyles } from '@material-ui/core/styles';
-
-import ArchiveResourceConfirmationModal from './modals/ArchiveResourceConfirmationModal';
-
 export interface IPropTypes {
   resource: IResource
   promptEditPrivacy: () => any
-  deleteResourcesLocally: (resources: IResource[]) => any
+  promptDeleteLocally: () => any
 }
 
-interface IStateTypes {
-  modal: any
-}
-
-const BigToolTip = withStyles((theme: Theme) => ({
-  tooltip: {
-    fontSize: 16,
-    maxWidth: 400,
-  },
-}))(Tooltip);
-
-export default class ResourceMetadata extends React.Component<IPropTypes, IStateTypes> {
-
-  state = {
-    modal: MODAL_TYPES.NONE,
-  };
+export default class ResourceMetadata extends React.Component<IPropTypes, never> {
 
   public render() {
     const {
@@ -44,29 +24,6 @@ export default class ResourceMetadata extends React.Component<IPropTypes, IState
       title,
     } = this.props.resource;
 
-    const showConfirmArchiveResourceModal = () => this.setState({ modal: MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE });
-
-    const deleteSelectedResourceLocally = () => {
-      this.props.deleteResourcesLocally(Array(this.props.resource));
-      this.setState({modal: MODAL_TYPES.NONE});
-    };
-
-    const closeModal = () => this.setState({ modal: MODAL_TYPES.NONE });
-
-    
-
-    let modal;
-      switch (this.state.modal) {
-        case MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE:
-          const selectedArchResources = Array(this.props.resource);
-          modal = <ArchiveResourceConfirmationModal
-            close={closeModal}
-            resources={selectedArchResources}
-            submit={deleteSelectedResourceLocally}
-          />
-          break;
-      }
-    const archiveText = " This will delete a resource from your workspace but save it in HydroShare. Please manually transfer from your workspace any remaining files you'd like to save to HydroShare before archiving as all of your files in your workspace will be lost."
     return (
       
       <div className="ResourceInfo content-row tile">
@@ -103,13 +60,10 @@ export default class ResourceMetadata extends React.Component<IPropTypes, IState
                       <a className="info-link" href="https://www.hydroshare.org/">Starter notebook</a>
                     </p>
                 </div>
-                <BigToolTip 
-                        title={archiveText}>
-                  <button className="archive-resource"
-                    onClick={showConfirmArchiveResourceModal}>
-                    <span>Archive resource</span>
-                  </button>
-                </BigToolTip>
+                <button className="archive-resource"
+                  onClick={this.props.promptDeleteLocally}>
+                  <span>Remove from workspace</span>
+                </button>
             </div>
             <div className="info-group">
                 <span className="info-header">Abstract</span>
@@ -117,14 +71,8 @@ export default class ResourceMetadata extends React.Component<IPropTypes, IState
             </div>
         </div>
         </div>
-        {modal}
       </div>
     )
   }
 
-}
-
-enum MODAL_TYPES {
-  NONE,
-  CONFIRM_ARCHIVE_RESOURCE,
 }

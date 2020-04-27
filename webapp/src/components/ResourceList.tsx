@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import '../styles/ResourceList.scss';
 
-import ArchiveResourceConfirmationModal from './modals/ArchiveResourceConfirmationModal';
+import DeleteLocallyConfirmationModal from './modals/DeleteLocallyConfirmationModal';
 
 import {
   IResource,
@@ -65,7 +65,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
 
     showConfirmResourceDeletionModal = () => this.setState({ modal: MODAL_TYPES.CONFIRM_RESOURCE_DELETION });
     showNewResourceModal = () => this.setState({ modal: MODAL_TYPES.NEW_RESOURCE });
-    showConfirmArchiveResourceModal = () => this.setState({ modal: MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE });
+    showConfirmDeleteResourceLocallyModal = () => this.setState({ modal: MODAL_TYPES.CONFIRM_DELETE_LOCALLY_RESOURCE });
 
 
     setSortBy = (sortBy: SORT_BY_OPTIONS) => {
@@ -195,9 +195,9 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           submit={this.deleteSelectedResource}
         />
         break;
-      case MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE:
+      case MODAL_TYPES.CONFIRM_DELETE_LOCALLY_RESOURCE:
         const selectedArchResources = Array.from(this.state.selectedResources).map(r => this.props.resources[r]);
-        modal = <ArchiveResourceConfirmationModal
+        modal = <DeleteLocallyConfirmationModal
           close={this.closeModal}
           resources={selectedArchResources}
           submit={this.deleteSelectedResourceLocally}
@@ -220,7 +220,6 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
              in JupyterHub and then synced to HydroShare. Think of JupyterHub as your workspace and HydroShare are your sharing or archival space. </p>
           <p>To begin, click the <b>New Resource</b> button to create a new resource or click on an existing resource in the list to view files in that resource.</p> 
           <p><b>Delete: </b> This will delete a resource from your workspace and from HydroShare. Please save any files you want to your desktop before deleting as all of your work will be lost.</p>
-          <p><b>Archive: </b> This will delete a resource from your workspace but save it in HydroShare. Please manually transfer from your workspace any remaining files you'd like to save to HydroShare before archiving as all of your files in your workspace will be lost.</p>
         </div>
         <div className="actions-row">
           <input className="search" type="text" placeholder="Search" onChange={this.filterTextChanged}/>
@@ -233,8 +232,8 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
           </button>
           <button className={deleteButtonClassName}
             disabled={selectedResources.size === 0}
-            onClick={this.showConfirmArchiveResourceModal}>
-            <span>Archive resource</span></button>
+            onClick={this.showConfirmDeleteResourceLocallyModal}>
+            <span>Remove from workspace</span></button>
         </div>
         <div className="table-header table-row">
           <span className="checkbox">
@@ -285,8 +284,8 @@ type RDCModalProps = {
 const ResourceDeleteConfirmationModal: React.FC<RDCModalProps> = (props: RDCModalProps) => {
   return (
     <Modal close={props.close} title="Confirm Deletion" submit={props.submit} isValid={true} submitText="Delete" isWarning={true}>
-      <p className="delete-header">Are you sure you want to delete the following resources?</p>
-      {props.resources.map(r => <p className="delete-resource-list">{r.title}</p>)}
+      <p className="body-header">Are you sure you want to delete the following resources?</p>
+      {props.resources.map(r => <p className="list-resources">{r.title}</p>)}
       <p>This will delete a resource from your workspace and from HydroShare.</p>
       <p>Please save any files you want to your desktop before deleting as all of your work will be lost.</p>
     </Modal>
@@ -298,7 +297,7 @@ enum MODAL_TYPES {
   NONE,
   NEW_RESOURCE,
   CONFIRM_RESOURCE_DELETION,
-  CONFIRM_ARCHIVE_RESOURCE,
+  CONFIRM_DELETE_LOCALLY_RESOURCE,
 }
 
 enum SORT_BY_OPTIONS {

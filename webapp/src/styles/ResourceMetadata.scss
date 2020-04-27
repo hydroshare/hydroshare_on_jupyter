@@ -41,11 +41,11 @@
 
     .info-edit {
       float: right;
-      color: #2586a6;
+      color: $link-blue;
     }
 
     .info-link {
-      color: #2586a6;
+      color:$link-blue;
     }
 
     .archive-message {
@@ -55,8 +55,8 @@
     .archive-resource {
       margin-top: 1.5em;
       margin-bottom: 1em;
-      border-color: #2586a6;
-      color: #2586a6;
+      border-color: $link-blue;
+      color: $link-blue;
     }
   }
 

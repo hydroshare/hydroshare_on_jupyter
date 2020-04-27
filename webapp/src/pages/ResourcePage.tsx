@@ -14,6 +14,7 @@ import ResourceMetadata from '../components/ResourceMetadata';
 import ArchiveMessage from '../components/ArchiveMessage';
 import ReadMeDisplay from '../components/ReadMeDisplay';
 import UploadFileModal from '../components/modals/UploadFileModal';
+import DeleteLocallyConfirmationModal from '../components/modals/DeleteLocallyConfirmationModal';
 
 
 import * as resourcesActions from '../store/actions/resources';
@@ -91,6 +92,8 @@ class ResourcePage extends React.Component<PropsType, StateType> {
   };
 
   displayModal = (type: MODAL_TYPES) => this.setState({modal: type});
+
+  showConfirmArchiveResourceModal = (type: MODAL_TYPES) => this.setState({ modal: MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE });
 
   displayDeleteConfirmationModal = (paths: string[]) => this.setState({
     modal: MODAL_TYPES.DELETE,
@@ -179,8 +182,12 @@ class ResourcePage extends React.Component<PropsType, StateType> {
 
     const renameFileOrFolder = (item: IFile | IFolder, newName: string) => {
       const destPath = item.path.replace( item.name, newName)
-      console.log(destPath)
       this.props.renameFileOrFolder(this.props.resource!, item.path, destPath)
+    }
+
+    const deleteResourceLocally = () => {
+      this.props.deleteResourcesLocally(Array(this.props.resource!))
+      this.setState({modal: MODAL_TYPES.NONE});
     }
 
     const openFile = (file: IFile) => this.props.openFile(resource, file);
@@ -227,6 +234,14 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           renameLocation = {"Workspace"}
           />
         break
+      case MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE:
+        const selectedArchResources = Array(this.props.resource!);
+        modal = <DeleteLocallyConfirmationModal
+          close={this.hideModal}
+          resources={selectedArchResources}
+          submit={deleteResourceLocally}
+        />
+        break;
     }
 
     return (
@@ -234,7 +249,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
         <ResourceMetadata 
           resource={resource} 
           promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDIT_PRIVACY)}
-          deleteResourcesLocally={this.props.deleteResourcesLocally}
+          promptDeleteLocally={() => this.displayModal(MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE)}
           />
         {this.props.archiveMessage !== "" ? <ArchiveMessage message={this.props.archiveMessage}/> : <div></div>}
         <FileManager
@@ -268,6 +283,7 @@ enum MODAL_TYPES {
   UPLOAD_FILE,
   RENAME_HYDROSHARE_FILE,
   RENAME_WORKSPACE_FILE,
+  CONFIRM_ARCHIVE_RESOURCE,
 }
 
 type DeleteConfirmationModalProps = {
