@@ -185,7 +185,6 @@ class ResourceHydroShareData:
             # if there exists a file type
             if path.suffix != '':
                 path_no_extension = path.with_suffix('')
-                extension = path.suffix
             else:
                 path_no_extension = None
             for dicts in metadata_dict:
