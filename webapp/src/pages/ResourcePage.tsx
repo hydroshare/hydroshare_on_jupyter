@@ -34,7 +34,7 @@ import {
   IRootState,
 } from '../store/types';
 
-const mapStateToProps = ({ resources, router }: IRootState) => {
+const mapStateToProps = ({ resources, router, user }: IRootState) => {
   // Extract the resource ID from the URL
   // @ts-ignore object possibly undefined
   const regexMatch = router.location.pathname.split('/').pop().match(/^\w+/);
@@ -49,12 +49,14 @@ const mapStateToProps = ({ resources, router }: IRootState) => {
     }
   }
   const archiveMessage = resources.archiveMessage
+  const username = user.userInfo?.username
   return {
     fetchingHydroShareFiles: resourceId ? resources.resourceHydroShareFilesBeingFetched.has(resourceId) : false,
     fetchingLocalFiles: resourceId ? resources.resourceLocalFilesBeingFetched.has(resourceId) : false,
     fetchingResourceMetadata: resources.fetchingResources,
     resource: resourceForPage,
     archiveMessage: archiveMessage,
+    username,
   };
 };
 
@@ -156,12 +158,12 @@ class ResourcePage extends React.Component<PropsType, StateType> {
     };
 
     const editPrivacy = () => {
-      window.location.replace(`https://www.hydroshare.org/resource/${resource.id}/`)
+      window.location.replace(`https://www.hydroshare.org/resource/${resource.id}/`);
       this.setState({modal: MODAL_TYPES.NONE});
     };
 
     const onSelectedFileToUploadChange = (event: any) => {
-      this.setState({selectedFileToUpload: event.target.files[0]})
+      this.setState({selectedFileToUpload: event.target.files[0]});
     };
 
     const uploadFile = (file: any) => {
@@ -172,23 +174,23 @@ class ResourcePage extends React.Component<PropsType, StateType> {
 
     const displayRenameHydroShareFileModal = (fileOrFolder: IFile | IFolder) => {
       this.setState({modal: MODAL_TYPES.RENAME_HYDROSHARE_FILE,
-                    selectedFileToRename: fileOrFolder})
-    }
+                    selectedFileToRename: fileOrFolder});
+    };
 
     const displayRenameWorkspaceFileModal = (fileOrFolder: IFile | IFolder) => {
       this.setState({modal: MODAL_TYPES.RENAME_WORKSPACE_FILE,
-                    selectedFileToRename: fileOrFolder})
-    }
+                    selectedFileToRename: fileOrFolder});
+    };
 
     const renameFileOrFolder = (item: IFile | IFolder, newName: string) => {
-      const destPath = item.path.replace( item.name, newName)
-      this.props.renameFileOrFolder(this.props.resource!, item.path, destPath)
-    }
+      const destPath = item.path.replace( item.name, newName);
+      this.props.renameFileOrFolder(this.props.resource!, item.path, destPath);
+    };
 
     const deleteResourceLocally = () => {
-      this.props.deleteResourcesLocally(Array(this.props.resource!))
+      this.props.deleteResourcesLocally(Array(this.props.resource!));
       this.setState({modal: MODAL_TYPES.NONE});
-    }
+    };
 
     const openFile = (file: IFile) => this.props.openFile(resource, file);
 
@@ -250,6 +252,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           resource={resource} 
           promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDIT_PRIVACY)}
           promptDeleteLocally={() => this.displayModal(MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE)}
+          username={this.props.username!}
           />
         {this.props.archiveMessage !== "" ? <ArchiveMessage message={this.props.archiveMessage}/> : <div></div>}
         <FileManager

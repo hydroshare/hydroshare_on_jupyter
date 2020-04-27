@@ -182,13 +182,18 @@ class ResourceHydroShareData:
                                                         rest_of_path,
                                                         dicts.get("contents"))
         else:
-            # if there exists a file type
+            # getting the name of the file or folder
+            # if there exists a file type (implies it's a file)
             if path.suffix != '':
                 path_no_extension = path.with_suffix('')
+            # if this is a folder or file with no extension
             else:
                 path_no_extension = None
             for dicts in metadata_dict:
                 name = dicts.get("name")
+                # checks if the name is the path (meaning it is a folder or
+                # file with no extension) or if name is path_no_extension (
+                # meaning it is a file with extension)
                 if name == str(path) or name == str(path_no_extension):
                     return dicts
 

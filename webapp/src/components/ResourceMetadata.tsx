@@ -9,6 +9,7 @@ export interface IPropTypes {
   resource: IResource
   promptEditPrivacy: () => any
   promptDeleteLocally: () => any
+  username: string
 }
 
 export default class ResourceMetadata extends React.Component<IPropTypes, never> {
@@ -23,6 +24,8 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
       public: is_public,
       title,
     } = this.props.resource;
+
+    const welcomeNotebookLink = `https://jupyter.cuahsi.org/user/${this.props.username}/notebooks/notebooks/Welcome.ipynb`
 
     return (
       
@@ -57,7 +60,7 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
                 <div className="info-group">
                     <span className="info-header">Getting started</span>
                     <p>
-                      <a className="info-link" href="https://www.hydroshare.org/">Starter notebook</a>
+                      <a className="info-link" href={welcomeNotebookLink}>Starter notebook</a>
                     </p>
                 </div>
                 <button className="archive-resource"
