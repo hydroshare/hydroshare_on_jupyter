@@ -169,33 +169,32 @@ class ResourceHydroShareData:
         """ Recursively gets and returns the metadata dictionary that is
         nested within metadata dict for the file or folder at specified path.
         """
-        path = Path(path)
         if metadata_dict is None:
             raise FileNotFoundError("File or folder not found.")
-        # checks to see if path is a nested file with folders or not
+        path = Path(path)
+
+        # Check if this file is within a folder
         if len(path.parts) > 1:
-            first_level = path.parts[0]
-            rest_of_path = os.path.relpath(path, first_level)
-            for dicts in metadata_dict:
-                if dicts["name"] == first_level:
+            highest_parent_folder = path.parts[0]
+            rest_of_path = os.path.relpath(path, highest_parent_folder)
+            for file_or_folder in metadata_dict:
+                if file_or_folder["name"] == highest_parent_folder:
                     return self._find_file_or_folder_metadata(
                                                         rest_of_path,
-                                                        dicts.get("contents"))
-        else:
-            # getting the name of the file or folder
-            # if there exists a file type (implies it's a file)
-            if path.suffix != '':
-                path_no_extension = path.with_suffix('')
-            # if this is a folder or file with no extension
-            else:
-                path_no_extension = None
-            for dicts in metadata_dict:
-                name = dicts.get("name")
-                # checks if the name is the path (meaning it is a folder or
-                # file with no extension) or if name is path_no_extension (
-                # meaning it is a file with extension)
-                if name == str(path) or name == str(path_no_extension):
-                    return dicts
+                                                        file_or_folder.get("contents"))
+            # File or folder metadata not found
+            return None
+
+        for file_or_folder in metadata_dict:
+            name = file_or_folder["name"]
+            # checks if the name is the path (meaning it is a folder or
+            # file with no extension) or if name is path_no_extension (
+            # meaning it is a file with extension)
+            if name == str(path) or name == str(path.stem):
+                return file_or_folder
+
+        # File or folder metadata not found
+        return None
 
     def _remove_prefix(self, text, prefix):
         return text[len(prefix):] if text.startswith(prefix) else text
