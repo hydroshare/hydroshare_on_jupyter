@@ -9,64 +9,31 @@ terminal:
     $ sudo apt install python3 python3-pip
 ```
 
-Once you have Python 3 and pip3, we need to install our dependencies and add a line to your `.bashrc` so your
-computer always knows where the server files are. To do that, run the following:
-
-```bash
-    $ cd backend
-    $ pip3 install -r requirements.txt
-    $ echo "export PYTHONPATH=$PYTHONPATH:$(pwd)" >> ~/.bashrc
-    $ source ~/.bashrc
-```
-
-Now we need to tell the Jupyter notebook server to load our extension. To do that, we need to edit the Jupyter notebook
-config file by running
-
-```bash
-    $ gedit ~/.jupyter/jupyter_notebook_config.py
-```
-
-If that file is empty, that means it hasn't been generated yet. So close it and run
-
-```bash
-    $ jupyter notebook --generate-config
-```
-
-If the above command fails because it cannot find the command `jupyter`, try running the following to add the directory
-containing `jupyter` to your PATH:
-
-```bash
-    $ echo "export PATH=$PATH:$HOME/.local/bin" >> ~/.bashrc
-    $ source ~/.bashrc
-```
-
-Then run `gedit ~/.jupyter/jupyter_notebook_config.py`
-
-Once you have the (non-empty) text file open, go to line 263 (or thereabout) where it
-says `c.NotebookApp.nbserver_extensions = {}` (there may or may not already be anything in between the `{}`). In between
-the `{}`, add `'backend.hydroshare_jupyter_sync': True`. Assuming it was empty before, it should now look like
+Install the Sync package 
 
 ```
-    c.NotebookApp.nbserver_extensions = {'backend.hydroshare_jupyter_sync': True}
+$ cd hydroshare_jupyter_sync
+$ python setup.py install
 ```
 
-Once that is done, save the file (Ctrl+S) and close it.
+Activate the server extension
 
-# Running the server
-
-In a terminal, run
-
-```bash
-    $ jupyter notebook
+```
+jupyter serverextension enable --py hydroshare_jupyter_sync --sys-prefix
 ```
 
-The Jupyter notebook server should start, and one of the lines of output should end with
+Launch the Jupyter server
 
-```bash
-    Successfully loaded hydroshare_jupyter_sync server extension.
+```
+jupyter notebook
 ```
 
-Once you see that, go to **[TODO: Insert URL here]**.
+Navigate to the Sync url
+
+```
+http://localhost:8888/sync
+```
+
 
 # For developers
 
