@@ -1,12 +1,36 @@
 import * as React from 'react';
-
 import '../styles/ArchiveMessage.scss';
+
+import {connect} from 'react-redux';
+
+import {
+  goHome,
+} from "../store/actions/App";
+import {
+  IRootState
+} from '../store/types';
+import {
+  ThunkDispatch,
+} from "redux-thunk";
+
+// @ts-ignore
+const ASSETS_URL = (window.FRONTEND_URL || '') + '/assets';
+
+const mapStateToProps = ({ user }: IRootState) => {
+  return {};
+};
+
+const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => ({
+  goHome: () => dispatch(goHome()),
+});
 
 interface IArchiveMessageProps {
   message: string
 }
 
-export default class ArchiveMessage extends React.Component<IArchiveMessageProps, never> {
+type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & IArchiveMessageProps;
+
+class ArchiveMessage extends React.Component<ReduxType, never> {
 
   public render() {
     const WarningIcon = (
@@ -20,7 +44,8 @@ export default class ArchiveMessage extends React.Component<IArchiveMessageProps
           {WarningIcon}
         </div>
         <div className="info-title">
-            <div>{this.props.message}</div>
+            <div>{this.props.message}
+            <div className="go-home" onClick={this.props.goHome}>Visit "My Resources" to delete unused workspaces</div></div>
         </div>
       </div>
     return (
@@ -33,3 +58,9 @@ export default class ArchiveMessage extends React.Component<IArchiveMessageProps
   }
 
 }
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ArchiveMessage);
+

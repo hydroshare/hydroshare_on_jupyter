@@ -15,7 +15,7 @@ import ArchiveMessage from '../components/ArchiveMessage';
 import ReadMeDisplay from '../components/ReadMeDisplay';
 import UploadFileModal from '../components/modals/UploadFileModal';
 import DeleteLocallyConfirmationModal from '../components/modals/DeleteLocallyConfirmationModal';
-
+import GettingStarted from '../components/GettingStarted';
 
 import * as resourcesActions from '../store/actions/resources';
 import {
@@ -246,14 +246,20 @@ class ResourcePage extends React.Component<PropsType, StateType> {
         break;
     }
 
+    let gettingStarted;
+    // @ts-ignore
+    if (window.NOTEBOOK_URL_PATH_PREFIX && window.GETTING_STARTED_NOTEBOOK_PATH) {
+      gettingStarted = <GettingStarted 
+          promptDeleteLocally={() => this.displayModal(MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE)}
+        />
+    }
     return (
       <div className="page resource-details">
         <ResourceMetadata 
           resource={resource} 
           promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDIT_PRIVACY)}
-          promptDeleteLocally={() => this.displayModal(MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE)}
-          username={this.props.username!}
           />
+        {gettingStarted}
         {this.props.archiveMessage !== "" ? <ArchiveMessage message={this.props.archiveMessage}/> : <div></div>}
         <FileManager
           fetchingHydroShareFiles={fetchingHydroShareFiles}

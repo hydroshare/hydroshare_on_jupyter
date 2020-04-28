@@ -42,21 +42,11 @@
     .info-edit {
       float: right;
       color: $link-blue;
+      cursor: pointer;
     }
 
     a {
       color:$link-blue;
-    }
-
-    .archive-message {
-      font-size: 15px;
-    }
-
-    .archive-resource {
-      margin-top: 1.5em;
-      margin-bottom: 1em;
-      border-color: $link-blue;
-      color: $link-blue;
     }
   }
 

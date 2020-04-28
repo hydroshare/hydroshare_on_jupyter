@@ -21,7 +21,12 @@
     .info-title {
       margin: auto;
       margin-left: 1em;
-      font-size: 20px;
+      font-size: 18px;
+    }
+
+    .go-home {
+      color: $link-blue;
+      cursor:pointer;
     }
   }
 }

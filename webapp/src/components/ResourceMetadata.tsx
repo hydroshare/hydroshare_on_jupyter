@@ -8,8 +8,6 @@ import '../styles/ResourceMetadata.scss';
 export interface IPropTypes {
   resource: IResource
   promptEditPrivacy: () => any
-  promptDeleteLocally: () => any
-  username: string
 }
 
 export default class ResourceMetadata extends React.Component<IPropTypes, never> {
@@ -24,21 +22,6 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
       public: is_public,
       title,
     } = this.props.resource;
-
-    let gettingStartedElement;
-    // @ts-ignore
-    if (window.NOTEBOOK_URL_PATH_PREFIX && window.GETTING_STARTED_NOTEBOOK_PATH) {
-      // @ts-ignore
-      const gettingStartedNotebookPath = window.NOTEBOOK_URL_PATH_PREFIX + '/' + window.GETTING_STARTED_NOTEBOOK_PATH;
-      gettingStartedElement = (
-        <div className="info-group">
-          <span className="info-header">Getting Started</span>
-          <p>
-            <a target="_blank" href={gettingStartedNotebookPath}>Starter notebook</a>
-          </p>
-        </div>
-      );
-    }
 
     return (
       
@@ -70,11 +53,6 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
                       <p className ="info-edit" onClick={this.props.promptEditPrivacy}>edit</p>
                     </div>
                 </div>
-              {gettingStartedElement}
-                <button className="archive-resource"
-                  onClick={this.props.promptDeleteLocally}>
-                  <span>Remove from workspace</span>
-                </button>
             </div>
             <div className="info-group">
                 <span className="info-header">Abstract</span>

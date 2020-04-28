@@ -1,0 +1,31 @@
+@import 'variables';
+
+
+.GettingStarted {
+  margin-bottom: 1em;
+  padding: $container-padding;
+
+
+  .meta-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .info-title {
+      margin: auto;
+      margin-left: 1em;
+      font-size: 20px;
+    }
+
+    .notebook-link {
+      color: $link-blue;
+      margin-left: 0.5em;
+    }
+  }
+
+}
+
+.GettingStarted.content-row {
+  margin-top: 1.5em;
+}
+
