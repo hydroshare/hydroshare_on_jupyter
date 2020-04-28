@@ -260,7 +260,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDIT_PRIVACY)}
           />
         {gettingStarted}
-        {this.props.archiveMessage !== "" ? <ArchiveMessage message={this.props.archiveMessage}/> : <div></div>}
+        {this.props.archiveMessage && <ArchiveMessage message={this.props.archiveMessage}/>}
         <FileManager
           fetchingHydroShareFiles={fetchingHydroShareFiles}
           fetchingLocalFiles={fetchingLocalFiles}

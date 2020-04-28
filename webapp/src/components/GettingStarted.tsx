@@ -15,8 +15,8 @@ export default class GettingStarted extends React.Component<IPropTypes, never> {
     return (
       <div className="GettingStarted content-row tile">
         <div className="meta-container">
-          <span className="info-header">For help getting started with using Jupyter notebooks or using HydroShare data, please consult this </span>
-          <a className="notebook-link" target="_blank" href={gettingStartedNotebookPath}>Helper Notebook</a>
+          <p className="info-header">For help getting started with using Jupyter notebooks or using HydroShare data, please consult this </p>
+          <p><a className="notebook-link" target="_blank" href={gettingStartedNotebookPath}>Helper Notebook</a>.</p>
         </div>
       </div>
       )

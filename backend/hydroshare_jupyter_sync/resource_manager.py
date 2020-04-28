@@ -49,6 +49,7 @@ class ResourceManager:
 
         self.hs_api_conn = None  # Use 'authenticate' to initialize
         self.username = None
+        self._archive_message = None
 
     def authenticate(self, username=None, password=None, save=False):
         """ Attempts to authenticate with HydroShare.
@@ -319,18 +320,8 @@ class ResourceManager:
         """ Gets the message to display on the resource page prompting the user
             to archive their resources to HydroShare
          """
-        loaded_archive_message = get_config_values(['archiveMessage'])
-        if loaded_archive_message and loaded_archive_message['archiveMessage']:
-            archive_message = loaded_archive_message['archiveMessage']
-        else:
-            archive_message = input("Please enter the archive message: ")
-
-            # Save the archive message
-            saved_successfully = set_config_values({
-                'archiveMessage': archive_message,
-            })
-            if saved_successfully:
-                logging.info('Successfully saved archive message to '
-                             'config file.')
-
-        return archive_message
+        if not self._archive_message:
+            config = get_config_values(['archiveMessage'])
+            if config:
+                self._archive_message = config.get('archiveMessage')
+        return self._archive_message

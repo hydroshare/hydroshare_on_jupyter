@@ -40,6 +40,11 @@ h2,
   font-size: 1.4rem;
 }
 
+a {
+  cursor: pointer;
+  color: $link-blue;
+}
+
 p.error,
 span.error {
   color: $red;
