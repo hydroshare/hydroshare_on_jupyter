@@ -24,6 +24,7 @@ export default class ResourceMetadata extends React.Component<IPropTypes, never>
     } = this.props.resource;
 
     return (
+      
       <div className="ResourceInfo content-row tile">
         <h1 className="title">{title}</h1>
         <div className="resource-meta-container">

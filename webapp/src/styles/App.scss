@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap');
-@import 'variables';
+@import 'constants';
 @import 'Header';
 
 $triangle-color: #aaaaaa;
@@ -38,6 +38,11 @@ h1,
 h2,
 .h2 {
   font-size: 1.4rem;
+}
+
+a {
+  cursor: pointer;
+  color: $link-blue;
 }
 
 p.error,
@@ -107,8 +112,9 @@ input[type="password"] {
 }
 
 .table {
-  $column-width-checkbox: 6%;
-  $column-width-other: 24%;
+  $column-width-checkbox: 7%;
+  $column-width-name: 35%;
+  $column-width-other: 25%;
   $column-padding: 2%;
 
   .table-header {
@@ -169,7 +175,11 @@ input[type="password"] {
     &:first-child {
       width: $column-width-checkbox;
     }
-    &:not(:first-child) {
+    &:nth-child(2) {
+      width: $column-width-name;
+      border-left: $border-style;
+    }
+    &:nth-child(n+3) {
       width: $column-width-other;
       border-left: $border-style;
     }

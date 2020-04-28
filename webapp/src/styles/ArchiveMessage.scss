@@ -1,36 +1,12 @@
-@import 'variables';
+@import 'constants';
 
 .PermanencyInfo {
-  margin-bottom: 1em;
+  align-items: center;
+  display: flex;
+  flex-direction: row;
   padding: $container-padding;
-
-  .title {
-    margin-bottom: 0.5em;
-  }
-
-  .permanency-info-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .permanency-info {
-    display: flex;
-
-    .info-title {
-      margin: auto;
-      margin-left: 1em;
-      font-size: 20px;
-    }
-  }
 }
 
-.PermanencyInfo.content-row {
-  margin-top: 1.5em;
-}
-
-.warning-icon-box {
-  margin:auto;
-  margin-left:0.5em;
+.icon-box {
+  margin-right: $container-padding;
 }

@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'constants';
 
 .ResourceInfo {
   margin-bottom: 1em;
@@ -41,7 +41,12 @@
 
     .info-edit {
       float: right;
-      color: #2586a6;
+      color: $link-blue;
+      cursor: pointer;
+    }
+
+    a {
+      color:$link-blue;
     }
   }
 

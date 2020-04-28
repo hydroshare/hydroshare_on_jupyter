@@ -133,12 +133,6 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   Size
                   {this.state.sortBy === SORT_BY_OPTIONS.SIZE && SortTriangleSVG}
                 </button>
-                <button
-                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED ? sortOrder : '')}
-                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.LAST_MODIFIED)}>
-                  Last Modified
-                  {this.state.sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && SortTriangleSVG}
-                </button>
               </div>
               <div className="scrollable-container">
                 {content}
@@ -228,7 +222,6 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             {this.generateTableCell(file.name, nestLevel, onClick)}
             {this.generateTableCell(file.type)}
             {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes))}
-            {this.generateTableCell(file.lastModified || 'Unknown')}
           </div>
         )}
       </Draggable>
@@ -249,7 +242,6 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             {this.generateFolderNameTableCell(folder, nestLevel)}
             {this.generateTableCell('folder')}
             {this.generateTableCell(this.getFormattedSizeString(folder.sizeBytes))}
-            {this.generateTableCell(folder.lastModified || 'Unknown')}
           </div>
         )}
       </Draggable>
@@ -281,7 +273,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
 
   generateTableCell = (content: ReactElement | string | number | moment.Moment, nestLevel: number = 0, onClick: any = undefined) => {
     const style = {
-      paddingLeft: `${nestLevel * 7}px`,
+      paddingLeft: `${nestLevel * 10}px`,
     };
     const tooltip = typeof content === 'string' ? content : undefined;
     const classNames: Array<string> = [];

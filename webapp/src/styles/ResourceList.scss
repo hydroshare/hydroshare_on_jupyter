@@ -1,4 +1,4 @@
-@import 'variables';
+@import 'constants';
 
 .ResourceList {
     .ResourceList-header {
@@ -15,14 +15,5 @@
         .button-enabled {
             background: white;
         }
-    }
-
-    .archive-header{
-        font-weight: bold;
-    }
-
-    .archive-resource-list{
-        text-align: center;
-        font-style: italic;
     }
 }

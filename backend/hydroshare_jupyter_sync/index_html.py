@@ -18,9 +18,12 @@ def set_backend_url(url):
 def get_index_html():
     global _frontend_url
     global _backend_api_url
-    config = get_config_values(['dataPath'])
+    config = get_config_values(['dataPath', 'gettingStartedNotebook'])
     notebook_url_path_prefix = url_path_join('/tree', 'local_hs_resources')
+    getting_started_notebook_path = ''
     if config:
+        if 'gettingStartedNotebook' in config:
+            getting_started_notebook_path = config['gettingStartedNotebook']
         if 'dataPath' in config:
             notebook_url_path_prefix = url_path_join('/tree',
                                                      config['dataPath'])
@@ -41,6 +44,7 @@ def get_index_html():
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <script>
+      window.GETTING_STARTED_NOTEBOOK_PATH = "{getting_started_notebook_path}";
       window.NOTEBOOK_URL_PATH_PREFIX = "{notebook_url_path_prefix}";
       window.FRONTEND_URL = "{_frontend_url}";
       window.BACKEND_API_URL = "{_backend_api_url}";
