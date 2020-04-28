@@ -31,26 +31,26 @@ def get_index_html():
     return f"""
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <link rel="stylesheet"
-      href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#000000" />
-  <link rel="shortcut icon" href="{_frontend_url}/assets/favicon.ico">
-  <title>CUAHSI Compute Sync</title>
-</head>
-<body>
-  <noscript>You need to enable JavaScript to run this app.</noscript>
-  <div id="root"></div>
-  <script>
-    window.GETTING_STARTED_NOTEBOOK_PATH = "{getting_started_notebook_path}";
-    window.NOTEBOOK_URL_PATH_PREFIX = "{notebook_url_path_prefix}";
-    window.FRONTEND_URL = "{_frontend_url}";
-    window.BACKEND_API_URL = "{_backend_api_url}";
-  </script>
-  <script type="text/javascript" src="{_frontend_url}/assets/bundle.js">
-  </script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="shortcut icon" href="{_frontend_url}/assets/favicon.ico">
+    <title>CUAHSI Compute Sync</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script>
+      window.GETTING_STARTED_NOTEBOOK_PATH = "{getting_started_notebook_path}";
+      window.NOTEBOOK_URL_PATH_PREFIX = "{notebook_url_path_prefix}";
+      window.FRONTEND_URL = "{_frontend_url}";
+      window.BACKEND_API_URL = "{_backend_api_url}";
+    </script>
+    <script type="text/javascript" src="{_frontend_url}/assets/bundle.js">
+    </script>
+  </body>
 </html>
 """
