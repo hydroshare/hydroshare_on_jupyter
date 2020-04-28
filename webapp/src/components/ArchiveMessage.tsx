@@ -37,7 +37,7 @@ class ArchiveMessage extends React.Component<ReduxType, never> {
         </div>
         <div className="message">
           <p>{this.props.message}</p>
-          <p><a className="go-home" onClick={this.props.goHome}>Visit "My Resources" to delete unused workspaces</a></p>
+          <p>Visit <a className="go-home" onClick={this.props.goHome}>My Resources</a> to delete unused workspaces.</p>
         </div>
       </div>
     )
