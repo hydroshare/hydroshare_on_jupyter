@@ -179,9 +179,10 @@ class ResourceHydroShareData:
             rest_of_path = os.path.relpath(path, highest_parent_folder)
             for file_or_folder in metadata_dict:
                 if file_or_folder["name"] == highest_parent_folder:
+                    contents = file_or_folder.get("contents")
                     return self._find_file_or_folder_metadata(
                                                         rest_of_path,
-                                                        file_or_folder.get("contents"))
+                                                        contents)
             # File or folder metadata not found
             return None
 
