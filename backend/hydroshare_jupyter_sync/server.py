@@ -54,10 +54,6 @@ class BaseRequestHandler(BaseHandler):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, "
                         "content-type, x-xsrftoken")
-        # TODO: Do this on a per-handler basis (not all of them allow all of
-        # these requests)
-        self.set_header('Access-Control-Allow-Methods',
-                        'POST, PUT, GET, DELETE, OPTIONS')
 
     def options(self, _=None):
         # web browsers make an OPTIONS request to check what methods (line 31)
