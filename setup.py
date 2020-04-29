@@ -7,7 +7,6 @@ import setuptools
 import subprocess
 from setuptools import Command
 from setuptools.command.install import install
-from distutils.command.install import install as _install
 
 # define package name globally
 pkgname = 'hydroshare_jupyter_sync'
@@ -29,25 +28,21 @@ def run_command(command, cwd):
         sys.stdout.write(line.decode('utf-8'))
 
 
-class install_(install):
+class build_react(install):
     def run(self):
-        # this block of code is necessary to preserve the original install
-        # functionality. Without it, the python requirements will not be 
-        # installed: https://stackoverflow.com/questions/14441955/how-to-perform-custom-build-steps-in-setup-py
-        ret = None
-        if self.old_and_unmanageable or self.single_version_externally_managed:
-            ret = _install.run(self)
-        else:
-            caller = sys._getframe(2)
-            caller_module = caller.f_globals.get('__name__','')
-            caller_name = caller.f_code.co_name
+        # build and install the Sync Webapp	
+        cmd = ['yarn', 'install']	
+        run_command(cmd, cwd=webpath)	
 
-            if caller_module != 'distutils.dist' or caller_name!='run_commands':
-                _install.run(self)
-            else:
-                self.do_egg_install()
+        cmd = ['yarn', 'build']	
+        run_command(cmd, cwd=webpath)	
 
-            return ret
+        # move files to python build dir	
+        assets = os.path.join(webpath, 'public', 'assets')	
+        target_path = os.path.join(os.getcwd(), pkgname, 'assets')	
+        if os.path.exists(target_path):	
+            shutil.rmtree(target_path)	
+        shutil.copytree(assets, target_path)
 
 
 class CleanCommand(Command):
@@ -77,15 +72,15 @@ class CleanCommand(Command):
                 if not path.startswith(here):
                     # Die if path in CLEAN_FILES is absolute 
                     # + outside this directory
-                    raise ValueError("%s is not a path inside %s" % (path, here))
+                    raise (ValueError)("%s is not a path inside %s"
+                                       % (path, here))
                 print('removing %s' % os.path.relpath(path))
                 shutil.rmtree(path)
-
 
 # standard setuptools args
 setuptools.setup(
     cmdclass={
-        'install': install_,
+        'build_react': build_react,
         'clean': CleanCommand,
         },
     name=pkgname,
