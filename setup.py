@@ -31,23 +31,6 @@ def run_command(command, cwd):
 
 class install_(install):
     def run(self):
-
-        # todo: check if npm is installed
-
-        # build and install the Sync Webapp
-        cmd = ['yarn', 'install']
-        run_command(cmd, cwd=webpath)
-
-        cmd = ['yarn', 'build']
-        run_command(cmd, cwd=webpath)
-
-        # move files to python build dir
-        assets = os.path.join(webpath, 'public', 'assets')
-        target_path = os.path.join(os.getcwd(), pkgname, 'assets')
-        if os.path.exists(target_path):
-            shutil.rmtree(target_path)
-        shutil.copytree(assets, target_path)
-
         # this block of code is necessary to preserve the original install
         # functionality. Without it, the python requirements will not be 
         # installed: https://stackoverflow.com/questions/14441955/how-to-perform-custom-build-steps-in-setup-py
@@ -97,10 +80,6 @@ class CleanCommand(Command):
                     raise ValueError("%s is not a path inside %s" % (path, here))
                 print('removing %s' % os.path.relpath(path))
                 shutil.rmtree(path)
-
-        cmd = ['yarn', 'cache', 'clean']
-        webpath = os.path.join(os.getcwd(), 'webapp')
-        run_command(cmd, cwd=webpath)
 
 
 # standard setuptools args
