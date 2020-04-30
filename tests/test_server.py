@@ -1,8 +1,7 @@
-'''
+"""
 This file sets up tornado unit tests to test the hydroshare server
-
 Author: 2019-20 CUAHSI Olin SCOPE Team
-'''
+"""
 from hydroshare_jupyter_sync.server import TestApp, get_route_handlers
 from tornado.testing import AsyncHTTPTestCase, gen_test
 import unittest
