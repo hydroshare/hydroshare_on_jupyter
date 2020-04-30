@@ -1,3 +1,12 @@
+"""
+This file installs the hydroshare_jupyter_sync package on your computer.
+It can be used as a jupyter server extension to launch the sync web app for
+syncing files between HydroShare and JupyterHub.
+
+Author: 2019-20 CUAHSI Olin SCOPE Team
+Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
+Email: vickymmcd@gmail.com
+"""
 import os
 import sys
 import glob
@@ -32,7 +41,7 @@ def run_command(command, cwd):
 class install_(install):
     def run(self):
         # this block of code is necessary to preserve the original install
-        # functionality. Without it, the python requirements will not be 
+        # functionality. Without it, the python requirements will not be
         # installed: https://stackoverflow.com/questions/14441955/how-to-perform-custom-build-steps-in-setup-py
         ret = None
         if self.old_and_unmanageable or self.single_version_externally_managed:
@@ -75,7 +84,7 @@ class CleanCommand(Command):
             abs_paths = glob.glob(os.path.normpath(os.path.join(here, path_spec)))
             for path in [str(p) for p in abs_paths]:
                 if not path.startswith(here):
-                    # Die if path in CLEAN_FILES is absolute 
+                    # Die if path in CLEAN_FILES is absolute
                     # + outside this directory
                     raise ValueError("%s is not a path inside %s" % (path, here))
                 print('removing %s' % os.path.relpath(path))

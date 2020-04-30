@@ -1,9 +1,9 @@
 """
-This file sets up the local folder class for getting the files stored within
-the local jupyterhub folder and the size of that folder.
+This file sets up the local data class for getting the files stored within
+the local folder and the size of that folder.
 
 Author: 2019-20 CUAHSI Olin SCOPE Team
-Email: vickymmcd@gmail.com
+Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 """
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
@@ -210,6 +210,10 @@ class ResourceLocalData:
 
 
 def _get_path_to_resources_data_root():
+    """ Gets the folder path to where local data is storedself.
+
+        :return: path to local HS resources folder
+    """
     global _root_data_path
     if _root_data_path is None:
         config = get_config_values(['dataPath'])
