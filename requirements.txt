@@ -2,4 +2,3 @@ hs-restclient
 jupyter
 notebook
 requests
-tornado

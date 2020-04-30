@@ -1,7 +1,3 @@
-login.py
-local_hs_resources/
-resources
-
 # Created by https://www.gitignore.io/api/node,linux,macos,python,pycharm,windows,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=node,linux,macos,python,pycharm,windows,visualstudiocode
 
@@ -113,8 +109,6 @@ typings/
 # dotenv environment variables file
 .env
 .env.test
-
-dist/
 
 ### PyCharm ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm

@@ -34,7 +34,7 @@ import tornado.options
 # Global resource handler variable
 resource_manager = ResourceManager()
 
-assets_path = Path(__file__).parent / 'assets'
+assets_path = Path(__file__).parent.parent / 'webapp' / 'public' / 'assets'
 data_path = Path.cwd() / 'local_hs_resources'
 
 # If we're running this file directly with Python, we'll be firing up a full
@@ -54,10 +54,6 @@ class BaseRequestHandler(BaseHandler):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, "
                         "content-type, x-xsrftoken")
-        # TODO: Do this on a per-handler basis (not all of them allow all of
-        # these requests)
-        self.set_header('Access-Control-Allow-Methods',
-                        'POST, PUT, GET, DELETE, OPTIONS')
 
     def options(self, _=None):
         # web browsers make an OPTIONS request to check what methods (line 31)
@@ -73,7 +69,8 @@ class WebAppHandler(BaseRequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
 
     def get(self):
-        self.write(get_index_html())
+        running_in_dev_mode = __name__ == '__main__'
+        self.write(get_index_html(running_in_dev_mode))
 
 
 class LoginHandler(BaseRequestHandler):
