@@ -8,6 +8,8 @@ Email: vickymmcd@gmail.com
 # !/usr/bin/python
 # -*- coding: utf-8
 
+import logging
+from hydroshare_jupyter_sync.config_reader_writer import get_config_values
 from hydroshare_jupyter_sync.index_html import (set_backend_url,
                                                 set_frontend_url)
 from .server import get_route_handlers
@@ -23,6 +25,12 @@ def _jupyter_server_extension_paths():
 def load_jupyter_server_extension(nb_server_app):
     nb_server_app.log.info("Successfully loaded hydroshare_jupyter_sync server"
                            "extension.")
+
+    config = get_config_values(['logPath'])
+    log_file_path = None
+    if config:
+        log_file_path = config.get('logPath')
+    logging.basicConfig(level=logging.DEBUG, filename=log_file_path)
 
     web_app = nb_server_app.web_app
 

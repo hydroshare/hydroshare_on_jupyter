@@ -1,36 +1,37 @@
-# Syncing Data Between HydroShare and Jupyter
+# Installation
 
-This graphical tool allows you to sync HydroShare resource files between HydroShare and your computer. It can be run
-on its own or as a Jupyter notebook extension.
 
-## Setup Instructions
+Install the Sync package 
 
-The frontend is a React app, and it requires you have [Node](https://nodejs.org/en/download/) and a Node package manager
-(we recommend [Yarn](https://classic.yarnpkg.com/en/docs/install/)) installed. Please ensure that is the case and then
- run the following in a terminal:
-
- ```bash
-$ cd webapp
-$ yarn install
-$ yarn build
+```
+$ cd hydroshare_jupyter_sync
+$ python setup.py install
 ```
 
-Once that is complete, please refer to [backend/README.md](https://github.com/kylecombes/hydroshare_jupyter_sync/tree/master/backend).
+Activate the server extension
 
-## Testing Style Guide Enforcement
-
-To run tests to make sure the code is pep8 compliant, you should first install flake8, a tool used for style guide enforcement
-with this command:
-
-```bash
-$ python<version> -m pip install flake8
+```
+jupyter serverextension enable --py hydroshare_jupyter_sync --sys-prefix
 ```
 
-To run the tests, run the following in a terminal:
+Launch the Jupyter server
 
-```bash
-$ cd backend
-$ python<version> -m flake8
+```
+jupyter notebook
 ```
 
-No output confirms that all tests are passing on Python files in the backend directory.
+Navigate to the Sync url
+
+```
+http://localhost:8888/sync
+```
+
+
+# For developers
+
+The file `backend/server.py` can also be run directly using Python (i.e. `$ python server.py`). This is especially
+useful if you are using a debugger and want to step through lines of code.
+
+This file is what runs the Tornado web server to handle all of the requests from the web app client. Documentation on
+the RESTful API endpoints available can be found
+[here](https://github.com/kylecombes/hydroshare-jupyter-gui/blob/dev/documentation/API_response_formats.md).
