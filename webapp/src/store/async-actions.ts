@@ -134,6 +134,7 @@ export function createNewFileOrFolder(resource: IResource, name: string, type: s
 
 export function createNewResource(details: ICreateResourceRequest): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
+    dispatch(notifyGettingResources());
     const { user: { userInfo} } = getState();
     try {
       const data = {
