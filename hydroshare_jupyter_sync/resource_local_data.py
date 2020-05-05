@@ -27,8 +27,10 @@ class ResourceLocalData:
     def __init__(self, resource_id):
         self.data_path = (_get_path_to_resources_data_root() / resource_id
                           / resource_id / 'data' / 'contents')
-        if not self.data_path.exists():
-            self.data_path.mkdir(parents=True)
+
+    def is_downloaded(self):
+        """ Checks if a local copy of this resource's data exists """
+        return self.data_path.exists()
 
     def get_size(self, folder_path):
         """ Gets the size of the contents of a folder stored locally """
