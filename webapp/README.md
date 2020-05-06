@@ -59,8 +59,8 @@ The [React components](https://reactjs.org/docs/components-and-props.html) defin
 
 ## Non-Page Components
 
-The rest of the components are defined in `src/components`. They get their information passed via props from Redux
-(discussed below).
+The rest of the [components](https://reactjs.org/docs/components-and-props.html) are defined in `src/components`.
+They get their information passed via props from Redux (discussed below).
 
 ## App State and Communication with the Backend
 
