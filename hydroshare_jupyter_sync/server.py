@@ -199,6 +199,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
 
     def get(self, res_id):
         local_data = ResourceLocalData(res_id)
+        if not local_data.is_downloaded():
+            resource_manager.save_resource_locally(res_id)
         self.write({
             'readMe': local_data.get_readme(),
             'rootDir': local_data.get_files_and_folders(),
