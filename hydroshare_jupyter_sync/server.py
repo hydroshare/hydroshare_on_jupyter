@@ -1,10 +1,10 @@
-'''
+"""
 This file sets up the hydroshare server for communicating with the
 hydroshare gui frontend.
 
 Author: 2019-20 CUAHSI Olin SCOPE Team
-Email: vickymmcd@gmail.com
-'''
+Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
+"""
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 
