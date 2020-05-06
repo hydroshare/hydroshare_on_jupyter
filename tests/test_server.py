@@ -1,15 +1,11 @@
-'''
+"""
 This file sets up tornado unit tests to test the hydroshare server
-
 Author: 2019-20 CUAHSI Olin SCOPE Team
-Email: vickymmcd@gmail.com
-'''
-from hydroshare_jupyter_sync.server import make_app
+"""
+from hydroshare_jupyter_sync.server import TestApp, get_route_handlers
 from tornado.testing import AsyncHTTPTestCase, gen_test
 import unittest
 
-# weird thing I had to do get rid of "loop already running error"
-# see https://github.com/spyder-ide/spyder/issues/7096
 import nest_asyncio
 nest_asyncio.apply()
 
@@ -17,12 +13,12 @@ nest_asyncio.apply()
 class TestHSServer(AsyncHTTPTestCase):
     """ Create an instance of the server for running tests """
     def get_app(self):
-        return make_app()
+        return TestApp(get_route_handlers('/', '/syncApi'))
 
     @gen_test
     def test_user(self):
         """ Tests get user info functionality """
-        response = self.fetch(r"/user")
+        response = self.fetch(r"/syncApi/user")
         self.assertEqual(response.code, 200)
         # make sure the string "username" is in the response
         un = 'username'
@@ -32,32 +28,10 @@ class TestHSServer(AsyncHTTPTestCase):
     @gen_test
     def test_resources(self):
         """ Tests get user resources functionality """
-        response = self.fetch(r"/resources")
+        response = self.fetch(r"/syncApi/resources")
         self.assertEqual(response.code, 200)
-        # make sure the string "Resources" is in the response
-        res = 'Resources'
-        res = res.encode('ascii')
-        self.assertIn(res, response.body)
-
-    @gen_test
-    def test_localfiles(self):
-        """ Tests get local files functionality """
-        response = self.fetch(r"/resources/8b826c43f55043f583c85ae312a8894f"
-                              "/local-files")
-        self.assertEqual(response.code, 200)
-        # make sure the string "Files" is in the response
-        res = 'Files'
-        res = res.encode('ascii')
-        self.assertIn(res, response.body)
-
-    @gen_test
-    def test_HSfiles(self):
-        """ Tests get HydroShare files functionality """
-        response = self.fetch(r"/resources/8b826c43f55043f583c85ae312a8894f"
-                              "/hs-files")
-        self.assertEqual(response.code, 200)
-        # make sure the string "Files" is in the response
-        res = 'Files'
+        # make sure the string "resources" is in the response
+        res = 'resources'
         res = res.encode('ascii')
         self.assertIn(res, response.body)
 

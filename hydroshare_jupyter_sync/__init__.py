@@ -17,12 +17,17 @@ from notebook.utils import url_path_join
 
 
 def _jupyter_server_extension_paths():
+    """Creates the path to load the jupyter server extension.
+    """
     return [{
         "module": "hydroshare_jupyter_sync"
     }]
 
 
 def load_jupyter_server_extension(nb_server_app):
+    """Sets up logging to a specific file, sets frontend & backend urls,
+    and loads up the server extension.
+    """
     nb_server_app.log.info("Successfully loaded hydroshare_jupyter_sync server"
                            "extension.")
 

@@ -2,9 +2,8 @@
 This file sets up the resource handler for working with resources in
 HydroShare & JupyterHub.
 
-# TODO: put our full names in these files
 Author: 2019-20 CUAHSI Olin SCOPE Team
-Email: vickymmcd@gmail.com
+Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 """
 # !/usr/bin/python
 # -*- coding: utf-8 -*-

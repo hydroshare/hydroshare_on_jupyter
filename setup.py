@@ -1,3 +1,12 @@
+"""
+This file installs the hydroshare_jupyter_sync package on your computer.
+It can be used as a jupyter server extension to launch the sync web app for
+syncing files between HydroShare and JupyterHub.
+
+Author: 2019-20 CUAHSI Olin SCOPE Team
+Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
+Email: vickymmcd@gmail.com
+"""
 import os
 import sys
 import glob
@@ -30,18 +39,18 @@ def run_command(command, cwd):
 
 class build_react(install):
     def run(self):
-        # build and install the Sync Webapp	
-        cmd = ['yarn', 'install']	
-        run_command(cmd, cwd=webpath)	
+        # build and install the Sync Webapp
+        cmd = ['yarn', 'install']
+        run_command(cmd, cwd=webpath)
 
-        cmd = ['yarn', 'build']	
-        run_command(cmd, cwd=webpath)	
+        cmd = ['yarn', 'build']
+        run_command(cmd, cwd=webpath)
 
-        # move files to python build dir	
-        assets = os.path.join(webpath, 'public', 'assets')	
-        target_path = os.path.join(os.getcwd(), pkgname, 'assets')	
-        if os.path.exists(target_path):	
-            shutil.rmtree(target_path)	
+        # move files to python build dir
+        assets = os.path.join(webpath, 'public', 'assets')
+        target_path = os.path.join(os.getcwd(), pkgname, 'assets')
+        if os.path.exists(target_path):
+            shutil.rmtree(target_path)
         shutil.copytree(assets, target_path)
 
 
@@ -67,15 +76,17 @@ class CleanCommand(Command):
 
         for path_spec in self.CLEAN_FILES:
             # Make paths absolute and relative to this path
-            abs_paths = glob.glob(os.path.normpath(os.path.join(here, path_spec)))
+            abs_paths = glob.glob(os.path.normpath(
+                                            os.path.join(here, path_spec)))
             for path in [str(p) for p in abs_paths]:
                 if not path.startswith(here):
-                    # Die if path in CLEAN_FILES is absolute 
+                    # Die if path in CLEAN_FILES is absolute
                     # + outside this directory
                     raise (ValueError)("%s is not a path inside %s"
                                        % (path, here))
                 print('removing %s' % os.path.relpath(path))
                 shutil.rmtree(path)
+
 
 # standard setuptools args
 setuptools.setup(
