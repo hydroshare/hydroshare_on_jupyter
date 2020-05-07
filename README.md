@@ -1,37 +1,56 @@
+This Jupyter server extension and web app enable easy management of HydroShare resource files in CUAHSI JupyterHub or
+on any computer running a Jupyter notebook server. It allows the user to easily open a HydroShare resource,
+work on its files in Jupyter, and then sync those changes back to HydroShare using a simple drag-and-drop
+interface.
+
+![CUAHSI Jupyter Sync resource list](https://imgur.com/uqvjp5G.png)
+
+![CUAHSI Jupyter Sync resource page](https://imgur.com/plRRvga.png)
+
 # Installation
 
+To install latest release of the app, run the following: 
 
-Install the Sync package 
-
-```
+```bash
 $ cd hydroshare_jupyter_sync
 $ python setup.py install
 ```
 
-Activate the server extension
+Then activate the server extension using
 
 ```
 jupyter serverextension enable --py hydroshare_jupyter_sync --sys-prefix
 ```
 
-Launch the Jupyter server
+Lastly, launch your Jupyter server:
 
 ```
 jupyter notebook
 ```
 
-Navigate to the Sync url
+and navigate to the CUAHSI Jupyter Sync URL:
 
 ```
 http://localhost:8888/sync
 ```
 
+# Configuration
 
-# For developers
+Your installation can be customized by creating (or editing) a config file in
+`~/.config/hydroshare_jupyter_sync/config.json`. Below are all the possible options to specify:
 
-The file `backend/server.py` can also be run directly using Python (i.e. `$ python server.py`). This is especially
-useful if you are using a debugger and want to step through lines of code.
+* `archiveMessage`: The message (if any) to display notifying the user of the data retention practices of the system
+ they are using (displayed on the resource page under the metadata)
+* `dataPath`: The path (relative to the current working directory when `jupyter notebook` is run) where the resource
+ data is stored
+* `gettingStartedNotebook`: The path (relative to the current working directory in which `jupyter notebook` is run) to
+ a getting started notebook. If specified, a message will be shown with a link to this notebook on the resource page.
+* `logPath`: The path to the log file in which to save logging output. 
 
-This file is what runs the Tornado web server to handle all of the requests from the web app client. Documentation on
-the RESTful API endpoints available can be found
-[here](https://github.com/kylecombes/hydroshare-jupyter-gui/blob/dev/documentation/API_response_formats.md).
+# For Developers
+
+A system diagram of our app is displayed below:
+
+![CUAHSI Jupyter Sync system diagram](https://imgur.com/6NWsxHi.png)
+
+View the `README.md` files in `webapp` and `backend` for more technical details.
