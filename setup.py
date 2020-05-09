@@ -5,7 +5,6 @@ syncing files between HydroShare and JupyterHub.
 
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
-Email: vickymmcd@gmail.com
 """
 import os
 import sys

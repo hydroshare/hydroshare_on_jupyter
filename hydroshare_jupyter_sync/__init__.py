@@ -3,7 +3,7 @@ This file sets up the jupyter server extension to launch our backend
 server when jupyter is launched.
 
 Author: 2019-20 CUAHSI Olin SCOPE Team
-Email: vickymmcd@gmail.com
+Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 '''
 # !/usr/bin/python
 # -*- coding: utf-8
