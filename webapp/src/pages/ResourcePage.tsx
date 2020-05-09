@@ -170,6 +170,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       const formData = new FormData();
       formData.append('file', this.state.selectedFileToUpload);
       this.props.uploadNewFile(this.props.resource!, formData);
+      this.hideModal();
     };
 
     const displayRenameHydroShareFileModal = (fileOrFolder: IFile | IFolder) => {
