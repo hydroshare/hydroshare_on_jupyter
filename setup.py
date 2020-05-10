@@ -94,7 +94,7 @@ setuptools.setup(
         'clean': CleanCommand,
         },
     name=pkgname,
-    version='0.1.1',
+    version='0.1.2',
     author='CUAHSI',
     author_email='scope-cuahsi@olin.edu',
     packages=setuptools.find_packages(),
