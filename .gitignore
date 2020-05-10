@@ -1,3 +1,7 @@
+dist/
+build/
+bundle-dev.js
+
 # Created by https://www.gitignore.io/api/node,linux,macos,python,pycharm,windows,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=node,linux,macos,python,pycharm,windows,visualstudiocode
 

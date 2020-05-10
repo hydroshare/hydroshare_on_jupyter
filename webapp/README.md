@@ -32,7 +32,7 @@ Then open [http://localhost:3000](http://localhost:3000) to view it in the brows
 If you would like to update the bundled app served by the backend when running in development mode, run
 
 ```bash
-$ yarn build
+$ yarn deploy-dev
 ```
 
 To create a new release (i.e. bundled app served by the Jupyter server extension), run

@@ -28,7 +28,7 @@ def load_jupyter_server_extension(nb_server_app):
     """Sets up logging to a specific file, sets frontend & backend urls,
     and loads up the server extension.
     """
-    nb_server_app.log.info("Successfully loaded hydroshare_jupyter_sync server"
+    nb_server_app.log.info("Successfully loaded hydroshare_jupyter_sync server "
                            "extension.")
 
     config = get_config_values(['logPath'])
