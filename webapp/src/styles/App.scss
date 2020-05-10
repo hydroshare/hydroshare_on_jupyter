@@ -19,6 +19,10 @@ body,
   height: 100%;
 }
 
+#root {
+  overflow-y: auto;
+}
+
 .clickable {
   cursor: pointer;
 }
