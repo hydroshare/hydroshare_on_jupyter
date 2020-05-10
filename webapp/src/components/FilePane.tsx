@@ -145,10 +145,6 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     );
   };
 
-  renameFileOrFolder = (event:any) => {
-    console.log(event?.currentTarget.value)
-  }
-
   filterFilesAndFolders = (items: (IFile | IFolder)[], filter: string): (IFile | IFolder)[] => {
     let filteredItems: (IFile | IFolder)[] = [];
     items.forEach(item => {

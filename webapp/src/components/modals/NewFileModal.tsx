@@ -42,6 +42,7 @@ export default class NewFileModal extends React.Component<INewFileModalProps, IN
         submitText="Create"
       >
         <TextInput title="Name" onChange={this.nameChange} value={this.state.name} pattern="^[\w,\-\.]+$"/>
+        <p>File or folder name must contain only alphanumeric characters, hyphens (-) and underscores (_). Spaces are not allowed.</p>
         <RadioInput choices={Object.values(NEW_FILE_OR_FOLDER_TYPES)} onChange={this.typeChange} selected={this.state.type} title="Type"/>
       </Modal>
     );
