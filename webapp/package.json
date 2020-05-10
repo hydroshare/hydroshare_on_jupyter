@@ -35,7 +35,8 @@
   "scripts": {
     "start": "webpack-dev-server --config=config/webpackDevServer.config.js",
     "build": "webpack --config=config/webpack.config.js",
-    "deploy": "yarn build ; cp build/bundle.js dist"
+    "deploy-dev": "yarn build ; cp build/bundle.js public/assets/bundle-dev.js",
+    "deploy": "yarn build ; cp build/bundle.js public/assets/bundle-dist.js"
   },
   "devDependencies": {
     "@types/jest": "^23.3.1",

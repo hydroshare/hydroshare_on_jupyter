@@ -34,7 +34,7 @@ import tornado.options
 # Global resource handler variable
 resource_manager = ResourceManager()
 
-assets_path = Path(__file__).parent.parent / 'webapp' / 'public' / 'assets'
+assets_path = Path(__file__).absolute().parent / 'assets'
 data_path = Path.cwd() / 'local_hs_resources'
 
 # If we're running this file directly with Python, we'll be firing up a full
