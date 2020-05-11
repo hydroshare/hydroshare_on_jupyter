@@ -212,6 +212,7 @@ export function deleteResourceFilesOrFolders(resource: IResource, paths: string[
       }
     });
     if (localFiles.length > 0) {
+      dispatch(notifyGettingResourceJupyterHubFiles(resource));
       deleteToBackend(`/resources/${resource.id}/local-files`, {
         files: localFiles,
       })
@@ -224,6 +225,7 @@ export function deleteResourceFilesOrFolders(resource: IResource, paths: string[
       });
     }
     if (hsFiles.length > 0) {
+      dispatch(notifyGettingResourceHydroShareFiles(resource));
       deleteToBackend(`/resources/${resource.id}/hs-files`, {
         files: hsFiles,
       })
