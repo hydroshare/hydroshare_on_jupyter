@@ -220,7 +220,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
           >
             {this.generateTableCell(this.generateCheckBox(file))}
             {this.generateTableCell(file.name, nestLevel, onClick)}
-            {this.generateTableCell(file.type)}
+            {this.generateTableCell(file.type || 'file')}
             {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes))}
           </div>
         )}
