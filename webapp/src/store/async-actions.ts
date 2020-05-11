@@ -433,7 +433,7 @@ function performFileOperation(resource: IResource, source: IFile | IFolder, dest
       fullDestPath += '/';
     }
     fullDestPath += source.name;
-    if (source.type !== FileOrFolderTypes.FOLDER) {
+    if (source.type && source.type !== FileOrFolderTypes.FOLDER) {
       fullDestPath += '.' + (source as IFile).type;
     }
     const data = {

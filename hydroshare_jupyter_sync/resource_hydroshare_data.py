@@ -34,16 +34,13 @@ class ResourceHydroShareData:
             modified_time = str(parse(modified_time))
         # if it is a file & has an extension then get name & extension
         if len(filepath.parts) == 1:
-            file_type = "File"
-            if filepath.suffix != '':
-                file_type = filepath.suffix[1:]
             filename = filepath.stem
             return ({
                 "name": filename,
                 "path": path_prefix + '/' + long_path.strip('/'),
                 "sizeBytes": file_info.get("size"),
                 "modifiedTime": modified_time,
-                "type": file_type,
+                "type": filepath.suffix[1:] if filepath.suffix else None,
             })
         else:
             return False

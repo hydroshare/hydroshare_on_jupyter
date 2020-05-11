@@ -68,7 +68,7 @@ class ResourceLocalData:
                 if dirpath.suffix:
                     file_type = dirpath.suffix[1:]  # without '.'
                 else:
-                    file_type = 'file'
+                    file_type = None
             elif dirpath.is_dir():  # is folder
                 file_type = "folder"
             else:  # is neither
