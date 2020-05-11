@@ -85,7 +85,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
       srcParentFolderPath += '/';
     }
     if (srcParentFolderPath === destFolder.path) {
-      console.log("File dropped in same location. Ignoring move request.");
+      // File dropped in its current directory
       return;
     }
     if (srcPrefix === destPrefix) {
@@ -95,8 +95,6 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
       // Copy files between HydroShare and the local filesystem
       this.props.copyFileOrFolder(srcFileOrFolder, destFolder);
     }
-    console.log(srcFileOrFolder);
-    console.log(destFolder);
   };
 
   filterByNameChanged = (e: ChangeEvent<HTMLInputElement>) => this.setState({filterByName: e.target.value});
