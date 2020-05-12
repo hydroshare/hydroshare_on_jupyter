@@ -9,6 +9,10 @@ interface IEditPrivacyModalProps {
   submit: () => any
 }
 
+/**
+ * Modal that prompts the user to confirm that they want to edit the privacy setting of their resource
+ */
+
 export default class EditPrivacyModal extends React.Component<IEditPrivacyModalProps, never> {
 
   isValid = (): boolean => {

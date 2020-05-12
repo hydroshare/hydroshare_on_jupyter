@@ -1,4 +1,4 @@
-import * as React from 'react';
+ import * as React from 'react';
 import Modal from "./Modal";
 
 import {IResource} from '../../store/types';
@@ -8,7 +8,10 @@ type IDeleteModalProps = {
     resources: IResource[] | undefined
     submit: () => any
 };
-  
+ 
+/**
+ * Modal to prompt a user to delete a resource from HydroShare and their workspace
+ */
 export default class DeleteLocallyConfirmationModal extends React.Component<IDeleteModalProps, never> {
     render() {
         return (

@@ -42,6 +42,10 @@ const initialState: ILoginModalState = {
 
 type ComponentPropTypes = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
+/**
+ * Modal for logging in to HydroShare
+ */
+
 const LoginModal: React.FC<ComponentPropTypes> = (props: ComponentPropTypes) => {
   if (!props.visible) return null;
 

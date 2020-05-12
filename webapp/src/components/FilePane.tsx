@@ -45,6 +45,9 @@ interface IFilePaneProps {
   fileLocation: string
 }
 
+/**
+ * Component that displays the list of files in a resource
+ */
 export default class FilePane extends React.Component<IFilePaneProps, IFilePaneState> {
 
   state = {
@@ -158,7 +161,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
           // Since some of the contents match, add this folder, but only show the contents that match the filter
           let filteredFolder = {...item, contents};
           filteredItems.push(filteredFolder);
-          // TODO: Expand this folder
+          // TODO: Expand this folder (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/46)
         }
       }
     });
@@ -177,6 +180,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     }
   }
 
+  // TODO: Add copy file option to context menu (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/42)
   generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: ((f: IFile) => IFile) | undefined, nestLevel: number = 0) => {
     if (item.type === FileOrFolderTypes.FOLDER) {
       return (<div>
@@ -423,7 +427,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       this.setFolderSelected(selectedFilesAndFolders, item as IFolder, makeSelected);
     }
     this.setState({
-      allFilesAndFoldersSelected: false, // TODO: Get a count of the number of files to check against
+      allFilesAndFoldersSelected: false,
       selectedFilesAndFolders: selectedFilesAndFolders,
     });
     if (this.props.onSelectedFilesAndFoldersChange) {

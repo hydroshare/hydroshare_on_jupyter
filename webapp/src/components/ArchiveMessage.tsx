@@ -27,6 +27,10 @@ interface IArchiveMessageProps {
 
 type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & IArchiveMessageProps;
 
+/**
+ * Component that displays the archive message set in the config file
+ * This component appears underneath the metadata component
+ */
 class ArchiveMessage extends React.Component<ReduxType, never> {
 
   public render() {

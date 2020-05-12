@@ -50,6 +50,10 @@ let fileOrFolderLookupTable = new Map<string, IFile | IFolder>();
 // @ts-ignore
 const ASSETS_URL = (window.FRONTEND_URL || '') + '/assets';
 
+/**
+ * Parent component that contains the actions bar and the file panes. It contains both the
+ * workspace file pane and the HydroShare file pane
+ */
 export default class FileManager extends React.Component<IFileManagerProps, IFileManagerState> {
 
   state = {

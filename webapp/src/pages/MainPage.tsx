@@ -1,5 +1,4 @@
-// TODO (Emily): in general i think adding some more comments to these files would be great -
-// at a minimum let's make sure we at least have a header comment for each one just saying what the file does
+
 import * as React from 'react';
 import ResourceList from '../components/ResourceList';
 import { connect } from 'react-redux';
@@ -34,6 +33,9 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
 
 type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
+/**
+ * Component that puts together the main page where all of the user's resources are displayed
+ */
 class MainPage extends React.Component<ReduxType, never>  {
 
   public handleViewResource = (resource: IResource) => {

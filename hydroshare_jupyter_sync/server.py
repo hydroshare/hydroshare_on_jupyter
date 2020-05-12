@@ -50,7 +50,7 @@ class BaseRequestHandler(BaseHandler):
     """ Sets the headers for all the request handlers that extend
         this class """
     def set_default_headers(self):
-        # TODO: change from * (any server) to our specific url
+        # TODO: change from * (any server) to our specific url (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/40)
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, "
                         "content-type, x-xsrftoken")
@@ -206,8 +206,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
             'rootDir': local_data.get_files_and_folders(),
         })
 
-    # TODO (kyle) move some of the logic here outside this file and deduplicate
-    # code
+    # TODO: move some of the logic here outside this file and deduplicate 
+    # code (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/41)
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
         file_and_folder_paths = body.get('files')
@@ -335,13 +335,12 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
             })
             return
 
-        # TODO: Get folder info
         hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         root_dir = hs_data.get_files()
         self.write({'rootDir': root_dir})
 
-    # TODO (kyle): Move the bulk of this function out of this file and
-    # deduplicate code
+    # TODO: Move the bulk of this function out of this file and
+    # deduplicate code (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/41)
     def delete(self, res_id):
         if not resource_manager.is_authenticated():
             self.write({
@@ -494,7 +493,7 @@ class MoveCopyFiles(BaseRequestHandler):
                             },
                         })
                         failure_count += 1
-                else:  # TODO: Copy
+                else:  # TODO: Copy (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/42)
                     # The frontend never requests this, but if one were to
                     # add such functionality, you'd handle it here
                     raise NotImplementedError('Copy within HydroShare '
@@ -506,7 +505,7 @@ class MoveCopyFiles(BaseRequestHandler):
                                                                   dest_path)
                     results.append({'success': True})
                     success_count += 1
-                else:  # Copy
+                else:  # TODO: Copy (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/42)
                     # The frontend never requests this, but if one were to
                     # add such functionality, you'd handle it here
                     raise NotImplementedError('Copy within the local '
