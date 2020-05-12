@@ -10,6 +10,9 @@ export interface IPropTypes {
   promptEditPrivacy: () => any
 }
 
+/**
+ * Component that displays a resource's metadata (title, author, abstract, etc..)
+ */
 export default class ResourceMetadata extends React.Component<IPropTypes, never> {
 
   public render() {

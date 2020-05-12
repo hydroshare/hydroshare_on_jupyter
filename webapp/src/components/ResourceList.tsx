@@ -36,6 +36,10 @@ interface IStateTypes {
   sortBy: SORT_BY_OPTIONS
 }
 
+/**
+ * Component that displays the list of a user's resources
+ * Contains the actions bar for managing resources
+ */
 export default class ResourceList extends React.Component<IResourceListProps, IStateTypes> {
 
     state = {

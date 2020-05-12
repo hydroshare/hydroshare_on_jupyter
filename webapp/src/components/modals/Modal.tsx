@@ -14,6 +14,11 @@ interface IModalProps {
   isConfirm?: boolean
 }
 
+/**
+ * General modal component that other modals are built off of
+ * @example ./LoginModal.tsx or ./DeleteLocallyConfirmationModal.tsx
+ */
+
 const Modal: React.FC<IModalProps> = (props: IModalProps) => {
 
   let submitButtonClasses = '';

@@ -84,6 +84,9 @@ type StateType = {
   selectedFileToRename: IFile | IFolder | null,
 };
 
+/**
+ * Component that displays the resource page (resource metadata, getting started, archive message, resource files, and readme display)
+ */
 class ResourcePage extends React.Component<PropsType, StateType> {
 
   state: StateType = {

@@ -14,6 +14,9 @@ interface IUploadFileModalState {
   type: string
 }
 
+/**
+ * Modal to prompt user to upload a file to their workspace
+ */
 export default class UploadFileModal extends React.Component<IUploadFileModalProps, IUploadFileModalState> {
 
   state = {

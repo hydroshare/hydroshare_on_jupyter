@@ -26,6 +26,10 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
 
 type NotificationBannerProps = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
+/**
+ * Component for notifications
+ * This displays warnings and errors to the user
+ */
 const NotificationBanner: React.FC<NotificationBannerProps> = (props: NotificationBannerProps) => {
   return (
     <div className="NotificationBanner">

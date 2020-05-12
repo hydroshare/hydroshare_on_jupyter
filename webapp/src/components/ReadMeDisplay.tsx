@@ -12,6 +12,9 @@ interface IReadMeDisplayState {
   selectedReadMe: string
 }
 
+/**
+ * Component to display a readme if it exists in a user's resource
+ */
 export default class ReadMeDisplay extends React.Component<IReadMeDisplayProps, IReadMeDisplayState> {
 
   state: IReadMeDisplayState = {

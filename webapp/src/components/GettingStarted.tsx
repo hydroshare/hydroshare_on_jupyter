@@ -6,6 +6,9 @@ export interface IPropTypes {
   promptDeleteLocally: () => any
 }
 
+/**
+ * Component that displays a getting started message
+ */
 export default class GettingStarted extends React.Component<IPropTypes, never> {
 
   public render() {

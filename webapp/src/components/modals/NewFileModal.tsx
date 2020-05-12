@@ -15,6 +15,10 @@ interface INewFileModalState {
   type: string
 }
 
+/**
+ * Modal to prompt user to create a new file
+ */
+
 export default class NewFileModal extends React.Component<INewFileModalProps, INewFileModalState> {
 
   state = {

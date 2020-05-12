@@ -26,6 +26,10 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => ({
 
 type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
+/**
+ * Compnent that contains the logo and the return to all my resources button
+ * Appears at the top of every page
+ */
 class Header extends React.Component<ReduxType, never> {
 
   public componentDidMount(): void {

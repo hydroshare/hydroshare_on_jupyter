@@ -35,7 +35,7 @@ class ResourceManager:
         """
         config = get_config_values(['dataPath', 'hydroShareHostname'])
         self.hs_hostname = 'www.hydroshare.org'
-        # TODO: Rename to hydroshare_resource_data
+        # TODO: Rename to hydroshare_resource_data (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/380)
         self.output_folder = Path('local_hs_resources')
         if config:
             if 'hydroShareHostname' in config:
@@ -178,7 +178,7 @@ class ResourceManager:
         return set(map(lambda p: p.name, self.output_folder.glob('*')))
 
     def get_list_of_user_resources(self):
-        # TODO: speed this up
+        # TODO: speed this up (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/39)
         """Gets list of all the resources for the logged in user, including
         those stored on hydroshare and those stored locally on jupyterhub
         and information about each one including whether HS ones are stored

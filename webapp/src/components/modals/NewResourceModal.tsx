@@ -26,6 +26,9 @@ const initialState: INewResourceModalState = {
   privacy: 'Private',
 };
 
+/**
+ * Modal to prompt user to make new resource
+ */
 const NewResourceModal: React.FC<INewResourceModalProps> = (props: INewResourceModalProps) => {
 
   const [state, setState] = React.useState(initialState);
