@@ -202,7 +202,12 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
         local_data = ResourceLocalData(res_id)
         if not local_data.is_downloaded():
             logging.info('No local data. Downloading...')
-            resource_manager.save_resource_locally(res_id)
+            try:
+                resource_manager.save_resource_locally(res_id)
+            except Exception as e:
+                logging.error(e)
+                self.write({'success': False})
+                return
         logging.info('Data downloaded')
         self.write({
             'readMe': local_data.get_readme(),
