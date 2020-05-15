@@ -198,21 +198,20 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                                                          'OPTIONS, POST, PUT'))
 
     def get(self, res_id):
-        logging.info('Handling local GET')
-        local_data = ResourceLocalData(res_id)
-        if not local_data.is_downloaded():
-            logging.info('No local data. Downloading...')
-            try:
+        try:
+            logging.info('Handling local GET')
+            local_data = ResourceLocalData(res_id)
+            if not local_data.is_downloaded():
+                logging.info('No local data. Downloading...')
                 resource_manager.save_resource_locally(res_id)
-            except Exception as e:
-                logging.error(e)
-                self.write({'success': False})
-                return
-        logging.info('Data downloaded')
-        self.write({
-            'readMe': local_data.get_readme(),
-            'rootDir': local_data.get_files_and_folders(),
-        })
+            logging.info('Data downloaded')
+            self.write({
+                'readMe': local_data.get_readme(),
+                'rootDir': local_data.get_files_and_folders(),
+            })
+        except Exception as e:
+            logging.error(e)
+            self.write({'success': False})
 
     # TODO: move some of the logic here outside this file and deduplicate 
     # code (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/41)
