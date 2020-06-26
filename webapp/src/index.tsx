@@ -16,6 +16,8 @@ import LoginModal from './components/modals/LoginModal';
 import MainPage from './pages/MainPage';
 import NotificationBanner from "./components/NotificationBanner";
 import ResourcePage from './pages/ResourcePage';
+//import UploadFileModal from './components/modals/UploadFileModal';
+import ResourceFile from './components/modals/ResourceFile';
 
 // @ts-ignore
 const URL_PREFIX = window.FRONTEND_URL || '';
@@ -23,6 +25,7 @@ const URL_PREFIX = window.FRONTEND_URL || '';
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
+      <ResourceFile/>
       <LoginModal/>
       <Header />
       <NotificationBanner/>
