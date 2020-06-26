@@ -56,13 +56,16 @@ class Header extends React.Component<ReduxType, never> {
      const e = event.target.value;
      console.log(e);
      if (e === '1') {
-      this.props.logout()
+      console.log('yet to be defined')
      }
      else if (e == '2') {
        console.log('yet to be defined')
      }
-     else {
+     else if (e == '3'){
        console.log('wait, we are getting close!')
+     }
+     else {
+      this.props.logout()
      }
   }
 
