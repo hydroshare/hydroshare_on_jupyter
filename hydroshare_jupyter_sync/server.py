@@ -12,6 +12,9 @@ import signal
 import logging
 import sys
 import json
+import os
+import requests
+from hydroshare_jupyter_sync.config_reader_writer import (config_path)
 from hs_restclient import exceptions as HSExceptions
 from hydroshare_jupyter_sync.resource_local_data import (ResourceLocalData,
                                                          LOCAL_PREFIX)
@@ -77,8 +80,37 @@ class LoginHandler(BaseRequestHandler):
     """ Handles authenticating the user with HydroShare """
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
-        self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST')
+        self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST, DELETE')
 
+    def delete(self):
+        logging.error('This is an error message!')
+        
+
+        if os.path.isfile(config_path):
+            logging.info('Deleting the config file which contains user information')
+            os.remove(config_path)
+            logging.info('Login config file deleted to logout. Now clearing cookies')
+            #logging.info(f'Available cookies after logout {self.request.cookies}')
+            #self.request.cookies.clear
+            s = requests.Session()
+            print(s.cookies.__dict__)
+            
+            #s.cookies.clear()
+            s.cookies.clear_session_cookies
+            print(s.cookies.__dict__)
+            logging.info(f'Available cookies after logout {self.request.cookies}')
+            logging.info('cookie deleted through request object')
+
+        else:  ## Show an error ##
+            print("Error: %s file not found", config_path)
+        '''
+        if os.path.exists(config_path):
+            logging.info('Deleting the config file which contains user information')
+            os.remove(config_path)
+            logging.info('Login config file deleted to logout. Now clearing cookies')
+            self.request.cookies.clear
+            logging.info('Available cookies after logout {self.request.cookies}')
+        '''
     def post(self):
         credentials = json.loads(self.request.body.decode('utf-8'))
         do_save = credentials.get('remember', False)

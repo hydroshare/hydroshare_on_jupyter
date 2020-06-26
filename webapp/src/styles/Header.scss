@@ -26,6 +26,13 @@ header {
         padding: 0 1em;
       }
 
+      .dropdown {
+        position: relative;
+        display: inline-block;
+        background-color: white;
+      }
+
+
       button {
         border: none;
         border-radius: 0;

@@ -271,6 +271,23 @@ export function loginToHydroShare(username: string, password: string, remember: 
     }
   };
 }
+export function logoutToHydroShare(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    dispatch(UserActions.notifyAttemptingHydroShareLogin());
+    try {
+      const response = await deleteToBackend<IAttemptHydroShareLoginResponse>('/login');
+      dispatch(UserActions.notifyReceivedHydroShareLoginResponse(response.data.success));
+      if (response.data.success) {
+        dispatch(loadInitData());
+        dispatch(setUserInfo(response.data.userInfo));
+      }
+    } catch (e) {
+      console.error(e);
+      dispatch(pushNotification('error', 'Could not logout.'));
+      dispatch(UserActions.notifyReceivedHydroShareLoginResponse(false));
+    }
+  };
+}
 export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     try {
