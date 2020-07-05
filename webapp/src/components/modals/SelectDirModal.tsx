@@ -20,52 +20,57 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
 
 type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & IUploadFileModalProps;
 
-
-interface IUploadFileModalProps {
-  /*
-  close: () => any
-  submit: (name: string, type: string) => any
-  onFileChange: (file: any) => any
-  */
-}
-
-interface IUploadFileModalState {
+interface IDirectorySelectState {
   dirPath: string,
   choice: string,
+  showDirectorySelector: boolean,
+
 }
 
 /**
  * Modal to prompt user to select a directory to download their hydroshare data into their workspace
  */
 
-class SelectDirModal extends React.Component<ReduxType, IUploadFileModalState> {
+class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState> {
 
   state = {
     dirPath: '',
-    choice: 'Yes'
+    choice: 'No',
+    showDirectorySelector: false
   };
-
+  public directoryChoice = (event: any) => {
+    event.target.value === "Yes" ? this.setState({ showDirectorySelector: true, choice: "Yes" }) : this.setState({ showDirectorySelector: false, choice: "No" });
+  }
   submit = () => {
     this.props.uploadNewDir(this.state.dirPath, this.state.choice);
 
-  }//this.props.submit(this.state.name, this.state.type);
-
+  }
   render() {
-    //return this.props.isSuccess ? null : 
+    const showDirectorySelector: boolean = this.state.showDirectorySelector;
+    const { directoryChoice } = this;
     return (
       <Modal
         close={() => { }}
-        title="Select a root directory"
+        title="Configure Hydroshare directory"
         isValid={true}
         submit={this.submit}
         submitText="Select"
       >
-        <div className="TextArea group"></div>
-        <div className="group-content">
 
-          <input id="myFile" type="text" onChange={(event) => { this.setState({ dirPath: event.target.value }) }} />
-          {this.props.dirResponse && <p className="error">{this.props.dirResponse}</p>}
+        <label>Where do you want to save your hydroshare data?</label>
+        <br />
+        <div onChange={directoryChoice}>
+          <input id="Yes" type="radio" name="dirselect" value="Yes" />Use custom directory
+        <br />
+          <input id="No" type="radio" name="dirselect" value="No" />Use default directory
         </div>
+        <br />
+        {showDirectorySelector && <div>
+          <label>Enter your custom directory path</label><br />
+          <input id="myFile" type="text" width="100%" onChange={(event) => { this.setState({ dirPath: event.target.value }) }} />
+        </div>
+        }
+        {this.props.dirResponse && <p className="error">{this.props.dirResponse}</p>}
 
       </Modal>
     );
@@ -75,4 +80,3 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(SelectDirModal);
-
