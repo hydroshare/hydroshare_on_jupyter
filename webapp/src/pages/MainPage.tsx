@@ -14,9 +14,12 @@ import {
   IRootState,
   ICreateResourceRequest,
 } from '../store/types';
+import SelectDirModal from '../components/modals/SelectDirModal';
 
-const mapStateToProps = ({ resources }: IRootState) => {
+const mapStateToProps = ({ resources, user }: IRootState) => {
   return {
+    attemptingLogin: user.attemptingLogin,
+    authenticationFailed: user.authenticationFailed,
     resources: resources.allResources,
     fetchingResources: resources.fetchingResources,
   };
@@ -54,6 +57,7 @@ class MainPage extends React.Component<ReduxType, never>  {
           viewResource={this.handleViewResource}
           resources={this.props.resources}
         />
+        {!this.props.attemptingLogin && !this.props.authenticationFailed &&  <SelectDirModal/> }
       </div>
     )
   }

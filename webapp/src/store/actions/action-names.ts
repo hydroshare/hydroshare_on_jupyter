@@ -37,3 +37,7 @@ export enum UserInfoActions {
   NOTIFY_RECEIVED_HYDROSHARE_LOGIN_RESPONSE = 'UserInfoActions/NOTIFY_RECEIVED_HYDROSHARE_LOGIN_RESPONSE',
   SET_USER_INFO = 'UserInfoActions/SET_USER_INFO',
 }
+
+export enum DirectoryActions {
+  NOTIFY_DIRECTORY_RESPONSE = 'DirectoryActions/NOTIFY_DIRECTORY_RESPONSE',
+}

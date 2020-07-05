@@ -5,6 +5,7 @@ import {
   NotificationsActions,
   ResourcesActions,
   UserInfoActions,
+  DirectoryActions,
 } from './actions/action-names';
 import {
   IFile,
@@ -14,6 +15,8 @@ import {
   IUserState,
   ResourcesActionTypes,
   UserActionTypes,
+  IDirectoryState,
+  DirectoryActionTypes,
 } from './types';
 
 const initNotificationsState: INotificationsState = {
@@ -33,6 +36,9 @@ const initUserState: IUserState = {
   authenticationFailed: false,
   credentialsInvalid: false,
 };
+const initDirectoryState: IDirectoryState = {
+  dirResponse: ''
+}
 
 export function notificationsReducer(state: INotificationsState = initNotificationsState, action: AnyAction): INotificationsState {
   let notifications = [...state.current];
@@ -167,3 +173,12 @@ export function userDataReducer(state: IUserState = initUserState, action: UserA
       return state;
   }
 }
+  export function directoryReducer(state: IDirectoryState = initDirectoryState, action: DirectoryActionTypes): IDirectoryState {
+    switch (action.type) {
+      case DirectoryActions.NOTIFY_DIRECTORY_RESPONSE:
+        return {...state, dirResponse: action.payload.message};
+      default:
+        return state;
+    }
+} 
+

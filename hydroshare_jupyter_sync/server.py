@@ -8,42 +8,42 @@ Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import signal
-import logging
-import sys
 import json
+import logging
+import os
+import signal
+import sys
+from pathlib import Path
+import tornado.ioloop
+import tornado.options
+import tornado.web
 from hs_restclient import exceptions as HSExceptions
-from hydroshare_jupyter_sync.resource_local_data import (ResourceLocalData,
-                                                         LOCAL_PREFIX)
-from hydroshare_jupyter_sync.resource_hydroshare_data import (
-                                                    ResourceHydroShareData,
-                                                    HS_PREFIX)
-from hydroshare_jupyter_sync.resource_manager import (
-                                                ResourceManager,
-                                                HYDROSHARE_AUTHENTICATION_ERROR
-                                                )
-from hydroshare_jupyter_sync.index_html import get_index_html
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
-from pathlib import Path
 
-import tornado.ioloop
-import tornado.web
-import tornado.options
+from hydroshare_jupyter_sync.config_reader_writer import (set_config_values)
+from hydroshare_jupyter_sync.index_html import get_index_html
+from hydroshare_jupyter_sync.resource_hydroshare_data import (
+    ResourceHydroShareData, HS_PREFIX)
+from hydroshare_jupyter_sync.resource_local_data import (ResourceLocalData,
+                                                         LOCAL_PREFIX)
+from hydroshare_jupyter_sync.resource_manager import (
+    ResourceManager,
+    HYDROSHARE_AUTHENTICATION_ERROR,
+)
 
 # Global resource handler variable
 resource_manager = ResourceManager()
 
 assets_path = Path(__file__).absolute().parent / 'assets'
-data_path = Path.cwd() / 'local_hs_resources'
-
+data_path = Path.cwd() / 'hydroshare' / 'local_hs_resources'
 # If we're running this file directly with Python, we'll be firing up a full
 # Tornado web server, so use Tornado's RequestHandler as our base class.
 # Otherwise (i.e. if this is being run by a Jupyter notebook server) we want to
 # use IPythonHandler as our base class. (See the code at the bottom of this
 # file for the server launching.)
-BaseHandler = (tornado.web.RequestHandler if __name__ == '__main__'
-               else IPythonHandler)
+BaseHandler = (tornado.web.RequestHandler
+               if __name__ == '__main__' else IPythonHandler)
 
 
 class BaseRequestHandler(BaseHandler):
@@ -117,10 +117,12 @@ class ResourcesRootHandler(BaseRequestHandler):
         resources, error = resource_manager.get_list_of_user_resources()
         archive_message = resource_manager.get_archive_message()
 
-        self.write({'resources': resources,
-                    'archive_message': archive_message,
-                    'success': error is None,
-                    'error': error})
+        self.write({
+            'resources': resources,
+            'archive_message': archive_message,
+            'success': error is None,
+            'error': error
+        })
 
     def post(self):
         """
@@ -148,14 +150,15 @@ class ResourcesRootHandler(BaseRequestHandler):
             self.write({
                 'success': False,
                 'error': {
-                    'type': 'InvalidRequest',
+                    'type':
+                    'InvalidRequest',
                     'message': ('The request body must specify '
                                 '"title" and "creators".'),
                 },
             })
         else:
             resource_id, error = resource_manager.create_HS_resource(
-                                resource_title, creators, abstract, privacy)
+                resource_title, creators, abstract, privacy)
             self.write({
                 'resource_id': resource_id,
                 'success': error is None,
@@ -189,6 +192,71 @@ class ResourceHandler(BaseRequestHandler):
         })
 
 
+class DirectorySelectorHandler(BaseRequestHandler):
+    """ Handles downloading of hydroshare data in user selected directory """
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods',
+                        'DELETE, OPTIONS, GET,POST')
+
+    def post(self):
+        returnValue = ""
+        dirpathinfo = json.loads(self.request.body.decode('utf-8'))
+        directoryPath = dirpathinfo["dirpath"]
+        choice = dirpathinfo["choice"]
+        print('Dir path and choice are', directoryPath, choice)
+
+        try:
+            if choice == "No":
+                hydroshare = 'hydroshare'
+                returnValue = self.createDirectory(Path.home() / hydroshare)
+            elif choice == "Yes":
+                dpath = Path(directoryPath)
+                print('datapath is', dpath)
+                print(dpath.exists())
+
+                if not dpath.exists():
+                    returnValue = 'Directory path is not valid, please check if directory exists'
+
+                elif os.access(dpath, os.W_OK):
+                    returnValue = self.createDirectory(dpath)
+                else:
+                    returnValue = "Permission Denied"
+
+        except Exception as e:
+            print('Error while setting the file path', e)
+            returnValue = 'Error while setting the file path '
+
+        if returnValue is not "":
+            self.write({
+                'success': dirpathinfo["dirpath"],
+                'error': returnValue,
+            })
+        else:
+            self.write({
+                'success': "Configuration saved successfully.",
+            })
+
+    def createDirectory(self, defaultPath):
+        returnValue = ''
+        localhsResources = 'local_hs_resources'
+        logpath = Path.home() / 'hydroshare' / 'sync.log'
+        saved_successfully = set_config_values({
+            "dataPath":
+            str(defaultPath / localhsResources),
+            "logPath":
+            str(logpath)
+        })
+        if saved_successfully:
+            logging.info('Successfully saved dataPath value to '
+                         'config file.')
+            resource_manager = ResourceManager()
+        else:
+            logging.info('Cannot set data Path values in config file')
+            returnValue = 'Cannot set data Path values in config file'
+        return returnValue
+
+
 class ResourceLocalFilesRequestHandler(BaseRequestHandler):
     """ Facilitates getting, deleting, and uploading to the files contained in
         a resource on the local disk """
@@ -198,6 +266,15 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                                                          'OPTIONS, POST, PUT'))
 
     def get(self, res_id):
+        # Handling authentication first to ensure local data if not present is downloaded from Hydroshare
+        if not resource_manager.is_authenticated():
+            self.write({
+                'success': False,
+                'success': False,
+                'error': HYDROSHARE_AUTHENTICATION_ERROR,
+            })
+            return
+
         local_data = ResourceLocalData(res_id)
         if not local_data.is_downloaded():
             resource_manager.save_resource_locally(res_id)
@@ -206,7 +283,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
             'rootDir': local_data.get_files_and_folders(),
         })
 
-    # TODO: move some of the logic here outside this file and deduplicate 
+    # TODO: move some of the logic here outside this file and deduplicate
     # code (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/41)
     def delete(self, res_id):
         body = json.loads(self.request.body.decode('utf-8'))
@@ -254,7 +331,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                 results.append({
                     'success': False,
                     'error': {
-                        'type': 'UnknownError',
+                        'type':
+                        'UnknownError',
                         'message': (f'An unknown error occurred when '
                                     f'attempting to delete {item_path}.')
                     }
@@ -280,8 +358,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
         if item_type is None or name is None:
             error_msg = ('Request must include both "type" and "name" '
                          'attributes.')
-        if not error_msg and not (item_type == 'file' or
-                                  item_type == 'folder'):
+        if not error_msg and not (item_type == 'file'
+                                  or item_type == 'folder'):
             error_msg = '"type" attribute must be either "file" or "folder".'
         if error_msg:
             self.set_status(400)  # Bad Request
@@ -313,8 +391,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
         local_data = ResourceLocalData(res_id)
         for field_name, files in self.request.files.items():
             for info in files:
-                with open(str(local_data.data_path /
-                          info['filename']), "wb") as f:
+                with open(str(local_data.data_path / info['filename']),
+                          "wb") as f:
                     f.write(info['body'])
         self.write({
             'success': True,
@@ -394,14 +472,15 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                     'error': {
                         'type': 'NotFoundError',
                         'message': f'Could not find {item_path} in '
-                                   'HydroShare.',
+                        'HydroShare.',
                     },
                 })
             except HSExceptions.HydroShareNotAuthorized:
                 results.append({
                     'success': False,
                     'error': {
-                        'type': 'NotAuthorizedError',
+                        'type':
+                        'NotAuthorizedError',
                         'message': (f'Could not delete {item_path}. Do you '
                                     'have write access to the resource?'),
                     },
@@ -411,7 +490,8 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                 results.append({
                     'success': False,
                     'error': {
-                        'type': 'UnknownError',
+                        'type':
+                        'UnknownError',
                         'message': (f'An unknown error occurred when'
                                     ' attempting to delete {item_path}.')
                     }
@@ -432,7 +512,6 @@ COPY = 'copy'
 class MoveCopyFiles(BaseRequestHandler):
     """ Handles moving (or renaming) files within the local filesystem,
         on HydroShare, and between the two. """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'PATCH, OPTIONS')
@@ -460,8 +539,8 @@ class MoveCopyFiles(BaseRequestHandler):
 
             # If this operation involves HydroShare, make sure we're
             # authenticated
-            if ((src_path == HS_PREFIX or dest_fs == HS_PREFIX) and
-                    not resource_manager.is_authenticated()):
+            if ((src_path == HS_PREFIX or dest_fs == HS_PREFIX)
+                    and not resource_manager.is_authenticated()):
                 results.append({
                     'success': False,
                     'error': HYDROSHARE_AUTHENTICATION_ERROR,
@@ -487,7 +566,8 @@ class MoveCopyFiles(BaseRequestHandler):
                         results.append({
                             'success': False,
                             'error': {
-                                'type': 'FileOrFolderExists',
+                                'type':
+                                'FileOrFolderExists',
                                 'message': (f'The file {dest_path} already '
                                             'exists in HydroShare.'),
                             },
@@ -501,8 +581,8 @@ class MoveCopyFiles(BaseRequestHandler):
             # Move/copy within the local filesystem
             elif src_fs == LOCAL_PREFIX and dest_fs == LOCAL_PREFIX:
                 if method == MOVE:  # Move or rename
-                    ResourceLocalData(res_id).rename_or_move_item(src_path,
-                                                                  dest_path)
+                    ResourceLocalData(res_id).rename_or_move_item(
+                        src_path, dest_path)
                     results.append({'success': True})
                     success_count += 1
                 else:  # TODO: Copy (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/42)
@@ -517,8 +597,8 @@ class MoveCopyFiles(BaseRequestHandler):
                                                   Path(dest_path))
                 if not error and method == MOVE:
                     # Delete the local copy of the file
-                    error = (ResourceLocalData(res_id).
-                             delete_file_or_folder(src_path))
+                    error = (ResourceLocalData(res_id).delete_file_or_folder(
+                        src_path))
                 results.append({
                     'success': error is None,
                     'error': error,
@@ -571,9 +651,7 @@ class UserInfoHandler(BaseRequestHandler):
             data, error = None, HYDROSHARE_AUTHENTICATION_ERROR
         else:
             data, error = resource_manager.get_user_info()
-        self.write({'data': data,
-                    'success': error is None,
-                    'error': error})
+        self.write({'data': data, 'success': error is None, 'error': error})
 
 
 class TestApp(tornado.web.Application):
@@ -593,31 +671,38 @@ class TestApp(tornado.web.Application):
 
 def get_route_handlers(frontend_url, backend_url):
     return [
-        (url_path_join(frontend_url, r"/assets/(.*)"),
-            tornado.web.StaticFileHandler, {'path': str(assets_path)}),
-        (url_path_join(backend_url, r"/download/(.*)"),
-            tornado.web.StaticFileHandler, {'path': str(data_path)}),
+        (url_path_join(frontend_url,
+                       r"/assets/(.*)"), tornado.web.StaticFileHandler, {
+                           'path': str(assets_path)
+                       }),
+        (url_path_join(backend_url,
+                       r"/download/(.*)"), tornado.web.StaticFileHandler, {
+                           'path': str(data_path)
+                       }),
         (url_path_join(backend_url, "/login"), LoginHandler),
         (url_path_join(backend_url, r"/user"), UserInfoHandler),
         (url_path_join(backend_url, r"/resources"), ResourcesRootHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)"), ResourceHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)/hs-files"),
-            ResourceHydroShareFilesRequestHandler),
+         ResourceHydroShareFilesRequestHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)/local-files"),
-            ResourceLocalFilesRequestHandler),
-        (url_path_join(backend_url, r"/resources/([^/]+)/move-copy-files"),
-            MoveCopyFiles),
+         ResourceLocalFilesRequestHandler),
+        (url_path_join(backend_url, "/selectdir"), DirectorySelectorHandler),
+        (url_path_join(backend_url,
+                       r"/resources/([^/]+)/move-copy-files"), MoveCopyFiles),
         # Put this last to catch everything else
         (frontend_url + r".*", WebAppHandler),
     ]
 
 
 if __name__ == '__main__':
-    LEVELS = {'debug': logging.DEBUG,
-              'info': logging.INFO,
-              'warning': logging.WARNING,
-              'error': logging.ERROR,
-              'critical': logging.CRITICAL}
+    LEVELS = {
+        'debug': logging.DEBUG,
+        'info': logging.INFO,
+        'warning': logging.WARNING,
+        'error': logging.ERROR,
+        'critical': logging.CRITICAL
+    }
 
     if len(sys.argv) > 1:
         level_name = sys.argv[1]

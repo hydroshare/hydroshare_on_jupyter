@@ -7,6 +7,7 @@ interface IModalProps {
   close: () => any
   children: React.ReactNode
   title: string
+  placeholder?: string
   submit: () => any
   submitText?: string
   isValid: boolean
