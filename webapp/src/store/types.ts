@@ -1,13 +1,14 @@
 import { RouterState } from 'connected-react-router';
 import * as moment from 'moment';
-import {ActionType} from 'typesafe-actions';
+import { ActionType } from 'typesafe-actions';
 
 import * as resourcesActions from './actions/resources';
 import * as userActions from './actions/user';
+import * as directoryActions from './actions/directory';
 
 export type ResourcesActionTypes = ActionType<typeof resourcesActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
-
+export type DirectoryActionTypes = ActionType<typeof directoryActions>;
 /** ---------- Enums ---------- **/
 
 export enum FileOrFolderTypes {
@@ -33,6 +34,7 @@ export interface IRootState {
   resources: IResourcesState
   router: RouterState
   user: IUserState
+  directory: IDirectoryState
 }
 
 export interface INotificationsState {
@@ -56,6 +58,9 @@ export interface IUserState {
   userInfo?: IUserInfo
 }
 
+export interface IDirectoryState {
+  dirResponse: string
+}
 /** --------- Data Models --------- **/
 
 export interface IFile {
@@ -118,7 +123,10 @@ export interface IUserInfo {
   title: string
   username: string
 }
-
+export interface IDirectoryInfo {
+  success: string
+  error?: string
+}
 /** --------- Backend Server Communication ---------- **/
 
 export interface IAttemptHydroShareLoginResponse {
@@ -169,7 +177,7 @@ export interface IUserInfoDataResponse {
   success: boolean
 }
 
-export interface IDeleteResourceRequestResponse{
+export interface IDeleteResourceRequestResponse {
   success: boolean
   error?: IServerError
 }

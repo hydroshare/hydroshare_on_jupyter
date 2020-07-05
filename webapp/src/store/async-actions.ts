@@ -1,13 +1,13 @@
 // TODO (kyle): get rid of actions altogether & move contents to other files
-import axios, {AxiosResponse} from 'axios';
-import {AnyAction,} from 'redux';
+import axios, { AxiosResponse } from 'axios';
+import { AnyAction, } from 'redux';
 import {
   ThunkAction,
   ThunkDispatch,
 } from 'redux-thunk';
 import { loadInitData } from "./actions/App";
 
-import {pushNotification,} from "./actions/notifications";
+import { pushNotification, } from "./actions/notifications";
 import {
   notifyGettingResourceHydroShareFiles,
   notifyGettingResourceJupyterHubFiles,
@@ -41,7 +41,10 @@ import {
   IUserInfoDataResponse,
   NEW_FILE_OR_FOLDER_TYPES,
   PATH_PREFIXES,
+  IDirectoryInfo,
 } from './types';
+import * as DirectoryActions from './actions/directory';
+
 
 // @ts-ignore
 const BACKEND_URL = window.BACKEND_API_URL || '//localhost:8080/syncApi';
@@ -55,17 +58,17 @@ function _get_cookie(name: string) {
 const XSRF_TOKEN = _get_cookie('_xsrf')
 
 const backendApi = axios.create({
-    headers: {
-      'X-XSRFToken': XSRF_TOKEN,
-    },
+  headers: {
+    'X-XSRFToken': XSRF_TOKEN,
+  },
 });
 
 function deleteToBackend<T>(endpoint: string, data: any = undefined): Promise<AxiosResponse<T>> {
-    return backendApi.delete<T>(BACKEND_URL + endpoint, {data});
+  return backendApi.delete<T>(BACKEND_URL + endpoint, { data });
 }
 
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
-    return backendApi.get<T>(BACKEND_URL + endpoint);
+  return backendApi.get<T>(BACKEND_URL + endpoint);
 }
 
 function patchToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>> {
@@ -135,7 +138,7 @@ export function createNewFileOrFolder(resource: IResource, name: string, type: s
 export function createNewResource(details: ICreateResourceRequest): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
     dispatch(notifyGettingResources());
-    const { user: { userInfo} } = getState();
+    const { user: { userInfo } } = getState();
     try {
       const data = {
         ...details,
@@ -183,8 +186,8 @@ export function deleteResources(resources: IResource[], localOnly: boolean): Thu
               }
             }
           }
-           ++successfulRequests
-          })
+          ++successfulRequests
+        })
         .catch(error => {
           console.error(error);
           dispatch(pushNotification('error', `Could not delete resource ${resource.title}.`));
@@ -216,26 +219,26 @@ export function deleteResourceFilesOrFolders(resource: IResource, paths: string[
       deleteToBackend(`/resources/${resource.id}/local-files`, {
         files: localFiles,
       })
-      .then(() => {
-        dispatch(getResourceLocalFiles(resource));
-      })
-      .catch((error) => {
-        console.error(error);
-        dispatch(pushNotification('error', 'Could not delete files in JupyterHub.'));
-      });
+        .then(() => {
+          dispatch(getResourceLocalFiles(resource));
+        })
+        .catch((error) => {
+          console.error(error);
+          dispatch(pushNotification('error', 'Could not delete files in JupyterHub.'));
+        });
     }
     if (hsFiles.length > 0) {
       dispatch(notifyGettingResourceHydroShareFiles(resource));
       deleteToBackend(`/resources/${resource.id}/hs-files`, {
         files: hsFiles,
       })
-      .then(() => {
-        dispatch(getResourceHydroShareFiles(resource));
-      })
-      .catch((error) => {
-        console.error(error);
-        dispatch(pushNotification('error', 'Could not delete files in HydroShare.'));
-      });
+        .then(() => {
+          dispatch(getResourceHydroShareFiles(resource));
+        })
+        .catch((error) => {
+          console.error(error);
+          dispatch(pushNotification('error', 'Could not delete files in HydroShare.'));
+        });
     }
   };
 }
@@ -254,14 +257,41 @@ export function uploadNewFile(resource: IResource, file: FormData): ThunkAction<
   };
 }
 
+export function uploadNewDir(dirPath: string, choice: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    const body = {
+      dirpath: dirPath,
+      choice: choice
+    }
+    try {
+      const response = await postToBackend<IDirectoryInfo>('/selectdir', body);
+
+      if (response.data.success) {
+        dispatch(loadInitData());
+        dispatch(DirectoryActions.notifyDirectoryResponse(response.data.success));
+        console.log('response.data')
+      }
+      if (response.data.error) {
+        dispatch(loadInitData());
+        dispatch(DirectoryActions.notifyDirectoryResponse(response.data.error));
+        console.log('response.data')
+      }
+    } catch (e) {
+
+      console.error(e);
+      dispatch(pushNotification('error', e));
+    }
+  };
+}
+
 export function loginToHydroShare(username: string, password: string, remember: boolean): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(UserActions.notifyAttemptingHydroShareLogin());
     try {
-      const response = await postToBackend<IAttemptHydroShareLoginResponse>('/login', {username, password, remember});
+      const response = await postToBackend<IAttemptHydroShareLoginResponse>('/login', { username, password, remember });
       dispatch(UserActions.notifyReceivedHydroShareLoginResponse(response.data.success));
       if (response.data.success) {
-        dispatch(loadInitData());
+        //dispatch(loadInitData());
         dispatch(setUserInfo(response.data.userInfo));
       }
     } catch (e) {
@@ -300,29 +330,29 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
 }
 
 export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
-    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
-      dispatch(notifyGettingResources());
-      try {
-        const response = await getFromBackend<IResourcesData>('/resources');
-        const {
-          data: {
-            resources,
-            archive_message,
-            error,
-          },
-        } = response;
-        if (error) {
-          handleError(error, dispatch);
-        } else {
-          dispatch(setResources(resources));
-          dispatch(setArchiveMessage(archive_message));
-        }
-      } catch (e) {
-        console.error(e);
-        dispatch(notifyGettingResourcesFailed());
-        dispatch(pushNotification('error', 'Could not get resources from the server.'));
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    dispatch(notifyGettingResources());
+    try {
+      const response = await getFromBackend<IResourcesData>('/resources');
+      const {
+        data: {
+          resources,
+          archive_message,
+          error,
+        },
+      } = response;
+      if (error) {
+        handleError(error, dispatch);
+      } else {
+        dispatch(setResources(resources));
+        dispatch(setArchiveMessage(archive_message));
       }
-    };
+    } catch (e) {
+      console.error(e);
+      dispatch(notifyGettingResourcesFailed());
+      dispatch(pushNotification('error', 'Could not get resources from the server.'));
+    }
+  };
 }
 
 export function getResourceLocalFiles(resource: IResource) {

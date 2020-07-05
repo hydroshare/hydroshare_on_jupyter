@@ -16,6 +16,7 @@ import {
   notificationsReducer,
   resourcesReducer,
   userDataReducer,
+  directoryReducer
 } from './reducer';
 import {
   IRootState,
@@ -32,6 +33,7 @@ const store = createStore<IRootState, any, any, any>(
         resources: resourcesReducer,
         router: connectRouter(history),
         user: userDataReducer,
+        directory: directoryReducer
     }),
     undefined,
     composeEnhancers(

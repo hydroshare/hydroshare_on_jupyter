@@ -24,6 +24,7 @@ import {
   deleteResourceFilesOrFolders,
   moveFileOrFolder,
   uploadNewFile,
+  uploadNewDir,
   renameFileOrFolder,
   deleteResources,
 } from '../store/async-actions';
@@ -69,6 +70,8 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     copyFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
     moveFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
     uploadNewFile: (resource: IResource, file: FormData) => dispatch(uploadNewFile(resource, file)),
+    // a new call to uploadNewDir
+    
     renameFileOrFolder: (resource: IResource, srcPath: string, destPath: string) => dispatch(renameFileOrFolder(resource, srcPath, destPath)),
     goBackToResources: () => dispatch(push('/')),
     deleteResourcesLocally: (resources: IResource[]) => dispatch(deleteResources(resources, true)),

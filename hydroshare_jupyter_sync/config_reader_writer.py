@@ -9,9 +9,7 @@ import json
 import logging
 from pathlib import Path
 
-config_path = (Path.home() / '.config' / 'hydroshare_jupyter_sync'
-               / 'config.json')
-
+config_path = (Path.home() / 'hydroshare'/ 'config.json')
 
 def get_config_values(keys):
     """ Gets config values for the variables in keys.

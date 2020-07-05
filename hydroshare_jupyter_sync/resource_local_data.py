@@ -220,7 +220,7 @@ def _get_path_to_resources_data_root():
     if _root_data_path is None:
         config = get_config_values(['dataPath'])
         if config and 'dataPath' in config:
-            _root_data_path = Path.cwd() / config['dataPath']
+            _root_data_path = Path(config['dataPath'])
         else: 
             # TODO: Rename to hydroshare_resource_data (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/38)
             _root_data_path = Path.cwd() / 'local_hs_resources'
