@@ -37,7 +37,7 @@ def get_config_values(keys):
                           ' but could not open it.')
             return None
     else:
-        logging.info('Could not locate config file at ' + str(config_path))
+        logging.info('Could  locate config file at ' + str(config_path))
         return None
 
 

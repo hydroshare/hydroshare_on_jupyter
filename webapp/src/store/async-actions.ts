@@ -261,7 +261,7 @@ export function uploadNewDir(dirPath: string, choice: string): ThunkAction<Promi
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     const body = {
       dirpath: dirPath,
-      choice: choice
+      choice: choice,
     }
     try {
       const response = await postToBackend<IDirectoryInfo>('/selectdir', body);
@@ -269,7 +269,9 @@ export function uploadNewDir(dirPath: string, choice: string): ThunkAction<Promi
       if (response.data.success) {
         dispatch(loadInitData());
         dispatch(DirectoryActions.notifyDirectoryResponse(response.data.success));
-        console.log('response.data')
+        
+        //dispatch(DirectoryActions.notifyFileSavedResponse(response.data.isFile))
+        console.log('Checking if File exists', response.data.isFile)
       }
       if (response.data.error) {
         dispatch(loadInitData());
@@ -291,6 +293,15 @@ export function loginToHydroShare(username: string, password: string, remember: 
       const response = await postToBackend<IAttemptHydroShareLoginResponse>('/login', { username, password, remember });
       dispatch(UserActions.notifyReceivedHydroShareLoginResponse(response.data.success));
       if (response.data.success) {
+        if(response.data.isFile == true){
+          dispatch(UserActions.checkDirectorySavedResonse(response.data.isFile))
+          dispatch(loadInitData());
+        }
+      
+        //if(UserActions.checkDirectorySavedResonse == true){
+          //dispatch(loadInitData());
+        //}
+        //console.log('Data through Response is', response.data.isFile)
         //dispatch(loadInitData());
         dispatch(setUserInfo(response.data.userInfo));
       }
@@ -308,6 +319,7 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
       const {
         data,
         error,
+        isFile
       } = response.data;
       if (error) {
         handleError(error, dispatch);
@@ -320,6 +332,8 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
           title: data.title,
           username: data.username,
         };
+
+        dispatch(UserActions.checkDirectorySavedResonse(response.data.isFile))
         dispatch(UserActions.setUserInfo(userInfo));
       }
   } catch (e) {

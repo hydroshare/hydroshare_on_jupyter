@@ -20,7 +20,6 @@ import ResourcePage from './pages/ResourcePage';
 // @ts-ignore
 const URL_PREFIX = window.FRONTEND_URL || '';
 
-
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>

@@ -55,11 +55,13 @@ export interface IUserState {
   attemptingLogin: boolean
   authenticationFailed: boolean
   credentialsInvalid: boolean
+  checkingFile: boolean
   userInfo?: IUserInfo
 }
 
 export interface IDirectoryState {
   dirResponse: string
+  fileSavedResponse: boolean
 }
 /** --------- Data Models --------- **/
 
@@ -126,12 +128,14 @@ export interface IUserInfo {
 export interface IDirectoryInfo {
   success: string
   error?: string
+  isFile: boolean
 }
 /** --------- Backend Server Communication ---------- **/
 
 export interface IAttemptHydroShareLoginResponse {
   success: boolean
   userInfo: IUserInfo
+  isFile: boolean
 }
 
 export interface ICreateFileOrFolderRequestResponse {
@@ -175,6 +179,7 @@ export interface IUserInfoDataResponse {
   }
   error?: IServerError
   success: boolean
+  isFile: boolean
 }
 
 export interface IDeleteResourceRequestResponse {

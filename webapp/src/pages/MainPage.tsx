@@ -22,6 +22,7 @@ const mapStateToProps = ({ resources, user }: IRootState) => {
     authenticationFailed: user.authenticationFailed,
     resources: resources.allResources,
     fetchingResources: resources.fetchingResources,
+    checkingFile: user.checkingFile
   };
 };
 
@@ -57,7 +58,7 @@ class MainPage extends React.Component<ReduxType, never>  {
           viewResource={this.handleViewResource}
           resources={this.props.resources}
         />
-        {!this.props.attemptingLogin && !this.props.authenticationFailed &&  <SelectDirModal/> }
+        {!this.props.attemptingLogin && !this.props.authenticationFailed && !this.props.checkingFile && <SelectDirModal/> }
       </div>
     )
   }
@@ -68,3 +69,4 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(MainPage);
+//

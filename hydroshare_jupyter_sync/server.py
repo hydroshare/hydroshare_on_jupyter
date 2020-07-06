@@ -37,6 +37,7 @@ resource_manager = ResourceManager()
 
 assets_path = Path(__file__).absolute().parent / 'assets'
 data_path = Path.cwd() / 'hydroshare' / 'local_hs_resources'
+isFile = False
 # If we're running this file directly with Python, we'll be firing up a full
 # Tornado web server, so use Tornado's RequestHandler as our base class.
 # Otherwise (i.e. if this is being run by a Jupyter notebook server) we want to
@@ -80,15 +81,22 @@ class LoginHandler(BaseRequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST')
 
     def post(self):
+        isFile = False
         credentials = json.loads(self.request.body.decode('utf-8'))
         do_save = credentials.get('remember', False)
         user_info = resource_manager.authenticate(credentials['username'],
                                                   credentials['password'],
                                                   do_save)
 
+
+        dirdetails =  Path(Path.home() / 'hydroshare' / 'dirinfo.json')
+        if dirdetails.exists():
+            isFile = True
+        print('Checking if file exists',isFile)
         self.write({
             'success': user_info is not None,
             'userInfo': user_info,
+            'isFile' : isFile,
         })
 
 
@@ -201,10 +209,18 @@ class DirectorySelectorHandler(BaseRequestHandler):
 
     def post(self):
         returnValue = ""
+        isFile = False
         dirpathinfo = json.loads(self.request.body.decode('utf-8'))
         directoryPath = dirpathinfo["dirpath"]
         choice = dirpathinfo["choice"]
         print('Dir path and choice are', directoryPath, choice)
+        self.dirdetails =  Path(Path.home() / 'hydroshare' / 'dirinfo.json')
+        if not self.dirdetails.is_dir():
+            # Let any exceptions that occur bubble up
+            self.dirdetails.mkdir(parents=True)
+        if self.dirdetails.is_dir():
+            isFile = True
+
 
         try:
             if choice == "No":
@@ -226,7 +242,7 @@ class DirectorySelectorHandler(BaseRequestHandler):
         except Exception as e:
             print('Error while setting the file path', e)
             returnValue = 'Error while setting the file path '
-
+        print('File', isFile)
         if returnValue is not "":
             self.write({
                 'success': dirpathinfo["dirpath"],
@@ -235,6 +251,7 @@ class DirectorySelectorHandler(BaseRequestHandler):
         else:
             self.write({
                 'success': "Configuration saved successfully.",
+                'isFile': isFile,
             })
 
     def createDirectory(self, defaultPath):
@@ -258,6 +275,7 @@ class DirectorySelectorHandler(BaseRequestHandler):
 
 
 class ResourceLocalFilesRequestHandler(BaseRequestHandler):
+    logging.info('Resource local Handler Class is called')
     """ Facilitates getting, deleting, and uploading to the files contained in
         a resource on the local disk """
     def set_default_headers(self):
@@ -266,10 +284,10 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                                                          'OPTIONS, POST, PUT'))
 
     def get(self, res_id):
+        logging.info('In the resource local function')
         # Handling authentication first to ensure local data if not present is downloaded from Hydroshare
         if not resource_manager.is_authenticated():
             self.write({
-                'success': False,
                 'success': False,
                 'error': HYDROSHARE_AUTHENTICATION_ERROR,
             })
@@ -647,11 +665,15 @@ class UserInfoHandler(BaseRequestHandler):
 
     def get(self):
         """ Gets the user's information (name, email, etc) from HydroShare """
+        isFile = False
         if not resource_manager.is_authenticated():
             data, error = None, HYDROSHARE_AUTHENTICATION_ERROR
         else:
             data, error = resource_manager.get_user_info()
-        self.write({'data': data, 'success': error is None, 'error': error})
+            dirdetails =  Path(Path.home() / 'hydroshare' / 'dirinfo.json')
+            if dirdetails.exists():
+                isFile = True
+        self.write({'data': data, 'success': error is None, 'isFile': isFile, 'error': error})
 
 
 class TestApp(tornado.web.Application):

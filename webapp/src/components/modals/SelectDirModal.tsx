@@ -1,14 +1,25 @@
 import * as React from 'react';
 import Modal, {
 } from "./Modal";
+//import Modal, {TextInput} from "../components/modals/Modal";
+//import Modal from '../../components/modals/Modal';
 import { NEW_FILE_OR_FOLDER_TYPES, IRootState } from '../../store/types';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { uploadNewDir } from '../../store/async-actions';
+import hideModal from '../../pages/ResourcePage';
 
-const mapStateToProps = ({ directory }: IRootState) => {
+interface IUploadFileModalProps {
+  close: () => any
+  submit: (name: string, type: string) => any
+  onFileChange: (file: any) => any
+}
+
+const mapStateToProps = ({ directory, user }: IRootState) => {
   return {
-    dirResponse: directory.dirResponse
+    dirResponse: directory.dirResponse,
+    //fileSavedResponse: directory.fileSavedResponse,
+    dirSavedResponse: user.checkingFile
   };
 };
 
@@ -18,43 +29,55 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   }
 };
 
-type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps> & IUploadFileModalProps;
+type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
 
 interface IDirectorySelectState {
   dirPath: string,
   choice: string,
   showDirectorySelector: boolean,
-
+  isShown: boolean,
+  //close: () => any,
 }
 
 /**
  * Modal to prompt user to select a directory to download their hydroshare data into their workspace
  */
 
-class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState> {
+class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState, IUploadFileModalProps> {
 
   state = {
     dirPath: '',
     choice: 'No',
-    showDirectorySelector: false
+    showDirectorySelector: false,
+    isShown: true,
+
   };
   public directoryChoice = (event: any) => {
     event.target.value === "Yes" ? this.setState({ showDirectorySelector: true, choice: "Yes" }) : this.setState({ showDirectorySelector: false, choice: "No" });
   }
   submit = () => {
     this.props.uploadNewDir(this.state.dirPath, this.state.choice);
+    this.setState({ isShown: false })
 
   }
+  isShown: any;
   render() {
+
     const showDirectorySelector: boolean = this.state.showDirectorySelector;
     const { directoryChoice } = this;
+
+    if (!this.state.isShown) {
+      return null;
+    }
     return (
+
       <Modal
-        close={() => { }}
+        close={() => { !this.state.isShown }}
         title="Configure Hydroshare directory"
-        isValid={true}
+        isValid={this.state.isShown}
         submit={this.submit}
         submitText="Select"
+
       >
 
         <label>Where do you want to save your hydroshare data?</label>
@@ -73,6 +96,7 @@ class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState> {
         {this.props.dirResponse && <p className="error">{this.props.dirResponse}</p>}
 
       </Modal>
+
     );
   }
 }
@@ -80,3 +104,5 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(SelectDirModal);
+
+//isValid={true}
