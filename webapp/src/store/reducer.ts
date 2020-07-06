@@ -35,9 +35,11 @@ const initUserState: IUserState = {
   attemptingLogin: false,
   authenticationFailed: false,
   credentialsInvalid: false,
+  checkingFile: false
 };
 const initDirectoryState: IDirectoryState = {
-  dirResponse: ''
+  dirResponse: '',
+  fileSavedResponse: false
 }
 
 export function notificationsReducer(state: INotificationsState = initNotificationsState, action: AnyAction): INotificationsState {
@@ -169,6 +171,8 @@ export function userDataReducer(state: IUserState = initUserState, action: UserA
       };
     case UserInfoActions.SET_USER_INFO:
       return {...state, userInfo: action.payload};
+    case UserInfoActions.CHECK_DIRECTORY_SAVED_RESPONSE:
+      return {...state, checkingFile: action.payload.isFile};
     default:
       return state;
   }
@@ -177,6 +181,8 @@ export function userDataReducer(state: IUserState = initUserState, action: UserA
     switch (action.type) {
       case DirectoryActions.NOTIFY_DIRECTORY_RESPONSE:
         return {...state, dirResponse: action.payload.message};
+      case DirectoryActions.NOTIFY_FILE_SAVED_RESPONSE:
+        return {...state, fileSavedResponse: action.payload.fileresponse}
       default:
         return state;
     }

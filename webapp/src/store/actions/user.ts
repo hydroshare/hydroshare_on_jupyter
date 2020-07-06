@@ -22,3 +22,6 @@ export function notifyHydroShareCredentialsInvalid() {
 export function notifyReceivedHydroShareLoginResponse(loginSuccess: boolean) {
   return action(UserInfoActions.NOTIFY_RECEIVED_HYDROSHARE_LOGIN_RESPONSE, { loginSuccess });
 }
+export function checkDirectorySavedResonse(isFile: boolean){
+  return action(UserInfoActions.CHECK_DIRECTORY_SAVED_RESPONSE, {isFile})
+}
