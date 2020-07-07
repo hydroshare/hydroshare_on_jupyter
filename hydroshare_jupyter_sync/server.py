@@ -199,13 +199,13 @@ class ResourceHandler(BaseRequestHandler):
             'error': error,
         })
 
-
 class DirectorySelectorHandler(BaseRequestHandler):
     """ Handles downloading of hydroshare data in user selected directory """
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods',
                         'DELETE, OPTIONS, GET,POST')
+
 
     def post(self):
         returnValue = ""
@@ -215,6 +215,8 @@ class DirectorySelectorHandler(BaseRequestHandler):
         choice = dirpathinfo["choice"]
         print('Dir path and choice are', directoryPath, choice)
         self.dirdetails =  Path(Path.home() / 'hydroshare' / 'dirinfo.json')
+        ##
+        WebAppHandler.get(self)
         if not self.dirdetails.is_dir():
             # Let any exceptions that occur bubble up
             self.dirdetails.mkdir(parents=True)
@@ -238,6 +240,14 @@ class DirectorySelectorHandler(BaseRequestHandler):
                     returnValue = self.createDirectory(dpath)
                 else:
                     returnValue = "Permission Denied"
+        # Notebook Configuration Path
+        #     print("Running get index html")
+        #     running_in_dev_mode = __name__ == '__main__'
+        #     self.write(get_index_html(running_in_dev_mode))
+        #     print("get index html completed")
+        #
+        #     #self.write(get_index_html())
+
 
         except Exception as e:
             print('Error while setting the file path', e)
@@ -245,7 +255,6 @@ class DirectorySelectorHandler(BaseRequestHandler):
         print('File', isFile)
         if returnValue is not "":
             self.write({
-                'success': dirpathinfo["dirpath"],
                 'error': returnValue,
             })
         else:
@@ -286,6 +295,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
     def get(self, res_id):
         logging.info('In the resource local function')
         # Handling authentication first to ensure local data if not present is downloaded from Hydroshare
+
         if not resource_manager.is_authenticated():
             self.write({
                 'success': False,
@@ -294,6 +304,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
             return
 
         local_data = ResourceLocalData(res_id)
+        print("resource id from localdata",res_id)
         if not local_data.is_downloaded():
             resource_manager.save_resource_locally(res_id)
         self.write({
