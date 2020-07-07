@@ -41,6 +41,7 @@ const mapStateToProps = ({ resources, router, user }: IRootState) => {
   const regexMatch = router.location.pathname.split('/').pop().match(/^\w+/);
   let resourceForPage;
   let resourceId = undefined;
+  
   if (regexMatch) {
     resourceId = regexMatch.pop() as string;
     if (resourceId) {
@@ -60,6 +61,7 @@ const mapStateToProps = ({ resources, router, user }: IRootState) => {
     username,
   };
 };
+
 
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {

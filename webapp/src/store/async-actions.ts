@@ -265,10 +265,12 @@ export function uploadNewDir(dirPath: string, choice: string): ThunkAction<Promi
     }
     try {
       const response = await postToBackend<IDirectoryInfo>('/selectdir', body);
-
+      dispatch(loadInitData());
       if (response.data.success) {
-        dispatch(loadInitData());
+
+        //dispatch(loadInitData());
         dispatch(DirectoryActions.notifyDirectoryResponse(response.data.success));
+        dispatch(loadInitData());
         
         //dispatch(DirectoryActions.notifyFileSavedResponse(response.data.isFile))
         console.log('Checking if File exists', response.data.isFile)
@@ -297,15 +299,19 @@ export function loginToHydroShare(username: string, password: string, remember: 
           dispatch(UserActions.checkDirectorySavedResonse(response.data.isFile))
           dispatch(loadInitData());
         }
-      
+      //dispatch(loadInitData());
         //if(UserActions.checkDirectorySavedResonse == true){
           //dispatch(loadInitData());
         //}
         //console.log('Data through Response is', response.data.isFile)
         //dispatch(loadInitData());
         dispatch(setUserInfo(response.data.userInfo));
+        //dispatch(loadInitData());
       }
-    } catch (e) {
+      
+    }
+    
+    catch (e) {
       console.error(e);
       dispatch(pushNotification('error', 'Could not login.'));
       dispatch(UserActions.notifyReceivedHydroShareLoginResponse(false));
