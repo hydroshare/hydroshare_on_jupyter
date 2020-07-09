@@ -61,6 +61,7 @@ export interface IUserState {
 
 export interface IDirectoryState {
   dirResponse: string
+  dirErrorResponse: string
   fileSavedResponse: boolean
 }
 /** --------- Data Models --------- **/

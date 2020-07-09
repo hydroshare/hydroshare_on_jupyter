@@ -16,13 +16,14 @@ import {
 } from '../store/types';
 import SelectDirModal from '../components/modals/SelectDirModal';
 
-const mapStateToProps = ({ resources, user }: IRootState) => {
+const mapStateToProps = ({ resources, user, directory }: IRootState) => {
   return {
     attemptingLogin: user.attemptingLogin,
     authenticationFailed: user.authenticationFailed,
     resources: resources.allResources,
     fetchingResources: resources.fetchingResources,
-    checkingFile: user.checkingFile
+    checkingFile: user.checkingFile,
+    isErrorMessage: directory.dirErrorResponse
   };
 };
 
