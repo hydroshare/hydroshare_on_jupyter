@@ -39,6 +39,7 @@ const initUserState: IUserState = {
 };
 const initDirectoryState: IDirectoryState = {
   dirResponse: '',
+  dirErrorResponse: '',
   fileSavedResponse: false
 }
 
@@ -181,6 +182,8 @@ export function userDataReducer(state: IUserState = initUserState, action: UserA
     switch (action.type) {
       case DirectoryActions.NOTIFY_DIRECTORY_RESPONSE:
         return {...state, dirResponse: action.payload.message};
+      case DirectoryActions.NOTIFY_DIRECTORY_ERROR_RESPONSE:
+        return {...state, dirErrorResponse: action.payload.message};
       case DirectoryActions.NOTIFY_FILE_SAVED_RESPONSE:
         return {...state, fileSavedResponse: action.payload.fileresponse}
       default:

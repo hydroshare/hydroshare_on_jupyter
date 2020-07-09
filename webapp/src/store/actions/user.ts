@@ -25,3 +25,7 @@ export function notifyReceivedHydroShareLoginResponse(loginSuccess: boolean) {
 export function checkDirectorySavedResonse(isFile: boolean){
   return action(UserInfoActions.CHECK_DIRECTORY_SAVED_RESPONSE, {isFile})
 }
+// new function for logout
+export function removeUserInfo(loginSuccess: boolean){
+  return action(UserInfoActions.LOGOUT)
+ }

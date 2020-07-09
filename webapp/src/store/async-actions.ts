@@ -267,17 +267,17 @@ export function uploadNewDir(dirPath: string, choice: string): ThunkAction<Promi
       const response = await postToBackend<IDirectoryInfo>('/selectdir', body);
       dispatch(loadInitData());
       if (response.data.success) {
-
-        //dispatch(loadInitData());
-        dispatch(DirectoryActions.notifyDirectoryResponse(response.data.success));
         dispatch(loadInitData());
-        
+        dispatch(DirectoryActions.notifyDirectoryResponse(response.data.success));
+
         //dispatch(DirectoryActions.notifyFileSavedResponse(response.data.isFile))
         console.log('Checking if File exists', response.data.isFile)
       }
       if (response.data.error) {
         dispatch(loadInitData());
-        dispatch(DirectoryActions.notifyDirectoryResponse(response.data.error));
+        dispatch(DirectoryActions.notifyDirectoryErrorResponse(response.data.error));
+        dispatch(pushNotification('error', response.data.error));
+        //dispatch(DirectoryActions.notifyDirectoryResponse(response.data.error));
         console.log('response.data')
       }
     } catch (e) {
@@ -287,6 +287,7 @@ export function uploadNewDir(dirPath: string, choice: string): ThunkAction<Promi
     }
   };
 }
+
 
 export function loginToHydroShare(username: string, password: string, remember: boolean): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
@@ -318,6 +319,37 @@ export function loginToHydroShare(username: string, password: string, remember: 
     }
   };
 }
+export function logoutToHydroShare(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    try {
+      const response = await deleteToBackend<IAttemptHydroShareLoginResponse>('/login');
+      let tempCookie = document.cookie;
+      console.log('temp cookie is', tempCookie)
+      tempCookie = "_xsrf= ";
+      // // Send your request
+      // document.cookie = tempCookie;
+      // console.log('reset cookie is', tempCookie)
+      dispatch(UserActions.removeUserInfo(true));
+      //dispatch(UserActions.notifyHydroShareCredentialsInvalid());
+      //dispatch(UserActions.notifyReceivedHydroShareLoginResponse(response.data.success));
+      //window.alert('Under dispatch'+response)
+      if (response.status === 200) {
+        //dispatch(loadInitData());
+        window.alert('Success!');
+        //loginToHydroShare(username, password, remember)
+        dispatch(UserActions.notifyReceivedHydroShareLoginResponse(false));
+        //dispatch(loadInitData());
+    }
+    } catch (e) {
+      window.alert('Failure!');
+      console.error(e);
+      dispatch(pushNotification('error', 'Could not logout.'));
+      dispatch(UserActions.notifyReceivedHydroShareLoginResponse(true));
+    }
+  };
+}
+
+
 export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     try {
