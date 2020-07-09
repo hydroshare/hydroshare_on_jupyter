@@ -54,11 +54,13 @@ class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState, I
   };
   public directoryChoice = (event: any) => {
     event.target.value === "Yes" ? this.setState({ showDirectorySelector: true, choice: "Yes" }) : this.setState({ showDirectorySelector: false, choice: "No" });
+
   }
   submit = () => {
-    if (this.props.dirErrorResponse === ""){
+    {
         this.props.uploadNewDir(this.state.dirPath, this.state.choice);
         this.setState({ isShown: false })
+        this.props.dirErrorResponse == "";
     }
   }
   isShown: any;
@@ -66,19 +68,20 @@ class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState, I
 
     const showDirectorySelector: boolean = this.state.showDirectorySelector;
     const { directoryChoice } = this;
-
     if (!this.state.isShown && this.props.dirErrorResponse == "") {
       return null;
     }
     return (
 
       <Modal
-        close={() => { !this.state.isShown && this.props.dirErrorResponse === "" }}
+        close={() => { return null }}
         title="Configure Hydroshare directory"
-        isValid={this.state.isShown}
+        isValid={this.state.isShown || this.props.dirErrorResponse !== ''}
         submit={this.submit}
-        submitText="Select"
-
+        submitText="Select Directory"
+        cancelText = "Cancel"
+        isCancelDisabled = {true}
+        isCloseDisabled = {true}
       >
 
         <label>Where do you want to save your hydroshare data?</label>
@@ -91,7 +94,7 @@ class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState, I
         <br />
         {showDirectorySelector && <div>
           <label>Enter your custom directory path</label><br />
-          <input id="myFile" type="text" width="100%" onChange={(event) => { this.setState({ dirPath: event.target.value }) }} />
+          <input id="myFile" type="text" onChange={(event) => { this.setState({ dirPath: event.target.value }) }} />
         </div>
         }
         {this.props.dirErrorResponse && <p className="error">{this.props.dirErrorResponse}</p>}
