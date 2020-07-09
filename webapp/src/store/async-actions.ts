@@ -323,23 +323,13 @@ export function logoutToHydroShare(): ThunkAction<Promise<void>, {}, {}, AnyActi
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     try {
       const response = await deleteToBackend<IAttemptHydroShareLoginResponse>('/login');
-      console.log('response is')
       let tempCookie = document.cookie;
       console.log('temp cookie is', tempCookie)
       tempCookie = "_xsrf= ";
-      // // Send your request
-      // document.cookie = tempCookie;
-      // console.log('reset cookie is', tempCookie)
       dispatch(UserActions.removeUserInfo(true));
-      //dispatch(UserActions.notifyHydroShareCredentialsInvalid());
-      //dispatch(UserActions.notifyReceivedHydroShareLoginResponse(response.data.success));
-      //window.alert('Under dispatch'+response)
       if (response.status === 200) {
-        //dispatch(loadInitData());
         window.alert('Success!');
-        //loginToHydroShare(username, password, remember)
         dispatch(UserActions.notifyReceivedHydroShareLoginResponse(false));
-        //dispatch(loadInitData());
     }
     } catch (e) {
       window.alert('Failure!');
