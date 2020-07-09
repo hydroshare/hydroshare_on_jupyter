@@ -79,13 +79,13 @@ class LoginHandler(BaseRequestHandler):
     """ Handles authenticating the user with HydroShare """
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
-        self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST')
+        self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST,DELETE ')
 
     def delete(self):
         if os.path.isfile(credential_path):
-            resource_manager.hs_api_conn = None
             logging.info('Deleting the credential file which contains user information')
             os.remove(credential_path)
+            resource_manager.hs_api_conn = None
             # logging.info(f'Available cookies after logout {self.request.cookies}')
             # self.request.cookies.clear
             s = requests.Session()
@@ -233,17 +233,20 @@ class DirectorySelectorHandler(BaseRequestHandler):
         print('Dir path and choice are', directoryPath, choice)
         self.dirdetails =  Path(Path.home() / 'hydroshare' / 'dirinfo.json')
         ##
-        if not self.dirdetails.is_dir():
+        ##if not self.directoryPath.is_dir():
             # Let any exceptions that occur bubble up
-            self.dirdetails.mkdir(parents=True)
-        if self.dirdetails.is_dir():
-            isFile = True
+          #  self.dirdetails.mkdir(parents=True)
 
+        #if self.dirdetails.is_dir():
+            #isFile = True
 
         try:
             if choice == "No":
                 hydroshare = 'hydroshare'
                 returnValue = self.createDirectory(Path.home() / hydroshare)
+                self.dirdetails.mkdir(parents=True)
+                isFile = True
+
             elif choice == "Yes":
                 dpath = Path(directoryPath)
                 print('datapath is', dpath)
@@ -254,6 +257,9 @@ class DirectorySelectorHandler(BaseRequestHandler):
 
                 elif os.access(dpath, os.W_OK):
                     returnValue = self.createDirectory(dpath)
+                    self.dirdetails.mkdir(parents=True)
+                    isFile = True
+
                 else:
                     returnValue = "Permission Denied"
 
