@@ -323,6 +323,7 @@ export function logoutToHydroShare(): ThunkAction<Promise<void>, {}, {}, AnyActi
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     try {
       const response = await deleteToBackend<IAttemptHydroShareLoginResponse>('/login');
+      console.log('response is')
       let tempCookie = document.cookie;
       console.log('temp cookie is', tempCookie)
       tempCookie = "_xsrf= ";
