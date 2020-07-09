@@ -12,6 +12,7 @@ import json
 import logging
 import os
 import signal
+import requests
 import sys
 from pathlib import Path
 import tornado.ioloop
@@ -20,7 +21,7 @@ import tornado.web
 from hs_restclient import exceptions as HSExceptions
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
-
+from hydroshare_jupyter_sync.credential_reader_writer import credential_path
 from hydroshare_jupyter_sync.config_reader_writer import (set_config_values)
 from hydroshare_jupyter_sync.index_html import get_index_html
 from hydroshare_jupyter_sync.resource_hydroshare_data import (
@@ -80,6 +81,24 @@ class LoginHandler(BaseRequestHandler):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST')
 
+    def delete(self):
+        if os.path.isfile(credential_path):
+            resource_manager.hs_api_conn = None
+            logging.info('Deleting the credential file which contains user information')
+            os.remove(credential_path)
+            # logging.info(f'Available cookies after logout {self.request.cookies}')
+            # self.request.cookies.clear
+            s = requests.Session()
+            print(s.cookies.__dict__)
+            # s.cookies.clear()
+            s.cookies.clear_session_cookies
+            print(s.cookies.__dict__)
+            logging.info(f'Available cookies after logout {self.request.cookies}')
+            logging.info('cookie deleted through request object')
+
+        else:  ## Show an error ##
+            print("Error: %s file does not exist", credential_path)
+
     def post(self):
         isFile = False
         credentials = json.loads(self.request.body.decode('utf-8'))
@@ -87,8 +106,6 @@ class LoginHandler(BaseRequestHandler):
         user_info = resource_manager.authenticate(credentials['username'],
                                                   credentials['password'],
                                                   do_save)
-
-
         dirdetails =  Path(Path.home() / 'hydroshare' / 'dirinfo.json')
         if dirdetails.exists():
             isFile = True
@@ -216,7 +233,6 @@ class DirectorySelectorHandler(BaseRequestHandler):
         print('Dir path and choice are', directoryPath, choice)
         self.dirdetails =  Path(Path.home() / 'hydroshare' / 'dirinfo.json')
         ##
-        WebAppHandler.get(self)
         if not self.dirdetails.is_dir():
             # Let any exceptions that occur bubble up
             self.dirdetails.mkdir(parents=True)
@@ -240,14 +256,6 @@ class DirectorySelectorHandler(BaseRequestHandler):
                     returnValue = self.createDirectory(dpath)
                 else:
                     returnValue = "Permission Denied"
-        # Notebook Configuration Path
-        #     print("Running get index html")
-        #     running_in_dev_mode = __name__ == '__main__'
-        #     self.write(get_index_html(running_in_dev_mode))
-        #     print("get index html completed")
-        #
-        #     #self.write(get_index_html())
-
 
         except Exception as e:
             print('Error while setting the file path', e)
