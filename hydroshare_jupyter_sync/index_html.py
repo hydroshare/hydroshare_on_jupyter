@@ -11,7 +11,7 @@ from pathlib import Path
 
 _frontend_url = ''
 _backend_api_url = '/syncApi'
-
+from pathlib import Path
 
 def set_frontend_url(url):
     global _frontend_url

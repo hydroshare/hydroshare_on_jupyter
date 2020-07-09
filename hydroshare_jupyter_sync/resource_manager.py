@@ -18,6 +18,8 @@ from hs_restclient.exceptions import HydroShareHTTPException
 
 from hydroshare_jupyter_sync.config_reader_writer import (get_config_values,
                                                           set_config_values)
+from hydroshare_jupyter_sync.credential_reader_writer import (get_credential_values,
+                                                          set_credential_values)
 
 HYDROSHARE_AUTHENTICATION_ERROR = {
     'type': 'HydroShareAuthenticationError',
@@ -81,13 +83,13 @@ class ResourceManager:
         """
         if not username or not password:
             # Check the config file for a username and password
-            config = get_config_values(['u', 'p'])
-            if not config or 'u' not in config or 'p' not in config:
+            credentials = get_credential_values(['u', 'p'])
+            if not credentials or 'u' not in credentials or 'p' not in credentials:
                 # No passed credentials and no saved credentials --
                 # can't authenticate
                 return None
-            username = config['u']
-            password = base64.b64decode(config['p']).decode('utf-8')
+            username = credentials['u']
+            password = base64.b64decode(credentials['p']).decode('utf-8')
 
         # Try to authenticate
         auth = HydroShareAuthBasic(username=username, password=password)
@@ -103,7 +105,7 @@ class ResourceManager:
         # Authentication succeeded
         if save:
             # Save the username and password
-            saved_successfully = set_config_values({
+            saved_successfully = set_credential_values({
                 'u':
                     username,
                 'p':
