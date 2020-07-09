@@ -3,11 +3,10 @@ import Modal, {
 } from "./Modal";
 //import Modal, {TextInput} from "../components/modals/Modal";
 //import Modal from '../../components/modals/Modal';
-import { NEW_FILE_OR_FOLDER_TYPES, IRootState } from '../../store/types';
+import { IRootState } from '../../store/types';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { uploadNewDir } from '../../store/async-actions';
-import hideModal from '../../pages/ResourcePage';
 
 interface IUploadFileModalProps {
   close: () => any
@@ -18,6 +17,7 @@ interface IUploadFileModalProps {
 const mapStateToProps = ({ directory, user }: IRootState) => {
   return {
     dirResponse: directory.dirResponse,
+    dirErrorResponse: directory.dirErrorResponse,
     //fileSavedResponse: directory.fileSavedResponse,
     dirSavedResponse: user.checkingFile
   };
@@ -56,9 +56,10 @@ class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState, I
     event.target.value === "Yes" ? this.setState({ showDirectorySelector: true, choice: "Yes" }) : this.setState({ showDirectorySelector: false, choice: "No" });
   }
   submit = () => {
-    this.props.uploadNewDir(this.state.dirPath, this.state.choice);
-    this.setState({ isShown: false })
-
+    if (this.props.dirErrorResponse === ""){
+        this.props.uploadNewDir(this.state.dirPath, this.state.choice);
+        this.setState({ isShown: false })
+    }
   }
   isShown: any;
   render() {
@@ -66,13 +67,13 @@ class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState, I
     const showDirectorySelector: boolean = this.state.showDirectorySelector;
     const { directoryChoice } = this;
 
-    if (!this.state.isShown) {
+    if (!this.state.isShown && this.props.dirErrorResponse == "") {
       return null;
     }
     return (
 
       <Modal
-        close={() => { !this.state.isShown }}
+        close={() => { !this.state.isShown && this.props.dirErrorResponse === "" }}
         title="Configure Hydroshare directory"
         isValid={this.state.isShown}
         submit={this.submit}
@@ -93,7 +94,7 @@ class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState, I
           <input id="myFile" type="text" width="100%" onChange={(event) => { this.setState({ dirPath: event.target.value }) }} />
         </div>
         }
-        {this.props.dirResponse && <p className="error">{this.props.dirResponse}</p>}
+        {this.props.dirErrorResponse && <p className="error">{this.props.dirErrorResponse}</p>}
 
       </Modal>
 
