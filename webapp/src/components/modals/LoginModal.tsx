@@ -9,7 +9,7 @@ import {
 } from '../../store/async-actions';
 
 import Modal, {
-  CheckboxInput,
+ // CheckboxInput,
   TextInput,
 } from "./Modal";
 
@@ -53,7 +53,7 @@ const LoginModal: React.FC<ComponentPropTypes> = (props: ComponentPropTypes) => 
 
   const usernameChange = (username: string) => setState({ ...state, username });
   const passwordChange = (password: string) => setState({ ...state, password });
-  const rememberChange = (remember: boolean) => setState({ ...state, remember });
+  //const rememberChange = (remember: boolean) => setState({ ...state, remember });
 
   const isValid = state.username.length > 0 && state.password.length > 0;
 
@@ -70,7 +70,7 @@ const LoginModal: React.FC<ComponentPropTypes> = (props: ComponentPropTypes) => 
         <TextInput placeholder="Username" onChange={usernameChange} value={state.username} pattern="^[\w,\-\.]+$" />
         <TextInput placeholder="Password" onChange={passwordChange} value={state.password} isPassword={true} />
         {props.credentialsInvalid && <p className="error">Sorry, that username and password is incorrect.</p>}
-        <CheckboxInput checked={state.remember} label="Remember" onChange={rememberChange} />
+
       </Modal>
   );
 }
@@ -79,3 +79,4 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(LoginModal);
+// <CheckboxInput checked={state.remember} label="Remember" onChange={rememberChange} />

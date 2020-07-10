@@ -222,15 +222,11 @@ def _get_path_to_resources_data_root():
     if _root_data_path is None:
         config = get_config_values(['dataPath'])
         if config and 'dataPath' in config:
-            print("condition 1 getting called")
             _root_data_path = Path(config['dataPath'])
-            print("Root Data Path is:",_root_data_path)
         else: 
             # TODO: Rename to hydroshare_resource_data (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/38)
-            print("condition 2 getting called")
             _root_data_path = Path.cwd() / 'local_hs_resources'
         if not _root_data_path.is_dir():
             # Let any exceptions that occur bubble up
             _root_data_path.mkdir(parents=True)
-            print("condition 3 getting called")
     return _root_data_path

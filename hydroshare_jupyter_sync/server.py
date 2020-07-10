@@ -86,17 +86,14 @@ class LoginHandler(BaseRequestHandler):
             logging.info('Deleting the credential file which contains user information')
             os.remove(credential_path)
             resource_manager.hs_api_conn = None
-            # logging.info(f'Available cookies after logout {self.request.cookies}')
-            # self.request.cookies.clear
             s = requests.Session()
             print(s.cookies.__dict__)
-            # s.cookies.clear()
             s.cookies.clear_session_cookies
             print(s.cookies.__dict__)
             logging.info(f'Available cookies after logout {self.request.cookies}')
             logging.info('cookie deleted through request object')
 
-        else:  ## Show an error ##
+        else:
             print("Error: %s file does not exist", credential_path)
 
     def post(self):

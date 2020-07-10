@@ -16,10 +16,9 @@ from pathlib import Path
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from hs_restclient.exceptions import HydroShareHTTPException
 
-from hydroshare_jupyter_sync.config_reader_writer import (get_config_values,
-                                                          set_config_values)
+from hydroshare_jupyter_sync.config_reader_writer import (get_config_values)
 from hydroshare_jupyter_sync.credential_reader_writer import (get_credential_values,
-                                                          set_credential_values)
+                                                              set_credential_values)
 
 HYDROSHARE_AUTHENTICATION_ERROR = {
     'type': 'HydroShareAuthenticationError',
@@ -39,6 +38,7 @@ class ResourceManager:
     This is where they will be able to delete a resource, create a new one, or
     just get the list of a user's resources in hydroshare or jupyterhub.
     """
+
     def __init__(self):
         """Makes an output folder for storing HS files locally, if none exists,
         and sets up authentication on hydroshare API.
@@ -103,19 +103,19 @@ class ResourceManager:
             raise e  # Some other error -- bubble it up
 
         # Authentication succeeded
-        if save:
-            # Save the username and password
-            saved_successfully = set_credential_values({
-                'u':
-                    username,
-                'p':
-                    str(
-                        base64.b64encode(
-                            password.encode('utf-8')).decode('utf-8')),
-            })
-            if saved_successfully:
-                logging.info('Successfully saved HydroShare credentials to '
-                             'config file.')
+        # if save:
+        # Save the username and password
+        saved_successfully = set_credential_values({
+            'u':
+                username,
+            'p':
+                str(
+                    base64.b64encode(
+                        password.encode('utf-8')).decode('utf-8')),
+        })
+        if saved_successfully:
+            logging.info('Successfully saved HydroShare credentials to '
+                         'config file.')
 
         return user_info  # Authenticated successfully
 
@@ -132,7 +132,6 @@ class ResourceManager:
             :type res_id: str
         """
         # Get resource from HS if it doesn't already exist locally
-        print("resource id from save function",res_id)
         config = get_config_values(['dataPath', 'hydroShareHostname'])
         self.output_folder = Path(config['dataPath'])
         if not (self.output_folder / res_id).exists():
@@ -140,8 +139,8 @@ class ResourceManager:
             print("Output Folder")
             print(self.output_folder / res_id)
             self.hs_api_conn.getResource(res_id,
-                                             destination=self.output_folder,
-                                             unzip=True)
+                                         destination=self.output_folder,
+                                         unzip=True)
 
     def get_user_info(self):
         """Gets information about the user currently logged into HydroShare
