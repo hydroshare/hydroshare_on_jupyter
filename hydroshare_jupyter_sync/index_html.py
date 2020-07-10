@@ -45,7 +45,6 @@ def get_index_html(dev_mode=False):
             config_data_path = str(config['dataPath'])
             config_new_path = config_data_path.replace(str(Path.home()),'')
             print("Config new path is :",config_new_path)
-            print("We are inside the dataPath generation logic")
             notebook_url_path_prefix = url_path_join('/tree',
                                                      config_new_path)
     bundle_suffix = 'dev' if dev_mode else 'dist'
