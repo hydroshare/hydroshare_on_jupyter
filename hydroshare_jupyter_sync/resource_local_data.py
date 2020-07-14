@@ -7,7 +7,8 @@ Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 """
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
-
+import hashlib
+import json
 import os
 import glob
 import shutil
@@ -28,6 +29,28 @@ class ResourceLocalData:
         self.data_path = (_get_path_to_resources_data_root() / resource_id
                           / resource_id / 'data' / 'contents')
         print("Resource data_path is : ",self.data_path)
+
+    def get_md5(self, resource_id):
+        """ Gets the md5 of local resource"""
+        self.md5_path = (_get_path_to_resources_data_root() / resource_id
+                          / resource_id / 'data/contents')
+        dict1 = {}
+        for e in self.md5_path.rglob('*'):
+            md5_hash = hashlib.md5()
+            a_file = open(e, "rb")
+            content = a_file.read()
+            # Computing md5 hash for local resources and storing those in json file
+            md5_hash.update(content)
+            digest = md5_hash.hexdigest()
+            filename = e.parts[-1]
+            dict1[filename] = digest
+            out_file = open(os.path.expanduser(os.path.join("~/hydroshare", "local_md5" + ".json")), "w")
+            json.dump(dict1, out_file, indent=4, sort_keys=False)
+
+        out_file.close()
+        local_md5_path = os.path.expanduser(os.path.join("~/hydroshare", "local_md5.json"))
+        local_overall_md5 = hashlib.md5(open(local_md5_path, 'rb').read()).hexdigest()
+        return local_overall_md5
 
     def is_downloaded(self):
         """ Checks if a local copy of this resource's data exists """

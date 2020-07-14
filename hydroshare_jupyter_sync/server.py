@@ -113,6 +113,54 @@ class LoginHandler(BaseRequestHandler):
             'isFile' : isFile,
         })
 
+class Localmd5Handler(BaseRequestHandler):
+
+    """ Handles calculation of local md5 values """
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST,DELETE,GET ')
+
+    def get(self, res_id):
+        print('Inside post')
+        local_data = ResourceLocalData(res_id)
+        print('fecthing local data')
+        local_data.get_md5(res_id)
+
+        self.write({
+            'success': 'success',
+            'userInfo': '',
+        })
+
+class Hsmd5Handler(BaseRequestHandler):
+
+    """ Handles calculation of local md5 values """
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST,DELETE,GET ')
+
+    def get(self, res_id):
+        diff_overall = True
+        if not resource_manager.is_authenticated():
+            self.write({
+                'success': False,
+                'error': HYDROSHARE_AUTHENTICATION_ERROR,
+            })
+            return
+
+        print('Inside get function of hsmd5')
+        hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
+        hs_overall_md5 = hs_data.get_hs_md5(res_id)
+        local_data = ResourceLocalData(res_id)
+        local_overall_md5 =  local_data.get_md5(res_id)
+        if hs_overall_md5 != local_overall_md5:
+            diff_overall = False
+
+        print('fetching hydroshare data')
+
+        self.write({
+            'success': diff_overall
+        })
+
 
 class ResourcesRootHandler(BaseRequestHandler):
     """ Handles /resources. Gets a user's resources (with metadata) and
@@ -304,6 +352,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                                                          'OPTIONS, POST, PUT'))
 
     def get(self, res_id):
+        print('In the local resource function')
         logging.info('In the resource local function')
         # Handling authentication first to ensure local data if not present is downloaded from Hydroshare
 
@@ -452,9 +501,10 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                 'error': HYDROSHARE_AUTHENTICATION_ERROR,
             })
             return
-
+        print("In get of resource hydroshare file request handler")
         hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         root_dir = hs_data.get_files()
+        print('after root dir value is fetched')
         self.write({'rootDir': root_dir})
 
     # TODO: Move the bulk of this function out of this file and
@@ -732,6 +782,9 @@ def get_route_handlers(frontend_url, backend_url):
         (url_path_join(backend_url, r"/resources/([^/]+)/local-files"),
          ResourceLocalFilesRequestHandler),
         (url_path_join(backend_url, "/selectdir"), DirectorySelectorHandler),
+        (url_path_join(backend_url, r"/resources/([^/]+)/localmd5"), Localmd5Handler),
+
+        (url_path_join(backend_url, r"/resources/([^/]+)/hsmd5"), Hsmd5Handler),
         (url_path_join(backend_url,
                        r"/resources/([^/]+)/move-copy-files"), MoveCopyFiles),
         # Put this last to catch everything else
