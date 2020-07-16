@@ -12,17 +12,19 @@ import json
 import logging
 import os
 import signal
-import requests
 import sys
 from pathlib import Path
+
+import requests
 import tornado.ioloop
 import tornado.options
 import tornado.web
 from hs_restclient import exceptions as HSExceptions
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
-from hydroshare_jupyter_sync.credential_reader_writer import credential_path
+
 from hydroshare_jupyter_sync.config_reader_writer import (set_config_values)
+from hydroshare_jupyter_sync.credential_reader_writer import credential_path
 from hydroshare_jupyter_sync.index_html import get_index_html
 from hydroshare_jupyter_sync.resource_hydroshare_data import (
     ResourceHydroShareData, HS_PREFIX)
@@ -51,11 +53,12 @@ BaseHandler = (tornado.web.RequestHandler
 class BaseRequestHandler(BaseHandler):
     """ Sets the headers for all the request handlers that extend
         this class """
+
     def set_default_headers(self):
         # TODO: change from * (any server) to our specific url (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/40)
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, "
-                        "content-type, x-xsrftoken")
+                                                        "content-type, x-xsrftoken")
 
     def options(self, _=None):
         # web browsers make an OPTIONS request to check what methods (line 31)
@@ -66,6 +69,7 @@ class BaseRequestHandler(BaseHandler):
 
 class WebAppHandler(BaseRequestHandler):
     """ Serves up the HTML for the React web app """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
@@ -77,20 +81,24 @@ class WebAppHandler(BaseRequestHandler):
 
 class LoginHandler(BaseRequestHandler):
     """ Handles authenticating the user with HydroShare """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
-        self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST,DELETE ')
+        self.set_header('Access-Control-Allow-Methods',
+                        'OPTIONS, POST,DELETE ')
 
     def delete(self):
         if os.path.isfile(credential_path):
-            logging.info('Deleting the credential file which contains user information')
+            logging.info(
+                'Deleting the credential file which contains user information')
             os.remove(credential_path)
             resource_manager.hs_api_conn = None
             s = requests.Session()
             print(s.cookies.__dict__)
             s.cookies.clear_session_cookies
             print(s.cookies.__dict__)
-            logging.info(f'Available cookies after logout {self.request.cookies}')
+            logging.info(
+                f'Available cookies after logout {self.request.cookies}')
             logging.info('cookie deleted through request object')
 
         else:
@@ -103,22 +111,24 @@ class LoginHandler(BaseRequestHandler):
         user_info = resource_manager.authenticate(credentials['username'],
                                                   credentials['password'],
                                                   do_save)
-        dirdetails =  Path(Path.home() / 'hydroshare' / 'dirinfo.json')
+        dirdetails = Path(Path.home() / 'hydroshare' / 'dirinfo.json')
         if dirdetails.exists():
             isFile = True
-        print('Checking if file exists',isFile)
+        print('Checking if file exists', isFile)
         self.write({
             'success': user_info is not None,
             'userInfo': user_info,
-            'isFile' : isFile,
+            'isFile': isFile,
         })
 
-class Localmd5Handler(BaseRequestHandler):
 
+class Localmd5Handler(BaseRequestHandler):
     """ Handles calculation of local md5 values """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
-        self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST,DELETE,GET ')
+        self.set_header('Access-Control-Allow-Methods',
+                        'OPTIONS, POST,DELETE,GET ')
 
     def get(self, res_id):
         print('Inside post')
@@ -131,12 +141,14 @@ class Localmd5Handler(BaseRequestHandler):
             'userInfo': '',
         })
 
-class Hsmd5Handler(BaseRequestHandler):
 
+class Hsmd5Handler(BaseRequestHandler):
     """ Handles calculation of local md5 values """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
-        self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST,DELETE,GET ')
+        self.set_header('Access-Control-Allow-Methods',
+                        'OPTIONS, POST,DELETE,GET ')
 
     def get(self, res_id):
         diff_overall = True
@@ -151,20 +163,19 @@ class Hsmd5Handler(BaseRequestHandler):
         hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         hs_overall_md5 = hs_data.get_hs_md5(res_id)
         local_data = ResourceLocalData(res_id)
-        local_overall_md5 =  local_data.get_md5(res_id)
+        local_overall_md5 = local_data.get_md5(res_id)
         if hs_overall_md5 != local_overall_md5:
             diff_overall = False
 
         print('fetching hydroshare data')
 
-        self.write({
-            'success': diff_overall
-        })
+        self.write({'success': diff_overall})
 
 
 class ResourcesRootHandler(BaseRequestHandler):
     """ Handles /resources. Gets a user's resources (with metadata) and
         creates new resources. """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST')
@@ -221,7 +232,7 @@ class ResourcesRootHandler(BaseRequestHandler):
                 'success': False,
                 'error': {
                     'type':
-                    'InvalidRequest',
+                        'InvalidRequest',
                     'message': ('The request body must specify '
                                 '"title" and "creators".'),
                 },
@@ -238,6 +249,7 @@ class ResourcesRootHandler(BaseRequestHandler):
 
 class ResourceHandler(BaseRequestHandler):
     """ Handles resource-specific requests made to /resources/<resource_id> """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'DELETE, OPTIONS')
@@ -261,13 +273,14 @@ class ResourceHandler(BaseRequestHandler):
             'error': error,
         })
 
+
 class DirectorySelectorHandler(BaseRequestHandler):
     """ Handles downloading of hydroshare data in user selected directory """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods',
                         'DELETE, OPTIONS, GET,POST')
-
 
     def post(self):
         returnValue = ""
@@ -276,14 +289,14 @@ class DirectorySelectorHandler(BaseRequestHandler):
         directoryPath = dirpathinfo["dirpath"]
         choice = dirpathinfo["choice"]
         print('Dir path and choice are', directoryPath, choice)
-        self.dirdetails =  Path(Path.home() / 'hydroshare' / 'dirinfo.json')
+        self.dirdetails = Path(Path.home() / 'hydroshare' / 'dirinfo.json')
         ##
         ##if not self.directoryPath.is_dir():
-            # Let any exceptions that occur bubble up
-          #  self.dirdetails.mkdir(parents=True)
+        # Let any exceptions that occur bubble up
+        #  self.dirdetails.mkdir(parents=True)
 
-        #if self.dirdetails.is_dir():
-            #isFile = True
+        # if self.dirdetails.is_dir():
+        # isFile = True
 
         try:
             if choice == "No":
@@ -328,9 +341,9 @@ class DirectorySelectorHandler(BaseRequestHandler):
         logpath = Path.home() / 'hydroshare' / 'sync.log'
         saved_successfully = set_config_values({
             "dataPath":
-            str(defaultPath / localhsResources),
+                str(defaultPath / localhsResources),
             "logPath":
-            str(logpath)
+                str(logpath)
         })
         if saved_successfully:
             logging.info('Successfully saved dataPath value to '
@@ -346,6 +359,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
     logging.info('Resource local Handler Class is called')
     """ Facilitates getting, deleting, and uploading to the files contained in
         a resource on the local disk """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', ('DELETE, GET,'
@@ -364,7 +378,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
             return
 
         local_data = ResourceLocalData(res_id)
-        print("resource id from localdata",res_id)
+        print("resource id from localdata", res_id)
         if not local_data.is_downloaded():
             resource_manager.save_resource_locally(res_id)
         self.write({
@@ -421,7 +435,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                     'success': False,
                     'error': {
                         'type':
-                        'UnknownError',
+                            'UnknownError',
                         'message': (f'An unknown error occurred when '
                                     f'attempting to delete {item_path}.')
                     }
@@ -490,6 +504,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
 
 class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
     """ Handles getting and deleting the files in a HydroShare resource """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'DELETE, GET, OPTIONS')
@@ -562,7 +577,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                     'error': {
                         'type': 'NotFoundError',
                         'message': f'Could not find {item_path} in '
-                        'HydroShare.',
+                                   'HydroShare.',
                     },
                 })
             except HSExceptions.HydroShareNotAuthorized:
@@ -570,7 +585,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                     'success': False,
                     'error': {
                         'type':
-                        'NotAuthorizedError',
+                            'NotAuthorizedError',
                         'message': (f'Could not delete {item_path}. Do you '
                                     'have write access to the resource?'),
                     },
@@ -581,7 +596,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                     'success': False,
                     'error': {
                         'type':
-                        'UnknownError',
+                            'UnknownError',
                         'message': (f'An unknown error occurred when'
                                     ' attempting to delete {item_path}.')
                     }
@@ -599,9 +614,48 @@ MOVE = 'move'
 COPY = 'copy'
 
 
+class DownloadHydroShareFilesRequestHandler(BaseRequestHandler):
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods',
+                        'DELETE, GET, OPTIONS, POST')
+
+    def post(self, res_id):
+        if not resource_manager.is_authenticated():
+            self.write({
+                'success': False,
+                'error': HYDROSHARE_AUTHENTICATION_ERROR,
+            })
+            return
+
+        data = json.loads(self.request.body.decode('utf-8'))
+        print('Data from json is', data)
+        file_and_folder_paths = data.get('files')
+        print('files selected to download are', file_and_folder_paths)
+        if file_and_folder_paths is None:
+            self.set_status(400)  # Bad Request
+            self.write('Could not find "files" in request body.')
+            return
+        for item_path in file_and_folder_paths:
+            # Remove any leading /
+            if item_path.startswith('/'):
+                item_path = item_path[1:]
+                print('item path after removing slash is', item_path)
+            local_data = ResourceLocalData(res_id)
+            hs_data = ResourceHydroShareData(resource_manager.hs_api_conn,
+                                             res_id)
+            resource_manager.save_file_locally(res_id, item_path)
+
+        self.write({
+            'readMe': local_data.get_readme(),
+            'rootDir': local_data.get_files_and_folders(),
+        })
+
+
 class MoveCopyFiles(BaseRequestHandler):
     """ Handles moving (or renaming) files within the local filesystem,
         on HydroShare, and between the two. """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'PATCH, OPTIONS')
@@ -657,7 +711,7 @@ class MoveCopyFiles(BaseRequestHandler):
                             'success': False,
                             'error': {
                                 'type':
-                                'FileOrFolderExists',
+                                    'FileOrFolderExists',
                                 'message': (f'The file {dest_path} already '
                                             'exists in HydroShare.'),
                             },
@@ -731,6 +785,7 @@ class UserInfoHandler(BaseRequestHandler):
         from HydroShare and storing the user's
         HydroShare credentials.
      """
+
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
@@ -742,10 +797,15 @@ class UserInfoHandler(BaseRequestHandler):
             data, error = None, HYDROSHARE_AUTHENTICATION_ERROR
         else:
             data, error = resource_manager.get_user_info()
-            dirdetails =  Path(Path.home() / 'hydroshare' / 'dirinfo.json')
+            dirdetails = Path(Path.home() / 'hydroshare' / 'dirinfo.json')
             if dirdetails.exists():
                 isFile = True
-        self.write({'data': data, 'success': error is None, 'isFile': isFile, 'error': error})
+        self.write({
+            'data': data,
+            'success': error is None,
+            'isFile': isFile,
+            'error': error
+        })
 
 
 class TestApp(tornado.web.Application):
@@ -767,24 +827,27 @@ def get_route_handlers(frontend_url, backend_url):
     return [
         (url_path_join(frontend_url,
                        r"/assets/(.*)"), tornado.web.StaticFileHandler, {
-                           'path': str(assets_path)
-                       }),
+             'path': str(assets_path)
+         }),
         (url_path_join(backend_url,
                        r"/download/(.*)"), tornado.web.StaticFileHandler, {
-                           'path': str(data_path)
-                       }),
+             'path': str(data_path)
+         }),
         (url_path_join(backend_url, "/login"), LoginHandler),
         (url_path_join(backend_url, r"/user"), UserInfoHandler),
         (url_path_join(backend_url, r"/resources"), ResourcesRootHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)"), ResourceHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)/hs-files"),
          ResourceHydroShareFilesRequestHandler),
+        (url_path_join(backend_url, r"/resources/([^/]+)/download-hs-files"),
+         DownloadHydroShareFilesRequestHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)/local-files"),
          ResourceLocalFilesRequestHandler),
         (url_path_join(backend_url, "/selectdir"), DirectorySelectorHandler),
-        (url_path_join(backend_url, r"/resources/([^/]+)/localmd5"), Localmd5Handler),
-
-        (url_path_join(backend_url, r"/resources/([^/]+)/hsmd5"), Hsmd5Handler),
+        (url_path_join(backend_url,
+                       r"/resources/([^/]+)/localmd5"), Localmd5Handler),
+        (url_path_join(backend_url,
+                       r"/resources/([^/]+)/hsmd5"), Hsmd5Handler),
         (url_path_join(backend_url,
                        r"/resources/([^/]+)/move-copy-files"), MoveCopyFiles),
         # Put this last to catch everything else

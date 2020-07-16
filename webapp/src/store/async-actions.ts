@@ -66,7 +66,9 @@ const backendApi = axios.create({
 function deleteToBackend<T>(endpoint: string, data: any = undefined): Promise<AxiosResponse<T>> {
   return backendApi.delete<T>(BACKEND_URL + endpoint, { data });
 }
-
+function getFilesFromBackend<T>(endpoint: string, data: any = undefined): Promise<AxiosResponse<T>> {
+  return backendApi.get<T>(BACKEND_URL + endpoint, { data });
+}
 function getFromBackend<T>(endpoint: string): Promise<AxiosResponse<T>> {
   return backendApi.get<T>(BACKEND_URL + endpoint);
 }
@@ -161,6 +163,43 @@ export function createNewResource(details: ICreateResourceRequest): ThunkAction<
     } catch (e) {
       console.error(e);
       dispatch(pushNotification('error', 'An error occurred when attempting to create the resource.'));
+    }
+  };
+}
+
+export function downloadResourceFilesOrFolders(resource: IResource, paths: string[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    let localFiles: string[] = [];
+    let hsFiles: string[] = [];
+    paths.forEach(p => {
+      let [prefix, pathRelRoot] = p.split(':');
+      if (prefix === 'local') {
+        localFiles.push(pathRelRoot);
+      } else if (prefix === 'hs') {
+        hsFiles.push(pathRelRoot);
+      }
+    });
+    if (hsFiles.length > 0) {
+      try {
+        const response = await postToBackend<IResourceFilesData>(`/resources/${resource.id}/download-hs-files`, {
+          files: hsFiles,
+        })
+        const {
+          data: {
+            rootDir,
+            readMe,
+            error,
+          },
+        } = response;
+        if (error) {
+          handleError(error, dispatch);
+        } else {
+          dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
+        }
+      } catch (e) {
+        console.error(e);
+        dispatch(pushNotification('error', 'An error occurred when trying to get the workspace files.'));
+      }
     }
   };
 }
@@ -296,22 +335,22 @@ export function loginToHydroShare(username: string, password: string, remember: 
       const response = await postToBackend<IAttemptHydroShareLoginResponse>('/login', { username, password, remember });
       dispatch(UserActions.notifyReceivedHydroShareLoginResponse(response.data.success));
       if (response.data.success) {
-        if(response.data.isFile == true){
+        if (response.data.isFile == true) {
           dispatch(UserActions.checkDirectorySavedResonse(response.data.isFile))
           dispatch(loadInitData());
         }
-      //dispatch(loadInitData());
+        //dispatch(loadInitData());
         //if(UserActions.checkDirectorySavedResonse == true){
-          //dispatch(loadInitData());
+        //dispatch(loadInitData());
         //}
         //console.log('Data through Response is', response.data.isFile)
         //dispatch(loadInitData());
         dispatch(setUserInfo(response.data.userInfo));
         //dispatch(loadInitData());
       }
-      
+
     }
-    
+
     catch (e) {
       console.error(e);
       dispatch(pushNotification('error', 'Could not login.'));
@@ -330,7 +369,7 @@ export function logoutToHydroShare(): ThunkAction<Promise<void>, {}, {}, AnyActi
       if (response.status === 200) {
         window.alert('Success!');
         dispatch(UserActions.notifyReceivedHydroShareLoginResponse(false));
-    }
+      }
     } catch (e) {
       window.alert('Failure!');
       console.error(e);
@@ -365,7 +404,7 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
         dispatch(UserActions.checkDirectorySavedResonse(response.data.isFile))
         dispatch(UserActions.setUserInfo(userInfo));
       }
-  } catch (e) {
+    } catch (e) {
       console.error(e);
       dispatch(pushNotification('error', 'Could not get user information from the server.'));
     }
