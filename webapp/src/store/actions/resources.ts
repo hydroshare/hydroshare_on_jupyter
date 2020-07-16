@@ -9,6 +9,7 @@ import { ResourcesActions } from './action-names';
 import {
   getResourceHydroShareFiles,
   getResourceLocalFiles,
+  downloadResourceFilesOrFolders,
 } from "../async-actions";
 
 import {
@@ -19,18 +20,30 @@ import {
 } from '../types';
 
 export function getFilesIfNeeded(resource: IResource): ThunkAction<Promise<void>, {}, {}, AnyAction> {
-    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
-        const {
-          resourceLocalFilesBeingFetched,
-          resourceHydroShareFilesBeingFetched,
-        } = getState().resources;
-        if (resource && !resource.localFiles && !resourceLocalFilesBeingFetched.has(resource.id)) {
-            dispatch(getResourceLocalFiles(resource));
-        }
-        if (resource && !resource.hydroShareFiles && !resourceHydroShareFilesBeingFetched.has(resource.id)) {
-            dispatch(getResourceHydroShareFiles(resource));
-        }
-    };
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
+    const {
+      resourceLocalFilesBeingFetched,
+      resourceHydroShareFilesBeingFetched,
+    } = getState().resources;
+    if (resource && !resource.hydroShareFiles && !resourceHydroShareFilesBeingFetched.has(resource.id)) {
+      dispatch(getResourceHydroShareFiles(resource));
+    }
+  };
+}
+
+export function downloadFilesOfResource(resource: IResource, paths: string[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
+    const {
+      resourceLocalFilesBeingFetched,
+      resourceHydroShareFilesBeingFetched,
+    } = getState().resources;
+    if (resource && !resource.localFiles && !resourceLocalFilesBeingFetched.has(resource.id)) {
+      dispatch(downloadResourceFilesOrFolders(resource, paths));
+    }
+    if (resource && !resource.hydroShareFiles && !resourceHydroShareFilesBeingFetched.has(resource.id)) {
+      dispatch(downloadResourceFilesOrFolders(resource, paths));
+    }
+  };
 }
 
 export function notifyGettingResources() {
@@ -50,17 +63,17 @@ export function notifyGettingResourceJupyterHubFiles(resource: IResource) {
 }
 
 export function openFileInJupyter(jupyterResource: IResource, file: IFile | IFolder) {
-    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
-        const state = getState();
-        if (state.user) {
-            const resourceId = jupyterResource.id;
-            // Discard the path prefix
-            const filePath = file.path.split(':')[1];
-            // @ts-ignore
-            const url = `${window.NOTEBOOK_URL_PATH_PREFIX}/${resourceId}/${resourceId}/data/contents${filePath}`;
-            window.open(url, '_blank');
-        }
-    };
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
+    const state = getState();
+    if (state.user) {
+      const resourceId = jupyterResource.id;
+      // Discard the path prefix
+      const filePath = file.path.split(':')[1];
+      // @ts-ignore
+      const url = `${window.NOTEBOOK_URL_PATH_PREFIX}/${resourceId}/${resourceId}/data/contents${filePath}`;
+      window.open(url, '_blank');
+    }
+  };
 }
 
 export function setResources(resources: IResource[]) {

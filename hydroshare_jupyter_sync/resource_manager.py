@@ -142,6 +142,22 @@ class ResourceManager:
                                          destination=self.output_folder,
                                          unzip=True)
 
+    def save_file_locally(self, res_id, item_path):
+        """ Downloads a file from HydroShare to the local filesystem if a copy does
+            not already exist locally
+
+            :param res_id: the resource ID
+            :type res_id: str
+        """
+        # Get resource from HS if it doesn't already exist locally
+        config = get_config_values(['dataPath', 'hydroShareHostname'])
+        self.output_folder = Path(config['dataPath'])
+        if not (self.output_folder / res_id).exists():
+            logging.info(f"Downloading file {res_id} from HydroShare...")
+            folderlocation = Path(config['dataPath'] + '/' + res_id + '/' + res_id + '/data/contents')
+            folderlocation.mkdir(parents=True)
+            self.hs_api_conn.getResourceFile(res_id, item_path, destination=folderlocation)
+
     def get_user_info(self):
         """Gets information about the user currently logged into HydroShare
         """
