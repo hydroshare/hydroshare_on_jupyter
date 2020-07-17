@@ -33,6 +33,7 @@ import {
   IFolder,
   IResource,
   IRootState,
+  PATH_PREFIXES,
 } from '../store/types';
 
 const mapStateToProps = ({ resources, router, user }: IRootState) => {
@@ -59,6 +60,7 @@ const mapStateToProps = ({ resources, router, user }: IRootState) => {
     resource: resourceForPage,
     archiveMessage: archiveMessage,
     username,
+    paths: [],
   };
 };
 
@@ -153,6 +155,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
     }
 
     this.props.getFilesIfNeeded(resource);
+    this.props.downloadFiles(resource, this.props.paths)
 
     // const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(resource!);
     // const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(resource!);

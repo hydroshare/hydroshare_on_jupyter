@@ -246,8 +246,8 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             Open in HydroShare
         </button>
           <button
-            className="button-enabled"
-
+            className={hydroShareDeleteClassName}
+            disabled={this.state.selectedHydroShareFilesAndFolders.size === 0}
             onClick={this.promptSelectedHydroShareFiles}
             title="Open the page for this resource in HydroShare">
             Download from HydroShare
@@ -288,3 +288,4 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     );
   };
 }
+//className="button-enabled"
