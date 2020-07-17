@@ -23,7 +23,7 @@ from hs_restclient import exceptions as HSExceptions
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
 
-from hydroshare_jupyter_sync.config_reader_writer import (set_config_values)
+from hydroshare_jupyter_sync.config_reader_writer import (get_config_values, set_config_values)
 from hydroshare_jupyter_sync.credential_reader_writer import credential_path
 from hydroshare_jupyter_sync.index_html import get_index_html
 from hydroshare_jupyter_sync.resource_hydroshare_data import (
@@ -320,11 +320,18 @@ class DirectorySelectorHandler(BaseRequestHandler):
 
                 else:
                     returnValue = "Permission Denied"
-
         except Exception as e:
             print('Error while setting the file path', e)
             returnValue = 'Error while setting the file path '
-        print('File', isFile)
+        config = get_config_values(['dataPath'])
+        if 'dataPath' in config:
+
+           #config_new_path = str(config['dataPath']).replace(Path.home(),'')
+            config_data_path = str(config['dataPath'])
+            config_new_path = config_data_path.replace(str(Path.home()),'')
+            print("Config new path is :",config_new_path)
+            notebook_url_path_prefix = url_path_join('/tree',
+                                                     config_new_path)
         if returnValue is not "":
             self.write({
                 'error': returnValue,
@@ -333,6 +340,7 @@ class DirectorySelectorHandler(BaseRequestHandler):
             self.write({
                 'success': "Configuration saved successfully.",
                 'isFile': isFile,
+                'configDataPath': notebook_url_path_prefix,
             })
 
     def createDirectory(self, defaultPath):

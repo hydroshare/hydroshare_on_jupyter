@@ -308,7 +308,12 @@ export function uploadNewDir(dirPath: string, choice: string): ThunkAction<Promi
       if (response.data.success) {
         dispatch(loadInitData());
         dispatch(DirectoryActions.notifyDirectoryResponse(response.data.success));
-
+        //set window object to new config data path
+        const config = response.data.configDataPath
+        console.log('response from server is', config)
+        // @ts-ignore
+        window.NOTEBOOK_URL_PATH_PREFIX = config
+       // `${window.NOTEBOOK_URL_PATH_PREFIX}` = response.data.configDataPath
         //dispatch(DirectoryActions.notifyFileSavedResponse(response.data.isFile))
         console.log('Checking if File exists', response.data.isFile)
       }
