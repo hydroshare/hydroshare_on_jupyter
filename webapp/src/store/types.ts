@@ -130,6 +130,7 @@ export interface IDirectoryInfo {
   success: string
   error?: string
   isFile: boolean
+  configDataPath: string
 }
 /** --------- Backend Server Communication ---------- **/
 

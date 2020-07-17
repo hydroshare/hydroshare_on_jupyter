@@ -11,7 +11,6 @@ import {
   getResourceLocalFiles,
   downloadResourceFilesOrFolders,
 } from "../async-actions";
-
 import {
   IFile,
   IFolder,
