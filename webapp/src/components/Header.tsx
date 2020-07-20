@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import {
   goHome,
   loadInitData,
+  displayUserProfile,
 } from "../store/actions/App";
 import {
   IRootState
@@ -12,8 +13,10 @@ import {
   ThunkDispatch,
 } from "redux-thunk";
 import {
-  logoutToHydroShare
+  logoutToHydroShare, getUserInfo, viewUserProfile
 } from '../store/async-actions';
+import { UserInfoActions } from 'src/store/actions/action-names';
+import * as UserActions from '../store/async-actions'
 // @ts-ignore
 const ASSETS_URL = (window.FRONTEND_URL || '') + '/assets';
 
@@ -24,7 +27,8 @@ const mapStateToProps = ({ user }: IRootState) => {
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => ({
   goHome: () => dispatch(goHome()),
   loadInitData: () => dispatch(loadInitData()),
-  logout: () => dispatch(logoutToHydroShare())
+  logout: () => dispatch(logoutToHydroShare()),
+  viewProfile: () => dispatch(displayUserProfile())
 });
 
 type ReduxType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
@@ -32,7 +36,7 @@ const elementPreferences = {
   options: [
 
    {id : 1, value : 'Preferences'},
-   {id : 2, value : 'Change directory'},
+   {id : 2, value : 'View Profile'},
    {id : 3, value : 'Update Config'},
    {id : 4, value : 'logout'}
  ] ,
@@ -58,7 +62,7 @@ class Header extends React.Component<ReduxType, never> {
       this.props.logout()
      }
      else if (e == '2') {
-       console.log('yet to be defined')
+      this.props.viewProfile()
      }
      else if (e == '3'){
       console.log('wait, we are getting close!')
