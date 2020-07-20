@@ -58,6 +58,7 @@ const LoginModal: React.FC<ComponentPropTypes> = (props: ComponentPropTypes) => 
   const isValid = state.username.length > 0 && state.password.length > 0;
 
   const submit = () => props.login(state.username, state.password, state.remember);
+  const signUpInHydroShare = () => window.open(`https://www.hydroshare.org/sign-up/`, '_blank');
 
   return (
       <Modal
@@ -70,7 +71,14 @@ const LoginModal: React.FC<ComponentPropTypes> = (props: ComponentPropTypes) => 
         <TextInput placeholder="Username" onChange={usernameChange} value={state.username} pattern="^[\w,\-\.]+$" />
         <TextInput placeholder="Password" onChange={passwordChange} value={state.password} isPassword={true} />
         {props.credentialsInvalid && <p className="error">Sorry, that username and password is incorrect.</p>}
-
+        <div>
+        <button
+            className="button-enabled"
+            onClick={signUpInHydroShare}
+            title="Open the page for this resource in HydroShare">
+            Not a user? Sign up in HydroShare
+        </button>
+        </div>
       </Modal>
   );
 }
