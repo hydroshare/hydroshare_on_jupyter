@@ -44,6 +44,7 @@ import {
   IDirectoryInfo,
 } from './types';
 import * as DirectoryActions from './actions/directory';
+import { Redirect } from 'react-router';
 
 
 // @ts-ignore
@@ -416,6 +417,34 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   }
 }
 
+// function that returns user id and redirects to profile page in HydroShare
+export function viewUserProfile(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    try {
+      const response = await getFromBackend<IUserInfoDataResponse>('/user');
+      const {
+        data,
+        error,
+        isFile
+      } = response.data;
+      if (error) {
+        handleError(error, dispatch);
+      } else {
+        const userInfo = {
+          email: data.email,
+          id: data.id,
+        };
+        window.open(`https://www.hydroshare.org/user/${userInfo.id}/`, '_blank');
+        // dispatch(UserActions.checkDirectorySavedResonse(response.data.isFile))
+        // dispatch(UserActions.setUserInfo(userInfo));
+      }
+    } catch (e) {
+      console.error(e);
+      dispatch(pushNotification('error', 'Could not get user information from the server.'));
+    }
+  }
+}
+
 export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(notifyGettingResources());
@@ -447,6 +476,29 @@ export function getResourceLocalFiles(resource: IResource) {
     dispatch(notifyGettingResourceJupyterHubFiles(resource));
     try {
       const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/local-files`);
+      const {
+        data: {
+          rootDir,
+          readMe,
+          error,
+        },
+      } = response;
+      if (error) {
+        handleError(error, dispatch);
+      } else {
+        dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
+      }
+    } catch (e) {
+      console.error(e);
+      dispatch(pushNotification('error', 'An error occurred when trying to get the workspace files.'));
+    }
+  };
+}
+export function getResourceDownloadedLocalFiles(resource: IResource) {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    dispatch(notifyGettingResourceJupyterHubFiles(resource));
+    try {
+      const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/downloaded-local-files`);
       const {
         data: {
           rootDir,
