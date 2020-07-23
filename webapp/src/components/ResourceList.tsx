@@ -133,8 +133,8 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
             return r2.creator.localeCompare(r1.creator);
           }
           case SORT_BY_OPTIONS.COPIED_LOCALLY:
-            const r1Val = r1.localCopyExists ? "True" : "False";
-            const r2Val = r2.localCopyExists ? "True" : "False";
+            const r1Val = r1.localCopyExists ? "Local" : "HydroShare";
+            const r2Val = r2.localCopyExists ? "Local" : "HydroShare";
             if (this.state.sortAscending) {
               return r1Val.localeCompare(r2Val);
             } else {
@@ -160,7 +160,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
     if (this.props.fetchingResources) {
       content = <Loading/>;
     } else {
-      const resourcesToShow = this.getFilteredSortedResources();
+      const resourcesToShow = this.getFilteredSortedResources()   
       if (resourcesToShow.length > 0) {
         content = resourcesToShow.map(resource => (
             <div className="table-row">
@@ -172,7 +172,8 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
               <span onClick={() => this.props.viewResource(resource)} className="clickable">{resource.title}</span>
               <span>{resource.lastUpdated.format('MMMM D, YYYY')}</span>
               <span>{resource.creator || 'Unknown'}</span>
-              <span>{resource.localCopyExists ? 'True' : 'False'}</span>
+              <span>{resource.localCopyExists ? 'Local' : 'HydroShare'}</span>
+              
             </div>
           )
         );
@@ -268,7 +269,7 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
             className={'clickable ' + (sortBy === SORT_BY_OPTIONS.COPIED_LOCALLY ? sortOrder : '')}
             onClick={() => this.setSortBy(SORT_BY_OPTIONS.COPIED_LOCALLY)}
           >
-            Copied to workspace
+            Location
             {sortBy === SORT_BY_OPTIONS.COPIED_LOCALLY && SortTriangleSVG}
           </button>
         </div>
