@@ -10,6 +10,7 @@ import {
   getResourceHydroShareFiles,
   getResourceLocalFiles,
   downloadResourceFilesOrFolders,
+  getResourceDownloadedLocalFiles,
 } from "../async-actions";
 import {
   IFile,
@@ -24,6 +25,9 @@ export function getFilesIfNeeded(resource: IResource): ThunkAction<Promise<void>
       resourceLocalFilesBeingFetched,
       resourceHydroShareFilesBeingFetched,
     } = getState().resources;
+     if (resource && !resource.localFiles && !resourceLocalFilesBeingFetched.has(resource.id)){
+       dispatch(getResourceDownloadedLocalFiles(resource));
+     }
     if (resource && !resource.hydroShareFiles && !resourceHydroShareFilesBeingFetched.has(resource.id)) {
       dispatch(getResourceHydroShareFiles(resource));
     }
@@ -39,7 +43,7 @@ export function downloadFilesOfResource(resource: IResource, paths: string[]): T
     if (resource && !resource.localFiles && !resourceLocalFilesBeingFetched.has(resource.id)) {
       dispatch(downloadResourceFilesOrFolders(resource, paths));
     }
-    if (resource && !resource.hydroShareFiles && !resourceHydroShareFilesBeingFetched.has(resource.id)) {
+    if (resource && resource.hydroShareFiles && !resourceHydroShareFilesBeingFetched.has(resource.id)) {
       dispatch(downloadResourceFilesOrFolders(resource, paths));
     }
   };
