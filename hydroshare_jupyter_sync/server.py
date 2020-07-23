@@ -649,16 +649,34 @@ class DownloadHydroShareFilesRequestHandler(BaseRequestHandler):
             if item_path.startswith('/'):
                 item_path = item_path[1:]
                 print('item path after removing slash is', item_path)
-            local_data = ResourceLocalData(res_id)
-            hs_data = ResourceHydroShareData(resource_manager.hs_api_conn,
-                                             res_id)
-            resource_manager.save_file_locally(res_id, item_path)
+                local_data = ResourceLocalData(res_id)
+                resource_manager.save_file_locally(res_id, item_path)
 
         self.write({
             'readMe': local_data.get_readme(),
             'rootDir': local_data.get_files_and_folders(),
         })
 
+class DownloadedLocalFilesRequestHandler(BaseRequestHandler):
+    def set_default_headers(self):
+            BaseRequestHandler.set_default_headers(self)
+            self.set_header('Access-Control-Allow-Methods',
+                        'DELETE, GET, OPTIONS, POST')
+
+    def get(self, res_id):
+        if not resource_manager.is_authenticated():
+            self.write({
+                'success': False,
+                'error': HYDROSHARE_AUTHENTICATION_ERROR,
+            })
+            return
+        local_data = ResourceLocalData(res_id)
+        print('Fetching data from local path',local_data.get_files_and_folders())
+        self.write({
+            'readMe': local_data.get_readme(),
+            'rootDir': local_data.get_files_and_folders(),
+        })
+  
 
 class MoveCopyFiles(BaseRequestHandler):
     """ Handles moving (or renaming) files within the local filesystem,
@@ -851,6 +869,8 @@ def get_route_handlers(frontend_url, backend_url):
          DownloadHydroShareFilesRequestHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)/local-files"),
          ResourceLocalFilesRequestHandler),
+        (url_path_join(backend_url, r"/resources/([^/]+)/downloaded-local-files"),
+         DownloadedLocalFilesRequestHandler),
         (url_path_join(backend_url, "/selectdir"), DirectorySelectorHandler),
         (url_path_join(backend_url,
                        r"/resources/([^/]+)/localmd5"), Localmd5Handler),
