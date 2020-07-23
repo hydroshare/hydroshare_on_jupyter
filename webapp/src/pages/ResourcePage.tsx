@@ -33,6 +33,7 @@ import {
   IFolder,
   IResource,
   IRootState,
+  IResourceFilesData,
   PATH_PREFIXES,
 } from '../store/types';
 
@@ -156,6 +157,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
 
     this.props.getFilesIfNeeded(resource);
     this.props.downloadFiles(resource, this.props.paths)
+  
 
     // const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(resource!);
     // const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(resource!);
