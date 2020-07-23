@@ -5,16 +5,17 @@ the local folder and the size of that folder.
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 """
+import datetime
+import glob
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 import hashlib
 import json
 import os
-import glob
 import shutil
-import datetime
-from notebook.services.contents.filemanager import FileContentsManager
 from pathlib import Path
+
+from notebook.services.contents.filemanager import FileContentsManager
 
 from hydroshare_jupyter_sync.config_reader_writer import get_config_values
 
@@ -28,12 +29,12 @@ class ResourceLocalData:
     def __init__(self, resource_id):
         self.data_path = (_get_path_to_resources_data_root() / resource_id
                           / resource_id / 'data' / 'contents')
-        print("Resource data_path is : ",self.data_path)
+        print("Resource data_path is : ", self.data_path)
 
     def get_md5(self, resource_id):
         """ Gets the md5 of local resource"""
         self.md5_path = (_get_path_to_resources_data_root() / resource_id
-                          / resource_id / 'data/contents')
+                         / resource_id / 'data/contents')
         dict1 = {}
         for e in self.md5_path.rglob('*'):
             md5_hash = hashlib.md5()
@@ -54,7 +55,6 @@ class ResourceLocalData:
 
     def is_downloaded(self):
         """ Checks if a local copy of this resource's data exists """
-        print("Checking is_downloaded",self.data_path.exists())
         return self.data_path.exists()
 
     def get_size(self, folder_path):
@@ -81,9 +81,9 @@ class ResourceLocalData:
         for filepath in files:
             # check contents recursively:
             folder_contents = self.get_contents_recursive(
-                                                    filepath,
-                                                    resource_data_root_dir,
-                                                    path_prefix)
+                filepath,
+                resource_data_root_dir,
+                path_prefix)
 
             # Populate info:
             dirpath = Path(filepath)
@@ -101,7 +101,7 @@ class ResourceLocalData:
 
             # if it was a folder, we need to populate its list of contents
             path_rel_resource_root = str(dirpath.relative_to(
-                                                    resource_data_root_dir))
+                resource_data_root_dir))
             if path_rel_resource_root == '.':
                 path_rel_resource_root = '/'
             else:
@@ -112,7 +112,7 @@ class ResourceLocalData:
                     "path": path_prefix + path_rel_resource_root,
                     "sizeBytes": self.get_size(filepath),
                     "modifiedTime": str(datetime.datetime.fromtimestamp(
-                                                    dirpath.stat().st_mtime)),
+                        dirpath.stat().st_mtime)),
                     "type": file_type,
                     "contents": folder_contents,
                 })
@@ -123,7 +123,7 @@ class ResourceLocalData:
                     "path": path_prefix + path_rel_resource_root,
                     "sizeBytes": os.path.getsize(filepath),
                     "modifiedTime": str(datetime.datetime.fromtimestamp(
-                                                    dirpath.stat().st_mtime)),
+                        dirpath.stat().st_mtime)),
                     "type": file_type,
                 })
         return files2
@@ -222,18 +222,20 @@ class ResourceLocalData:
             (so the frontend can distinguish from paths
              on HydroShare)
         """
-        path_prefix = LOCAL_PREFIX+':' if prefix_paths else None
+        path_prefix = LOCAL_PREFIX + ':' if prefix_paths else None
         return {
-            "name": "",
-            "path": LOCAL_PREFIX + ":/" if prefix_paths else "",
-            "sizeBytes": self.get_size(self.data_path),
-            "modifiedTime": str(datetime.datetime.fromtimestamp(
-                                            self.data_path.stat().st_mtime)),
-            "type": "folder",
-            "contents": self.get_contents_recursive(self.data_path,
-                                                    self.data_path,
-                                                    path_prefix),
-        }
+
+                    "name": "",
+                    "path": LOCAL_PREFIX + ":/" if prefix_paths else "",
+                    "sizeBytes": self.get_size(self.data_path),
+                    "modifiedTime": str(datetime.datetime.fromtimestamp(
+                        self.data_path.stat().st_mtime)),
+                    "type": "folder",
+                    "contents": self.get_contents_recursive(self.data_path,
+                                                            self.data_path,
+                                                            path_prefix),
+            }
+
 
 
 def _get_path_to_resources_data_root():
@@ -246,7 +248,7 @@ def _get_path_to_resources_data_root():
         config = get_config_values(['dataPath'])
         if config and 'dataPath' in config:
             _root_data_path = Path(config['dataPath'])
-        else: 
+        else:
             # TODO: Rename to hydroshare_resource_data (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/38)
             _root_data_path = Path.cwd() / 'local_hs_resources'
         if not _root_data_path.is_dir():
