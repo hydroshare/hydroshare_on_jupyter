@@ -152,11 +152,12 @@ class ResourceManager:
         # Get resource from HS if it doesn't already exist locally
         config = get_config_values(['dataPath', 'hydroShareHostname'])
         self.output_folder = Path(config['dataPath'])
+        logging.info(f"Downloading file {res_id} from HydroShare...")
+        folderlocation = Path(config['dataPath'] + '/' + res_id + '/' + res_id + '/data/contents')
         if not (self.output_folder / res_id).exists():
-            logging.info(f"Downloading file {res_id} from HydroShare...")
-            folderlocation = Path(config['dataPath'] + '/' + res_id + '/' + res_id + '/data/contents')
             folderlocation.mkdir(parents=True)
-            self.hs_api_conn.getResourceFile(res_id, item_path, destination=folderlocation)
+            
+        self.hs_api_conn.getResourceFile(res_id, item_path, destination=folderlocation)
 
     def get_user_info(self):
         """Gets information about the user currently logged into HydroShare
