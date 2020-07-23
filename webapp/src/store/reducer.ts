@@ -149,13 +149,14 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
 }
 
 function recursivelyConvertDatesToMoment(files: (IFile | IFolder)[]) {
-  return files.map(fileOrFolder => {
-    if (fileOrFolder.lastModified) {
-      fileOrFolder.lastModified = moment(fileOrFolder.lastModified);
-    }
-    return fileOrFolder;
-  });
-}
+    return files.map(fileOrFolder => {
+      if (fileOrFolder.lastModified) {
+        fileOrFolder.lastModified = moment(fileOrFolder.lastModified);
+      }
+      return fileOrFolder;
+    });
+  }
+
 
 export function userDataReducer(state: IUserState = initUserState, action: UserActionTypes): IUserState {
   switch (action.type) {
