@@ -72,8 +72,17 @@ export interface IFile {
   name: string
   type: FileOrFolderTypes
   sizeBytes: number
+  fileChanged: string
 }
+export interface ISync {
+  resourceId : string
+  filesChanged: string
+  modifiedTimeHydroShare? : string
+  modifiedTimeLocal? : string
+  fileName: string
+  filePath: string
 
+}
 export interface IFolder extends IFile {
   contents: (IFile | IFolder)[]
 }
@@ -116,8 +125,16 @@ export interface IResourceFilesData {
   rootDir: IFolder
   readMe: string
   error?: IServerError
+  filesChanged: string
+  modified_time: Date
+  myJson: ISync
 }
-
+export interface ICheckSync {
+  filesChanged: string
+  modified_time: string
+  rootDir: IFolder
+  readMe: string
+}
 export interface IUserInfo {
   email: string
   id: number
