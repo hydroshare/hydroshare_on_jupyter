@@ -50,6 +50,7 @@
     }
   }
 
+
   .table-row {
     border-bottom: $border-style;
     display: flex;
@@ -66,6 +67,9 @@
 
     .collapsed svg {
       transform: rotate(-90deg);
+    }
+    &:hover {
+      background-color: #dddddd;
     }
   }
 
