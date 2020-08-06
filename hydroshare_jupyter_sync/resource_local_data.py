@@ -52,6 +52,36 @@ class ResourceLocalData:
         local_md5_path = os.path.expanduser(os.path.join("~/hydroshare", "local_md5.json"))
         local_overall_md5 = hashlib.md5(open(local_md5_path, 'rb').read()).hexdigest()
         return local_overall_md5
+    
+    def get_md5_files(self, resource_id, item_path):
+        """ Gets the md5 of the selected file """
+        self.md5_file_path = (_get_path_to_resources_data_root() / resource_id
+                         / resource_id / 'data/contents'/ item_path)
+        # if self.md5_file_path.exists:
+        #     a_file = open(self.md5_file_path, "rb")
+        #     md5_hash = hashlib.md5()
+        #     content = a_file.read()
+        #     md5_hash.update(content)
+        #     digest = md5_hash.hexdigest()
+        # return digest
+
+        files2 = []
+        dirpath = Path(item_path)
+        print('dirpath is', dirpath)
+        modified_time_local = str(datetime.datetime.fromtimestamp(
+                        self.md5_file_path.stat().st_mtime))
+        # files2.append({
+        #  "modifiedTime": str(datetime.datetime.fromtimestamp(
+        #                 self.md5_file_path.stat().st_mtime))
+
+        # })
+        print(modified_time_local)
+        return modified_time_local
+
+
+
+
+    
 
     def is_downloaded(self):
         """ Checks if a local copy of this resource's data exists """
@@ -83,6 +113,7 @@ class ResourceLocalData:
             folder_contents = self.get_contents_recursive(
                 filepath,
                 resource_data_root_dir,
+
                 path_prefix)
 
             # Populate info:
@@ -222,6 +253,7 @@ class ResourceLocalData:
             (so the frontend can distinguish from paths
              on HydroShare)
         """
+
         path_prefix = LOCAL_PREFIX + ':' if prefix_paths else None
         return {
 
@@ -233,7 +265,8 @@ class ResourceLocalData:
                     "type": "folder",
                     "contents": self.get_contents_recursive(self.data_path,
                                                             self.data_path,
-                                                            path_prefix),
+
+                                                            path_prefix)
             }
 
 
