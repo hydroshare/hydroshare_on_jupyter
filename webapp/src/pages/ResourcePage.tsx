@@ -27,6 +27,7 @@ import {
   uploadNewDir,
   renameFileOrFolder,
   deleteResources,
+  checkSyncStatusFiles,
 } from '../store/async-actions';
 import {
   IFile,
@@ -72,6 +73,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     deleteResourceFilesOrFolders: (resource: IResource, paths: string[]) => dispatch(deleteResourceFilesOrFolders(resource, paths)),
     getFilesIfNeeded: (resource: IResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
     downloadFiles: (resource: IResource, paths: string[]) => dispatch(resourcesActions.downloadFilesOfResource(resource, paths)),
+    checkSyncStatusFiles:(resource: IResource, paths: string[]) => dispatch(checkSyncStatusFiles(resource, paths)),
     openFile: (resource: IResource, file: IFile | IFolder) => dispatch(resourcesActions.openFileInJupyter(resource, file)),
     copyFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
     moveFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
@@ -126,6 +128,9 @@ class ResourcePage extends React.Component<PropsType, StateType> {
     this.props.downloadFiles(this.props.resource!, paths!);
   };
 
+  checkSyncStatus = (paths: string[]) => {
+    this.props.checkSyncStatusFiles(this.props.resource!, paths!)
+  }
   hideModal = () => this.setState({ modal: MODAL_TYPES.NONE });
 
   public render() {
@@ -299,6 +304,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           promptRenameFileOrFolderWorkspace={displayRenameWorkspaceFileModal}
           resourceId={resource.id}
           downloadFileOrFolder={this.doDownloadSelectedFiles}
+          checkSyncStatus={this.checkSyncStatus}
         />
         <ReadMeDisplay localReadMe={this.props.resource ? this.props.resource.localReadMe : "# No ReadMe yet"} resId={resource.id} />
         {modal}

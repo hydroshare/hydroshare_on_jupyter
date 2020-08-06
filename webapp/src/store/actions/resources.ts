@@ -48,6 +48,17 @@ export function downloadFilesOfResource(resource: IResource, paths: string[]): T
     }
   };
 }
+export function checkSyncStatus(resource: IResource, paths: string[]): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IRootState) => {
+    const {
+      resourceLocalFilesBeingFetched,
+      resourceHydroShareFilesBeingFetched,
+    } = getState().resources;
+    if (resource && !resource.localFiles && !resourceLocalFilesBeingFetched.has(resource.id)) {
+      dispatch(checkSyncStatus(resource, paths));
+    }
+  };
+}
 
 export function notifyGettingResources() {
   return action(ResourcesActions.NOTIFY_GETTING_RESOURCES);
@@ -94,7 +105,11 @@ export function setResourceLocalFiles(resourceId: string, rootDir: IFolder, loca
     localReadMe,
   });
 }
-
+export function getFilesStatusChanged(myJson: JSON) {
+  return action(ResourcesActions.SET_FILES_STATUS_CHANGED , {
+  myJson,
+  });
+}
 export function setResourceHydroShareFiles(resourceId: string, rootDir: IFolder) {
   return action(ResourcesActions.SET_RESOURCE_HYDROSHARE_FILES, {
     resourceId,
