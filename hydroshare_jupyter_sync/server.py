@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 import requests
+import datetime
 import tornado.ioloop
 import tornado.options
 import tornado.web
@@ -160,12 +161,12 @@ class Hsmd5Handler(BaseRequestHandler):
             return
 
         print('Inside get function of hsmd5')
-        hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
-        hs_overall_md5 = hs_data.get_hs_md5(res_id)
-        local_data = ResourceLocalData(res_id)
-        local_overall_md5 = local_data.get_md5(res_id)
-        if hs_overall_md5 != local_overall_md5:
-            diff_overall = False
+        # hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
+        # #hs_overall_md5 = hs_data.get_hs_md5(res_id)
+        # local_data = ResourceLocalData(res_id)
+        # local_overall_md5 = local_data.get_md5(res_id)
+        # if hs_overall_md5 != local_overall_md5:
+        #     diff_overall = False
 
         print('fetching hydroshare data')
 
@@ -391,7 +392,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
             resource_manager.save_resource_locally(res_id)
         self.write({
             'readMe': local_data.get_readme(),
-            'rootDir': local_data.get_files_and_folders(),
+            # 'rootDir': local_data.get_files_and_folders(),
+            'rootDir': 'rootDir'
         })
 
     # TODO: move some of the logic here outside this file and deduplicate
@@ -527,6 +529,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
         print("In get of resource hydroshare file request handler")
         hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         root_dir = hs_data.get_files()
+        
         print('after root dir value is fetched')
         self.write({'rootDir': root_dir})
 
@@ -639,6 +642,7 @@ class DownloadHydroShareFilesRequestHandler(BaseRequestHandler):
         data = json.loads(self.request.body.decode('utf-8'))
         print('Data from json is', data)
         file_and_folder_paths = data.get('files')
+        filesChanged = 'sync'
         print('files selected to download are', file_and_folder_paths)
         if file_and_folder_paths is None:
             self.set_status(400)  # Bad Request
@@ -651,11 +655,150 @@ class DownloadHydroShareFilesRequestHandler(BaseRequestHandler):
                 print('item path after removing slash is', item_path)
                 local_data = ResourceLocalData(res_id)
                 resource_manager.save_file_locally(res_id, item_path)
+                # modified_time_local = local_data.get_md5_files(res_id, item_path)
+                # hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
+                # modified_time_hs = hs_data.get_md5_files(res_id, item_path)
+                # if modified_time_hs < modified_time_local:
+                #     filesChanged = 'local'
+                # elif modified_time_hs > modified_time_local:
+                #     filesChanged = 'HydroShare'
+
 
         self.write({
             'readMe': local_data.get_readme(),
             'rootDir': local_data.get_files_and_folders(),
         })
+
+def checkFileSyncStatus(temporaryRoot, res_id):
+    serverIsLatest = 'HYDRO_SHARE_LATEST'
+    localIsLatest = 'LOCAL_LATEST'
+    localSyncServer = 'Sync'
+    local_data = ResourceLocalData(res_id)
+    hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
+    # find where are the files and its properties in temporaryRoot
+    contents = temporaryRoot['contents'];
+    for file in contents:
+
+        #modified_time_local = local_data.get_md5_files(res_id, file['name'])
+        modified_time_local = file['modifiedTime']
+        print('modified time local is', modified_time_local)
+        print('file name is', file['name'])
+        modified_time_hs = hs_data.get_modified_time_hs(file['name'])
+        #modified_time_hs = hs_data.get_md5_files(res_id, file['name'])
+        if modified_time_hs < modified_time_local:
+            # add fileChanged value
+            file.update({"fileChanged": localIsLatest})
+            print(localIsLatest)
+
+        elif modified_time_hs > modified_time_local:
+            file.update({"fileChanged": serverIsLatest})
+            print(serverIsLatest)
+        else:
+            file.update({"fileChanged": localSyncServer})
+        # else:
+        #     print(k, ":", v)  for k,v in temporaryRoot.items():
+     # if isinstance(v, dict):
+     #     iterdict(v)
+     # else:
+     #     print (k,":",v)
+
+    # iterate over temporaryRoot contents
+
+    # call method to check for file status in hydroshare
+
+    # update temporaryRoot by adding syncStatus variable with appropriate value
+
+
+
+class CheckSyncStatusFilesRequestHandler(BaseRequestHandler):
+    filesChanged = 'sync'
+    modified_time_local = ''
+    modified_time_hs = ''
+
+    def set_default_headers(self):
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods',
+                        'DELETE, GET, OPTIONS, POST')
+
+    def post(self, res_id):
+        if not resource_manager.is_authenticated():
+            self.write({
+                'success': False,
+                'error': HYDROSHARE_AUTHENTICATION_ERROR,
+            })
+            return
+
+        data = json.loads(self.request.body.decode('utf-8'))
+        print('Data from json is', data)
+        file_and_folder_paths = data.get('files')
+        print('files selected to download are', file_and_folder_paths)
+        myList = []
+        
+        if file_and_folder_paths is None:
+            self.set_status(400)  # Bad Request
+            self.write('Could not find "files" in request body.')
+            return
+        for item_path in file_and_folder_paths:
+            #file_path = item_path
+            # Remove any leading /
+            if item_path.startswith('/'):
+                file_name = item_path[1:]
+                print('item path after removing slash is', file_name)
+                local_data = ResourceLocalData(res_id)
+                #resource_manager.save_file_locally(res_id, item_path)
+                # digest_local = local_data.get_md5_files(res_id, item_path)
+                # print('local digest is', digest_local)
+                CheckSyncStatusFilesRequestHandler.modified_time_local = local_data.get_md5_files(res_id, file_name)
+                print('modified time locally is', CheckSyncStatusFilesRequestHandler.modified_time_local)
+                # appending local modified time to list
+                hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
+                CheckSyncStatusFilesRequestHandler.modified_time_hs = hs_data.get_md5_files(res_id, file_name)
+                print('modified time in hydroshare is', CheckSyncStatusFilesRequestHandler.modified_time_hs)
+                # comapring date and time
+                #filesChanged = 'sync'
+                
+                if CheckSyncStatusFilesRequestHandler.modified_time_hs < CheckSyncStatusFilesRequestHandler.modified_time_local:
+                    print('local files are latest')
+                    CheckSyncStatusFilesRequestHandler.filesChanged = 'local'
+                    
+                   #myList.append(CheckSyncStatusFilesRequestHandler)
+                    myDict = {
+                        'resourceId': res_id,
+                        'filesChanged': CheckSyncStatusFilesRequestHandler.filesChanged,
+                        'modified_time_local': CheckSyncStatusFilesRequestHandler.modified_time_local,
+                        'file_name': file_name,
+                        'file_path': item_path
+                    }
+                    myList.append(myDict)
+                    myJson = json.dumps(myList)
+                    
+                    # print('local data files and folder after apending are', local_data.get_files_and_folders())
+                    #myList.append(CheckSyncStatusFilesRequestHandler.modified_time_local)
+                    print('Json when',CheckSyncStatusFilesRequestHandler.filesChanged,' is latest is as follows', myJson)           
+                elif CheckSyncStatusFilesRequestHandler.modified_time_hs > CheckSyncStatusFilesRequestHandler.modified_time_local:
+                    print('HydroShare files are latest')
+                    myDict = {
+                        'resourceId': res_id,
+                        'filesChanged': CheckSyncStatusFilesRequestHandler.filesChanged,
+                        'modified_time_local': CheckSyncStatusFilesRequestHandler.modified_time_hs,
+                        'file_name': file_name,
+                        'file_path': item_path
+                    }
+                    myList.append(myDict)
+                    myJson = json.dumps(myList)
+                    print('Json when',CheckSyncStatusFilesRequestHandler.filesChanged,' is latest is as follows', myJson)  
+                    
+        temporaryRoot = local_data.get_files_and_folders()
+#create a new method - checkSyncStatus(temporaryRoot)
+
+        # Iterate over temporary root to inser sync status for every file by matching it name
+        # local_data.get_files_and_folders(CheckSyncStatusFilesRequestHandler.filesChanged),
+        self.write({
+            'readMe': local_data.get_readme(),
+            'rootDir': temporaryRoot,
+            'myJson': myJson
+        }) 
+    
 
 class DownloadedLocalFilesRequestHandler(BaseRequestHandler):
     def set_default_headers(self):
@@ -671,10 +814,32 @@ class DownloadedLocalFilesRequestHandler(BaseRequestHandler):
             })
             return
         local_data = ResourceLocalData(res_id)
+        # hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
+        # root_dir = hs_data.get_files()
+        # modified_time_hs = root_dir["content"]
+
+        # get modified time of HydroShare and pass filesChanged to get_files 
+
+        temporaryRoot = local_data.get_files_and_folders()
+        # hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
+        # root_dir = hs_data.get_files()
+        # contents_local = temporaryRoot['contents'];
+        # contents_hydroshare = root_dir['contents']
+        # for file in contents_local:
+        #     exists=hs_data.get_file_exists(file['name'])
+        # if exists:
+        #     file.update({"fileChanged": 'Exists in Local'})
+        # else:
+        #     file.update({"fileChanged": 'Exists in HydroShare'})
+
+        checkFileSyncStatus(temporaryRoot, res_id)
+        # call syncstatus method with temporary root as paramter
+        # in syncstatus method iterate over temporaryroot contents, match with name, and update syncstatus variable
+
         print('Fetching data from local path',local_data.get_files_and_folders())
         self.write({
             'readMe': local_data.get_readme(),
-            'rootDir': local_data.get_files_and_folders(),
+            'rootDir': temporaryRoot,
         })
   
 
@@ -867,6 +1032,8 @@ def get_route_handlers(frontend_url, backend_url):
          ResourceHydroShareFilesRequestHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)/download-hs-files"),
          DownloadHydroShareFilesRequestHandler),
+        (url_path_join(backend_url, r"/resources/([^/]+)/check-sync-files"),
+         CheckSyncStatusFilesRequestHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)/local-files"),
          ResourceLocalFilesRequestHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)/downloaded-local-files"),
