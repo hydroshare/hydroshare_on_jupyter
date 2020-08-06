@@ -17,6 +17,7 @@ import {
   setResourceHydroShareFiles,
   setResourceLocalFiles,
   setResources,
+  //getFilesStatusChanged,
 } from './actions/resources';
 import {
   notifyHydroShareCredentialsInvalid,
@@ -42,6 +43,7 @@ import {
   NEW_FILE_OR_FOLDER_TYPES,
   PATH_PREFIXES,
   IDirectoryInfo,
+  ICheckSync,
 } from './types';
 import * as DirectoryActions from './actions/directory';
 import { Redirect } from 'react-router';
@@ -94,7 +96,6 @@ function handleError(error: IServerError, dispatch: ThunkDispatch<{}, {}, AnyAct
     dispatch(pushNotification('error', error.message));
   }
 }
-
 export function createNewFileOrFolder(resource: IResource, name: string, type: string): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     try {
@@ -201,6 +202,41 @@ export function downloadResourceFilesOrFolders(resource: IResource, paths: strin
         console.error(e);
         dispatch(pushNotification('error', 'An error occurred when trying to get the workspace files.'));
       }
+    }
+  };
+}
+
+export function checkSyncStatusFiles(resource: IResource, paths: string[]):ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    let localFiles: string[] = [];
+    let hsFiles: string[] = [];
+    paths.forEach(p => {
+      let [prefix, pathRelRoot] = p.split(':');
+      if (prefix === 'local') {
+        localFiles.push(pathRelRoot);
+      } else if (prefix === 'hs') {
+        hsFiles.push(pathRelRoot);
+      }
+    });
+    if (localFiles.length == 0) {
+        try {
+          const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/downloaded-local-files`);
+          const {
+            data: {
+              rootDir,
+              readMe,
+              error,
+            },
+          } = response;
+          if (error) {
+            handleError(error, dispatch);
+          } else {
+            dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
+          }
+        } catch (e) {
+          console.error(e);
+          dispatch(pushNotification('error', 'An error occurred when trying to get the workspace files.'));
+        }
     }
   };
 }
