@@ -1,7 +1,6 @@
 
-
 import * as React from 'react';
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import {
   Draggable,
   DraggableStateSnapshot,
@@ -22,6 +21,11 @@ import Loading from "./Loading";
 
 // @ts-ignore
 const DOWNLOAD_URL = (window.BACKEND_API_URL) + '/download';
+const optionsCursorTrueWithMargin = {
+  followCursor: true,
+  shiftX: 20,
+  shiftY: 0
+}
 
 interface IFilePaneState {
   allFilesAndFoldersSelected: boolean
@@ -29,6 +33,7 @@ interface IFilePaneState {
   selectedFilesAndFolders: Set<string>
   sortAscending: boolean
   sortBy: SORT_BY_OPTIONS
+  hovered: boolean
 }
 
 interface IFilePaneProps {
@@ -45,6 +50,7 @@ interface IFilePaneProps {
   fileLocation: string
 }
 
+
 /**
  * Component that displays the list of files in a resource
  */
@@ -56,9 +62,11 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     selectedFilesAndFolders: new Set<string>(),
     sortAscending: true,
     sortBy: SORT_BY_OPTIONS.NAME,
+    hovered: false
   };
 
   render() {
+
     const className = ['FilePane', 'table'];
     if (this.props.className) {
       className.push(this.props.className);
@@ -136,6 +144,12 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   Size
                   {this.state.sortBy === SORT_BY_OPTIONS.SIZE && SortTriangleSVG}
                 </button>
+                <button
+                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SIZE ? sortOrder : '')}
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}>
+                  Sync Status
+                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE && SortTriangleSVG}
+                </button>
               </div>
               <div className="scrollable-container">
                 {content}
@@ -159,7 +173,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
         let contents = this.filterFilesAndFolders((item as IFolder).contents, filter);
         if (contents.length > 0) {
           // Since some of the contents match, add this folder, but only show the contents that match the filter
-          let filteredFolder = {...item, contents};
+          let filteredFolder = { ...item, contents };
           filteredItems.push(filteredFolder);
           // TODO: Expand this folder (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/46)
         }
@@ -168,7 +182,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     return filteredItems;
   };
 
-  handleMenuClick = (item: IFile | IFolder, action: CONTEXT_MENU_ACTIONS)=> {
+  handleMenuClick = (item: IFile | IFolder, action: CONTEXT_MENU_ACTIONS) => {
     switch (action) {
       case (CONTEXT_MENU_ACTIONS.RENAME):
         this.props.promptRenameFile(item);
@@ -176,7 +190,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       case (CONTEXT_MENU_ACTIONS.DOWNLOAD):
         const itemPath = item.path.split(":")[1];
         window.open(DOWNLOAD_URL + "/" + this.props.resourceId + "/" + this.props.resourceId + "/data/contents" + itemPath)
-      
+
     }
   }
 
@@ -184,47 +198,75 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
   generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: ((f: IFile) => IFile) | undefined, nestLevel: number = 0) => {
     if (item.type === FileOrFolderTypes.FOLDER) {
       return (<div>
-          <ContextMenuTrigger id={item.path}>{this.generateFolderElement(item as IFolder, index, openFile, nestLevel)}</ContextMenuTrigger>
-          <ContextMenu  className="context-menu" id={item.path}>
-            <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
-              Rename
+        <ContextMenuTrigger id={item.path}>{this.generateFolderElement(item as IFolder, index, openFile, nestLevel)}</ContextMenuTrigger>
+        <ContextMenu className="context-menu" id={item.path}>
+          <MenuItem className="menu-item clickable" data={{ action: CONTEXT_MENU_ACTIONS.RENAME }} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
+            Rename
             </MenuItem>
-          </ContextMenu>
-        </div>);
+        </ContextMenu>
+      </div>);
     } else {
       return (
         <div>
           <ContextMenuTrigger id={item.path}>{this.generateFileElement(item as IFile, index, openFile, nestLevel)}</ContextMenuTrigger>
-          <ContextMenu  className="context-menu" id={item.path}>
-            <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.RENAME}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
+          <ContextMenu className="context-menu" id={item.path}>
+            <MenuItem className="menu-item clickable" data={{ action: CONTEXT_MENU_ACTIONS.RENAME }} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
               Rename
             </MenuItem>
-            {this.props.fileLocation==="Workspace" ? <MenuItem className="menu-item clickable" data={{action: CONTEXT_MENU_ACTIONS.DOWNLOAD}} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.DOWNLOAD)}>
+            {this.props.fileLocation === "Workspace" ? <MenuItem className="menu-item clickable" data={{ action: CONTEXT_MENU_ACTIONS.DOWNLOAD }} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.DOWNLOAD)}>
               Download
-            </MenuItem> : null }
+            </MenuItem> : null}
           </ContextMenu>
         </div>);
     }
   };
 
+  // ConvertDatesToMoment(file: IFile){
+  //   if (file.lastModified) {
+  //     file.lastModified = moment(file.lastModified);
+  //     return file.lastModified
+  //   }
+  //   else {
+  //     return ''
+  //   }
+
+  // }
+
   generateFileElement = (file: IFile, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
     const onClick = openFile ? () => openFile(file) : undefined;
     return (
-      <Draggable draggableId={file.path} index={index} key={file.path}>
-        {(provided, snapshot) => (
-          <div
-            className={this.getDraggableClasses(snapshot, 'table-row file-element')}
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-          >
-            {this.generateTableCell(this.generateCheckBox(file))}
-            {this.generateTableCell(file.name, nestLevel, onClick)}
-            {this.generateTableCell(file.type || 'file')}
-            {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes))}
-          </div>
+      <div 
+        onMouseEnter={() => this.setState({ hovered: true })}
+        onMouseLeave={() => this.setState({ hovered: false })} >
+        <Draggable draggableId={file.path} index={index} key={file.path}>
+
+          {(provided, snapshot) => (
+            <div
+              className={this.getDraggableClasses(snapshot, 'table-row file-element')}
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps} style = {{ color: file.fileChanged=='LOCAL_LATEST' || file.fileChanged== 'HYDROSHARE_LATEST'? 'red' : 'green'}}
+            >
+              {this.generateTableCell(this.generateCheckBox(file))}
+              {this.generateTableCell(file.name, nestLevel, onClick)}
+              {this.generateTableCell(file.type || 'file')}
+              {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes))}
+
+              {this.generateTableCell(file.fileChanged || 'Synced')}
+              {this.generateTableCell(file.lastModified || 'time')}
+              
+        
+              
+            </div>
+
+          )}
+        </Draggable>
+        {this.state.hovered && (
+          <span>
+            Last Modified : {file.type}
+          </span>
         )}
-      </Draggable>
+      </div>
     );
   };
 
@@ -310,7 +352,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
   generateCheckBox = (item: IFile | IFolder) => {
     const onClick = () => this.toggleSingleFileOrFolderSelected(item);
     return (
-      <input type="checkbox" onClick={onClick} checked={this.state.selectedFilesAndFolders.has(item.path)}/>
+      <input type="checkbox" onClick={onClick} checked={this.state.selectedFilesAndFolders.has(item.path)} />
     );
   };
 
@@ -378,10 +420,10 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
   setSortBy = (sortBy: SORT_BY_OPTIONS) => {
     if (this.state.sortBy === sortBy) {
       // Already sorted by this column, so reverse sort order
-      this.setState({sortAscending: !this.state.sortAscending});
+      this.setState({ sortAscending: !this.state.sortAscending });
     } else {
       // Otherwise sort by this column
-      this.setState({sortBy});
+      this.setState({ sortBy });
     }
   };
 
@@ -412,7 +454,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     } else {
       expandedFolders.add(folder.path);
     }
-    this.setState({expandedFolders});
+    this.setState({ expandedFolders });
   };
 
   toggleSingleFileOrFolderSelected = (item: IFile | IFolder) => {
@@ -462,7 +504,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       return '0B';
     }
     const labelIndex = Math.floor(Math.log10(sizeBytes) / 3);
-    const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, 3*labelIndex));
+    const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, 3 * labelIndex));
     return `${sizeInHumanReadableUnits}${HUMAN_READABLE_FILE_SIZES[labelIndex]}`;
   };
 
@@ -491,5 +533,5 @@ const HUMAN_READABLE_FILE_SIZES = [
 ];
 
 export const SortTriangleSVG = <svg xmlns="http://www.w3.org/2000/svg" className="triangle" width="10" height="10" viewBox="0 0 2.646 2.646">
-    <path d="M0 0l1.323 2.646L2.646 0z"/>
-  </svg>;
+  <path d="M0 0l1.323 2.646L2.646 0z" />
+</svg>;

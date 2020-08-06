@@ -19,6 +19,7 @@ import {
   IFile,
   IFolder,
   IResource,
+  IResourceFilesData,
   IRootState,
 } from '../store/types';
 
@@ -48,6 +49,7 @@ interface IFileManagerProps {
   promptRenameFileOrFolderHydroShare: (fileOrFolder: IFile | IFolder) => any
   resourceId: string
   downloadFileOrFolder: (paths: string[]) => any
+  checkSyncStatus: (paths: string[]) => any
 }
 
 // For converting file paths back into IFiles and IFolders
@@ -142,7 +144,10 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     const selectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.hydroShareResourceRootDir, this.state.selectedHydroShareFilesAndFolders);
     this.props.downloadFileOrFolder(selectedItems);
   };
-
+  promptCheckSyncStatusFiles = () => {
+    const selectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.localFilesRootDir, this.state.selectedLocalFilesAndFolders);
+    this.props.checkSyncStatus(selectedItems);
+  }
 
   promptDeleteSelectedLocalFiles = () => {
     // This would ideally be done when we get a new list of file from the server, but since the only way to do that
@@ -184,7 +189,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
 
     // Rebuild the lookup table
     this.buildLookupTable();
-
+    
     const localFilesDeleteClassName = this.state.selectedLocalFilesAndFolders.size === 0 ? "button-disabled" : "button-enabled"
     const localFilesHeader =
       <div>
@@ -211,9 +216,16 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
           >
             Delete
           </button>
+          <button
+            className={localFilesDeleteClassName}
+            
+            onClick={this.promptCheckSyncStatusFiles}
+            title="Open the page for this resource in HydroShare">
+            Check Sync Status
+        </button>
         </div>
       </div>;
-
+    
     const hydroShareDeleteClassName = this.state.selectedHydroShareFilesAndFolders.size === 0 ? "button-disabled" : "button-enabled"
     const openInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resourceId}/`, '_blank');
     const hydroShareHeader =
