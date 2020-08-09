@@ -34,6 +34,7 @@ interface IFilePaneState {
   sortAscending: boolean
   sortBy: SORT_BY_OPTIONS
   hovered: boolean
+  hoverableId: string
 }
 
 interface IFilePaneProps {
@@ -62,7 +63,8 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     selectedFilesAndFolders: new Set<string>(),
     sortAscending: true,
     sortBy: SORT_BY_OPTIONS.NAME,
-    hovered: false
+    hovered: false,
+    hoverableId: ''
   };
 
   render() {
@@ -147,7 +149,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                 <button
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SIZE ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}>
-                  Sync Status
+                  Latest In
                   {this.state.sortBy === SORT_BY_OPTIONS.SIZE && SortTriangleSVG}
                 </button>
               </div>
@@ -221,54 +223,45 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     }
   };
 
-  // ConvertDatesToMoment(file: IFile){
-  //   if (file.lastModified) {
-  //     file.lastModified = moment(file.lastModified);
-  //     return file.lastModified
-  //   }
-  //   else {
-  //     return ''
-  //   }
-
-  // }
-
+  onHover = (id: any) => {
+    this.setState({ hoverableId: id })
+  };
+  onOut = () => {
+    this.setState({ hoverableId: '' })
+  };
   generateFileElement = (file: IFile, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
+
+    {
+      this.state.hoverableId == file.path && (
+        <div style={{ color: "red" }} id="hoverableId">
+          Last Modified : {file.modifiedTime?.toString()}
+
+        </div>
+      )
+    }
+
     const onClick = openFile ? () => openFile(file) : undefined;
     return (
-      <div 
-        onMouseEnter={() => this.setState({ hovered: true })}
-        onMouseLeave={() => this.setState({ hovered: false })} >
-        <Draggable draggableId={file.path} index={index} key={file.path}>
-
-          {(provided, snapshot) => (
-            <div
-              className={this.getDraggableClasses(snapshot, 'table-row file-element')}
-              ref={provided.innerRef}
-              {...provided.draggableProps}
-              {...provided.dragHandleProps} style = {{ color: file.fileChanged=='LOCAL_LATEST' || file.fileChanged== 'HYDROSHARE_LATEST'? 'red' : 'green'}}
-            >
-              {this.generateTableCell(this.generateCheckBox(file))}
-              {this.generateTableCell(file.name, nestLevel, onClick)}
-              {this.generateTableCell(file.type || 'file')}
-              {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes))}
-
-              {this.generateTableCell(file.fileChanged || 'Synced')}
-              {this.generateTableCell(file.lastModified || 'time')}
-              
-        
-              
-            </div>
-
-          )}
-        </Draggable>
-        {this.state.hovered && (
-          <span>
-            Last Modified : {file.type}
-          </span>
+      <Draggable draggableId={file.path} index={index} key={file.path} >
+        {(provided, snapshot) => (
+          <div
+            className={this.getDraggableClasses(snapshot, 'table-row file-element')}
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            onMouseEnter={() => this.onHover(file.path)}
+            onMouseLeave={() => this.onOut()}
+          >
+            {this.generateTableCell(this.generateCheckBox(file),file.modifiedTime)}
+            {this.generateTableCell(file.name,file.modifiedTime, nestLevel, onClick)}
+            {this.generateTableCell(file.type || 'file',file.modifiedTime)}
+            {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes),file.modifiedTime)}
+            {this.generateTableCell(file.fileChanged|| 'Synced',file.modifiedTime)}
+          </div>
         )}
-      </div>
+      </Draggable>
     );
-  };
+  }
 
   generateFolderElement = (folder: IFolder, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
     const folderLineItem = (
@@ -280,10 +273,10 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             {...provided.draggableProps}
             {...provided.dragHandleProps}
           >
-            {this.generateTableCell(this.generateCheckBox(folder))}
+            {this.generateTableCell(this.generateCheckBox(folder),folder.modifiedTime)}
             {this.generateFolderNameTableCell(folder, nestLevel)}
-            {this.generateTableCell('folder')}
-            {this.generateTableCell(this.getFormattedSizeString(folder.sizeBytes))}
+            {this.generateTableCell('folder',folder.modifiedTime)}
+            {this.generateTableCell(this.getFormattedSizeString(folder.sizeBytes),folder.modifiedTime)}
           </div>
         )}
       </Draggable>
@@ -313,11 +306,12 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     );
   };
 
-  generateTableCell = (content: ReactElement | string | number | moment.Moment, nestLevel: number = 0, onClick: any = undefined) => {
+  generateTableCell = (content: ReactElement | string | number | moment.Moment, appendToolTip: moment.Moment | undefined, nestLevel: number = 0, onClick: any = undefined) => {
     const style = {
       paddingLeft: `${nestLevel * 10}px`,
     };
-    const tooltip = typeof content === 'string' ? content : undefined;
+    const time = appendToolTip ===undefined ? " ":appendToolTip.toString();
+    const tooltip = typeof content === 'string' ? content+", Modified Time: "+time : undefined;
     const classNames: Array<string> = [];
     if (onClick) {
       classNames.push('clickable');
@@ -385,22 +379,22 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
           return (i2.type || '').localeCompare(i1.type || '');
         }
       case SORT_BY_OPTIONS.LAST_MODIFIED:
-        if (!i1.lastModified && !i2.lastModified) {
+        if (!i1.modifiedTime && !i2.modifiedTime) {
           // Neither have a defined last modified time, so consider them equal
           return 0;
         }
-        if (!i1.lastModified) {
+        if (!i1.modifiedTime) {
           // Put i1 second if ascending, i2 if descending
           return sortAscending ? -1 : 1;
         }
-        if (!i2.lastModified) {
+        if (!i2.modifiedTime) {
           // Put i2 second if ascending, i1 if descending
           return sortAscending ? 1 : -1;
         }
         if (sortAscending) {
-          return i1.lastModified?.diff(i2.lastModified)
+          return i1.modifiedTime?.diff(i2.modifiedTime)
         } else {
-          return i2.lastModified?.diff(i1.lastModified)
+          return i2.modifiedTime?.diff(i1.modifiedTime)
         }
       case SORT_BY_OPTIONS.SIZE:
         return (sortAscending ? 1 : -1) * ((i1.sizeBytes || -1) - (i2.sizeBytes || -1));
