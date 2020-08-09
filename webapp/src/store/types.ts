@@ -68,7 +68,7 @@ export interface IDirectoryState {
 
 export interface IFile {
   path: string // If a folder, no trailing forward slash
-  lastModified?: moment.Moment
+  modifiedTime?: moment.Moment
   name: string
   type: FileOrFolderTypes
   sizeBytes: number
