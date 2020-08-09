@@ -392,8 +392,8 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
             resource_manager.save_resource_locally(res_id)
         self.write({
             'readMe': local_data.get_readme(),
-            # 'rootDir': local_data.get_files_and_folders(),
-            'rootDir': 'rootDir'
+            'rootDir': local_data.get_files_and_folders(),
+            
         })
 
     # TODO: move some of the logic here outside this file and deduplicate
@@ -528,10 +528,18 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
             return
         print("In get of resource hydroshare file request handler")
         hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
-        root_dir = hs_data.get_files()
+        # Code for updating the latest files on Root Dir object 
+
+        local_data = ResourceLocalData(res_id)
+        #temporaryRoot = local_data.get_files_and_folders()
+        temporaryRoot = hs_data.get_files()
+        checkHydroShareSyncStatus(temporaryRoot, res_id)
+        # code ends here
+        #root_dir = hs_data.get_files()
         
         print('after root dir value is fetched')
-        self.write({'rootDir': root_dir})
+        #self.write({'rootDir': root_dir})
+        self.write({'rootDir': temporaryRoot})
 
     # TODO: Move the bulk of this function out of this file and
     # deduplicate code (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/41)
@@ -670,9 +678,10 @@ class DownloadHydroShareFilesRequestHandler(BaseRequestHandler):
         })
 
 def checkFileSyncStatus(temporaryRoot, res_id):
-    serverIsLatest = 'HYDRO_SHARE_LATEST'
-    localIsLatest = 'LOCAL_LATEST'
-    localSyncServer = 'Sync'
+    serverIsLatest = 'HYDROSHARE'
+    localIsLatest = 'LOCAL'
+    localSyncServer = 'In Sync'
+    isfileExists = ''
     local_data = ResourceLocalData(res_id)
     hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
     # find where are the files and its properties in temporaryRoot
@@ -684,30 +693,59 @@ def checkFileSyncStatus(temporaryRoot, res_id):
         print('modified time local is', modified_time_local)
         print('file name is', file['name'])
         modified_time_hs = hs_data.get_modified_time_hs(file['name'])
+        
         #modified_time_hs = hs_data.get_md5_files(res_id, file['name'])
-        if modified_time_hs < modified_time_local:
-            # add fileChanged value
-            file.update({"fileChanged": localIsLatest})
-            print(localIsLatest)
-
-        elif modified_time_hs > modified_time_local:
-            file.update({"fileChanged": serverIsLatest})
-            print(serverIsLatest)
+        if modified_time_hs == None:
+            isfileExists = "File doesn't exist in HydroShare"
+            file.update({"fileChanged": isfileExists})
         else:
-            file.update({"fileChanged": localSyncServer})
-        # else:
-        #     print(k, ":", v)  for k,v in temporaryRoot.items():
-     # if isinstance(v, dict):
-     #     iterdict(v)
-     # else:
-     #     print (k,":",v)
+            if modified_time_hs < modified_time_local:
+                # add fileChanged value
+                file.update({"fileChanged": localIsLatest})
+                print(localIsLatest)
 
-    # iterate over temporaryRoot contents
+            elif modified_time_hs > modified_time_local:
+                file.update({"fileChanged": serverIsLatest})
+                print(serverIsLatest)
+            else:
+                file.update({"fileChanged": localSyncServer})
 
-    # call method to check for file status in hydroshare
 
-    # update temporaryRoot by adding syncStatus variable with appropriate value
+def checkHydroShareSyncStatus(temporaryRoot, res_id):
+    serverIsLatest = 'HYDROSHARE'
+    localIsLatest = 'LOCAL'
+    localSyncServer = 'In Sync'
+    isFileExist = ''
+    local_data = ResourceLocalData(res_id)
+    hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
+    # find where are the files and its properties in temporaryRoot
+    contents = temporaryRoot['contents'];
+    for file in contents:
 
+        # modified_time_local = local_data.get_md5_files(res_id, file['name'])
+        modified_time_hs = file['modifiedTime']
+        print('modified time local is', modified_time_hs)
+        if file['path'].startswith('hs'):
+            file_name = file['path'][4:]
+        print('file name is', file_name)
+        modified_time_local = local_data.get_md5_files(res_id,file_name)
+
+        # modified_time_hs = hs_data.get_md5_files(res_id, file['name'])
+        if modified_time_local == None:
+            isFileExist = "File doesn't exist in Local"
+            file.update({"fileChanged" : isFileExist})
+        else:
+
+            if modified_time_hs < modified_time_local:
+                # add fileChanged value
+                file.update({"fileChanged": localIsLatest})
+                print(localIsLatest)
+
+            elif modified_time_hs > modified_time_local:
+                file.update({"fileChanged": serverIsLatest})
+                print(serverIsLatest)
+            else:
+                file.update({"fileChanged": localSyncServer})
 
 
 class CheckSyncStatusFilesRequestHandler(BaseRequestHandler):
