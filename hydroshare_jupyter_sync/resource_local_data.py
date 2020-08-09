@@ -57,6 +57,7 @@ class ResourceLocalData:
         """ Gets the md5 of the selected file """
         self.md5_file_path = (_get_path_to_resources_data_root() / resource_id
                          / resource_id / 'data/contents'/ item_path)
+
         # if self.md5_file_path.exists:
         #     a_file = open(self.md5_file_path, "rb")
         #     md5_hash = hashlib.md5()
@@ -66,17 +67,22 @@ class ResourceLocalData:
         # return digest
 
         files2 = []
-        dirpath = Path(item_path)
-        print('dirpath is', dirpath)
-        modified_time_local = str(datetime.datetime.fromtimestamp(
-                        self.md5_file_path.stat().st_mtime))
-        # files2.append({
-        #  "modifiedTime": str(datetime.datetime.fromtimestamp(
-        #                 self.md5_file_path.stat().st_mtime))
+        print('Checking if file exists:', self.md5_file_path.exists())
+        if self.md5_file_path.is_file():
+            print('Dir path is', Path(item_path))
+            dirpath = Path(item_path)
+            print('dirpath is', dirpath)
+            modified_time_local = str(datetime.datetime.fromtimestamp(
+                            self.md5_file_path.stat().st_mtime))
+            # files2.append({
+            #  "modifiedTime": str(datetime.datetime.fromtimestamp(
+            #                 self.md5_file_path.stat().st_mtime))
 
-        # })
-        print(modified_time_local)
-        return modified_time_local
+            # })
+            print(modified_time_local)
+            return modified_time_local
+        else:
+            print("File doesn't exist")
 
 
 
