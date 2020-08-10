@@ -28,6 +28,7 @@ import {
   renameFileOrFolder,
   deleteResources,
   checkSyncStatusFiles,
+  checkSyncHydroShareStatusFiles,
 } from '../store/async-actions';
 import {
   IFile,
@@ -74,6 +75,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     getFilesIfNeeded: (resource: IResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
     downloadFiles: (resource: IResource, paths: string[]) => dispatch(resourcesActions.downloadFilesOfResource(resource, paths)),
     checkSyncStatusFiles:(resource: IResource, paths: string[]) => dispatch(checkSyncStatusFiles(resource, paths)),
+    checkSyncHydroShareStatusFiles:(resource: IResource, paths: string[]) => dispatch(checkSyncHydroShareStatusFiles(resource, paths)),
     openFile: (resource: IResource, file: IFile | IFolder) => dispatch(resourcesActions.openFileInJupyter(resource, file)),
     copyFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
     moveFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
@@ -130,6 +132,9 @@ class ResourcePage extends React.Component<PropsType, StateType> {
 
   checkSyncStatus = (paths: string[]) => {
     this.props.checkSyncStatusFiles(this.props.resource!, paths!)
+  }
+  checkSyncHydroShare = (paths: string[]) => {
+    this.props.checkSyncHydroShareStatusFiles(this.props.resource!, paths!)
   }
   hideModal = () => this.setState({ modal: MODAL_TYPES.NONE });
 
@@ -305,6 +310,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           resourceId={resource.id}
           downloadFileOrFolder={this.doDownloadSelectedFiles}
           checkSyncStatus={this.checkSyncStatus}
+          checkSyncHydroShare={this.checkSyncHydroShare}
         />
         <ReadMeDisplay localReadMe={this.props.resource ? this.props.resource.localReadMe : "# No ReadMe yet"} resId={resource.id} />
         {modal}
