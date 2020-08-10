@@ -41,6 +41,7 @@ class ResourceHydroShareData:
                 "sizeBytes": file_info.get("size"),
                 "modifiedTime": modified_time,
                 "type": filepath.suffix[1:] if filepath.suffix else None,
+                "checksum" : file_info.get("checksum")
             })
         else:
             return False
@@ -213,10 +214,17 @@ class ResourceHydroShareData:
                 print('Filename is', contents.get("file_name"))
                 if (contents.get("name") == filename):
                     modified_time = contents.get("modifiedTime")
+                    checksum = contents.get("checksum")
                     print('Modified time in HydroShare is', modified_time)
-                    if modified_time:
-                        modified_time = str(parse(modified_time))
-                    return modified_time
+                    print('Checksum in Hydroshare is', checksum)
+                #     if modified_time:
+                #         modified_time = str(parse(modified_time))
+                #     return modified_time
+                # else:
+                #     print('filename does not exist')
+                    if checksum:
+                        #modified_time = str(parse(modified_time))
+                        return checksum, modified_time
                 else:
                     print('filename does not exist')
 
