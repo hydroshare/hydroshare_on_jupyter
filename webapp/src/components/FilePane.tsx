@@ -241,11 +241,18 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     }
 
     const onClick = openFile ? () => openFile(file) : undefined;
+    // Choose color of row based on file sync status
+    let rowCssClass = 'table-row file-element row-not-sync';
+    if (file.fileChanged.includes("File doesn't")) {
+      rowCssClass = 'table-row file-element row-file-not-exist'
+    } else  if (file.fileChanged== 'In Sync'){
+      rowCssClass = 'table-row file-element'
+    }
     return (
       <Draggable draggableId={file.path} index={index} key={file.path} >
         {(provided, snapshot) => (
           <div
-            className={this.getDraggableClasses(snapshot, 'table-row file-element')}
+            className={this.getDraggableClasses(snapshot, rowCssClass)}
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
@@ -262,6 +269,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       </Draggable>
     );
   }
+
 
   generateFolderElement = (folder: IFolder, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
     const folderLineItem = (
