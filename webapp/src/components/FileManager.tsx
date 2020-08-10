@@ -50,6 +50,7 @@ interface IFileManagerProps {
   resourceId: string
   downloadFileOrFolder: (paths: string[]) => any
   checkSyncStatus: (paths: string[]) => any
+  checkSyncHydroShare: (paths: string[]) => any
 }
 
 // For converting file paths back into IFiles and IFolders
@@ -146,7 +147,11 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
   };
   promptCheckSyncStatusFiles = () => {
     const selectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.localFilesRootDir, this.state.selectedLocalFilesAndFolders);
+    const hydroshareSelectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.hydroShareResourceRootDir, this.state.selectedHydroShareFilesAndFolders);
     this.props.checkSyncStatus(selectedItems);
+    this.props.checkSyncHydroShare(hydroshareSelectedItems);
+  
+    
   }
 
   promptDeleteSelectedLocalFiles = () => {
