@@ -704,7 +704,7 @@ def checkFileSyncStatus(temporaryRoot, res_id):
             file.update({"fileChanged": isfileExists, "syncStatus": syncStatus})
         else:
             if checksum_local!= checksum_hs:
-                syncStatus = "OutofSync";
+                syncStatus = "Out of Sync";
                 if modified_time_hs < modified_time_local:
                     # add fileChanged value
                     file.update({"fileChanged": localIsLatest, "syncStatus": syncStatus})
