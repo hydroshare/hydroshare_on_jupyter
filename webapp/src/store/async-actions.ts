@@ -240,6 +240,40 @@ export function checkSyncStatusFiles(resource: IResource, paths: string[]):Thunk
     }
   };
 }
+export function checkSyncHydroShareStatusFiles(resource: IResource, paths: string[]):ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    let localFiles: string[] = [];
+    let hsFiles: string[] = [];
+    paths.forEach(p => {
+      let [prefix, pathRelRoot] = p.split(':');
+      if (prefix === 'local') {
+        localFiles.push(pathRelRoot);
+      } else if (prefix === 'hs') {
+        hsFiles.push(pathRelRoot);
+      }
+    });
+    if (hsFiles.length == 0) {
+        try {
+          const response = await getFromBackend<IResourceFilesData>(`/resources/${resource.id}/hs-files`);
+          const {
+            data: {
+              rootDir,
+              readMe,
+              error,
+            },
+          } = response;
+          if (error) {
+            handleError(error, dispatch);
+          } else {
+            dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
+          }
+        } catch (e) {
+          console.error(e);
+          dispatch(pushNotification('error', 'An error occurred when trying to get the HydroShare files.'));
+        }
+    }
+  };
+}
 
 export function deleteResources(resources: IResource[], localOnly: boolean): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
