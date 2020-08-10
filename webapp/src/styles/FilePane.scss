@@ -68,9 +68,13 @@
     .collapsed svg {
       transform: rotate(-90deg);
     }
-    // &:hover {
-    //   background-color: #dddddd;
-    // }
+
+  }
+  .row-not-sync {
+    background-color: #FFB6C1;
+  }
+  .row-file-not-exist {
+    background-color: #D3D3D3;
   }
 
   .context-menu {
