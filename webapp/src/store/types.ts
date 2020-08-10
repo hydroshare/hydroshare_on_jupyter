@@ -67,6 +67,7 @@ export interface IDirectoryState {
 /** --------- Data Models --------- **/
 
 export interface IFile {
+  syncStatus: string
   path: string // If a folder, no trailing forward slash
   modifiedTime?: moment.Moment
   name: string

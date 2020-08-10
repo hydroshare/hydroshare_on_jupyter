@@ -149,7 +149,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                 <button
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SIZE ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}>
-                  Latest In
+                  Sync Status
                   {this.state.sortBy === SORT_BY_OPTIONS.SIZE && SortTriangleSVG}
                 </button>
               </div>
@@ -243,9 +243,9 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     const onClick = openFile ? () => openFile(file) : undefined;
     // Choose color of row based on file sync status
     let rowCssClass = 'table-row file-element row-not-sync';
-    if (file.fileChanged.includes("File doesn't")) {
+    if (file.syncStatus.includes("File not in")) {
       rowCssClass = 'table-row file-element row-file-not-exist'
-    } else  if (file.fileChanged== 'In Sync'){
+    } else  if (file.syncStatus == 'In Sync'){
       rowCssClass = 'table-row file-element'
     }
     return (
@@ -263,7 +263,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             {this.generateTableCell(file.name,file.modifiedTime, nestLevel, onClick)}
             {this.generateTableCell(file.type || 'file',file.modifiedTime)}
             {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes),file.modifiedTime)}
-            {this.generateTableCell(file.fileChanged|| 'Synced',file.modifiedTime)}
+            {this.generateTableCell(file.syncStatus|| 'Synced',file.modifiedTime)}
           </div>
         )}
       </Draggable>
