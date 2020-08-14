@@ -29,7 +29,7 @@ class ResourceLocalData:
     def __init__(self, resource_id):
         self.data_path = (_get_path_to_resources_data_root() / resource_id
                           / resource_id / 'data' / 'contents')
-        print("Resource data_path is : ", self.data_path)
+        
 
     def get_md5(self, resource_id):
         """ Gets the md5 of local resource"""
@@ -55,8 +55,7 @@ class ResourceLocalData:
     
     def get_md5_files(self, item_path):
         """ Gets the md5 of the selected file """
-        # self.md5_file_path = (_get_path_to_resources_data_root() / resource_id
-        #                  / resource_id / 'data/contents'/ item_path)
+
         self.md5_file_path = Path(item_path)
 
         if self.md5_file_path.exists():
@@ -66,7 +65,7 @@ class ResourceLocalData:
                 content = a_file.read()
                 md5_hash.update(content)
                 digest = md5_hash.hexdigest()
-                print('Local checksum in md5 func is', digest)
+                
                 modified_time_local = str(datetime.datetime.fromtimestamp(
                                     self.md5_file_path.stat().st_mtime))
                 return digest
@@ -77,18 +76,7 @@ class ResourceLocalData:
 
 
         files2 = []
-        # """ Returning local modified time """
-        # print('Checking if file exists:', self.md5_file_path.exists())
-        # if self.md5_file_path.is_file():
-        #     print('Dir path is', Path(item_path))
-        #     dirpath = Path(item_path)
-        #     print('dirpath is', dirpath)
-        #     modified_time_local = str(datetime.datetime.fromtimestamp(
-        #                     self.md5_file_path.stat().st_mtime))
-        #     print(modified_time_local)
-        #     return modified_time_local
-        # else:
-        #     print("File doesn't exist")
+
 
 
 

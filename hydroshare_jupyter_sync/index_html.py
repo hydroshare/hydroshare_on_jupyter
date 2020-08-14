@@ -13,6 +13,7 @@ _frontend_url = ''
 _backend_api_url = '/syncApi'
 from pathlib import Path
 
+
 def set_frontend_url(url):
     global _frontend_url
     _frontend_url = url
@@ -33,7 +34,7 @@ def get_index_html(dev_mode=False):
     global _frontend_url
     global _backend_api_url
     config = get_config_values(['dataPath', 'gettingStartedNotebook'])
-    print("Config Details:",config)
+
     notebook_url_path_prefix = url_path_join('/tree', 'local_hs_resources')
     getting_started_notebook_path = ''
     if config:
@@ -41,12 +42,11 @@ def get_index_html(dev_mode=False):
             getting_started_notebook_path = config['gettingStartedNotebook']
         if 'dataPath' in config:
 
-           #config_new_path = str(config['dataPath']).replace(Path.home(),'')
+            #config_new_path = str(config['dataPath']).replace(Path.home(),'')
             config_data_path = str(config['dataPath'])
-            config_new_path = config_data_path.replace(str(Path.home()),'')
-            print("Config new path is :",config_new_path)
-            notebook_url_path_prefix = url_path_join('/tree',
-                                                     config_new_path)
+            config_new_path = config_data_path.replace(str(Path.home()), '')
+
+            notebook_url_path_prefix = url_path_join('/tree', config_new_path)
     bundle_suffix = 'dev' if dev_mode else 'dist'
 
     return f"""
