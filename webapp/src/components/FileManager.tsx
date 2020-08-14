@@ -178,8 +178,6 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
     return list;
   };
 
-
-
   render() {
     const {
       hydroShareResourceRootDir,
@@ -212,21 +210,18 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             type="text"
             value={filterByName}
           />
-
           <MdCreateNewFolder
             cursor='pointer'
+            title="Create a file or a folder"
             style={{ width: 40, height: 30, backgroundColor: "transparent" }}
             className={localFilesDeleteClassName}
             onClick={this.props.promptCreateNewFileOrFolder}></MdCreateNewFolder>
-
-
           <RiUpload2Line
-
             cursor='pointer'
+            title="Upload file from local system to workspace"
             style={{ width: 40, height: 30, backgroundColor: "transparent" }}
             className={localFilesDeleteClassName}
             onClick={this.props.promptUploadFile}></RiUpload2Line>
-
           <AiFillDelete
             cursor='pointer'
             style={{ width: 40, height: 30 }}
@@ -234,13 +229,12 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             onClick={this.promptDeleteSelectedLocalFiles}
             title="Delete the selected files and/or folders"
           />
-
           <FiRefreshCcw
             cursor='pointer'
             style={{ width: 40, height: 30, backgroundColor: "transparent" }}
             className={localFilesDeleteClassName}
             onClick={this.promptCheckSyncStatusFiles}
-            title="Open the page for this resource in HydroShare">
+            title="Checks the sync status">
           </FiRefreshCcw>
         </div>
       </div>;
@@ -262,7 +256,6 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             type="text"
             value={filterByName}
           />
-
           <button
             className="button-enabled"
             onClick={openInHydroShare}
@@ -274,7 +267,7 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             style={{ width: 40, height: 30 }}
             className={hydroShareDeleteClassName}
             onClick={this.promptSelectedHydroShareFiles}
-            title="Open the page for this resource in HydroShare">
+            title="Download the files from HydroShare to Workspace">
           </RiDownload2Line>
           <AiFillDelete
             cursor='pointer'
@@ -289,12 +282,10 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             cursor='pointer'
             className={hydroShareDeleteClassName}
             onClick={this.promptCheckSyncStatusFiles}
-            title="Open the page for this resource in HydroShare">
+            title="Checks the sync status">
           </FiRefreshCcw>
-
         </div>
       </div>;
-
 
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
