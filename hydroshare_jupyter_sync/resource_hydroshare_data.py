@@ -59,8 +59,6 @@ class ResourceHydroShareData:
                 if modified_time:
                     modified_time = str(parse(modified_time))
                 return modified_time
-            else:
-                print('filename does not exist')
 
     def get_files(self, force_fetch=False):
         """ Gets all of the files in the resource in HydroShare
@@ -214,8 +212,7 @@ class ResourceHydroShareData:
                 if checksum:
 
                     return checksum, modified_time
-            else:
-                print(filename, ' does not exist in HydroShare')
+                
         return None, None
 
     def get_file_exists(self, filename, force_fetch=False):
@@ -264,12 +261,6 @@ class ResourceHydroShareData:
             # if it is just a file, add it to the final list
             else:
                 root_dir_contents.append(file_definition_hs)
-        for contents in root_dir_contents:
-            
-            if (contents.get("name") == filename):
-                print('exists')
-            else:
-                print('filename does not exist')
 
     def exists(self, item_path, file_extension=None):
         """ Checks if a file or folder exists in the resource on HydroShare
