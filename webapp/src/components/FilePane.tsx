@@ -8,6 +8,9 @@ import {
   DroppableStateSnapshot,
 } from 'react-beautiful-dnd';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import {TiTick} from 'react-icons/ti';
+import {MdCancel} from 'react-icons/md';
+import {FaQuestion} from 'react-icons/fa';
 import * as moment from 'moment';
 
 import {
@@ -18,6 +21,7 @@ import {
 
 import '../styles/FilePane.scss';
 import Loading from "./Loading";
+import { IconType } from 'react-icons/lib';
 
 // @ts-ignore
 const DOWNLOAD_URL = (window.BACKEND_API_URL) + '/download';
@@ -46,6 +50,7 @@ interface IFilePaneProps {
   header?: ReactElement
   loading?: boolean
   openFile?: (f: IFile) => any
+  openFileInHydroShare?: (f: IFile) => any
   onSelectedFilesAndFoldersChange?: (items: Set<String>) => any
   promptRenameFile: (fileOrFolder: IFile | IFolder) => any
   fileLocation: string
@@ -62,7 +67,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     expandedFolders: new Set<string>(),
     selectedFilesAndFolders: new Set<string>(),
     sortAscending: true,
-    sortBy: SORT_BY_OPTIONS.NAME,
+    sortBy: SORT_BY_OPTIONS.SYNCSTATUS,
     hovered: false,
     hoverableId: ''
   };
@@ -147,10 +152,10 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   {this.state.sortBy === SORT_BY_OPTIONS.SIZE && SortTriangleSVG}
                 </button>
                 <button
-                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SIZE ? sortOrder : '')}
-                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}>
+                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SYNCSTATUS ? sortOrder : '')}
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.SYNCSTATUS)}>
                   Sync Status
-                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE && SortTriangleSVG}
+                  {this.state.sortBy === SORT_BY_OPTIONS.SYNCSTATUS && SortTriangleSVG}
                 </button>
               </div>
               <div className="scrollable-container">
@@ -239,11 +244,11 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
         </div>
       )
     }
-
+    const openInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resourceId}/`, '_blank');
     const onClick = openFile ? () => openFile(file) : undefined;
     // Choose color of row based on file sync status
     let rowCssClass = 'table-row file-element row-not-sync';
-    if (file.syncStatus.includes("File not in")) {
+    if (file.syncStatus == ' ') {
       rowCssClass = 'table-row file-element row-file-not-exist'
     } else  if (file.syncStatus == 'In Sync'){
       rowCssClass = 'table-row file-element'
@@ -259,11 +264,11 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             onMouseEnter={() => this.onHover(file.path)}
             onMouseLeave={() => this.onOut()}
           >
-            {this.generateTableCell(this.generateCheckBox(file),file.modifiedTime)}
-            {this.generateTableCell(file.name,file.modifiedTime, nestLevel, onClick)}
-            {this.generateTableCell(file.type || 'file',file.modifiedTime)}
-            {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes),file.modifiedTime)}
-            {this.generateTableCell(file.syncStatus|| 'Synced',file.modifiedTime)}
+            {this.generateTableCell(this.generateCheckBox(file),file.modifiedTime,file.fileChanged)}
+            {this.generateTableCell(file.name,file.modifiedTime,file.fileChanged, nestLevel, onClick,)}
+            {this.generateTableCell(file.type || 'file',file.modifiedTime,file.fileChanged)}
+            {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes),file.modifiedTime,file.fileChanged)}
+            {this.generateTableCell(file.syncStatus == 'In Sync' ? <TiTick title="In Sync" /> :file.syncStatus == 'Out of Sync'? <MdCancel title="Out of Sync"/> : <FaQuestion  title="Unknown"/>,file.modifiedTime,file.fileChanged)}
           </div>
         )}
       </Draggable>
@@ -272,19 +277,26 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
 
 
   generateFolderElement = (folder: IFolder, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
+    let rowCssClass = 'table-row file-element row-not-sync';
+    if (folder.syncStatus == ' ') {
+      rowCssClass = 'table-row file-element row-file-not-exist'
+    } else  if (folder.syncStatus == 'In Sync'){
+      rowCssClass = 'table-row file-element'
+    }
     const folderLineItem = (
       <Draggable draggableId={folder.path} index={0} key={folder.path}>
         {(provided, snapshot) => (
           <div
-            className={this.getDraggableClasses(snapshot, 'table-row folder-element')}
+            className={this.getDraggableClasses(snapshot,rowCssClass )}
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
           >
-            {this.generateTableCell(this.generateCheckBox(folder),folder.modifiedTime)}
+            {this.generateTableCell(this.generateCheckBox(folder),folder.modifiedTime,folder.fileChanged)}
             {this.generateFolderNameTableCell(folder, nestLevel)}
-            {this.generateTableCell('folder',folder.modifiedTime)}
-            {this.generateTableCell(this.getFormattedSizeString(folder.sizeBytes),folder.modifiedTime)}
+            {this.generateTableCell('folder',folder.modifiedTime,folder.fileChanged)}
+            {this.generateTableCell(this.getFormattedSizeString(folder.sizeBytes),folder.modifiedTime,folder.fileChanged)}
+            {this.generateTableCell(folder.syncStatus == 'In Sync' ? <TiTick title="In Sync" /> :folder.syncStatus == 'Out of Sync'? <MdCancel title="Out of Sync"/> : <FaQuestion  title="Unknown"/>,folder.modifiedTime,folder.fileChanged)}
           </div>
         )}
       </Draggable>
@@ -314,12 +326,12 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     );
   };
 
-  generateTableCell = (content: ReactElement | string | number | moment.Moment, appendToolTip: moment.Moment | undefined, nestLevel: number = 0, onClick: any = undefined) => {
+  generateTableCell = (content: ReactElement | string | number | moment.Moment | IconType, appendToolTip: moment.Moment | undefined, fileInfo: string | undefined, nestLevel: number = 0, onClick: any = undefined) => {
     const style = {
       paddingLeft: `${nestLevel * 10}px`,
     };
     const time = appendToolTip ===undefined ? " ":appendToolTip.toString();
-    const tooltip = typeof content === 'string' ? content+", Modified Time: "+time : undefined;
+    const tooltip = typeof content === 'string' || 'IconType' ? content+", Modified Time: "+time+" FileInfo: "+ fileInfo : undefined;
     const classNames: Array<string> = [];
     if (onClick) {
       classNames.push('clickable');
@@ -406,6 +418,8 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
         }
       case SORT_BY_OPTIONS.SIZE:
         return (sortAscending ? 1 : -1) * ((i1.sizeBytes || -1) - (i2.sizeBytes || -1));
+      case SORT_BY_OPTIONS.SYNCSTATUS:
+      return (i1.fileChanged > i2.fileChanged) ? -1: 1
       default: // Should never happen, but needed to satisfy TypeScript
         return 0;
     }
@@ -420,6 +434,16 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
   };
 
   setSortBy = (sortBy: SORT_BY_OPTIONS) => {
+    if (this.state.sortBy === sortBy) {
+      // Already sorted by this column, so reverse sort order
+      this.setState({ sortAscending: !this.state.sortAscending });
+    } else {
+      // Otherwise sort by this column
+      this.setState({ sortBy });
+    }
+  };
+
+  setSortByIcons = (sortBy: SORT_BY_OPTIONS) => {
     if (this.state.sortBy === sortBy) {
       // Already sorted by this column, so reverse sort order
       this.setState({ sortAscending: !this.state.sortAscending });
@@ -517,6 +541,7 @@ enum SORT_BY_OPTIONS {
   TYPE,
   SIZE,
   LAST_MODIFIED,
+  SYNCSTATUS,
 }
 
 enum CONTEXT_MENU_ACTIONS {
