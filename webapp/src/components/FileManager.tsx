@@ -11,9 +11,12 @@ import {
   DragDropContext,
   DropResult,
 } from 'react-beautiful-dnd';
-import { AnyAction } from "redux";
+import { AiFillDelete } from "react-icons/ai";
+import { MdCreateNewFolder } from 'react-icons/md';
+import { FiRefreshCcw } from 'react-icons/fi';
+import { RiDownload2Line } from 'react-icons/ri';
+import { RiUpload2Line } from 'react-icons/ri';
 import '../styles/FileManager.scss';
-
 import {
   FileOrFolderTypes,
   IFile,
@@ -148,10 +151,8 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
   promptCheckSyncStatusFiles = () => {
     const selectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.localFilesRootDir, this.state.selectedLocalFilesAndFolders);
     const hydroshareSelectedItems = this.removeInvalidChoicesFromSelectedSet(this.props.hydroShareResourceRootDir, this.state.selectedHydroShareFilesAndFolders);
-    this.props.checkSyncStatus(selectedItems);
     this.props.checkSyncHydroShare(hydroshareSelectedItems);
-  
-    
+    this.props.checkSyncStatus(selectedItems);
   }
 
   promptDeleteSelectedLocalFiles = () => {
@@ -194,8 +195,8 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
 
     // Rebuild the lookup table
     this.buildLookupTable();
-    
-    const localFilesDeleteClassName = this.state.selectedLocalFilesAndFolders.size === 0 ? "button-disabled" : "button-enabled"
+
+    const localFilesDeleteClassName = this.state.selectedLocalFilesAndFolders.size === 0 ? "button-disabled button-down" : "button-enabled button-down"
     const localFilesHeader =
       <div>
         <div className="title-row">
@@ -211,27 +212,40 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             type="text"
             value={filterByName}
           />
-          <button className="button-enabled" onClick={this.props.promptCreateNewFileOrFolder}>New</button>
-          <button className="button-enabled" onClick={this.props.promptUploadFile}>Upload</button>
-          <button
+
+          <MdCreateNewFolder
+            cursor='pointer'
+            style={{ width: 40, height: 30, backgroundColor: "transparent" }}
+            className={localFilesDeleteClassName}
+            onClick={this.props.promptCreateNewFileOrFolder}></MdCreateNewFolder>
+
+
+          <RiUpload2Line
+
+            cursor='pointer'
+            style={{ width: 40, height: 30, backgroundColor: "transparent" }}
+            className={localFilesDeleteClassName}
+            onClick={this.props.promptUploadFile}></RiUpload2Line>
+
+          <AiFillDelete
+            cursor='pointer'
+            style={{ width: 40, height: 30 }}
             className={localFilesDeleteClassName}
             onClick={this.promptDeleteSelectedLocalFiles}
-            disabled={this.state.selectedLocalFilesAndFolders.size === 0}
             title="Delete the selected files and/or folders"
-          >
-            Delete
-          </button>
-          <button
+          />
+
+          <FiRefreshCcw
+            cursor='pointer'
+            style={{ width: 40, height: 30, backgroundColor: "transparent" }}
             className={localFilesDeleteClassName}
-            
             onClick={this.promptCheckSyncStatusFiles}
             title="Open the page for this resource in HydroShare">
-            Check Sync Status
-        </button>
+          </FiRefreshCcw>
         </div>
       </div>;
-    
-    const hydroShareDeleteClassName = this.state.selectedHydroShareFilesAndFolders.size === 0 ? "button-disabled" : "button-enabled"
+
+    const hydroShareDeleteClassName = this.state.selectedHydroShareFilesAndFolders.size === 0 ? "button-disabled button-down" : "button-enabled button-down"
     const openInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resourceId}/`, '_blank');
     const hydroShareHeader =
       <div>
@@ -248,33 +262,57 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             type="text"
             value={filterByName}
           />
-          <button
-            className={hydroShareDeleteClassName}
-            disabled={this.state.selectedHydroShareFilesAndFolders.size === 0}
-            onClick={this.promptDeleteSelectedHydroShareFiles}
-            title="Delete the selected files and/or folders"
-          >
-            Delete
-          </button>
+
           <button
             className="button-enabled"
             onClick={openInHydroShare}
             title="Open the page for this resource in HydroShare">
             Open in HydroShare
         </button>
-          <button
+          <RiDownload2Line
+            cursor='pointer'
+            style={{ width: 40, height: 30 }}
             className={hydroShareDeleteClassName}
-            disabled={this.state.selectedHydroShareFilesAndFolders.size === 0}
             onClick={this.promptSelectedHydroShareFiles}
             title="Open the page for this resource in HydroShare">
-            Download from HydroShare
-        </button>
+          </RiDownload2Line>
+          <AiFillDelete
+            cursor='pointer'
+            style={{ width: 40, height: 30 }}
+            className={hydroShareDeleteClassName}
+            onClick={this.promptDeleteSelectedHydroShareFiles}
+            title="Delete the selected files and/or folders"
+          >
+          </AiFillDelete>
+          <FiRefreshCcw
+            style={{ width: 40, height: 30, backgroundColor: "transparent" }}
+            cursor='pointer'
+            className={hydroShareDeleteClassName}
+            onClick={this.promptCheckSyncStatusFiles}
+            title="Open the page for this resource in HydroShare">
+          </FiRefreshCcw>
+
         </div>
       </div>;
+
 
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
         <div className="FileManager content-row">
+
+          <FilePane
+            resourceId={this.props.resourceId}
+            className="tile hydroshare"
+            droppableId={hydroShareResourceRootDir?.path || 'loading'}
+            filterByName={filterByName}
+            loading={fetchingHydroShareFiles}
+            rootDir={hydroShareResourceRootDir}
+            header={hydroShareHeader}
+            openFile={openInHydroShare}
+            promptRenameFile={this.props.promptRenameFileOrFolderHydroShare}
+            fileLocation={"HydroShare"}
+            onSelectedFilesAndFoldersChange={this.setSelectedHydroShareFilesAndFolders}
+          />
           <FilePane
             resourceId={this.props.resourceId}
             className="tile jupyterhub"
@@ -288,21 +326,8 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             fileLocation={"Workspace"}
             onSelectedFilesAndFoldersChange={this.setSelectedLocalFilesAndFolders}
           />
-          <FilePane
-            resourceId={this.props.resourceId}
-            className="tile hydroshare"
-            droppableId={hydroShareResourceRootDir?.path || 'loading'}
-            filterByName={filterByName}
-            loading={fetchingHydroShareFiles}
-            rootDir={hydroShareResourceRootDir}
-            header={hydroShareHeader}
-            promptRenameFile={this.props.promptRenameFileOrFolderHydroShare}
-            fileLocation={"HydroShare"}
-            onSelectedFilesAndFoldersChange={this.setSelectedHydroShareFilesAndFolders}
-          />
         </div>
       </DragDropContext>
     );
   };
 }
-//className="button-enabled"
