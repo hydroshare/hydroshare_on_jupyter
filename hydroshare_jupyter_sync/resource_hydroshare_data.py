@@ -41,33 +41,27 @@ class ResourceHydroShareData:
                 "sizeBytes": file_info.get("size"),
                 "modifiedTime": modified_time,
                 "type": filepath.suffix[1:] if filepath.suffix else None,
-                "checksum" : file_info.get("checksum")
+                "checksum": file_info.get("checksum")
             })
         else:
             return False
 
-    def get_md5_files(self,res_id, item_path):
+    def get_md5_files(self, res_id, item_path):
 
         filepath = Path(item_path)
         print('item path is', item_path)
         print('Filepath is', filepath)
         hs_resource_info = self.hs_api_conn.getResourceFileList(self.res_id)
-        #hs_file_info = self.hs_api_conn.getResourceFile(self.res_id, filepath)
-        #print('hs_file_info is',hs_file_info)
-        #for filepath in hs_resource_info:
         print(next(hs_resource_info))
         for a in hs_resource_info:
-        #if filepath.exists in hs_resource_info:
-            print('Filename is',a.get("file_name"))
-            if(a.get("file_name") == item_path):
+            print('Filename is', a.get("file_name"))
+            if (a.get("file_name") == item_path):
                 modified_time = a.get("modified_time")
-                #print('Modified time in HydroShare is', modified_time)
                 if modified_time:
                     modified_time = str(parse(modified_time))
                 return modified_time
             else:
                 print('filename does not exist')
-
 
     def get_files(self, force_fetch=False):
         """ Gets all of the files in the resource in HydroShare
@@ -96,27 +90,24 @@ class ResourceHydroShareData:
         nested_files = {}
         for file_info in hs_resource_info:
             # extract filepath from url
-            filepath = file_info["url"][len(url_prefix)+1:]
+            filepath = file_info["url"][len(url_prefix) + 1:]
             # get proper definition formatting of file if it is a file
-            file_definition_hs = self._get_file_metadata(filepath, filepath,
-                                                         file_info,
-                                                         HS_PREFIX + ':')
+            file_definition_hs = self._get_file_metadata(
+                filepath, filepath, file_info, HS_PREFIX + ':')
             # if it is a folder, build up contents
             if not file_definition_hs:
                 nested_files[filepath + "/"] = file_info
                 folders = filepath.split("/")
                 currpath = ""
-                for x in range(0, len(folders)-1):
+                for x in range(0, len(folders) - 1):
                     folder = folders[x]
                     currpath = currpath + folder + "/"
                     # build up dictionary of folder -> what is in it
                     if (x, folder, currpath) not in folders_dict:
                         folders_dict[(x, folder, currpath)] = []
-                    folders_dict[(x, folder, currpath)].append((x+1,
-                                                                folders[x+1],
-                                                                (currpath +
-                                                                 folders[x+1] +
-                                                                 "/")))
+                    folders_dict[(x, folder, currpath)].append(
+                        (x + 1, folders[x + 1],
+                         (currpath + folders[x + 1] + "/")))
             # if it is just a file, add it to the final list
             else:
                 root_dir_contents.append(file_definition_hs)
@@ -128,26 +119,32 @@ class ResourceHydroShareData:
             # into the result by means of the recursive calls
             if key[0] == 0:
                 folder_time, folder_size, folder_contents = (
-                            self._get_contents_recursive(val, folders_dict,
-                                                         nested_files,
-                                                         HS_PREFIX + ':'))
+                    self._get_contents_recursive(val, folders_dict,
+                                                 nested_files,
+                                                 HS_PREFIX + ':'))
                 if folder_time:
                     folder_time = str(folder_time)
                 level, name, path = key
                 root_dir_contents.append({
-                    "name": name,
-                    "path": HS_PREFIX + ':/' + path.strip('/'),
-                    "sizeBytes": folder_size,
-                    "modifiedTime": folder_time,
-                    "type": "folder",
-                    "contents": folder_contents,
+                    "name":
+                    name,
+                    "path":
+                    HS_PREFIX + ':/' + path.strip('/'),
+                    "sizeBytes":
+                    folder_size,
+                    "modifiedTime":
+                    folder_time,
+                    "type":
+                    "folder",
+                    "contents":
+                    folder_contents,
                 })
 
         # calculate the size of root folder by summing size of contents
         rootsize = 0
         for f in root_dir_contents:
             rootsize += (f["sizeBytes"])
-        print('root dir contents are',root_dir_contents)
+        print('root dir contents are', root_dir_contents)
         self._files = {
             "name": "",
             "path": HS_PREFIX + ":/",
@@ -158,83 +155,8 @@ class ResourceHydroShareData:
 
         return self._files
 
-    def get_modified_time_hs(self, filename, force_fetch=False ):
-
-            """ Gets all of the files in the resource in HydroShare
-
-                :param force_fetch: whether to request the files from HydroShare
-                even if a local cache exists
-                :type force_fetch: bool
-                :returns {
-                    "name": "",
-                    "path": HS_PREFIX + ":/",
-                    "sizeBytes": #,
-                    "type": "folder",
-                    "contents": [list of similar dicts representing files and
-                    folders],
-                }
-                :rtype dict
-             """
-            if self._files and not force_fetch:
-                return self._files
-
-            hs_resource_info = self.hs_api_conn.getResourceFileList(self.res_id)
-            url_prefix = ('http://www.hydroshare.org/resource/' + self.res_id +
-                          '/data/contents')
-            folders_dict = {}
-            root_dir_contents = []
-            nested_files = {}
-            for file_info in hs_resource_info:
-                # extract filepath from url
-                filepath = file_info["url"][len(url_prefix) + 1:]
-                # get proper definition formatting of file if it is a file
-                file_definition_hs = self._get_file_metadata(filepath, filepath,
-                                                             file_info,
-                                                             HS_PREFIX + ':')
-                # if it is a folder, build up contents
-                if not file_definition_hs:
-                    nested_files[filepath + "/"] = file_info
-                    folders = filepath.split("/")
-                    currpath = ""
-                    for x in range(0, len(folders) - 1):
-                        folder = folders[x]
-                        currpath = currpath + folder + "/"
-                        # build up dictionary of folder -> what is in it
-                        if (x, folder, currpath) not in folders_dict:
-                            folders_dict[(x, folder, currpath)] = []
-                        folders_dict[(x, folder, currpath)].append((x + 1,
-                                                                    folders[x + 1],
-                                                                    (currpath +
-                                                                     folders[x + 1] +
-                                                                     "/")))
-                # if it is just a file, add it to the final list
-                else:
-                    root_dir_contents.append(file_definition_hs) # all files in hydroshare are appended to root_dir_contents
-            for contents in root_dir_contents:
-
-                #print('Filename is', contents.get("file_name"))
-                if (contents.get("name") == filename):
-                    modified_time = contents.get("modifiedTime")
-                    checksum = contents.get("checksum")
-                    print('Modified time in HydroShare is', modified_time)
-                    print('Checksum in Hydroshare is', checksum)
-                #     if modified_time:
-                #         modified_time = str(parse(modified_time))
-                #     return modified_time
-                # else:
-                #     print('filename does not exist')
-                    if checksum:
-                        #modified_time = str(parse(modified_time))
-                        return checksum, modified_time
-                else:
-                    print(filename,' does not exist in HydroShare')
-            return None, None
-
-
-
-    def get_file_exists(self, filename, force_fetch=False ):
-
-            """ Gets all of the files in the resource in HydroShare
+    def get_modified_time_hs(self, filename, force_fetch=False):
+        """ Gets all of the files in the resource in HydroShare
 
                 :param force_fetch: whether to request the files from HydroShare
                 even if a local cache exists
@@ -249,47 +171,106 @@ class ResourceHydroShareData:
                 }
                 :rtype dict
              """
-            # if self._files and not force_fetch:
-            #     return self._files
+        if self._files and not force_fetch:
+            return self._files
 
-            hs_resource_info = self.hs_api_conn.getResourceFileList(self.res_id)
-            url_prefix = ('http://www.hydroshare.org/resource/' + self.res_id +
-                          '/data/contents')
-            folders_dict = {}
-            root_dir_contents = []
-            nested_files = {}
-            for file_info in hs_resource_info:
-                # extract filepath from url
-                filepath = file_info["url"][len(url_prefix) + 1:]
-                # get proper definition formatting of file if it is a file
-                file_definition_hs = self._get_file_metadata(filepath, filepath,
-                                                             file_info,
-                                                             HS_PREFIX + ':')
-                # if it is a folder, build up contents
-                if not file_definition_hs:
-                    nested_files[filepath + "/"] = file_info
-                    folders = filepath.split("/")
-                    currpath = ""
-                    for x in range(0, len(folders) - 1):
-                        folder = folders[x]
-                        currpath = currpath + folder + "/"
-                        # build up dictionary of folder -> what is in it
-                        if (x, folder, currpath) not in folders_dict:
-                            folders_dict[(x, folder, currpath)] = []
-                        folders_dict[(x, folder, currpath)].append((x + 1,
-                                                                    folders[x + 1],
-                                                                    (currpath +
-                                                                     folders[x + 1] +
-                                                                     "/")))
-                # if it is just a file, add it to the final list
-                else:
-                    root_dir_contents.append(file_definition_hs)
-            for contents in root_dir_contents:
-                print('Filename is', contents.get("file_name"))
-                if (contents.get("name") == filename):
-                    print('exists')
-                else:
-                    print('filename does not exist')
+        hs_resource_info = self.hs_api_conn.getResourceFileList(self.res_id)
+        url_prefix = ('http://www.hydroshare.org/resource/' + self.res_id +
+                      '/data/contents')
+        folders_dict = {}
+        root_dir_contents = []
+        nested_files = {}
+        for file_info in hs_resource_info:
+            # extract filepath from url
+            filepath = file_info["url"][len(url_prefix) + 1:]
+            # get proper definition formatting of file if it is a file
+            file_definition_hs = self._get_file_metadata(
+                filepath, filepath, file_info, HS_PREFIX + ':')
+            # if it is a folder, build up contents
+            if not file_definition_hs:
+                nested_files[filepath + "/"] = file_info
+                folders = filepath.split("/")
+                currpath = ""
+                for x in range(0, len(folders) - 1):
+                    folder = folders[x]
+                    currpath = currpath + folder + "/"
+                    # build up dictionary of folder -> what is in it
+                    if (x, folder, currpath) not in folders_dict:
+                        folders_dict[(x, folder, currpath)] = []
+                    folders_dict[(x, folder, currpath)].append(
+                        (x + 1, folders[x + 1],
+                         (currpath + folders[x + 1] + "/")))
+            # if it is just a file, add it to the final list
+            else:
+                root_dir_contents.append(
+                    file_definition_hs
+                )  # all files in hydroshare are appended to root_dir_contents
+        for contents in root_dir_contents:
+
+            #print('Filename is', contents.get("file_name"))
+            if (contents.get("name") == filename):
+                modified_time = contents.get("modifiedTime")
+                checksum = contents.get("checksum")
+
+                if checksum:
+
+                    return checksum, modified_time
+            else:
+                print(filename, ' does not exist in HydroShare')
+        return None, None
+
+    def get_file_exists(self, filename, force_fetch=False):
+        """ Gets all of the files in the resource in HydroShare
+
+                :param force_fetch: whether to request the files from HydroShare
+                even if a local cache exists
+                :type force_fetch: bool
+                :returns {
+                    "name": "",
+                    "path": HS_PREFIX + ":/",
+                    "sizeBytes": #,
+                    "type": "folder",
+                    "contents": [list of similar dicts representing files and
+                    folders],
+                }
+                :rtype dict
+             """
+
+        hs_resource_info = self.hs_api_conn.getResourceFileList(self.res_id)
+        url_prefix = ('http://www.hydroshare.org/resource/' + self.res_id +
+                      '/data/contents')
+        folders_dict = {}
+        root_dir_contents = []
+        nested_files = {}
+        for file_info in hs_resource_info:
+            # extract filepath from url
+            filepath = file_info["url"][len(url_prefix) + 1:]
+            # get proper definition formatting of file if it is a file
+            file_definition_hs = self._get_file_metadata(
+                filepath, filepath, file_info, HS_PREFIX + ':')
+            # if it is a folder, build up contents
+            if not file_definition_hs:
+                nested_files[filepath + "/"] = file_info
+                folders = filepath.split("/")
+                currpath = ""
+                for x in range(0, len(folders) - 1):
+                    folder = folders[x]
+                    currpath = currpath + folder + "/"
+                    # build up dictionary of folder -> what is in it
+                    if (x, folder, currpath) not in folders_dict:
+                        folders_dict[(x, folder, currpath)] = []
+                    folders_dict[(x, folder, currpath)].append(
+                        (x + 1, folders[x + 1],
+                         (currpath + folders[x + 1] + "/")))
+            # if it is just a file, add it to the final list
+            else:
+                root_dir_contents.append(file_definition_hs)
+        for contents in root_dir_contents:
+            print('Filename is', contents.get("file_name"))
+            if (contents.get("name") == filename):
+                print('exists')
+            else:
+                print('filename does not exist')
 
     def exists(self, item_path, file_extension=None):
         """ Checks if a file or folder exists in the resource on HydroShare
@@ -311,8 +292,8 @@ class ResourceHydroShareData:
                         current_dir_contents = file_or_folder.get('contents')
                         found_next_part = True
                         break
-                    elif (file_extension is not None and
-                          file_or_folder["type"] == file_extension):
+                    elif (file_extension is not None
+                          and file_or_folder["type"] == file_extension):
                         return True
             if not found_next_part:
                 return False
@@ -335,8 +316,7 @@ class ResourceHydroShareData:
                 if file_or_folder["name"] == highest_parent_folder:
                     contents = file_or_folder.get("contents")
                     return self._find_file_or_folder_metadata(
-                                                        rest_of_path,
-                                                        contents)
+                        rest_of_path, contents)
             # File or folder metadata not found
             return None
 
@@ -369,27 +349,34 @@ class ResourceHydroShareData:
                 is not None):
             raise FileExistsError(f'The file {dest_path} already exists.')
 
-        metadata = self._find_file_or_folder_metadata(str(src_path),
-                                                      self.get_files()
-                                                      ["contents"])
+        metadata = self._find_file_or_folder_metadata(
+            str(src_path),
+            self.get_files()["contents"])
         if metadata["type"] == "folder":
             if len(metadata.get("contents")) == 0:
-                (self.hs_api_conn.resource(self.res_id).functions.
-                    move_or_rename({
-                        "source_path": str(src_path),
-                        "target_path": str(dest_path),
-                        }))
+                (self.hs_api_conn.resource(
+                    self.res_id).functions.move_or_rename({
+                        "source_path":
+                        str(src_path),
+                        "target_path":
+                        str(dest_path),
+                    }))
             for child_file_or_folder in metadata.get("contents"):
                 new_src = self._remove_prefix(child_file_or_folder.get("path"),
                                               HS_PREFIX + ':/')
                 self.rename_or_move_file(new_src, dest_path)
         else:
             self.hs_api_conn.resource(self.res_id).functions.move_or_rename({
-                "source_path": str(src_path),
-                "target_path": str(dest_path),
+                "source_path":
+                str(src_path),
+                "target_path":
+                str(dest_path),
             })
 
-    def download_to_local(self, local_data, src_path, dest_path,
+    def download_to_local(self,
+                          local_data,
+                          src_path,
+                          dest_path,
                           temp_dir=None):
         """ Copies a file or folder from HydroShare to the local filesystem
 
@@ -405,23 +392,23 @@ class ResourceHydroShareData:
             the file
             :type temp_dir: PosixPath | None
          """
-        metadata = self._find_file_or_folder_metadata(str(src_path),
-                                                      self.get_files()
-                                                      ["contents"])
+        metadata = self._find_file_or_folder_metadata(
+            str(src_path),
+            self.get_files()["contents"])
         if metadata["type"] == "folder":
             # Does nothing if the folder already exists
             local_data.create_local_folder(dest_path)
             for child_file_or_folder in metadata['contents']:
-                new_src = Path(self._remove_prefix(
-                                        child_file_or_folder['path'],
+                new_src = Path(
+                    self._remove_prefix(child_file_or_folder['path'],
                                         HS_PREFIX + ':/'))
-                self.download_to_local(local_data, new_src, dest_path /
-                                       new_src.name, temp_dir)
+                self.download_to_local(local_data, new_src,
+                                       dest_path / new_src.name, temp_dir)
         else:
             # Download the file
             with open(str(local_data.data_path / dest_path), 'wb') as f:
-                for chunk in self.hs_api_conn.getResourceFile(self.res_id,
-                                                              str(src_path)):
+                for chunk in self.hs_api_conn.getResourceFile(
+                        self.res_id, str(src_path)):
                     f.write(chunk)
 
     def upload_from_local(self, local_data, src_path, dest_path):
@@ -490,8 +477,8 @@ class ResourceHydroShareData:
                     self._get_contents_recursive(folders_dict[v], folders_dict,
                                                  nested_files, path_prefix))
                 folder_size += subfolder_size
-                if (subfolder_time and folder_time and
-                        subfolder_time > folder_time):
+                if (subfolder_time and folder_time
+                        and subfolder_time > folder_time):
                     folder_time = subfolder_time
                 if subfolder_time:
                     subfolder_time = str(subfolder_time)
@@ -505,8 +492,9 @@ class ResourceHydroShareData:
                 })
             else:
                 # v is not a folder, so must be a file, get its metadata
-                contents.append(self._get_file_metadata(name, path,
-                                nested_files[path], path_prefix))
+                contents.append(
+                    self._get_file_metadata(name, path, nested_files[path],
+                                            path_prefix))
                 # nested_files is a dictionary which stores file info
                 # (such as size & modified time)
                 # key is path to the file & value is file info dictionary
