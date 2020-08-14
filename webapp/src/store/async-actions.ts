@@ -124,7 +124,9 @@ export function createNewFileOrFolder(resource: IResource, name: string, type: s
         error,
       } = response.data;
       if (success) {
-        dispatch(getResourceLocalFiles(resource));
+        //dispatch(getResourceLocalFiles(resource));
+        dispatch(getResourceDownloadedLocalFiles(resource));
+        dispatch(getResourceHydroShareFiles(resource));
       } else {
         if (error) {
           handleError(error, dispatch);
@@ -197,6 +199,8 @@ export function downloadResourceFilesOrFolders(resource: IResource, paths: strin
           handleError(error, dispatch);
         } else {
           dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
+          dispatch(getResourceDownloadedLocalFiles(resource));
+          dispatch(getResourceHydroShareFiles(resource));
         }
       } catch (e) {
         console.error(e);
@@ -266,6 +270,8 @@ export function checkSyncHydroShareStatusFiles(resource: IResource, paths: strin
             handleError(error, dispatch);
           } else {
             dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
+            dispatch(getResourceHydroShareFiles(resource));
+            dispatch(getResourceDownloadedLocalFiles(resource));
           }
         } catch (e) {
           console.error(e);
@@ -330,7 +336,9 @@ export function deleteResourceFilesOrFolders(resource: IResource, paths: string[
         files: localFiles,
       })
         .then(() => {
-          dispatch(getResourceLocalFiles(resource));
+          //dispatch(getResourceLocalFiles(resource));
+          dispatch(getResourceDownloadedLocalFiles(resource));
+          dispatch(getResourceHydroShareFiles(resource));
         })
         .catch((error) => {
           console.error(error);
@@ -343,7 +351,9 @@ export function deleteResourceFilesOrFolders(resource: IResource, paths: string[
         files: hsFiles,
       })
         .then(() => {
+          dispatch(getResourceDownloadedLocalFiles(resource));
           dispatch(getResourceHydroShareFiles(resource));
+          
         })
         .catch((error) => {
           console.error(error);
@@ -443,11 +453,10 @@ export function logoutToHydroShare(): ThunkAction<Promise<void>, {}, {}, AnyActi
       tempCookie = "_xsrf= ";
       dispatch(UserActions.removeUserInfo(true));
       if (response.status === 200) {
-        window.alert('Success!');
         dispatch(UserActions.notifyReceivedHydroShareLoginResponse(false));
       }
     } catch (e) {
-      window.alert('Failure!');
+      window.alert('Cannot logout!');
       console.error(e);
       dispatch(pushNotification('error', 'Could not logout.'));
       dispatch(UserActions.notifyReceivedHydroShareLoginResponse(true));
@@ -650,8 +659,11 @@ export function renameFileOrFolder(resource: IResource, source: string, destinat
     // Refresh the file lists if we should
     if (successCount > 0) {
       if (source.startsWith(PATH_PREFIXES.LOCAL)) {
-        dispatch(getResourceLocalFiles(resource));
+        //dispatch(getResourceLocalFiles(resource));
+        dispatch(getResourceDownloadedLocalFiles(resource));
+        dispatch(getResourceHydroShareFiles(resource));
       } else {
+        dispatch(getResourceHydroShareFiles(resource));
         dispatch(getResourceHydroShareFiles(resource));
       }
     }
@@ -708,10 +720,13 @@ function performFileOperation(resource: IResource, source: IFile | IFolder, dest
     // Refresh the file lists if we should
     if (successCount > 0) {
       if (localBeingModified) {
-        dispatch(getResourceLocalFiles(resource));
+        //dispatch(getResourceLocalFiles(resource));
+        dispatch(getResourceDownloadedLocalFiles(resource));
+        dispatch(getResourceHydroShareFiles(resource));
       }
       if (hsBeingModified) {
         dispatch(getResourceHydroShareFiles(resource));
+        dispatch(getResourceDownloadedLocalFiles(resource));
       }
     }
   }
