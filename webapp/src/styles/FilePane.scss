@@ -91,6 +91,24 @@
     }
   }
 
+.button-down
+{
+  color:#000000;
+  background:transparent;
+}
+.button-down :active
+{
+  color: white;
+  background:transparent;
+  
+}
+.button-down :hover
+{
+  color: #505050;
+  background:transparent;
+  
+}
+
   .FilePane-files-container {
     display: flex;
     flex-direction: column;
