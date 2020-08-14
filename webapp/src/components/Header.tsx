@@ -17,6 +17,7 @@ import {
 } from '../store/async-actions';
 import { UserInfoActions } from 'src/store/actions/action-names';
 import * as UserActions from '../store/async-actions'
+import ResourcePage from 'src/pages/ResourcePage';
 // @ts-ignore
 const ASSETS_URL = (window.FRONTEND_URL || '') + '/assets';
 
@@ -37,8 +38,7 @@ const elementPreferences = {
 
    {id : 1, value : 'Preferences'},
    {id : 2, value : 'View Profile'},
-   {id : 3, value : 'Update Config'},
-   {id : 4, value : 'logout'}
+   {id : 3, value : 'logout'}
  ] ,
  value : ''
  }
@@ -53,7 +53,6 @@ class Header extends React.Component<ReduxType, never> {
     // TODO: Move this somewhere better
     this.props.loadInitData();
   }
-
   onClicking(event: React.ChangeEvent<HTMLSelectElement>) {
     console.log(event);
      const e = event.target.value;
@@ -64,9 +63,6 @@ class Header extends React.Component<ReduxType, never> {
      else if (e == '2') {
       this.props.viewProfile()
      }
-     else if (e == '3'){
-      console.log('wait, we are getting close!')
-    }
     else {
      this.props.logout()
     }
