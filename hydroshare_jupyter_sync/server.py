@@ -24,7 +24,8 @@ from hs_restclient import exceptions as HSExceptions
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
 
-from hydroshare_jupyter_sync.config_reader_writer import (get_config_values, set_config_values)
+from hydroshare_jupyter_sync.config_reader_writer import (get_config_values,
+                                                          set_config_values)
 from hydroshare_jupyter_sync.credential_reader_writer import credential_path
 from hydroshare_jupyter_sync.index_html import get_index_html
 from hydroshare_jupyter_sync.resource_hydroshare_data import (
@@ -54,12 +55,11 @@ BaseHandler = (tornado.web.RequestHandler
 class BaseRequestHandler(BaseHandler):
     """ Sets the headers for all the request handlers that extend
         this class """
-
     def set_default_headers(self):
         # TODO: change from * (any server) to our specific url (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/40)
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, "
-                                                        "content-type, x-xsrftoken")
+                        "content-type, x-xsrftoken")
 
     def options(self, _=None):
         # web browsers make an OPTIONS request to check what methods (line 31)
@@ -70,7 +70,6 @@ class BaseRequestHandler(BaseHandler):
 
 class WebAppHandler(BaseRequestHandler):
     """ Serves up the HTML for the React web app """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
@@ -82,7 +81,6 @@ class WebAppHandler(BaseRequestHandler):
 
 class LoginHandler(BaseRequestHandler):
     """ Handles authenticating the user with HydroShare """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods',
@@ -90,17 +88,13 @@ class LoginHandler(BaseRequestHandler):
 
     def delete(self):
         if os.path.isfile(credential_path):
-            logging.info(
-                'Deleting the credential file which contains user information')
+
             os.remove(credential_path)
             resource_manager.hs_api_conn = None
             s = requests.Session()
-            print(s.cookies.__dict__)
+
             s.cookies.clear_session_cookies
-            print(s.cookies.__dict__)
-            logging.info(
-                f'Available cookies after logout {self.request.cookies}')
-            logging.info('cookie deleted through request object')
+
 
         else:
             print("Error: %s file does not exist", credential_path)
@@ -115,7 +109,7 @@ class LoginHandler(BaseRequestHandler):
         dirdetails = Path(Path.home() / 'hydroshare' / 'dirinfo.json')
         if dirdetails.exists():
             isFile = True
-        print('Checking if file exists', isFile)
+
         self.write({
             'success': user_info is not None,
             'userInfo': user_info,
@@ -125,16 +119,15 @@ class LoginHandler(BaseRequestHandler):
 
 class Localmd5Handler(BaseRequestHandler):
     """ Handles calculation of local md5 values """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods',
                         'OPTIONS, POST,DELETE,GET ')
 
     def get(self, res_id):
-        print('Inside post')
+
         local_data = ResourceLocalData(res_id)
-        print('fecthing local data')
+
         local_data.get_md5(res_id)
 
         self.write({
@@ -145,7 +138,6 @@ class Localmd5Handler(BaseRequestHandler):
 
 class Hsmd5Handler(BaseRequestHandler):
     """ Handles calculation of local md5 values """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods',
@@ -160,23 +152,12 @@ class Hsmd5Handler(BaseRequestHandler):
             })
             return
 
-        print('Inside get function of hsmd5')
-        # hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
-        # #hs_overall_md5 = hs_data.get_hs_md5(res_id)
-        # local_data = ResourceLocalData(res_id)
-        # local_overall_md5 = local_data.get_md5(res_id)
-        # if hs_overall_md5 != local_overall_md5:
-        #     diff_overall = False
-
-        print('fetching hydroshare data')
-
         self.write({'success': diff_overall})
 
 
 class ResourcesRootHandler(BaseRequestHandler):
     """ Handles /resources. Gets a user's resources (with metadata) and
         creates new resources. """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST')
@@ -233,7 +214,7 @@ class ResourcesRootHandler(BaseRequestHandler):
                 'success': False,
                 'error': {
                     'type':
-                        'InvalidRequest',
+                    'InvalidRequest',
                     'message': ('The request body must specify '
                                 '"title" and "creators".'),
                 },
@@ -250,7 +231,6 @@ class ResourcesRootHandler(BaseRequestHandler):
 
 class ResourceHandler(BaseRequestHandler):
     """ Handles resource-specific requests made to /resources/<resource_id> """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'DELETE, OPTIONS')
@@ -277,7 +257,6 @@ class ResourceHandler(BaseRequestHandler):
 
 class DirectorySelectorHandler(BaseRequestHandler):
     """ Handles downloading of hydroshare data in user selected directory """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods',
@@ -289,15 +268,8 @@ class DirectorySelectorHandler(BaseRequestHandler):
         dirpathinfo = json.loads(self.request.body.decode('utf-8'))
         directoryPath = dirpathinfo["dirpath"]
         choice = dirpathinfo["choice"]
-        print('Dir path and choice are', directoryPath, choice)
-        self.dirdetails = Path(Path.home() / 'hydroshare' / 'dirinfo.json')
-        ##
-        ##if not self.directoryPath.is_dir():
-        # Let any exceptions that occur bubble up
-        #  self.dirdetails.mkdir(parents=True)
 
-        # if self.dirdetails.is_dir():
-        # isFile = True
+        self.dirdetails = Path(Path.home() / 'hydroshare' / 'dirinfo.json')
 
         try:
             if choice == "No":
@@ -327,12 +299,10 @@ class DirectorySelectorHandler(BaseRequestHandler):
         config = get_config_values(['dataPath'])
         if 'dataPath' in config:
 
-           #config_new_path = str(config['dataPath']).replace(Path.home(),'')
             config_data_path = str(config['dataPath'])
-            config_new_path = config_data_path.replace(str(Path.home()),'')
-            print("Config new path is :",config_new_path)
-            notebook_url_path_prefix = url_path_join('/tree',
-                                                     config_new_path)
+            config_new_path = config_data_path.replace(str(Path.home()), '')
+            print("Config new path is :", config_new_path)
+            notebook_url_path_prefix = url_path_join('/tree', config_new_path)
         if returnValue is not "":
             self.write({
                 'error': returnValue,
@@ -350,25 +320,23 @@ class DirectorySelectorHandler(BaseRequestHandler):
         logpath = Path.home() / 'hydroshare' / 'sync.log'
         saved_successfully = set_config_values({
             "dataPath":
-                str(defaultPath / localhsResources),
+            str(defaultPath / localhsResources),
             "logPath":
-                str(logpath)
+            str(logpath)
         })
         if saved_successfully:
-            logging.info('Successfully saved dataPath value to '
-                         'config file.')
+
             resource_manager = ResourceManager()
         else:
-            logging.info('Cannot set data Path values in config file')
+
             returnValue = 'Cannot set data Path values in config file'
         return returnValue
 
 
 class ResourceLocalFilesRequestHandler(BaseRequestHandler):
-    logging.info('Resource local Handler Class is called')
+
     """ Facilitates getting, deleting, and uploading to the files contained in
         a resource on the local disk """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', ('DELETE, GET,'
@@ -387,13 +355,12 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
             return
 
         local_data = ResourceLocalData(res_id)
-        print("resource id from localdata", res_id)
+
         if not local_data.is_downloaded():
             resource_manager.save_resource_locally(res_id)
         self.write({
             'readMe': local_data.get_readme(),
             'rootDir': local_data.get_files_and_folders(),
-            
         })
 
     # TODO: move some of the logic here outside this file and deduplicate
@@ -445,7 +412,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                     'success': False,
                     'error': {
                         'type':
-                            'UnknownError',
+                        'UnknownError',
                         'message': (f'An unknown error occurred when '
                                     f'attempting to delete {item_path}.')
                     }
@@ -514,7 +481,6 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
 
 class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
     """ Handles getting and deleting the files in a HydroShare resource """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'DELETE, GET, OPTIONS')
@@ -528,17 +494,13 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
             return
         print("In get of resource hydroshare file request handler")
         hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
-        # Code for updating the latest files on Root Dir object 
+        # Code for updating the latest files on Root Dir object
 
         local_data = ResourceLocalData(res_id)
-        #temporaryRoot = local_data.get_files_and_folders()
+
         temporaryRoot = hs_data.get_files()
         checkHydroShareSyncStatus(temporaryRoot, res_id)
-        # code ends here
-        #root_dir = hs_data.get_files()
-        
-        print('after root dir value is fetched')
-        #self.write({'rootDir': root_dir})
+
         self.write({'rootDir': temporaryRoot})
 
     # TODO: Move the bulk of this function out of this file and
@@ -596,7 +558,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                     'error': {
                         'type': 'NotFoundError',
                         'message': f'Could not find {item_path} in '
-                                   'HydroShare.',
+                        'HydroShare.',
                     },
                 })
             except HSExceptions.HydroShareNotAuthorized:
@@ -604,7 +566,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                     'success': False,
                     'error': {
                         'type':
-                            'NotAuthorizedError',
+                        'NotAuthorizedError',
                         'message': (f'Could not delete {item_path}. Do you '
                                     'have write access to the resource?'),
                     },
@@ -615,7 +577,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
                     'success': False,
                     'error': {
                         'type':
-                            'UnknownError',
+                        'UnknownError',
                         'message': (f'An unknown error occurred when'
                                     ' attempting to delete {item_path}.')
                     }
@@ -660,22 +622,15 @@ class DownloadHydroShareFilesRequestHandler(BaseRequestHandler):
             # Remove any leading /
             if item_path.startswith('/'):
                 item_path = item_path[1:]
-                print('item path after removing slash is', item_path)
+
                 local_data = ResourceLocalData(res_id)
                 resource_manager.save_file_locally(res_id, item_path)
-                # modified_time_local = local_data.get_md5_files(res_id, item_path)
-                # hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
-                # modified_time_hs = hs_data.get_md5_files(res_id, item_path)
-                # if modified_time_hs < modified_time_local:
-                #     filesChanged = 'local'
-                # elif modified_time_hs > modified_time_local:
-                #     filesChanged = 'HydroShare'
-
 
         self.write({
             'readMe': local_data.get_readme(),
             'rootDir': local_data.get_files_and_folders(),
         })
+
 
 def checkFileSyncStatus(temporaryRoot, res_id):
     serverIsLatest = 'HydroShare is latest'
@@ -685,37 +640,50 @@ def checkFileSyncStatus(temporaryRoot, res_id):
     local_data = ResourceLocalData(res_id)
     hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
     # find where are the files and its properties in temporaryRoot
-    contents = temporaryRoot['contents'];
+    contents = temporaryRoot['contents']
     for file in contents:
 
-        #modified_time_local = local_data.get_md5_files(res_id, file['name'])
         modified_time_local = file['modifiedTime']
         checksum_local = file["checksum"]
-        #print('modified time local is', modified_time_local)
-        print('Local checksum in server.py is', checksum_local)
-        print('file name is', file['name'])
-        #modified_time_hs = hs_data.get_modified_time_hs(file['name'])
-        checksum_hs, modified_time_hs = hs_data.get_modified_time_hs(file['name'])
-        
-        #modified_time_hs = hs_data.get_md5_files(res_id, file['name'])
-        if checksum_hs == None:
-            syncStatus = "File not in HydroShare"
+
+
+
+
+        checksum_hs, modified_time_hs = hs_data.get_modified_time_hs(
+            file['name'])
+
+        if checksum_hs == None or modified_time_hs == None:
+            syncStatus = " "
             isfileExists = "File doesn't exist in HydroShare"
-            file.update({"fileChanged": isfileExists, "syncStatus": syncStatus})
+            file.update({
+                "fileChanged": isfileExists,
+                "syncStatus": syncStatus
+            })
         else:
-            if checksum_local!= checksum_hs:
-                syncStatus = "Out of Sync";
+            if checksum_local != checksum_hs:
+                syncStatus = "Out of Sync"
                 if modified_time_hs < modified_time_local:
                     # add fileChanged value
-                    file.update({"fileChanged": localIsLatest, "syncStatus": syncStatus})
+                    file.update({
+                        "fileChanged": localIsLatest,
+                        "syncStatus": syncStatus
+                    })
                     print(localIsLatest)
 
                 elif modified_time_hs > modified_time_local:
-                    file.update({"fileChanged": serverIsLatest, "syncStatus": syncStatus})
+                    file.update({
+                        "fileChanged": serverIsLatest,
+                        "syncStatus": syncStatus
+                    })
                     print(serverIsLatest)
             elif checksum_local == checksum_hs:
-                syncStatus = "In Sync";
-                file.update({"fileChanged": "Local and HydroShare are synced", "syncStatus": syncStatus})
+                syncStatus = "In Sync"
+                file.update({
+                    "fileChanged": "Local and HydroShare are synced",
+                    "syncStatus": syncStatus
+                })
+
+    temporaryRoot = sorted(contents, key=lambda x: x['syncStatus'] == ' ')
 
 
 def checkHydroShareSyncStatus(temporaryRoot, res_id):
@@ -725,43 +693,53 @@ def checkHydroShareSyncStatus(temporaryRoot, res_id):
     isFileExist = ''
     local_data = ResourceLocalData(res_id)
     hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
-    # find where are the files and its properties in temporaryRoot
-    contents = temporaryRoot['contents'];
+
+    contents = temporaryRoot['contents']
+
     for file in contents:
 
-        # modified_time_local = local_data.get_md5_files(res_id, file['name'])
         modified_time_hs = file['modifiedTime']
         checksum_hs = file['checksum']
-        print('modified time hydroshare is', modified_time_hs)
+
         if file['path'].startswith('hs'):
             file_name = file['path'][4:]
-            
-        print('file name is', file_name)
-        item_path = str(local_data.data_path)+'/'+file_name
+
+
+        item_path = str(local_data.data_path) + '/' + file_name
         print('item path is', item_path)
         checksum_local = local_data.get_md5_files(item_path)
 
-        # modified_time_hs = hs_data.get_md5_files(res_id, file['name'])
         if checksum_local == None:
-            syncStatus = "File not in Local"
+            syncStatus = " "
             isFileExist = "File doesn't exist in Local"
-            file.update({"fileChanged" : isFileExist, "syncStatus": syncStatus})
+            file.update({"fileChanged": isFileExist, "syncStatus": syncStatus})
         else:
-            modified_time_local = str(datetime.datetime.fromtimestamp(
-                (Path(item_path).stat().st_mtime)))
-            if checksum_local!= checksum_hs:
+            modified_time_local = str(
+                datetime.datetime.fromtimestamp(
+                    (Path(item_path).stat().st_mtime)))
+            if checksum_local != checksum_hs:
                 syncStatus = 'Out of Sync'
                 if modified_time_hs < modified_time_local:
                     # add fileChanged value
-                    file.update({"fileChanged": localIsLatest, "syncStatus" : syncStatus})
+                    file.update({
+                        "fileChanged": localIsLatest,
+                        "syncStatus": syncStatus
+                    })
                     print(localIsLatest)
 
                 elif modified_time_hs > modified_time_local:
-                    file.update({"fileChanged": serverIsLatest, "syncStatus" : syncStatus})
+                    file.update({
+                        "fileChanged": serverIsLatest,
+                        "syncStatus": syncStatus
+                    })
                     print(serverIsLatest)
             else:
                 syncStatus = 'In Sync'
-                file.update({"fileChanged": "Local and HydroShare are synced", "syncStatus" : syncStatus})
+                file.update({
+                    "fileChanged": "Local and HydroShare are synced",
+                    "syncStatus": syncStatus
+                })
+    temporaryRoot = sorted(contents, key=lambda x: x['syncStatus'] == ' ')
 
 
 class CheckSyncStatusFilesRequestHandler(BaseRequestHandler):
@@ -787,7 +765,7 @@ class CheckSyncStatusFilesRequestHandler(BaseRequestHandler):
         file_and_folder_paths = data.get('files')
         print('files selected to download are', file_and_folder_paths)
         myList = []
-        
+
         if file_and_folder_paths is None:
             self.set_status(400)  # Bad Request
             self.write('Could not find "files" in request body.')
@@ -799,65 +777,62 @@ class CheckSyncStatusFilesRequestHandler(BaseRequestHandler):
                 file_name = item_path[1:]
                 print('item path after removing slash is', file_name)
                 local_data = ResourceLocalData(res_id)
-                #resource_manager.save_file_locally(res_id, item_path)
-                # digest_local = local_data.get_md5_files(res_id, item_path)
-                # print('local digest is', digest_local)
-                CheckSyncStatusFilesRequestHandler.modified_time_local = local_data.get_md5_files(res_id, file_name)
-                print('modified time locally is', CheckSyncStatusFilesRequestHandler.modified_time_local)
+
+                CheckSyncStatusFilesRequestHandler.modified_time_local = local_data.get_md5_files(
+                    res_id, file_name)
+
                 # appending local modified time to list
-                hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
-                CheckSyncStatusFilesRequestHandler.modified_time_hs = hs_data.get_md5_files(res_id, file_name)
-                print('modified time in hydroshare is', CheckSyncStatusFilesRequestHandler.modified_time_hs)
+                hs_data = ResourceHydroShareData(resource_manager.hs_api_conn,
+                                                 res_id)
+                CheckSyncStatusFilesRequestHandler.modified_time_hs = hs_data.get_md5_files(
+                    res_id, file_name)
+
                 # comapring date and time
-                #filesChanged = 'sync'
-                
+
                 if CheckSyncStatusFilesRequestHandler.modified_time_hs < CheckSyncStatusFilesRequestHandler.modified_time_local:
                     print('local files are latest')
                     CheckSyncStatusFilesRequestHandler.filesChanged = 'local'
-                    
-                   #myList.append(CheckSyncStatusFilesRequestHandler)
-                    myDict = {
-                        'resourceId': res_id,
-                        'filesChanged': CheckSyncStatusFilesRequestHandler.filesChanged,
-                        'modified_time_local': CheckSyncStatusFilesRequestHandler.modified_time_local,
-                        'file_name': file_name,
-                        'file_path': item_path
-                    }
-                    myList.append(myDict)
-                    myJson = json.dumps(myList)
-                    
-                    # print('local data files and folder after apending are', local_data.get_files_and_folders())
-                    #myList.append(CheckSyncStatusFilesRequestHandler.modified_time_local)
-                    print('Json when',CheckSyncStatusFilesRequestHandler.filesChanged,' is latest is as follows', myJson)           
-                elif CheckSyncStatusFilesRequestHandler.modified_time_hs > CheckSyncStatusFilesRequestHandler.modified_time_local:
-                    print('HydroShare files are latest')
-                    myDict = {
-                        'resourceId': res_id,
-                        'filesChanged': CheckSyncStatusFilesRequestHandler.filesChanged,
-                        'modified_time_local': CheckSyncStatusFilesRequestHandler.modified_time_hs,
-                        'file_name': file_name,
-                        'file_path': item_path
-                    }
-                    myList.append(myDict)
-                    myJson = json.dumps(myList)
-                    print('Json when',CheckSyncStatusFilesRequestHandler.filesChanged,' is latest is as follows', myJson)  
-                    
-        temporaryRoot = local_data.get_files_and_folders()
-#create a new method - checkSyncStatus(temporaryRoot)
 
-        # Iterate over temporary root to inser sync status for every file by matching it name
-        # local_data.get_files_and_folders(CheckSyncStatusFilesRequestHandler.filesChanged),
+                    myDict = {
+                        'resourceId': res_id,
+                        'filesChanged':
+                        CheckSyncStatusFilesRequestHandler.filesChanged,
+                        'modified_time_local':
+                        CheckSyncStatusFilesRequestHandler.modified_time_local,
+                        'file_name': file_name,
+                        'file_path': item_path
+                    }
+                    myList.append(myDict)
+                    myJson = json.dumps(myList)
+
+
+                elif CheckSyncStatusFilesRequestHandler.modified_time_hs > CheckSyncStatusFilesRequestHandler.modified_time_local:
+
+                    myDict = {
+                        'resourceId': res_id,
+                        'filesChanged':
+                        CheckSyncStatusFilesRequestHandler.filesChanged,
+                        'modified_time_local':
+                        CheckSyncStatusFilesRequestHandler.modified_time_hs,
+                        'file_name': file_name,
+                        'file_path': item_path
+                    }
+                    myList.append(myDict)
+                    myJson = json.dumps(myList)
+
+        temporaryRoot = local_data.get_files_and_folders()
+
         self.write({
             'readMe': local_data.get_readme(),
             'rootDir': temporaryRoot,
             'myJson': myJson
-        }) 
-    
+        })
+
 
 class DownloadedLocalFilesRequestHandler(BaseRequestHandler):
     def set_default_headers(self):
-            BaseRequestHandler.set_default_headers(self)
-            self.set_header('Access-Control-Allow-Methods',
+        BaseRequestHandler.set_default_headers(self)
+        self.set_header('Access-Control-Allow-Methods',
                         'DELETE, GET, OPTIONS, POST')
 
     def get(self, res_id):
@@ -868,39 +843,20 @@ class DownloadedLocalFilesRequestHandler(BaseRequestHandler):
             })
             return
         local_data = ResourceLocalData(res_id)
-        # hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
-        # root_dir = hs_data.get_files()
-        # modified_time_hs = root_dir["content"]
-
-        # get modified time of HydroShare and pass filesChanged to get_files 
 
         temporaryRoot = local_data.get_files_and_folders()
-        # hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
-        # root_dir = hs_data.get_files()
-        # contents_local = temporaryRoot['contents'];
-        # contents_hydroshare = root_dir['contents']
-        # for file in contents_local:
-        #     exists=hs_data.get_file_exists(file['name'])
-        # if exists:
-        #     file.update({"fileChanged": 'Exists in Local'})
-        # else:
-        #     file.update({"fileChanged": 'Exists in HydroShare'})
 
         checkFileSyncStatus(temporaryRoot, res_id)
-        # call syncstatus method with temporary root as paramter
-        # in syncstatus method iterate over temporaryroot contents, match with name, and update syncstatus variable
 
-        #print('Fetching data from local path',local_data.get_files_and_folders())
         self.write({
             'readMe': local_data.get_readme(),
             'rootDir': temporaryRoot,
         })
-  
+
 
 class MoveCopyFiles(BaseRequestHandler):
     """ Handles moving (or renaming) files within the local filesystem,
         on HydroShare, and between the two. """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'PATCH, OPTIONS')
@@ -956,7 +912,7 @@ class MoveCopyFiles(BaseRequestHandler):
                             'success': False,
                             'error': {
                                 'type':
-                                    'FileOrFolderExists',
+                                'FileOrFolderExists',
                                 'message': (f'The file {dest_path} already '
                                             'exists in HydroShare.'),
                             },
@@ -1030,7 +986,6 @@ class UserInfoHandler(BaseRequestHandler):
         from HydroShare and storing the user's
         HydroShare credentials.
      """
-
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
         self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
@@ -1072,12 +1027,12 @@ def get_route_handlers(frontend_url, backend_url):
     return [
         (url_path_join(frontend_url,
                        r"/assets/(.*)"), tornado.web.StaticFileHandler, {
-             'path': str(assets_path)
-         }),
+                           'path': str(assets_path)
+                       }),
         (url_path_join(backend_url,
                        r"/download/(.*)"), tornado.web.StaticFileHandler, {
-             'path': str(data_path)
-         }),
+                           'path': str(data_path)
+                       }),
         (url_path_join(backend_url, "/login"), LoginHandler),
         (url_path_join(backend_url, r"/user"), UserInfoHandler),
         (url_path_join(backend_url, r"/resources"), ResourcesRootHandler),
@@ -1090,7 +1045,8 @@ def get_route_handlers(frontend_url, backend_url):
          CheckSyncStatusFilesRequestHandler),
         (url_path_join(backend_url, r"/resources/([^/]+)/local-files"),
          ResourceLocalFilesRequestHandler),
-        (url_path_join(backend_url, r"/resources/([^/]+)/downloaded-local-files"),
+        (url_path_join(backend_url,
+                       r"/resources/([^/]+)/downloaded-local-files"),
          DownloadedLocalFilesRequestHandler),
         (url_path_join(backend_url, "/selectdir"), DirectorySelectorHandler),
         (url_path_join(backend_url,
