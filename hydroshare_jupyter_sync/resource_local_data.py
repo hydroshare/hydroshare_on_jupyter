@@ -69,19 +69,6 @@ class ResourceLocalData:
                 modified_time_local = str(datetime.datetime.fromtimestamp(
                                     self.md5_file_path.stat().st_mtime))
                 return digest
-            else:
-                print('file does not exist in local')
-        else:
-            print('No such directory or file')
-
-
-        files2 = []
-
-
-
-
-
-    
 
     def is_downloaded(self):
         """ Checks if a local copy of this resource's data exists """

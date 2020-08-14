@@ -96,9 +96,6 @@ class LoginHandler(BaseRequestHandler):
 
             s.cookies.clear_session_cookies
 
-        else:
-            print("Error: %s file does not exist", credential_path)
-
     def post(self):
         isFile = False
         credentials = json.loads(self.request.body.decode('utf-8'))
