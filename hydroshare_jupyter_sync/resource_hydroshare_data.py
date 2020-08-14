@@ -49,12 +49,11 @@ class ResourceHydroShareData:
     def get_md5_files(self, res_id, item_path):
 
         filepath = Path(item_path)
-        print('item path is', item_path)
-        print('Filepath is', filepath)
+
         hs_resource_info = self.hs_api_conn.getResourceFileList(self.res_id)
-        print(next(hs_resource_info))
+        
         for a in hs_resource_info:
-            print('Filename is', a.get("file_name"))
+            
             if (a.get("file_name") == item_path):
                 modified_time = a.get("modified_time")
                 if modified_time:
@@ -144,7 +143,7 @@ class ResourceHydroShareData:
         rootsize = 0
         for f in root_dir_contents:
             rootsize += (f["sizeBytes"])
-        print('root dir contents are', root_dir_contents)
+       
         self._files = {
             "name": "",
             "path": HS_PREFIX + ":/",
@@ -207,7 +206,7 @@ class ResourceHydroShareData:
                 )  # all files in hydroshare are appended to root_dir_contents
         for contents in root_dir_contents:
 
-            #print('Filename is', contents.get("file_name"))
+            
             if (contents.get("name") == filename):
                 modified_time = contents.get("modifiedTime")
                 checksum = contents.get("checksum")
@@ -266,7 +265,7 @@ class ResourceHydroShareData:
             else:
                 root_dir_contents.append(file_definition_hs)
         for contents in root_dir_contents:
-            print('Filename is', contents.get("file_name"))
+            
             if (contents.get("name") == filename):
                 print('exists')
             else:

@@ -17,8 +17,8 @@ from hs_restclient import HydroShare, HydroShareAuthBasic
 from hs_restclient.exceptions import HydroShareHTTPException
 
 from hydroshare_jupyter_sync.config_reader_writer import (get_config_values)
-from hydroshare_jupyter_sync.credential_reader_writer import (get_credential_values,
-                                                              set_credential_values)
+from hydroshare_jupyter_sync.credential_reader_writer import (
+    get_credential_values, set_credential_values)
 
 HYDROSHARE_AUTHENTICATION_ERROR = {
     'type': 'HydroShareAuthenticationError',
@@ -38,7 +38,6 @@ class ResourceManager:
     This is where they will be able to delete a resource, create a new one, or
     just get the list of a user's resources in hydroshare or jupyterhub.
     """
-
     def __init__(self):
         """Makes an output folder for storing HS files locally, if none exists,
         and sets up authentication on hydroshare API.
@@ -107,11 +106,9 @@ class ResourceManager:
         # Save the username and password
         saved_successfully = set_credential_values({
             'u':
-                username,
+            username,
             'p':
-                str(
-                    base64.b64encode(
-                        password.encode('utf-8')).decode('utf-8')),
+            str(base64.b64encode(password.encode('utf-8')).decode('utf-8')),
         })
         if saved_successfully:
             logging.info('Successfully saved HydroShare credentials to '
@@ -136,8 +133,7 @@ class ResourceManager:
         self.output_folder = Path(config['dataPath'])
         if not (self.output_folder / res_id).exists():
             logging.info(f"Downloading resource {res_id} from HydroShare...")
-            print("Output Folder")
-            print(self.output_folder / res_id)
+
             self.hs_api_conn.getResource(res_id,
                                          destination=self.output_folder,
                                          unzip=True)
@@ -153,11 +149,14 @@ class ResourceManager:
         config = get_config_values(['dataPath', 'hydroShareHostname'])
         self.output_folder = Path(config['dataPath'])
         logging.info(f"Downloading file {res_id} from HydroShare...")
-        folderlocation = Path(config['dataPath'] + '/' + res_id + '/' + res_id + '/data/contents')
+        folderlocation = Path(config['dataPath'] + '/' + res_id + '/' +
+                              res_id + '/data/contents')
         if not (self.output_folder / res_id).exists():
             folderlocation.mkdir(parents=True)
-            
-        self.hs_api_conn.getResourceFile(res_id, item_path, destination=folderlocation)
+
+        self.hs_api_conn.getResourceFile(res_id,
+                                         item_path,
+                                         destination=folderlocation)
 
     def get_user_info(self):
         """Gets information about the user currently logged into HydroShare
@@ -188,7 +187,7 @@ class ResourceManager:
         if not resource_path.exists():
             return {
                 'type':
-                    'FileNotFoundError',
+                'FileNotFoundError',
                 'message': (f'Could not find a local copy of resource {res_id}'
                             ' to delete.'),
             }
@@ -197,7 +196,7 @@ class ResourceManager:
         except IOError:
             return {
                 'type':
-                    'IOError',
+                'IOError',
                 'message': (f'Something went wrong. Could not delete'
                             f' resourc {res_id}.'),
             }
@@ -292,7 +291,7 @@ class ResourceManager:
             error = {
                 'type': 'IncorrectType',
                 'message': '"Creators" object should be a '
-                           'list of strings.'
+                'list of strings.'
             }
             return resource_id, error
 
