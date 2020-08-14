@@ -64,6 +64,7 @@ const mapStateToProps = ({ resources, router, user }: IRootState) => {
     archiveMessage: archiveMessage,
     username,
     paths: [],
+    checkingRefresh: false,
   };
 };
 
@@ -75,6 +76,7 @@ const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
     getFilesIfNeeded: (resource: IResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
     downloadFiles: (resource: IResource, paths: string[]) => dispatch(resourcesActions.downloadFilesOfResource(resource, paths)),
     checkSyncStatusFiles:(resource: IResource, paths: string[]) => dispatch(checkSyncStatusFiles(resource, paths)),
+    checkSyncLocalFiles:(resource: IResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
     checkSyncHydroShareStatusFiles:(resource: IResource, paths: string[]) => dispatch(checkSyncHydroShareStatusFiles(resource, paths)),
     openFile: (resource: IResource, file: IFile | IFolder) => dispatch(resourcesActions.openFileInJupyter(resource, file)),
     copyFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
@@ -137,6 +139,9 @@ class ResourcePage extends React.Component<PropsType, StateType> {
     this.props.checkSyncHydroShareStatusFiles(this.props.resource!, paths!)
   }
   hideModal = () => this.setState({ modal: MODAL_TYPES.NONE });
+  checkingRefresh: boolean;
+  
+
 
   public render() {
     const {
@@ -144,6 +149,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
       fetchingLocalFiles,
       fetchingResourceMetadata,
       resource,
+      checkingRefresh,
     } = this.props;
 
     if (fetchingResourceMetadata) {
@@ -161,6 +167,14 @@ class ResourcePage extends React.Component<PropsType, StateType> {
             <h1>No resource found</h1>
             <p>You do not have a resource with the ID specified.</p>
           </div>
+        </div>
+      );
+    }
+
+    if (checkingRefresh) {
+      return (
+        <div className="page resource-details">
+          <Loading />
         </div>
       );
     }
@@ -226,6 +240,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
     };
 
     const openFile = (file: IFile) => this.props.openFile(resource, file);
+    const openFileInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resource?.id}/`, '_blank');
 
     let modal;
 
@@ -312,14 +327,14 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           checkSyncStatus={this.checkSyncStatus}
           checkSyncHydroShare={this.checkSyncHydroShare}
         />
-        <ReadMeDisplay localReadMe={this.props.resource ? this.props.resource.localReadMe : "# No ReadMe yet"} resId={resource.id} />
+        
         {modal}
       </div>
     )
   }
 
 }
-
+// <ReadMeDisplay localReadMe={this.props.resource ? this.props.resource.localReadMe : "# No ReadMe yet"} resId={resource.id} />
 enum MODAL_TYPES {
   NONE,
   NEW,
