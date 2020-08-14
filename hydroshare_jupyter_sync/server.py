@@ -93,12 +93,8 @@ class LoginHandler(BaseRequestHandler):
             os.remove(credential_path)
             resource_manager.hs_api_conn = None
             s = requests.Session()
-            print(s.cookies.__dict__)
+
             s.cookies.clear_session_cookies
-            print(s.cookies.__dict__)
-            logging.info(
-                f'Available cookies after logout {self.request.cookies}')
-            logging.info('cookie deleted through request object')
 
         else:
             print("Error: %s file does not exist", credential_path)
@@ -113,7 +109,7 @@ class LoginHandler(BaseRequestHandler):
         dirdetails = Path(Path.home() / 'hydroshare' / 'dirinfo.json')
         if dirdetails.exists():
             isFile = True
-        print('Checking if file exists', isFile)
+
         self.write({
             'success': user_info is not None,
             'userInfo': user_info,
@@ -129,9 +125,9 @@ class Localmd5Handler(BaseRequestHandler):
                         'OPTIONS, POST,DELETE,GET ')
 
     def get(self, res_id):
-        print('Inside post')
+
         local_data = ResourceLocalData(res_id)
-        print('fecthing local data')
+
         local_data.get_md5(res_id)
 
         self.write({
@@ -291,8 +287,6 @@ class DirectorySelectorHandler(BaseRequestHandler):
 
             elif choice == "Yes":
                 dpath = Path(directoryPath)
-                print('datapath is', dpath)
-                print(dpath.exists())
 
                 if not dpath.exists():
                     returnValue = 'Directory path is not valid, please check if directory exists'
@@ -305,14 +299,14 @@ class DirectorySelectorHandler(BaseRequestHandler):
                 else:
                     returnValue = "Permission Denied"
         except Exception as e:
-            print('Error while setting the file path', e)
+
             returnValue = 'Error while setting the file path '
         config = get_config_values(['dataPath'])
         if 'dataPath' in config:
 
             config_data_path = str(config['dataPath'])
             config_new_path = config_data_path.replace(str(Path.home()), '')
-            print("Config new path is :", config_new_path)
+
             notebook_url_path_prefix = url_path_join('/tree', config_new_path)
         if returnValue is not "":
             self.write({
@@ -354,8 +348,7 @@ class ResourceLocalFilesRequestHandler(BaseRequestHandler):
                                                          'OPTIONS, POST, PUT'))
 
     def get(self, res_id):
-        print('In the local resource function')
-        logging.info('In the resource local function')
+
         # Handling authentication first to ensure local data if not present is downloaded from Hydroshare
 
         if not resource_manager.is_authenticated():
@@ -624,7 +617,7 @@ class DownloadHydroShareFilesRequestHandler(BaseRequestHandler):
 
         file_and_folder_paths = data.get('files')
         filesChanged = 'sync'
-        print('files selected to download are', file_and_folder_paths)
+
         if file_and_folder_paths is None:
             self.set_status(400)  # Bad Request
             self.write('Could not find "files" in request body.')
@@ -633,7 +626,7 @@ class DownloadHydroShareFilesRequestHandler(BaseRequestHandler):
             # Remove any leading /
             if item_path.startswith('/'):
                 item_path = item_path[1:]
-                print('item path after removing slash is', item_path)
+
                 local_data = ResourceLocalData(res_id)
                 resource_manager.save_file_locally(res_id, item_path)
 
@@ -657,9 +650,6 @@ def checkFileSyncStatus(temporaryRoot, res_id):
         modified_time_local = file['modifiedTime']
         checksum_local = file["checksum"]
 
-        print('Local checksum in server.py is', checksum_local)
-        print('file name is', file['name'])
-
         checksum_hs, modified_time_hs = hs_data.get_modified_time_hs(
             file['name'])
 
@@ -679,14 +669,13 @@ def checkFileSyncStatus(temporaryRoot, res_id):
                         "fileChanged": localIsLatest,
                         "syncStatus": syncStatus
                     })
-                    print(localIsLatest)
 
                 elif modified_time_hs > modified_time_local:
                     file.update({
                         "fileChanged": serverIsLatest,
                         "syncStatus": syncStatus
                     })
-                    print(serverIsLatest)
+
             elif checksum_local == checksum_hs:
                 syncStatus = "In Sync"
                 file.update({
@@ -711,13 +700,12 @@ def checkHydroShareSyncStatus(temporaryRoot, res_id):
 
         modified_time_hs = file['modifiedTime']
         checksum_hs = file['checksum']
-        print('modified time hydroshare is', modified_time_hs)
+
         if file['path'].startswith('hs'):
             file_name = file['path'][4:]
 
-        print('file name is', file_name)
         item_path = str(local_data.data_path) + '/' + file_name
-        print('item path is', item_path)
+
         checksum_local = local_data.get_md5_files(item_path)
 
         if checksum_local == None:
@@ -736,14 +724,13 @@ def checkHydroShareSyncStatus(temporaryRoot, res_id):
                         "fileChanged": localIsLatest,
                         "syncStatus": syncStatus
                     })
-                    print(localIsLatest)
 
                 elif modified_time_hs > modified_time_local:
                     file.update({
                         "fileChanged": serverIsLatest,
                         "syncStatus": syncStatus
                     })
-                    print(serverIsLatest)
+
             else:
                 syncStatus = 'In Sync'
                 file.update({
@@ -772,9 +759,9 @@ class CheckSyncStatusFilesRequestHandler(BaseRequestHandler):
             return
 
         data = json.loads(self.request.body.decode('utf-8'))
-        print('Data from json is', data)
+
         file_and_folder_paths = data.get('files')
-        print('files selected to download are', file_and_folder_paths)
+
         myList = []
 
         if file_and_folder_paths is None:
@@ -786,23 +773,20 @@ class CheckSyncStatusFilesRequestHandler(BaseRequestHandler):
             # Remove any leading /
             if item_path.startswith('/'):
                 file_name = item_path[1:]
-                print('item path after removing slash is', file_name)
+
                 local_data = ResourceLocalData(res_id)
 
                 CheckSyncStatusFilesRequestHandler.modified_time_local = local_data.get_md5_files(
                     file_name)
-                print('modified time locally is',
-                      CheckSyncStatusFilesRequestHandler.modified_time_local)
+
                 # appending local modified time to list
                 hs_data = ResourceHydroShareData(resource_manager.hs_api_conn,
                                                  res_id)
                 CheckSyncStatusFilesRequestHandler.modified_time_hs = hs_data.get_md5_files(
                     res_id, file_name)
-                print('modified time in hydroshare is',
-                      CheckSyncStatusFilesRequestHandler.modified_time_hs)
 
                 if CheckSyncStatusFilesRequestHandler.modified_time_hs < CheckSyncStatusFilesRequestHandler.modified_time_local:
-                    print('local files are latest')
+
                     CheckSyncStatusFilesRequestHandler.filesChanged = 'local'
 
                     myDict = {
@@ -817,11 +801,8 @@ class CheckSyncStatusFilesRequestHandler(BaseRequestHandler):
                     myList.append(myDict)
                     myJson = json.dumps(myList)
 
-                    print('Json when',
-                          CheckSyncStatusFilesRequestHandler.filesChanged,
-                          ' is latest is as follows', myJson)
                 elif CheckSyncStatusFilesRequestHandler.modified_time_hs > CheckSyncStatusFilesRequestHandler.modified_time_local:
-                    print('HydroShare files are latest')
+
                     myDict = {
                         'resourceId': res_id,
                         'filesChanged':
@@ -833,9 +814,6 @@ class CheckSyncStatusFilesRequestHandler(BaseRequestHandler):
                     }
                     myList.append(myDict)
                     myJson = json.dumps(myList)
-                    print('Json when',
-                          CheckSyncStatusFilesRequestHandler.filesChanged,
-                          ' is latest is as follows', myJson)
 
         temporaryRoot = local_data.get_files_and_folders()
 
