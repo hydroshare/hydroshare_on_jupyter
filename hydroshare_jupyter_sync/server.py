@@ -7,7 +7,7 @@ Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 """
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
-
+import itertools
 import json
 import logging
 import os
@@ -39,6 +39,11 @@ from hydroshare_jupyter_sync.resource_manager import (
 
 # Global resource handler variable
 resource_manager = ResourceManager()
+
+WORKSPACE_FILES_ERROR = {
+    'type': 'WorkspaceFileError',
+    'message' : 'HydroShare files not present in Workspace',
+}
 
 assets_path = Path(__file__).absolute().parent / 'assets'
 data_path = Path.cwd() / 'hydroshare' / 'local_hs_resources'
@@ -497,7 +502,7 @@ class ResourceHydroShareFilesRequestHandler(BaseRequestHandler):
         hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         # Code for updating the latest files on Root Dir object
 
-        local_data = ResourceLocalData(res_id)
+        #local_data = ResourceLocalData(res_id)
 
         temporaryRoot = hs_data.get_files()
         checkHydroShareSyncStatus(temporaryRoot, res_id)
@@ -609,7 +614,7 @@ class DownloadHydroShareFilesRequestHandler(BaseRequestHandler):
                 'error': HYDROSHARE_AUTHENTICATION_ERROR,
             })
             return
-
+        hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         data = json.loads(self.request.body.decode('utf-8'))
 
         file_and_folder_paths = data.get('files')
@@ -625,7 +630,8 @@ class DownloadHydroShareFilesRequestHandler(BaseRequestHandler):
                 item_path = item_path[1:]
 
                 local_data = ResourceLocalData(res_id)
-                resource_manager.save_file_locally(res_id, item_path)
+                # resource_manager.save_file_locally(res_id, item_path)
+                hs_data.download_to_local(local_data, Path(item_path), Path(item_path))
 
         self.write({
             'readMe': local_data.get_readme(),
@@ -682,6 +688,72 @@ def checkFileSyncStatus(temporaryRoot, res_id):
 
     temporaryRoot = sorted(contents, key=lambda x: x['syncStatus'] == ' ')
 
+def addParameters(data, local_data, localIsLatest, serverIsLatest, res_id):
+    if data['type'] == 'folder':
+        for k, v in data.items():
+            if k == 'contents':
+                for j in v:
+                    addParameters(j, local_data, localIsLatest, serverIsLatest, res_id)
+    else:
+        #hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
+    #for file in data:
+
+        modified_time_hs = data['modifiedTime']
+        checksum_hs = data['checksum']
+        # if file['checksum'] in file:
+        #     checksum_hs = file['checksum']
+        # else:
+
+        if data['path'].startswith('hs'):
+            file_name = data['path'][4:]
+
+        else:
+            file_name = data['path'][7:]
+
+        item_path = str(local_data.data_path) + '/' + file_name
+
+        checksum_local = local_data.get_md5_files(item_path)
+        #checksum_hs, modified_time_hs = hs_data.get_modified_time_hs(
+        #file_name)
+        if checksum_local == None:
+            syncStatus = " "
+            isFileExist = "File doesn't exist in Local"
+            data.update({"fileChanged": isFileExist, "syncStatus": syncStatus})
+
+        # elif checksum_hs == None or modified_time_hs == None:
+        #     syncStatus = " "
+        #     isfileExists = "File doesn't exist in HydroShare"
+        #     data.update({
+        #         "fileChanged": isfileExists,
+        #         "syncStatus": syncStatus
+        #     })
+        else:
+            modified_time_local = str(
+                datetime.datetime.fromtimestamp(
+                    (Path(item_path).stat().st_mtime)))
+            if checksum_local != checksum_hs:
+                syncStatus = 'Out of Sync'
+                if modified_time_hs < modified_time_local:
+                    # add fileChanged value
+                    data.update({
+                        "fileChanged": localIsLatest,
+                        "syncStatus": syncStatus
+                    })
+
+                elif modified_time_hs > modified_time_local:
+                    data.update({
+                        "fileChanged": serverIsLatest,
+                        "syncStatus": syncStatus
+                    })
+
+            else:
+                syncStatus = 'In Sync'
+                data.update({
+                    "fileChanged": "Local and HydroShare are synced",
+                    "syncStatus": syncStatus
+                })
+
+
 
 def checkHydroShareSyncStatus(temporaryRoot, res_id):
     serverIsLatest = 'HydroShare is latest'
@@ -693,48 +765,15 @@ def checkHydroShareSyncStatus(temporaryRoot, res_id):
 
     contents = temporaryRoot['contents']
 
-    for file in contents:
+    for data in contents:
+        addParameters(data, local_data, localIsLatest, serverIsLatest, res_id)
 
-        modified_time_hs = file['modifiedTime']
-        checksum_hs = file['checksum']
+    ''' Write code to add syncStatus to folder level'''
+    # for data in contents:
+    #     if data['type'] == 'folder':
+    #         for k, v in data.items():
 
-        if file['path'].startswith('hs'):
-            file_name = file['path'][4:]
-
-        item_path = str(local_data.data_path) + '/' + file_name
-
-        checksum_local = local_data.get_md5_files(item_path)
-
-        if checksum_local == None:
-            syncStatus = " "
-            isFileExist = "File doesn't exist in Local"
-            file.update({"fileChanged": isFileExist, "syncStatus": syncStatus})
-        else:
-            modified_time_local = str(
-                datetime.datetime.fromtimestamp(
-                    (Path(item_path).stat().st_mtime)))
-            if checksum_local != checksum_hs:
-                syncStatus = 'Out of Sync'
-                if modified_time_hs < modified_time_local:
-                    # add fileChanged value
-                    file.update({
-                        "fileChanged": localIsLatest,
-                        "syncStatus": syncStatus
-                    })
-
-                elif modified_time_hs > modified_time_local:
-                    file.update({
-                        "fileChanged": serverIsLatest,
-                        "syncStatus": syncStatus
-                    })
-
-            else:
-                syncStatus = 'In Sync'
-                file.update({
-                    "fileChanged": "Local and HydroShare are synced",
-                    "syncStatus": syncStatus
-                })
-    temporaryRoot = sorted(contents, key=lambda x: x['syncStatus'] == ' ')
+    #temporaryRoot = sorted(contents, key=lambda x: x['syncStatus'] == ' ')
 
 
 class CheckSyncStatusFilesRequestHandler(BaseRequestHandler):
@@ -835,15 +874,22 @@ class DownloadedLocalFilesRequestHandler(BaseRequestHandler):
             })
             return
         local_data = ResourceLocalData(res_id)
+        if not local_data.is_downloaded():
+            self.write({
+                'success': False,
+                'error' : WORKSPACE_FILES_ERROR,
+                #'error' : 'HydroShare files not present in Workspace',
+            })
+            return
+        else:
+            temporaryRoot = local_data.get_files_and_folders()
 
-        temporaryRoot = local_data.get_files_and_folders()
-
-        checkFileSyncStatus(temporaryRoot, res_id)
-
-        self.write({
-            'readMe': local_data.get_readme(),
-            'rootDir': temporaryRoot,
-        })
+            #checkFileSyncStatus(temporaryRoot, res_id)
+            checkHydroShareSyncStatus(temporaryRoot, res_id)
+            self.write({
+                'readMe': local_data.get_readme(),
+                'rootDir': temporaryRoot,
+            })
 
 
 class MoveCopyFiles(BaseRequestHandler):
