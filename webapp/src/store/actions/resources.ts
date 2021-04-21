@@ -68,6 +68,9 @@ export function notifyGettingResourcesFailed() {
   return action(ResourcesActions.NOTIFY_GETTING_RESOURCES_FAILED);
 }
 
+export function notifyGettingWorkspaceFilesFailed(){
+  return action(ResourcesActions.NOTIFY_GETTING_WORKSPACE_FILES_FAILED);
+}
 export function notifyGettingResourceHydroShareFiles(resource: IResource) {
   return action(ResourcesActions.NOTIFY_GETTING_RESOURCE_HYDROSHARE_FILES, { resourceId: resource.id });
 }
