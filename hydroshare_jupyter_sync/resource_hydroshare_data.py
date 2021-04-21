@@ -202,17 +202,23 @@ class ResourceHydroShareData:
                 root_dir_contents.append(
                     file_definition_hs
                 )  # all files in hydroshare are appended to root_dir_contents
-        for contents in root_dir_contents:
 
-            
-            if (contents.get("name") == filename):
+        for contents in root_dir_contents:
+            if(contents.get("name") == filename):
                 modified_time = contents.get("modifiedTime")
                 checksum = contents.get("checksum")
 
                 if checksum:
-
                     return checksum, modified_time
-                
+        #         else:
+        #             print(nested_files)
+        #print(nested_files)
+        # filename = str(filename + '/')
+        # print(filename)
+        # for k, v in nested_files.items():
+        #     if k == filename:
+        #         return k['checksum'], k['modified_time']
+
         return None, None
 
     def get_file_exists(self, filename, force_fetch=False):
@@ -396,6 +402,9 @@ class ResourceHydroShareData:
                                        dest_path / new_src.name, temp_dir)
         else:
             # Download the file
+            if not local_data.data_path.exists():
+                local_data.data_path.mkdir(parents =  True)
+
             with open(str(local_data.data_path / dest_path), 'wb') as f:
                 for chunk in self.hs_api_conn.getResourceFile(
                         self.res_id, str(src_path)):
