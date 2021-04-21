@@ -741,20 +741,18 @@ def addParameters(data, data_to_compare, localIsLatest, serverIsLatest, res_id, 
          if local file doesnt have checksum the file is no
 
         """
-        # Identify if its hydroshare file or local file
+        # Identify if its Hydroshare file or local file
         if data['path'].startswith('hs'):
             file_name = data['path'][4:]
         else:
             file_name = data['path'][7:]
 
-
-
-        # Get checksum for both hydroshare and local files
+        # Get checksum for both Hydroshare and local files
 
         if is_local_data:
-            item_path = str(data.data_path) + '/' + file_name
-            checksum_local = data.get_md5_files(item_path)
-            checksum_hs = data_to_compare['checksum']
+            item_path = str(ResourceLocalData(res_id).data_path) + '/' + file_name
+            checksum_local = ResourceLocalData(res_id).get_md5_files(item_path)
+            checksum_hs = data_to_compare.checksum_hs(file_name.partition('.')[0], file_name.partition('.')[2])
         else:
             item_path = str(data_to_compare.data_path) + '/' + file_name
             checksum_local = data_to_compare.get_md5_files(item_path)
@@ -894,7 +892,7 @@ class DownloadedLocalFilesRequestHandler(BaseRequestHandler):
             local_file_data = local_data.get_files_and_folders()
 
             # checkFileSyncStatus(temporaryRoot, res_id)
-            #checkHydroShareSyncStatus(local_file_data, res_id, True)
+            checkHydroShareSyncStatus(local_file_data, res_id, True)
             self.write({
                 'readMe': local_data.get_readme(),
                 'rootDir': local_file_data,
