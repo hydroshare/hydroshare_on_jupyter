@@ -207,6 +207,7 @@ export function downloadResourceFilesOrFolders(resource: IResource, paths: strin
           dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
           //dispatch(getResourceDownloadedLocalFiles(resource));
           dispatch(getResourceHydroShareFiles(resource));
+          dispatch(getResourceDownloadedLocalFiles(resource));
         }
       } catch (e) {
         console.error(e);

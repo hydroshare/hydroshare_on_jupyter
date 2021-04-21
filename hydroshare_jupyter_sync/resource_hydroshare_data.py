@@ -296,6 +296,35 @@ class ResourceHydroShareData:
 
         return False
 
+    def checksum_hs(self, item_path, file_extension=None):
+        """ Checks if a file or folder exists in the resource on HydroShare
+
+            :param item_path the name (sans extension) of the file or folder
+            :param file_extension if a file, the extension of that file
+            :return whether or not the file or folder exists in the resource
+            on HydroShare
+            :rtype bool
+         """
+        if file_extension == '':
+            file_extension = None
+        if not isinstance(item_path, PosixPath):
+            item_path = Path(item_path)
+        current_dir_contents = self.get_files().get('contents')
+        for current_path_part in item_path.parts:
+            found_next_part = False
+            for file_or_folder in current_dir_contents:
+                if file_or_folder["name"] == current_path_part:
+                    if file_or_folder["type"] == "folder":
+                        current_dir_contents = file_or_folder.get('contents')
+                        found_next_part = True
+                        break
+                    elif (file_or_folder["type"] == file_extension):
+                        return file_or_folder["checksum"]
+            if not found_next_part:
+                return None
+
+        return None
+
     def _find_file_or_folder_metadata(self, path, metadata_dict):
         """ Recursively gets and returns the metadata dictionary that is
         nested within metadata dict for the file or folder at specified path.
