@@ -268,7 +268,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             {this.generateTableCell(file.name,file.modifiedTime,file.fileChanged, nestLevel, onClick,)}
             {this.generateTableCell(file.type || 'file',file.modifiedTime,file.fileChanged)}
             {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes),file.modifiedTime,file.fileChanged)}
-            {this.generateTableCell(file.syncStatus == 'In Sync' ? <TiTick title="In Sync" /> :file.syncStatus == 'Out of Sync'? <MdCancel title="Out of Sync"/> : <FaQuestion  title="Unknown"/>,file.modifiedTime,file.fileChanged)}
+            {this.generateTableCell(file.syncStatus == 'In Sync' ? <TiTick title="In Sync" /> :file.syncStatus == 'Out of Sync'? <MdCancel title="Out of Sync"/> : <FaQuestion  title="Unknown"/>, file.modifiedTime,file.fileChanged)}
           </div>
         )}
       </Draggable>
@@ -331,7 +331,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       paddingLeft: `${nestLevel * 10}px`,
     };
     const time = appendToolTip ===undefined ? " ":appendToolTip.toString();
-    const tooltip = typeof content === 'string' || 'IconType' ? content+", Modified Time: "+time+" FileInfo: "+ fileInfo : undefined;
+    const tooltip = typeof content === 'string' || 'IconType' ? content+",: ? Modified Time: "+time+" FileInfo: "+ fileInfo : undefined;
     const classNames: Array<string> = [];
     if (onClick) {
       classNames.push('clickable');
