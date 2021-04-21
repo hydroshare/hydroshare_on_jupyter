@@ -7,12 +7,13 @@ import {
 } from 'redux-thunk';
 import { loadInitData } from "./actions/App";
 
-import { pushNotification, } from "./actions/notifications";
+import { dismissNotification, pushNotification, } from "./actions/notifications";
 import {
   notifyGettingResourceHydroShareFiles,
   notifyGettingResourceJupyterHubFiles,
   notifyGettingResources,
   notifyGettingResourcesFailed,
+  notifyGettingWorkspaceFilesFailed,
   setArchiveMessage,
   setResourceHydroShareFiles,
   setResourceLocalFiles,
@@ -47,6 +48,8 @@ import {
 } from './types';
 import * as DirectoryActions from './actions/directory';
 import { Redirect } from 'react-router';
+// import FilePane from 'src/components/FilePane';
+// import { NotificationsActions } from './actions/action-names';
 
 
 // @ts-ignore
@@ -89,10 +92,13 @@ function putToBackend<T>(endpoint: string, data: any): Promise<AxiosResponse<T>>
 }
 
 function handleError(error: IServerError, dispatch: ThunkDispatch<{}, {}, AnyAction>) {
-  console.error(error);
   if (error.type === 'HydroShareAuthenticationError') {
     dispatch(notifyHydroShareCredentialsInvalid());
-  } else {
+  } 
+  if (error.type === 'WorkspaceFileError'){
+    dispatch(notifyGettingWorkspaceFilesFailed());
+  }
+  else {
     dispatch(pushNotification('error', error.message));
   }
 }
@@ -199,7 +205,7 @@ export function downloadResourceFilesOrFolders(resource: IResource, paths: strin
           handleError(error, dispatch);
         } else {
           dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
-          dispatch(getResourceDownloadedLocalFiles(resource));
+          //dispatch(getResourceDownloadedLocalFiles(resource));
           dispatch(getResourceHydroShareFiles(resource));
         }
       } catch (e) {
@@ -271,7 +277,7 @@ export function checkSyncHydroShareStatusFiles(resource: IResource, paths: strin
           } else {
             dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
             dispatch(getResourceHydroShareFiles(resource));
-            dispatch(getResourceDownloadedLocalFiles(resource));
+            //dispatch(getResourceDownloadedLocalFiles(resource));
           }
         } catch (e) {
           console.error(e);
@@ -369,6 +375,7 @@ export function uploadNewFile(resource: IResource, file: FormData): ThunkAction<
       const response = await postToBackend<IAttemptHydroShareLoginResponse>(`/resources/${resource.id}/local-files`, file);
       if (response.data.success) {
         dispatch(loadInitData());
+        dispatch(getResourceHydroShareFiles(resource));
       }
     } catch (e) {
       console.error(e);
@@ -475,8 +482,12 @@ export function getUserInfo(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
         isFile
       } = response.data;
       if (error) {
-        handleError(error, dispatch);
-      } else {
+        if (response.data.data == null){
+          handleError(error, dispatch);
+          dispatch(dismissNotification(0));
+        }
+    }
+      else {
         const userInfo = {
           email: data.email,
           id: data.id,
@@ -537,13 +548,13 @@ export function getResources(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
         },
       } = response;
       if (error) {
-        handleError(error, dispatch);
+        //handleError(error, dispatch);
       } else {
         dispatch(setResources(resources));
         dispatch(setArchiveMessage(archive_message));
       }
     } catch (e) {
-      console.error(e);
+      //console.error(e);
       dispatch(notifyGettingResourcesFailed());
       dispatch(pushNotification('error', 'Could not get resources from the server.'));
     }
@@ -587,11 +598,19 @@ export function getResourceDownloadedLocalFiles(resource: IResource) {
       } = response;
       if (error) {
         handleError(error, dispatch);
-      } else {
-        dispatch(setResourceLocalFiles(resource.id, rootDir, readMe));
+      } 
+      if (rootDir == null){
+        dispatch(pushNotification('warning', 'files not in workspace'))
+      }
+      else{
+        console.log('trying to dismiss notification')
+        //NotificationsActions.DISMISS_NOTIFICATION
+        dispatch(dismissNotification(0));
+        //dismissNotification(0);
+        dispatch(setResourceLocalFiles(resource.id, rootDir, readMe)); 
       }
     } catch (e) {
-      console.error(e);
+      console.error('error is',e);
       dispatch(pushNotification('error', 'An error occurred when trying to get the workspace files.'));
     }
   };

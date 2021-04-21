@@ -73,8 +73,8 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
     case ResourcesActions.SET_RESOURCES:
       const allResources = {};
       action.payload.forEach(resource => {
-        resource.created = moment(resource.created, 'MM-DD-YYYY');
-        resource.lastUpdated = moment(resource.lastUpdated, 'MM-DD-YYYY');
+        resource.created = moment(resource.created, 'YYYY-MM-DD');
+        resource.lastUpdated = moment(resource.lastUpdated, 'YYYY-MM-DD');
         allResources[resource.id] = resource;
       });
       return {

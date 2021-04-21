@@ -48,7 +48,6 @@ type ComponentPropTypes = ReturnType<typeof mapStateToProps> & ReturnType<typeof
 
 const LoginModal: React.FC<ComponentPropTypes> = (props: ComponentPropTypes) => {
   if (!props.visible) return null;
-
   const [state, setState] = React.useState(initialState);
 
   const usernameChange = (username: string) => setState({ ...state, username });
