@@ -209,7 +209,7 @@ class ResourceLocalData:
             else:
                 raise FileExistsError(f'Directory {str(folder_path)} exists')
 
-        folder_path.mkdir()
+        folder_path.mkdir(parents=True, exist_ok=True)
 
     def delete_file_or_folder(self, item_path):
         """ Deletes a file or folder from the local filesystem.
