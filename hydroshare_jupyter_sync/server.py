@@ -894,7 +894,7 @@ class DownloadedLocalFilesRequestHandler(BaseRequestHandler):
             local_file_data = local_data.get_files_and_folders()
 
             # checkFileSyncStatus(temporaryRoot, res_id)
-            checkHydroShareSyncStatus(local_file_data, res_id, True)
+            #checkHydroShareSyncStatus(local_file_data, res_id, True)
             self.write({
                 'readMe': local_data.get_readme(),
                 'rootDir': local_file_data,

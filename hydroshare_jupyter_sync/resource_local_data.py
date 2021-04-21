@@ -133,6 +133,7 @@ class ResourceLocalData:
                         dirpath.stat().st_mtime)),
                     "type": file_type,
                     "contents": folder_contents,
+                    #"data_path": self.data_path,
                     #"checksum": self.get_md5_files(path_rel_resource_root)
                 })
             # otherwise we just get the relevant file information
@@ -144,6 +145,7 @@ class ResourceLocalData:
                     "modifiedTime": str(datetime.datetime.fromtimestamp(
                         dirpath.stat().st_mtime)),
                     "type": file_type,
+                    #"data_path": self.data_path,
                     #"checksum": self.get_md5_files(filepath)
                 })
         return files2
@@ -255,7 +257,8 @@ class ResourceLocalData:
                     "contents": self.get_contents_recursive(self.data_path,
                                                             self.data_path,
 
-                                                            path_prefix)
+                                                            path_prefix),
+                    #"data_path": self.data_path,
             }
 
 
