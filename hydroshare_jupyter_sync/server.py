@@ -753,10 +753,17 @@ def addParameters(data, data_to_compare, localIsLatest, serverIsLatest, res_id, 
             item_path = str(ResourceLocalData(res_id).data_path) + '/' + file_name
             checksum_local = ResourceLocalData(res_id).get_md5_files(item_path)
             checksum_hs = data_to_compare.checksum_hs(file_name.partition('.')[0], file_name.partition('.')[2])
+            modified_time_local = str(datetime.datetime.fromtimestamp(Path(item_path).stat().st_mtime))
+            modified_time_hs = data_to_compare.modified_time_hs(file_name.partition('.')[0], file_name.partition('.')[2])
+
         else:
             item_path = str(data_to_compare.data_path) + '/' + file_name
             checksum_local = data_to_compare.get_md5_files(item_path)
+            modified_time_local = None
+            if Path(item_path).exists():
+                modified_time_local = str(datetime.datetime.fromtimestamp(Path(item_path).stat().st_mtime))
             checksum_hs = data['checksum']
+            modified_time_hs = data['modifiedTime']
 
         syncStatus = " "
 
@@ -767,8 +774,6 @@ def addParameters(data, data_to_compare, localIsLatest, serverIsLatest, res_id, 
             isfileExists = "File doesn't exist in HydroShare Server"
             data.update({"fileChanged": isfileExists, "syncStatus": syncStatus})
         else:
-            modified_time_local = str(datetime.datetime.fromtimestamp(Path(item_path).stat().st_mtime))
-            modified_time_hs = data['modifiedTime']
 
             if checksum_local != checksum_hs:
                 syncStatus = 'Out of Sync'
