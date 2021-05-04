@@ -154,7 +154,7 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                 <button
                   className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SYNCSTATUS ? sortOrder : '')}
                   onClick={() => this.setSortBy(SORT_BY_OPTIONS.SYNCSTATUS)}>
-                  Sync Status
+                  Sync 
                   {this.state.sortBy === SORT_BY_OPTIONS.SYNCSTATUS && SortTriangleSVG}
                 </button>
               </div>
@@ -328,10 +328,11 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
 
   generateTableCell = (content: ReactElement | string | number | moment.Moment | IconType, appendToolTip: moment.Moment | undefined, fileInfo: string | undefined, nestLevel: number = 0, onClick: any = undefined) => {
     const style = {
-      paddingLeft: `${nestLevel * 10}px`,
+      //paddingLeft: `${nestLevel * 10}px`,
+      paddingLeft: `${nestLevel}px`
     };
     const time = appendToolTip ===undefined ? " ":appendToolTip.toString();
-    const tooltip = typeof content === 'string' || 'IconType' ? content+",: ? Modified Time: "+time+" FileInfo: "+ fileInfo : undefined;
+    const tooltip = typeof content === 'string' ? content+", Modified Time: "+time+", FileInfo: "+ fileInfo : "Modified Time: "+time+", FileInfo: "+ fileInfo;
     const classNames: Array<string> = [];
     if (onClick) {
       classNames.push('clickable');
