@@ -62,7 +62,9 @@ const LoginModal: React.FC<ComponentPropTypes> = (props: ComponentPropTypes) => 
   return (
       <Modal
         close={() => {}}
+        isCloseDisabled={true}
         title="Login to HydroShare"
+        isCancelDisabled={true}
         isValid={isValid && !props.attemptingLogin}
         submit={submit}
         submitText={props.attemptingLogin ? 'Logging in...' : 'Login'}
