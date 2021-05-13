@@ -65,7 +65,7 @@ class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState, I
   }
   isShown: any;
   render() {
-
+    const homedir = require('os').homedir();
     const showDirectorySelector: boolean = this.state.showDirectorySelector;
     const { directoryChoice } = this;
     if (!this.state.isShown && this.props.dirErrorResponse == "") {
@@ -89,7 +89,7 @@ class SelectDirModal extends React.Component<ReduxType, IDirectorySelectState, I
         <div onChange={directoryChoice}>
           <input id="Yes" type="radio" name="dirselect" value="Yes" />Use custom directory
         <br />
-          <input id="No" type="radio" name="dirselect" value="No" />Use default directory
+          <input id="No" type="radio" name="dirselect" value="No" />Use default directory <i>(&lt;path-to-home-dir&gt;/hydroshare</i>
         </div>
         <br />
         {showDirectorySelector && <div>
