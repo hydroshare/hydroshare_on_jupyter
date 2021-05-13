@@ -256,12 +256,6 @@ export default class FileManager extends React.Component<IFileManagerProps, IFil
             type="text"
             value={filterByName}
           />
-          <button
-            className="button-enabled"
-            onClick={openInHydroShare}
-            title="Open the page for this resource in HydroShare">
-            Open in HydroShare
-        </button>
           <RiDownload2Line
             cursor='pointer'
             style={{ width: 40, height: 30 }}
