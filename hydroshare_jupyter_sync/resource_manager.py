@@ -8,20 +8,29 @@ Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 import base64
+import json
 import logging
 import shutil
-import json
 from pathlib import Path
 
-from hydroshare_jupyter_sync.config_reader_writer import (get_config_values,
-                                                          set_config_values)
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from hs_restclient.exceptions import HydroShareHTTPException
+
+from hydroshare_jupyter_sync.config_reader_writer import (get_config_values)
+from hydroshare_jupyter_sync.credential_reader_writer import (
+    get_credential_values, set_credential_values)
 
 HYDROSHARE_AUTHENTICATION_ERROR = {
     'type': 'HydroShareAuthenticationError',
     'message': 'Invalid HydroShare username or password.',
 }
+PERMISSION_ERROR = {
+    'type': 'PermissionDeniedError',
+    'message': 'Cannot write to Directory, check you have write permissions'
+}
+
+defaultPath = Path.home() / 'hydroshare' / 'local_hs_resources'
+data_log = Path.home() / 'hydroshare' / 'sync.log'
 
 
 class ResourceManager:
@@ -36,15 +45,23 @@ class ResourceManager:
         config = get_config_values(['dataPath', 'hydroShareHostname'])
         self.hs_hostname = 'www.hydroshare.org'
         # TODO: Rename to hydroshare_resource_data (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/380)
-        self.output_folder = Path('local_hs_resources')
+        self.output_folder = Path(defaultPath)
+        self.data_log_folder = Path(data_log)
         if config:
             if 'hydroShareHostname' in config:
                 self.hs_hostname = config['hydroShareHostname']
             if 'dataPath' in config:
                 self.output_folder = Path(config['dataPath'])
+            if 'logPath' in config:
+                self.data_log_folder = Path(config['logPath'])
+
         if not self.output_folder.is_dir():
             # Let any exceptions that occur bubble up
             self.output_folder.mkdir(parents=True)
+
+        if not self.data_log_folder.is_dir():
+            # Let any exceptions that occur bubble up
+            self.data_log_folder.mkdir(parents=True)
 
         self.hs_api_conn = None  # Use 'authenticate' to initialize
         self.username = None
@@ -65,13 +82,13 @@ class ResourceManager:
         """
         if not username or not password:
             # Check the config file for a username and password
-            config = get_config_values(['u', 'p'])
-            if not config or 'u' not in config or 'p' not in config:
+            credentials = get_credential_values(['u', 'p'])
+            if not credentials or 'u' not in credentials or 'p' not in credentials:
                 # No passed credentials and no saved credentials --
                 # can't authenticate
                 return None
-            username = config['u']
-            password = base64.b64decode(config['p']).decode('utf-8')
+            username = credentials['u']
+            password = base64.b64decode(credentials['p']).decode('utf-8')
 
         # Try to authenticate
         auth = HydroShareAuthBasic(username=username, password=password)
@@ -85,16 +102,17 @@ class ResourceManager:
             raise e  # Some other error -- bubble it up
 
         # Authentication succeeded
-        if save:
-            # Save the username and password
-            saved_successfully = set_config_values({
-                'u': username,
-                'p': str(base64.b64encode(password.encode('utf-8')).decode(
-                                                                    'utf-8')),
-            })
-            if saved_successfully:
-                logging.info('Successfully saved HydroShare credentials to '
-                             'config file.')
+        # if save:
+        # Save the username and password
+        saved_successfully = set_credential_values({
+            'u':
+            username,
+            'p':
+            str(base64.b64encode(password.encode('utf-8')).decode('utf-8')),
+        })
+        if saved_successfully:
+            logging.info('Successfully saved HydroShare credentials to '
+                         'config file.')
 
         return user_info  # Authenticated successfully
 
@@ -111,11 +129,34 @@ class ResourceManager:
             :type res_id: str
         """
         # Get resource from HS if it doesn't already exist locally
+        config = get_config_values(['dataPath', 'hydroShareHostname'])
+        self.output_folder = Path(config['dataPath'])
         if not (self.output_folder / res_id).exists():
             logging.info(f"Downloading resource {res_id} from HydroShare...")
+
             self.hs_api_conn.getResource(res_id,
                                          destination=self.output_folder,
                                          unzip=True)
+
+    def save_file_locally(self, res_id, item_path):
+        """ Downloads a file from HydroShare to the local filesystem if a copy does
+            not already exist locally
+
+            :param res_id: the resource ID
+            :type res_id: str
+        """
+        # Get resource from HS if it doesn't already exist locally
+        config = get_config_values(['dataPath', 'hydroShareHostname'])
+        self.output_folder = Path(config['dataPath'])
+        logging.info(f"Downloading file {res_id} from HydroShare...")
+        folderlocation = Path(config['dataPath'] + '/' + res_id + '/' +
+                              res_id + '/data/contents')
+        if not (self.output_folder / res_id).exists():
+            folderlocation.mkdir(parents=True)
+
+        self.hs_api_conn.getResourceFile(res_id,
+                                         item_path,
+                                         destination=folderlocation)
 
     def get_user_info(self):
         """Gets information about the user currently logged into HydroShare
@@ -145,7 +186,8 @@ class ResourceManager:
         resource_path = self.output_folder / res_id
         if not resource_path.exists():
             return {
-                'type': 'FileNotFoundError',
+                'type':
+                'FileNotFoundError',
                 'message': (f'Could not find a local copy of resource {res_id}'
                             ' to delete.'),
             }
@@ -153,7 +195,8 @@ class ResourceManager:
             shutil.rmtree(str(resource_path))
         except IOError:
             return {
-                'type': 'IOError',
+                'type':
+                'IOError',
                 'message': (f'Something went wrong. Could not delete'
                             f' resourc {res_id}.'),
             }
@@ -223,7 +266,10 @@ class ResourceManager:
 
         return list(resources.values()), error
 
-    def create_HS_resource(self, resource_title, creators, abstract="",
+    def create_HS_resource(self,
+                           resource_title,
+                           creators,
+                           abstract="",
                            privacy="Private"):
         """
         Creates a hydroshare resource from the metadata specified in a dict
@@ -235,15 +281,18 @@ class ResourceManager:
 
         # Type errors for resource_title and creators
         if not isinstance(resource_title, str):
-            error = {'type': 'IncorrectType',
-                     'message': 'Resource title should be a string.'}
+            error = {
+                'type': 'IncorrectType',
+                'message': 'Resource title should be a string.'
+            }
             return resource_id, error
-        if (not isinstance(creators, list) or
-            not all(isinstance(creator, str)
-                    for creator in creators)):
-            error = {'type': 'IncorrectType',
-                     'message': '"Creators" object should be a '
-                     'list of strings.'}
+        if (not isinstance(creators, list)
+                or not all(isinstance(creator, str) for creator in creators)):
+            error = {
+                'type': 'IncorrectType',
+                'message': '"Creators" object should be a '
+                'list of strings.'
+            }
             return resource_id, error
 
         if abstract is None:
@@ -260,31 +309,33 @@ class ResourceManager:
             meta_metadata.append({"creator": {"name": creator}})
         meta_metadata = json.dumps(meta_metadata)
 
-        metadata = {'abstract': abstract,
-                    'title': resource_title,
-                    'keywords': (),
-                    'rtype': 'GenericResource',
-                    'fpath': '',
-                    'metadata': meta_metadata,
-                    'extra_metadata': ''}
+        metadata = {
+            'abstract': abstract,
+            'title': resource_title,
+            'keywords': (),
+            'rtype': 'GenericResource',
+            'fpath': '',
+            'metadata': meta_metadata,
+            'extra_metadata': ''
+        }
 
         resource_id = ''
         try:
-            resource_id = (
-                self.hs_api_conn.createResource(
-                                     metadata['rtype'],
-                                     metadata['title'],
-                                     resource_file=metadata['fpath'],
-                                     keywords=metadata['keywords'],
-                                     abstract=metadata['abstract'],
-                                     metadata=metadata['metadata'],
-                                     extra_metadata=metadata[
-                                                        'extra_metadata']))
+            resource_id = (self.hs_api_conn.createResource(
+                metadata['rtype'],
+                metadata['title'],
+                resource_file=metadata['fpath'],
+                keywords=metadata['keywords'],
+                abstract=metadata['abstract'],
+                metadata=metadata['metadata'],
+                extra_metadata=metadata['extra_metadata']))
 
             self.hs_api_conn.setAccessRules(resource_id, public=public)
         except Exception:
-            error = {'type': 'UnknownError',
-                     'message': 'Unable to create resource.'}
+            error = {
+                'type': 'UnknownError',
+                'message': 'Unable to create resource.'
+            }
         return resource_id, error
 
     def create_copy_of_resource_in_hs(self, src_res_id):

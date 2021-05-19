@@ -50,6 +50,7 @@
     }
   }
 
+
   .table-row {
     border-bottom: $border-style;
     display: flex;
@@ -67,6 +68,13 @@
     .collapsed svg {
       transform: rotate(-90deg);
     }
+
+  }
+  .row-not-sync {
+    background-color: #FFB6C1;
+  }
+  .row-file-not-exist {
+    background-color: #D3D3D3;
   }
 
   .context-menu {
@@ -82,6 +90,24 @@
       margin-bottom: 0.5em;
     }
   }
+
+.button-down
+{
+  color:#000000;
+  background:transparent;
+}
+.button-down :active
+{
+  color: white;
+  background:transparent;
+  
+}
+.button-down :hover
+{
+  color: #505050;
+  background:transparent;
+  
+}
 
   .FilePane-files-container {
     display: flex;

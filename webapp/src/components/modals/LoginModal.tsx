@@ -9,7 +9,7 @@ import {
 } from '../../store/async-actions';
 
 import Modal, {
-  CheckboxInput,
+ // CheckboxInput,
   TextInput,
 } from "./Modal";
 
@@ -48,34 +48,44 @@ type ComponentPropTypes = ReturnType<typeof mapStateToProps> & ReturnType<typeof
 
 const LoginModal: React.FC<ComponentPropTypes> = (props: ComponentPropTypes) => {
   if (!props.visible) return null;
-
   const [state, setState] = React.useState(initialState);
 
-  const usernameChange = (username: string) => setState({...state, username});
-  const passwordChange = (password: string) => setState({...state, password});
-  const rememberChange = (remember: boolean) => setState({...state, remember});
+  const usernameChange = (username: string) => setState({ ...state, username });
+  const passwordChange = (password: string) => setState({ ...state, password });
+  //const rememberChange = (remember: boolean) => setState({ ...state, remember });
 
   const isValid = state.username.length > 0 && state.password.length > 0;
 
   const submit = () => props.login(state.username, state.password, state.remember);
+  const signUpInHydroShare = () => window.open(`https://www.hydroshare.org/sign-up/`, '_blank');
 
-    return (
+  return (
       <Modal
         close={() => {}}
+        isCloseDisabled={true}
         title="Login to HydroShare"
+        isCancelDisabled={true}
         isValid={isValid && !props.attemptingLogin}
         submit={submit}
         submitText={props.attemptingLogin ? 'Logging in...' : 'Login'}
       >
-        <TextInput placeholder="Username" onChange={usernameChange} value={state.username} pattern="^[\w,\-\.]+$"/>
-        <TextInput placeholder="Password" onChange={passwordChange} value={state.password} isPassword={true}/>
+        <TextInput placeholder="Username" onChange={usernameChange} value={state.username} pattern="^[\w,\-\.]+$" />
+        <TextInput placeholder="Password" onChange={passwordChange} value={state.password} isPassword={true} />
         {props.credentialsInvalid && <p className="error">Sorry, that username and password is incorrect.</p>}
-        <CheckboxInput checked={state.remember} label="Remember" onChange={rememberChange} />
+        <div>
+        <button
+            className="button-enabled"
+            onClick={signUpInHydroShare}
+            title="Open the page for this resource in HydroShare">
+            Not a user? Sign up in HydroShare
+        </button>
+        </div>
       </Modal>
-    );
+  );
 }
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(LoginModal);
+// <CheckboxInput checked={state.remember} label="Remember" onChange={rememberChange} />

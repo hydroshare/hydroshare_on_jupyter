@@ -1,13 +1,14 @@
 import { RouterState } from 'connected-react-router';
 import * as moment from 'moment';
-import {ActionType} from 'typesafe-actions';
+import { ActionType } from 'typesafe-actions';
 
 import * as resourcesActions from './actions/resources';
 import * as userActions from './actions/user';
+import * as directoryActions from './actions/directory';
 
 export type ResourcesActionTypes = ActionType<typeof resourcesActions>;
 export type UserActionTypes = ActionType<typeof userActions>;
-
+export type DirectoryActionTypes = ActionType<typeof directoryActions>;
 /** ---------- Enums ---------- **/
 
 export enum FileOrFolderTypes {
@@ -33,6 +34,7 @@ export interface IRootState {
   resources: IResourcesState
   router: RouterState
   user: IUserState
+  directory: IDirectoryState
 }
 
 export interface INotificationsState {
@@ -53,19 +55,35 @@ export interface IUserState {
   attemptingLogin: boolean
   authenticationFailed: boolean
   credentialsInvalid: boolean
+  checkingFile: boolean
   userInfo?: IUserInfo
 }
 
+export interface IDirectoryState {
+  dirResponse: string
+  dirErrorResponse: string
+  fileSavedResponse: boolean
+}
 /** --------- Data Models --------- **/
 
 export interface IFile {
+  syncStatus: string
   path: string // If a folder, no trailing forward slash
-  lastModified?: moment.Moment
+  modifiedTime?: moment.Moment
   name: string
   type: FileOrFolderTypes
   sizeBytes: number
+  fileChanged: string
 }
+export interface ISync {
+  resourceId : string
+  filesChanged: string
+  modifiedTimeHydroShare? : string
+  modifiedTimeLocal? : string
+  fileName: string
+  filePath: string
 
+}
 export interface IFolder extends IFile {
   contents: (IFile | IFolder)[]
 }
@@ -108,8 +126,16 @@ export interface IResourceFilesData {
   rootDir: IFolder
   readMe: string
   error?: IServerError
+  filesChanged: string
+  modified_time: Date
+  myJson: ISync
 }
-
+export interface ICheckSync {
+  filesChanged: string
+  modified_time: string
+  rootDir: IFolder
+  readMe: string
+}
 export interface IUserInfo {
   email: string
   id: number
@@ -118,12 +144,18 @@ export interface IUserInfo {
   title: string
   username: string
 }
-
+export interface IDirectoryInfo {
+  success: string
+  error?: string
+  isFile: boolean
+  configDataPath: string
+}
 /** --------- Backend Server Communication ---------- **/
 
 export interface IAttemptHydroShareLoginResponse {
   success: boolean
   userInfo: IUserInfo
+  isFile: boolean
 }
 
 export interface ICreateFileOrFolderRequestResponse {
@@ -167,9 +199,10 @@ export interface IUserInfoDataResponse {
   }
   error?: IServerError
   success: boolean
+  isFile: boolean
 }
 
-export interface IDeleteResourceRequestResponse{
+export interface IDeleteResourceRequestResponse {
   success: boolean
   error?: IServerError
 }

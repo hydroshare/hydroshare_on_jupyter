@@ -8,6 +8,7 @@ import {
 import {
   getResources,
   getUserInfo,
+  viewUserProfile,
 } from '../async-actions';
 import {
   IResource,
@@ -20,6 +21,12 @@ export function loadInitData(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
   return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
     dispatch(getResources());
     dispatch(getUserInfo());
+  };
+}
+
+export function displayUserProfile(): ThunkAction<Promise<void>, {}, {}, AnyAction> {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>) => {
+    dispatch(viewUserProfile());
   };
 }
 

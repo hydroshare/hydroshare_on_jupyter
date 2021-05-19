@@ -7,9 +7,11 @@ Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 """
 from hydroshare_jupyter_sync.config_reader_writer import get_config_values
 from notebook.utils import url_path_join
+from pathlib import Path
 
 _frontend_url = ''
 _backend_api_url = '/syncApi'
+from pathlib import Path
 
 
 def set_frontend_url(url):
@@ -32,15 +34,19 @@ def get_index_html(dev_mode=False):
     global _frontend_url
     global _backend_api_url
     config = get_config_values(['dataPath', 'gettingStartedNotebook'])
+
     notebook_url_path_prefix = url_path_join('/tree', 'local_hs_resources')
     getting_started_notebook_path = ''
     if config:
         if 'gettingStartedNotebook' in config:
             getting_started_notebook_path = config['gettingStartedNotebook']
         if 'dataPath' in config:
-            notebook_url_path_prefix = url_path_join('/tree',
-                                                     config['dataPath'])
 
+            #config_new_path = str(config['dataPath']).replace(Path.home(),'')
+            config_data_path = str(config['dataPath'])
+            config_new_path = config_data_path.replace(str(Path.home()), '')
+
+            notebook_url_path_prefix = url_path_join('/tree', config_new_path)
     bundle_suffix = 'dev' if dev_mode else 'dist'
 
     return f"""
@@ -60,7 +66,9 @@ def get_index_html(dev_mode=False):
     <div id="root"></div>
     <script>
       window.GETTING_STARTED_NOTEBOOK_PATH = "{getting_started_notebook_path}";
+      console.log(window.GETTING_STARTED_NOTEBOOK_PATH);
       window.NOTEBOOK_URL_PATH_PREFIX = "{notebook_url_path_prefix}";
+      console.log(window.NOTEBOOK_URL_PATH_PREFIX);
       window.FRONTEND_URL = "{_frontend_url}";
       window.BACKEND_API_URL = "{_backend_api_url}";
     </script>

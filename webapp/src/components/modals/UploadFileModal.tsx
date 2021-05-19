@@ -43,8 +43,9 @@ export default class UploadFileModal extends React.Component<IUploadFileModalPro
         submit={this.submit}
         submitText="Upload"
       >
-        <input type="file" onChange={this.props.onFileChange} />
+      <input type="file" onChange={this.props.onFileChange} />
       </Modal>
     );
   }
 }
+ 

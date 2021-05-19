@@ -5,6 +5,7 @@ import {
   NotificationsActions,
   ResourcesActions,
   UserInfoActions,
+  DirectoryActions,
 } from './actions/action-names';
 import {
   IFile,
@@ -14,6 +15,8 @@ import {
   IUserState,
   ResourcesActionTypes,
   UserActionTypes,
+  IDirectoryState,
+  DirectoryActionTypes,
 } from './types';
 
 const initNotificationsState: INotificationsState = {
@@ -32,7 +35,13 @@ const initUserState: IUserState = {
   attemptingLogin: false,
   authenticationFailed: false,
   credentialsInvalid: false,
+  checkingFile: false
 };
+const initDirectoryState: IDirectoryState = {
+  dirResponse: '',
+  dirErrorResponse: '',
+  fileSavedResponse: false
+}
 
 export function notificationsReducer(state: INotificationsState = initNotificationsState, action: AnyAction): INotificationsState {
   let notifications = [...state.current];
@@ -64,8 +73,8 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
     case ResourcesActions.SET_RESOURCES:
       const allResources = {};
       action.payload.forEach(resource => {
-        resource.created = moment(resource.created, 'MM-DD-YYYY');
-        resource.lastUpdated = moment(resource.lastUpdated, 'MM-DD-YYYY');
+        resource.created = moment(resource.created, 'YYYY-MM-DD');
+        resource.lastUpdated = moment(resource.lastUpdated, 'YYYY-MM-DD');
         allResources[resource.id] = resource;
       });
       return {
@@ -140,13 +149,14 @@ export function resourcesReducer(state: IResourcesState = initResourcesState, ac
 }
 
 function recursivelyConvertDatesToMoment(files: (IFile | IFolder)[]) {
-  return files.map(fileOrFolder => {
-    if (fileOrFolder.lastModified) {
-      fileOrFolder.lastModified = moment(fileOrFolder.lastModified);
-    }
-    return fileOrFolder;
-  });
-}
+    return files.map(fileOrFolder => {
+      if (fileOrFolder.modifiedTime) {
+        fileOrFolder.modifiedTime = moment(fileOrFolder.modifiedTime);
+      }
+      return fileOrFolder;
+    });
+  }
+
 
 export function userDataReducer(state: IUserState = initUserState, action: UserActionTypes): IUserState {
   switch (action.type) {
@@ -163,7 +173,22 @@ export function userDataReducer(state: IUserState = initUserState, action: UserA
       };
     case UserInfoActions.SET_USER_INFO:
       return {...state, userInfo: action.payload};
+    case UserInfoActions.CHECK_DIRECTORY_SAVED_RESPONSE:
+      return {...state, checkingFile: action.payload.isFile};
     default:
       return state;
   }
 }
+  export function directoryReducer(state: IDirectoryState = initDirectoryState, action: DirectoryActionTypes): IDirectoryState {
+    switch (action.type) {
+      case DirectoryActions.NOTIFY_DIRECTORY_RESPONSE:
+        return {...state, dirResponse: action.payload.message};
+      case DirectoryActions.NOTIFY_DIRECTORY_ERROR_RESPONSE:
+        return {...state, dirErrorResponse: action.payload.message};
+      case DirectoryActions.NOTIFY_FILE_SAVED_RESPONSE:
+        return {...state, fileSavedResponse: action.payload.fileresponse}
+      default:
+        return state;
+    }
+} 
+

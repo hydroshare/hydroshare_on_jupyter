@@ -7,11 +7,14 @@ interface IModalProps {
   close: () => any
   children: React.ReactNode
   title: string
+  placeholder?: string
   submit: () => any
   submitText?: string
   isValid: boolean
   isWarning?: boolean
   isConfirm?: boolean
+  isCancelDisabled?: boolean
+  isCloseDisabled?: boolean
 }
 
 /**
@@ -34,14 +37,16 @@ const Modal: React.FC<IModalProps> = (props: IModalProps) => {
       <div className="content">
         <div className="header">
           <span className="title">{props.title}</span>
-          <button className="close" onClick={props.close}>{CloseXSVG}</button>
+          <button className="close" onClick={props.close} disabled={props.isCloseDisabled}>{CloseXSVG}</button>
         </div>
         <div className="body">
           {props.children}
         </div>
         <div className="footer">
           <button
-            onClick={props.close}>
+            id = 'cancelButtonId'
+            onClick={props.close}
+            disabled={props.isCancelDisabled}>
             {props.cancelText || 'Cancel'}
           </button>
           <button

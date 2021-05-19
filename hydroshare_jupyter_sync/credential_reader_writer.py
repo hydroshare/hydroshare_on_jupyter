@@ -9,19 +9,19 @@ import json
 import logging
 from pathlib import Path
 
-config_path = (Path.home() / 'hydroshare'/ 'config.json')
+credential_path = (Path.home() / 'hydroshare'/ 'credentials_data.dat')
 
-def get_config_values(keys):
+def get_credential_values(keys):
     """ Gets config values for the variables in keys.
 
         :param keys: list of keys you want to look up in config file
         :type keys: list
         :return: dictionary of keys mapping to their values from config
     """
-    if config_path.is_file():
+    if credential_path.is_file():
         try:
             # Read from the file
-            with open(str(config_path), 'r') as f:
+            with open(str(credential_path), 'r') as f:
                 try:
                     config = json.load(f)
                     res = {}
@@ -30,51 +30,51 @@ def get_config_values(keys):
                             res[k] = config[k]
                     return res
                 except json.JSONDecodeError:
-                    logging.error('Could not decode ' + str(config_path))
+                    logging.error('Could not decode ' + str(credential_path))
                     return None
         except IOError:
-            logging.error('Found existing config file in ' + str(config_path) +
+            logging.error('Found existing config file in ' + str(credential_path) +
                           ' but could not open it.')
             return None
     else:
-        logging.info('Could  locate config file at ' + str(config_path))
+        logging.info('Could not locate config file at ' + str(credential_path))
         return None
 
 
-def set_config_values(d):
+def set_credential_values(d):
     """ Sets config values for the key, value pairs in d.
 
         :param d: dictionary of key value pairs to store in config file
         :type d: dict
         :return: True if write is successful and False otherwise
     """
-    config_exists = config_path.exists()
-    if not config_exists:
+    credentials_exists = credential_path.exists()
+    if not credentials_exists:
         # Create the parent directory if it doesn't exist
-        if not config_path.parent.exists():
-            config_path.parent.mkdir(parents=True)
-    elif not config_path.is_file():  # A folder perhaps?
-        logging.error(str(config_path) + ' exists but is not a file.')
+        if not credential_path.parent.exists():
+            credential_path.parent.mkdir(parents=True)
+    elif not credential_path.is_file():  # A folder perhaps?
+        logging.error(str(credential_path) + ' exists but is not a file.')
         return False
 
-    mode = 'r+' if config_exists else 'w+'
+    mode = 'r+' if credentials_exists else 'w+'
     try:
-        with open(str(config_path), mode) as f:
-            if config_exists:
+        with open(str(credential_path), mode) as f:
+            if credentials_exists:
                 try:
-                    config = json.load(f)
+                    credentials = json.load(f)
                     f.seek(0)  # Point back to the beginning of the file
                 except json.JSONDecodeError as e:
                     logging.error(e)
                     logging.warning('Could not parse config file')
-                    config = {}
+                    credentials = {}
             else:
-                config = {}
+                credentials = {}
             for k, v in d.items():
-                config[k] = v
-            json.dump(config, f)
+                credentials[k] = v
+            json.dump(credentials, f)
             return True
     except IOError as e:
-        logging.error('Could not write to config file ' + str(config_path))
+        logging.error('Could not write to credentials file ' + str(credential_path))
         logging.error(e)
         return False
