@@ -34,16 +34,17 @@ and navigate to the CUAHSI Jupyter Sync URL:
 ```
 http://localhost:8888/sync
 ```
+# Configuration
+
 Choose custom directory to provide your custom path where you want to store HydroShare data or 
 choose default directory to store HydroShare data in your home folder
 
 ![CUAHSI Jupyter Sync path selector](https://imgur.com/0UeTkyY.png)
-# Configuration
 
 Your installation can be customized by creating (or editing) a config file in
-`~/.config/hydroshare_jupyter_sync/config.json`. Below are all the possible options to specify:
+`~/hydroshare/config.json`. Below are all the possible options to specify:
 
-* `dataPath`: The path (asked with the Path Selector dialog during the initialization of app) where the resource
+* `dataPath`: The path (asked with the Path Selector dialog during the initialization of application) where the resource
  data is stored
 
 * `logPath`: The path to the log file in which to save logging output. 
