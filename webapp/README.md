@@ -72,3 +72,5 @@ data is stored in the frontend.
 
 The `src/store` directory contains all of the Redux-related files. (This includes all of the code making requests to the
 backend.)
+The `src/store/actions/async-actions.ts` contains all of the api calls referenced in 
+`hydroshare_jupyter_sync/server.py`
