@@ -316,7 +316,7 @@ class DirectorySelectorHandler(BaseRequestHandler):
             config_new_path = config_data_path.replace(str(Path.home()), '')
 
             notebook_url_path_prefix = url_path_join('/tree', config_new_path)
-        if returnValue is not "":
+        if returnValue != "":
             self.write({
                 'error': returnValue,
             })
