@@ -76,59 +76,46 @@ class ResourceManager:
         port: int = HydroShare.default_port,
         client_id: str = None,
         token: str = None,
-    ) -> HydroShare:
-        """Attempts to authenticate with HydroShare.
+    ) -> None:
+        """Create and authenticate request session with HydroShare.
 
-        :param username: the user's HydroShare username
-        :type username: str
-        :param password: the user's HydroShare password
-        :type password: str
-        :param save: whether or not to save the credentials to the config
-        file if the authentication succeeds
-        :type save: bool
-        :return: the user's information (name, email, etc) from HydroShare if
-        successful, None otherwise
+        Parameters
+        ----------
+        username : str, optional
+            HydroShare username, by default None
+        password : str, optional
+            HydroShare password, by default None
+        host : str, optional
+            hostname of hydroshare instance, by default "www.hydroshare.org"
+        protocol : str, optional
+            request protocol, by default "https"
+        port : int, optional
+            request port, by default 443
+        client_id : str, optional
+            client id associated with OAuth2 token, by default None
+        token : str, optional
+            OAuth2 token, by default None
         """
-        if not username or not password:
-            # Check the config file for a username and password
-            credentials = get_credential_values(['u', 'p'])
-            if not credentials or 'u' not in credentials or 'p' not in credentials:
-                # No passed credentials and no saved credentials --
-                # can't authenticate
-                return None
-            username = credentials['u']
-            password = base64.b64decode(credentials['p']).decode('utf-8')
+        # TODO: verify that username and password's of None can't be passed to create a non-login session
+        # instantiate authenticated session
+        self._session = HydroShare(
+            username=username,
+            password=password,
+            host=host,
+            protocol=protocol,
+            port=port,
+            client_id=client_id,
+            token=token,
+        )
 
-        # Try to authenticate
-        auth = HydroShareAuthBasic(username=username, password=password)
-        self.hs_api_conn = HydroShare(auth=auth, hostname=self.hs_hostname)
-        try:
-            user_info = self.hs_api_conn.getUserInfo()
-            self.username = user_info.get('username')
-        except HydroShareHTTPException as e:
-            if e.status_code == 401:  # Unauthorized
-                return None  # Authentication failed
-            raise e  # Some other error -- bubble it up
+    def is_authenticated(self) -> bool:
+        """Return the status of the HydroShare authenticated requests session.
 
-        # Authentication succeeded
-        # if save:
-        # Save the username and password
-        saved_successfully = set_credential_values({
-            'u':
-            username,
-            'p':
-            str(base64.b64encode(password.encode('utf-8')).decode('utf-8')),
-        })
-        if saved_successfully:
-            logging.info('Successfully saved HydroShare credentials to '
-                         'config file.')
-
-        return user_info  # Authenticated successfully
-
-    def is_authenticated(self):
-        if self.hs_api_conn is None:
-            self.authenticate()
-        return self.hs_api_conn is not None
+        Returns
+        -------
+        bool
+        """
+        return self._session is not None
 
     def save_resource_locally(self, res_id):
         """ Downloads a resource to the local filesystem if a copy does
