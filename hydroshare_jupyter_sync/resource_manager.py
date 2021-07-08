@@ -15,9 +15,12 @@ from pathlib import Path
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from hs_restclient.exceptions import HydroShareHTTPException
 
-from hydroshare_jupyter_sync.config_reader_writer import (get_config_values)
-from hydroshare_jupyter_sync.credential_reader_writer import (
-    get_credential_values, set_credential_values)
+# local imports
+from .config_reader_writer import get_config_values
+from .credential_reader_writer import (
+    get_credential_values,
+    set_credential_values,
+)
 
 HYDROSHARE_AUTHENTICATION_ERROR = {
     'type': 'HydroShareAuthenticationError',
