@@ -121,7 +121,6 @@ typings/
 # User-specific stuff
 .idea/
 
-
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -264,3 +263,19 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/node,linux,macos,python,pycharm,windows,visualstudiocode
 
+# common python vitrual environment names
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+miniconda3/
+
+# jupyter notebook checkpoints
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
