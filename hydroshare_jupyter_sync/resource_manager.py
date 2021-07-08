@@ -64,7 +64,6 @@ class ResourceManager:
 
         self._session = None  # Use 'authenticate' to initialize
 
-        self.username = None
         self._archive_message = None
 
     def authenticate(
@@ -76,7 +75,7 @@ class ResourceManager:
         port: int = HydroShare.default_port,
         client_id: str = None,
         token: str = None,
-    ) -> None:
+    ) -> dict:
         """Create and authenticate request session with HydroShare.
 
         Parameters
@@ -95,6 +94,11 @@ class ResourceManager:
             client id associated with OAuth2 token, by default None
         token : str, optional
             OAuth2 token, by default None
+
+        Returns
+        -------
+        dict
+            Dictionary of user info
         """
         # TODO: verify that username and password's of None can't be passed to create a non-login session
         # instantiate authenticated session
@@ -107,6 +111,9 @@ class ResourceManager:
             client_id=client_id,
             token=token,
         )
+
+        # Retrieve user info
+        return self._session.my_user_info()
 
     def is_authenticated(self) -> bool:
         """Return the status of the HydroShare authenticated requests session.
