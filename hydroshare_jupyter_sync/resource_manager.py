@@ -11,9 +11,12 @@ import json
 import logging
 import shutil
 from pathlib import Path
+from typing import Union
 
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from hs_restclient.exceptions import HydroShareHTTPException
+
+from hsclient import HydroShare
 
 # local imports
 from .config_reader_writer import get_config_values
@@ -21,56 +24,60 @@ from .credential_reader_writer import (
     get_credential_values,
     set_credential_values,
 )
+from .utilities.pathlib_utils import expand_and_resolve
+
+# module logger instance
+_log = logging.getLogger(__name__)
 
 HYDROSHARE_AUTHENTICATION_ERROR = {
-    'type': 'HydroShareAuthenticationError',
-    'message': 'Invalid HydroShare username or password.',
+    "type": "HydroShareAuthenticationError",
+    "message": "Invalid HydroShare username or password.",
 }
 PERMISSION_ERROR = {
-    'type': 'PermissionDeniedError',
-    'message': 'Cannot write to Directory, check you have write permissions'
+    "type": "PermissionDeniedError",
+    "message": "Cannot write to Directory, check you have write permissions",
 }
 
-defaultPath = Path.home() / 'hydroshare' / 'local_hs_resources'
-data_log = Path.home() / 'hydroshare' / 'sync.log'
+# TODO: should be moved else where
+defaultPath = Path.home() / "hydroshare" / "local_hs_resources"
+data_log = Path.home() / "hydroshare" / "sync.log"
 
 
 class ResourceManager:
-    """ Class that defines a handler for working with all of a user's resources.
+    """Class that defines a handler for working with all of a user's resources.
     This is where they will be able to delete a resource, create a new one, or
     just get the list of a user's resources in hydroshare or jupyterhub.
     """
-    def __init__(self):
+
+    def __init__(
+        self,
+        *,
+        data_path: Union[str, Path] = Path("~/hydroshare"),
+    ) -> None:
         """Makes an output folder for storing HS files locally, if none exists,
         and sets up authentication on hydroshare API.
         """
-        config = get_config_values(['dataPath', 'hydroShareHostname'])
-        self.hs_hostname = 'www.hydroshare.org'
-        # TODO: Rename to hydroshare_resource_data (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/380)
-        self.output_folder = Path(defaultPath)
-        self.data_log_folder = Path(data_log)
-        if config:
-            if 'hydroShareHostname' in config:
-                self.hs_hostname = config['hydroShareHostname']
-            if 'dataPath' in config:
-                self.output_folder = Path(config['dataPath'])
-            if 'logPath' in config:
-                self.data_log_folder = Path(config['logPath'])
+        self._data_path = expand_and_resolve(data_path)
 
-        if not self.output_folder.is_dir():
-            # Let any exceptions that occur bubble up
-            self.output_folder.mkdir(parents=True)
+        # Create directories if they don't already exist
+        self._data_path.mkdir(parents=True, exist_ok=True)
 
-        if not self.data_log_folder.is_dir():
-            # Let any exceptions that occur bubble up
-            self.data_log_folder.mkdir(parents=True)
+        self._session = None  # Use 'authenticate' to initialize
 
-        self.hs_api_conn = None  # Use 'authenticate' to initialize
         self.username = None
         self._archive_message = None
 
-    def authenticate(self, username=None, password=None, save=False):
-        """ Attempts to authenticate with HydroShare.
+    def authenticate(
+        self,
+        username: str = None,
+        password: str = None,
+        host: str = HydroShare.default_host,
+        protocol: str = HydroShare.default_protocol,
+        port: int = HydroShare.default_port,
+        client_id: str = None,
+        token: str = None,
+    ) -> HydroShare:
+        """Attempts to authenticate with HydroShare.
 
         :param username: the user's HydroShare username
         :type username: str
