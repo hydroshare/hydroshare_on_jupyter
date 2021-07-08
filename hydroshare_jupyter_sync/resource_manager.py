@@ -10,6 +10,7 @@ import base64
 import json
 import logging
 import shutil
+import zipfile
 from pathlib import Path
 from typing import Union
 
@@ -124,22 +125,24 @@ class ResourceManager:
         """
         return self._session is not None
 
-    def save_resource_locally(self, res_id):
-        """ Downloads a resource to the local filesystem if a copy does
-            not already exist locally
-
-            :param res_id: the resource ID
-            :type res_id: str
-        """
+    def save_resource_locally(self, res_id: str):
         # Get resource from HS if it doesn't already exist locally
-        config = get_config_values(['dataPath', 'hydroShareHostname'])
-        self.output_folder = Path(config['dataPath'])
-        if not (self.output_folder / res_id).exists():
-            logging.info(f"Downloading resource {res_id} from HydroShare...")
+        res_path = self._data_path / res_id
+        if not (res_path).exists():
+            _log.info(f"Downloading resource {res_id} from HydroShare.")
 
-            self.hs_api_conn.getResource(res_id,
-                                         destination=self.output_folder,
-                                         unzip=True)
+            res = self._session.resource(res_id)
+            res.download(save_path=self._data_path)
+
+            res_zip = res_path.with_suffix(".zip")
+            _log.debug(f"Unzipping resource {res_zip}.")
+
+            with zipfile.ZipFile(res_zip, "r") as zip_ref:
+                zip_ref.extractall(res_path)
+
+            _log.debug(f"Removing zipped bag resource {res_zip}.")
+            # delete zip bag archive
+            res_zip.unlink()
 
     def save_file_locally(self, res_id, item_path):
         """ Downloads a file from HydroShare to the local filesystem if a copy does
