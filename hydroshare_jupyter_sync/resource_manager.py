@@ -5,7 +5,6 @@ HydroShare & JupyterHub.
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 """
-# !/usr/bin/python
 # -*- coding: utf-8 -*-
 import base64
 import json
