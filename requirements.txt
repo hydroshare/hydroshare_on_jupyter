@@ -1,4 +1,0 @@
-hs-restclient
-jupyter
-notebook
-requests
