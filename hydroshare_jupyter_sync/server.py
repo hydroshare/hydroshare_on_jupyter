@@ -5,9 +5,7 @@ hydroshare gui frontend.
 Author: 2019-20 CUAHSI Olin SCOPE Team
 Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 """
-# !/usr/bin/python
 # -*- coding: utf-8 -*-
-import itertools
 import json
 import logging
 import os
