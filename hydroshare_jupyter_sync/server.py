@@ -43,12 +43,15 @@ from .resource_manager import (
 resource_manager = ResourceManager()
 
 WORKSPACE_FILES_ERROR = {
-    'type': 'WorkspaceFileError',
-    'message': 'HydroShare files not present in Workspace',
+    "type": "WorkspaceFileError",
+    "message": "HydroShare files not present in Workspace",
 }
 
-assets_path = Path(__file__).absolute().parent / 'assets'
-data_path = Path.cwd() / 'hydroshare' / 'local_hs_resources'
+# TODO: These are constants, so change case
+# also, this should be moved to the config setup
+assets_path = Path(__file__).absolute().parent / "assets"
+data_path = Path.cwd() / "hydroshare" / "local_hs_resources"
+
 isFile = False
 # If we're running this file directly with Python, we'll be firing up a full
 # Tornado web server, so use Tornado's RequestHandler as our base class.
