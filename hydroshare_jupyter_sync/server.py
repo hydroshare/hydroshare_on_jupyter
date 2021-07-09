@@ -12,6 +12,7 @@ import os
 import signal
 import sys
 from pathlib import Path
+from http import HTTPStatus
 
 import requests
 import datetime
@@ -22,15 +23,18 @@ from hs_restclient import exceptions as HSExceptions
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
 
-from hydroshare_jupyter_sync.config_reader_writer import (get_config_values,
-                                                          set_config_values)
-from hydroshare_jupyter_sync.credential_reader_writer import credential_path
-from hydroshare_jupyter_sync.index_html import get_index_html
-from hydroshare_jupyter_sync.resource_hydroshare_data import (
-    ResourceHydroShareData, HS_PREFIX)
-from hydroshare_jupyter_sync.resource_local_data import (ResourceLocalData,
-                                                         LOCAL_PREFIX)
-from hydroshare_jupyter_sync.resource_manager import (
+from .config_reader_writer import (
+    get_config_values,
+    set_config_values,
+)
+from .credential_reader_writer import credential_path
+from .index_html import get_index_html
+from .resource_hydroshare_data import (
+    ResourceHydroShareData,
+    HS_PREFIX,
+)
+from .resource_local_data import ResourceLocalData, LOCAL_PREFIX
+from .resource_manager import (
     ResourceManager,
     HYDROSHARE_AUTHENTICATION_ERROR,
 )
