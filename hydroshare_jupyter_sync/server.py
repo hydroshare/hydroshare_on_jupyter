@@ -68,8 +68,16 @@ class BaseRequestHandler(tornado.web.RequestHandler):  # TODO: will need to chan
     def set_default_headers(self):
         # TODO: change from * (any server) to our specific url (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/40)
         self.set_header("Access-Control-Allow-Origin", "*")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, "
-                                                        "content-type, x-xsrftoken")
+        self.set_header(
+            "Access-Control-Allow-Headers",
+            "x-requested-with, content-type, x-xsrftoken",
+        )
+
+    def prepare(self):
+        super().prepare()
+        if not resource_manager.is_authenticated():
+            self.set_status(HTTPStatus.UNAUTHORIZED)
+            raise tornado.web.Finish
 
     def options(self, _=None):
         # web browsers make an OPTIONS request to check what methods (line 31)
