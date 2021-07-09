@@ -82,7 +82,7 @@ class BaseRequestHandler(tornado.web.RequestHandler):  # TODO: will need to chan
     def options(self, _=None):
         # web browsers make an OPTIONS request to check what methods (line 31)
         # are allowed at/for an endpoint.
-        self.set_status(204)  # No content
+        self.set_status(HTTPStatus.NO_CONTENT)
         self.finish()
 
 
