@@ -86,12 +86,14 @@ class BaseRequestHandler(tornado.web.RequestHandler):  # TODO: will need to chan
         self.finish()
 
 
-class WebAppHandler(BaseRequestHandler):
-    """ Serves up the HTML for the React web app """
-
+class HeadersMixIn:
     def set_default_headers(self):
         BaseRequestHandler.set_default_headers(self)
-        self.set_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        # [(header, value tuples), ...]
+        for header, value in self._custom_headers:  # implement in child class
+            self.set_header(header, value)
+
+
 
     def get(self):
         running_in_dev_mode = __name__ == '__main__'
