@@ -58,13 +58,12 @@ isFile = False
 # Otherwise (i.e. if this is being run by a Jupyter notebook server) we want to
 # use IPythonHandler as our base class. (See the code at the bottom of this
 # file for the server launching.)
-BaseHandler = (tornado.web.RequestHandler
-               if __name__ == '__main__' else IPythonHandler)
+BaseHandler = tornado.web.RequestHandler if __name__ == "__main__" else IPythonHandler
 
 
-class BaseRequestHandler(BaseHandler):
-    """ Sets the headers for all the request handlers that extend
-        this class """
+class BaseRequestHandler(tornado.web.RequestHandler):  # TODO: will need to change
+    """Sets the headers for all the request handlers that extend
+    this class"""
 
     def set_default_headers(self):
         # TODO: change from * (any server) to our specific url (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/40)
