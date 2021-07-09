@@ -199,22 +199,7 @@ class Hsmd5Handler(HeadersMixIn, BaseRequestHandler):
         # TODO: Add schema. Is this a string, bytes, int?
         diff_overall = True
 
-        # TODO: don't use global state
         # TODO: add output schema. Something like:
-        # {
-        #   "success": {"type": string"},
-        #   "error": {"type": "string", "optional": True}
-        # }
-        if not resource_manager.is_authenticated():
-            self.write(
-                {
-                    "success": False,
-                    "error": HYDROSHARE_AUTHENTICATION_ERROR,
-                }
-            )
-            # TODO: just use an else here for clarity
-            return
-
         self.write({"success": diff_overall})
 
 
@@ -228,20 +213,6 @@ class ResourcesRootHandler(HeadersMixIn, BaseRequestHandler):
 
     def get(self):
         # TODO: use output schema
-        # {
-        #   "success": {"type": "boolean"},
-        #   "error": {"type": "string", "optional": True}
-        # }
-        #
-        if not resource_manager.is_authenticated():
-            self.write(
-                {
-                    "success": False,
-                    "error": HYDROSHARE_AUTHENTICATION_ERROR,
-                }
-            )
-            return
-
         # TODO: don't use global state
         resources, error = resource_manager.get_list_of_user_resources()
         archive_message = (
@@ -268,16 +239,6 @@ class ResourcesRootHandler(HeadersMixIn, BaseRequestHandler):
         {"resource title": string
         "creators": list of strings}
         """
-        # TODO: if this is how we want to handle this, this should be moved to a method in the base class
-        if not resource_manager.is_authenticated():
-            self.write(
-                {
-                    "success": False,
-                    "error": HYDROSHARE_AUTHENTICATION_ERROR,
-                }
-            )
-            return
-
         # TODO: Add schema validation
         # {
         #   "title": {"type": "string"},
@@ -326,15 +287,6 @@ class ResourceHandler(HeadersMixIn, BaseRequestHandler):
     # NOTE: Does this mean delete it locally or on HS?
 
     def delete(self, res_id):
-        if not resource_manager.is_authenticated():
-            self.write(
-                {
-                    "success": False,
-                    "error": HYDROSHARE_AUTHENTICATION_ERROR,
-                }
-            )
-            return
-
         # TODO: Needs a schema
         body = json.loads(self.request.body.decode("utf-8"))
         del_locally_only = body.get("locallyOnly", True)
@@ -460,15 +412,6 @@ class ResourceLocalFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
         # TODO: add input schema
 
         # Handling authentication first to ensure local data if not present is downloaded from Hydroshare
-
-        if not resource_manager.is_authenticated():
-            self.write(
-                {
-                    "success": False,
-                    "error": HYDROSHARE_AUTHENTICATION_ERROR,
-                }
-            )
-            return
 
         # NOTE: Seems like a static method could be used to check if a resource exists or not
         local_data = ResourceLocalData(res_id)
@@ -624,15 +567,6 @@ class ResourceHydroShareFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
     _custom_headers = [("Access-Control-Allow-Methods", "DELETE, GET")]
 
     def get(self, res_id):
-        if not resource_manager.is_authenticated():
-            self.write(
-                {
-                    "success": False,
-                    "error": HYDROSHARE_AUTHENTICATION_ERROR,
-                }
-            )
-            return
-
         hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         # Code for updating the latest files on Root Dir object
 
@@ -646,15 +580,6 @@ class ResourceHydroShareFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
     # TODO: Move the bulk of this function out of this file and
     # deduplicate code (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/41)
     def delete(self, res_id):
-        if not resource_manager.is_authenticated():
-            self.write(
-                {
-                    "success": False,
-                    "error": HYDROSHARE_AUTHENTICATION_ERROR,
-                }
-            )
-            return
-
         data = json.loads(self.request.body.decode("utf-8"))
         file_and_folder_paths = data.get("files")
         if file_and_folder_paths is None:
@@ -751,14 +676,6 @@ class DownloadHydroShareFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
     _custom_headers = [("Access-Control-Allow-Methods", "POST")]
 
     def post(self, res_id):
-        if not resource_manager.is_authenticated():
-            self.write(
-                {
-                    "success": False,
-                    "error": HYDROSHARE_AUTHENTICATION_ERROR,
-                }
-            )
-            return
         hs_data = ResourceHydroShareData(resource_manager.hs_api_conn, res_id)
         data = json.loads(self.request.body.decode("utf-8"))
 
@@ -961,15 +878,6 @@ class CheckSyncStatusFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
     modified_time_hs = ""
 
     def post(self, res_id):
-        if not resource_manager.is_authenticated():
-            self.write(
-                {
-                    "success": False,
-                    "error": HYDROSHARE_AUTHENTICATION_ERROR,
-                }
-            )
-            return
-
         data = json.loads(self.request.body.decode("utf-8"))
 
         file_and_folder_paths = data.get("files")
@@ -1045,14 +953,6 @@ class DownloadedLocalFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
     _custom_headers = [("Access-Control-Allow-Methods", "GET")]
 
     def get(self, res_id):
-        if not resource_manager.is_authenticated():
-            self.write(
-                {
-                    "success": False,
-                    "error": HYDROSHARE_AUTHENTICATION_ERROR,
-                }
-            )
-            return
         local_data = ResourceLocalData(res_id)
         if not local_data.is_downloaded():
             self.write(
@@ -1226,15 +1126,11 @@ class UserInfoHandler(HeadersMixIn, BaseRequestHandler):
     def get(self):
         """Gets the user's information (name, email, etc) from HydroShare"""
         isFile = False
-        if not resource_manager.is_authenticated():
-            # Either use HTTP response codes or an enum to fail
-            data, error = None, HYDROSHARE_AUTHENTICATION_ERROR
-        else:
-            data, error = resource_manager.get_user_info()
-            # NOTE: what is this? I didn't see it anywhere else in the repo
-            dirdetails = Path(Path.home() / "hydroshare" / "dirinfo.json")
-            if dirdetails.exists():
-                isFile = True
+        data, error = resource_manager.get_user_info()
+        # NOTE: what is this? I didn't see it anywhere else in the repo
+        dirdetails = Path(Path.home() / "hydroshare" / "dirinfo.json")
+        if dirdetails.exists():
+            isFile = True
         # Needs output schema model
         # {
         # "data": {"type": "string?"},
