@@ -22,6 +22,9 @@ import tornado.web
 from hs_restclient import exceptions as HSExceptions
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
+from typing import Union
+
+from hsclient import HydroShare
 
 from .config_reader_writer import (
     get_config_values,
@@ -39,8 +42,22 @@ from .resource_manager import (
     HYDROSHARE_AUTHENTICATION_ERROR,
 )
 
-# Global resource handler variable
+from .models.api_models import Credentials, Success
+from .session_struct import SessionStruct
+
+
+# Global singleton session wrapper. Contains:
+# - hs_client.HydroShare instance
+# - deciphered user cookie
+# - last user activity time
+# NOTE: This should be a bound composition element or collection in the future.
+# The current state does not support multiple connected users.
+# activity initialized at -1, ergo no connection made
+SESSION = SessionStruct(session=None, cookie=None, activity=-1)
+
 resource_manager = ResourceManager()
+
+_log = logging.getLogger(__name__)
 
 WORKSPACE_FILES_ERROR = {
     "type": "WorkspaceFileError",
