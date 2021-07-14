@@ -36,10 +36,12 @@ PYTHON_REQUIRES = ">=3.7"
 
 # Package dependency requirements
 REQUIREMENTS = [
-    "hs-restclient",
+    "hs-restclient",  # TODO: remove hs-restclient
+    "hsclient",
     "jupyterlab",
     "notebook",
     "requests",
+    "pydantic",
 ]
 
 # Development requirements
