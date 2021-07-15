@@ -13,6 +13,7 @@ import signal
 import sys
 from pathlib import Path
 from http import HTTPStatus
+import secrets
 
 import requests
 import datetime
@@ -53,7 +54,7 @@ from .session_struct import SessionStruct
 # NOTE: This should be a bound composition element or collection in the future.
 # The current state does not support multiple connected users.
 # activity initialized at -1, ergo no connection made
-SESSION = SessionStruct(session=None, cookie=None, activity=-1)
+SESSION = SessionStruct(session=None, cookie=None)
 
 resource_manager = ResourceManager()
 
@@ -75,10 +76,52 @@ isFile = False
 # Otherwise (i.e. if this is being run by a Jupyter notebook server) we want to
 # use IPythonHandler as our base class. (See the code at the bottom of this
 # file for the server launching.)
-BaseHandler = tornado.web.RequestHandler if __name__ == "__main__" else IPythonHandler
+# NOTE: Given that IPythonHandler is a subclass of tornado.web.RequestHandler, I don't
+# think it is an issue to use it as the base class. This may come up in the future and
+# need to be changed.
+# BaseHandler = tornado.web.RequestHandler if __name__ == "__main__" else IPythonHandler
 
 
-class BaseRequestHandler(tornado.web.RequestHandler):  # TODO: will need to change
+class SessionMixIn:
+    """MixIn with methods for reading the state of the current session."""
+
+    session_cookie_key = "user"
+
+    def get_current_user(self):
+        # @overrides BaseRequestHandler.get_current_user()
+        return self.validate_session()
+
+    def get_session(self) -> SessionStruct:
+        return SESSION
+
+    def get_hs_session(self) -> HydroShare:
+        return SESSION.session
+
+    def get_client_cookie(self) -> Union[bytes, None]:
+        """Get deciphered cookie value from client request"""
+        return self.get_secure_cookie(self.session_cookie_key)
+
+    def get_server_cookie(self) -> Union[bytes, None]:
+        """Get deciphered cookie value stored on server side"""
+        return self.get_session().cookie
+
+    def get_client_server_cookie_status(self) -> bool:
+        """Return if client and server cookies match or if server cookies are outdated."""
+        # server side session
+        session = self.get_session()
+        client_cookie = self.get_client_cookie()
+
+        # server side cookie != client request cookie or server side cookie is outdated
+        return session == client_cookie
+
+    def validate_session(self) -> Union[bytes, None]:
+        if self.get_client_server_cookie_status():
+            return self.get_client_cookie()
+
+        return None
+
+
+class BaseRequestHandler(SessionMixIn, IPythonHandler):  # TODO: will need to change
     """Sets the headers for all the request handlers that extend
     this class"""
 
