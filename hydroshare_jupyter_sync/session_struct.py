@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from hs_restclient import HydroShare
+from hsclient import HydroShare
 
 # type hint imports
 from typing import Union
