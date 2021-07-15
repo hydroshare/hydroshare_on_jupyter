@@ -161,6 +161,14 @@ class HeadersMixIn:
             self.set_header(header, value)
 
 
+class MutateSessionMixIn:
+    """MixIn allowing mutation current session."""
+
+    def set_session(self, session: SessionStruct) -> None:
+        global SESSION
+        SESSION = session
+
+
 class WebAppHandler(HeadersMixIn, BaseRequestHandler):
     """Serves up the HTML for the React web app"""
 
