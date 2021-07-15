@@ -180,64 +180,58 @@ class WebAppHandler(HeadersMixIn, BaseRequestHandler):
         self.write(get_index_html(running_in_dev_mode))
 
 
-class LoginHandler(HeadersMixIn, BaseRequestHandler):
+class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
     """Handles authenticating the user with HydroShare"""
 
-    _custom_headers = [("Access-Control-Allow-Methods", "OPTIONS, POST,DELETE ")]
+    _custom_headers = [("Access-Control-Allow-Methods", "OPTIONS,POST,DELETE")]
+
+    def prepare(self):
+        self.set_header("Content-Type", "application/json")
 
     def delete(self):
-        # TODO: don't use global state here
-        # use Path everywhere else in project, why not use it here?
-        if os.path.isfile(credential_path):
-            logging.info("Deleting the credential file which contains user information")
-            os.remove(credential_path)
-
-            # TODO: don't use global resource manager to change state
-            resource_manager.hs_api_conn = None
-
-            # NOTE: why are cookies being cleared here?
-            s = requests.Session()
-
-            s.cookies.clear_session_cookies
+        # Ensure user is signed before destroying session
+        if self.get_client_server_cookie_status():
+            self._destroy_session()
+        else:
+            self.set_status(HTTPStatus.UNAUTHORIZED)  # 401
 
     def post(self):
-        # TODO: use Cerberus for validation
+        # NOTE: A user can login and then try to login to another account, but if they
+        # do not use the DELETE method first, they will still be signed into the first
+        # account bc of the `user` cookie
+        credentials = Credentials.parse_raw(self.request.body.decode("utf-8"))
 
-        isFile = False
-        # no input validation here
-        credentials = json.loads(self.request.body.decode("utf-8"))
+        successful = True
+        # client and server cookies don't match or is out of date
+        if not self.get_client_server_cookie_status():
+            try:
+                self._create_session(credentials)
 
-        # NOTE: seems like it should be
-        # {
-        #   "remember": bool: Optional,
-        #   "username": str,
-        #   "password": str,
-        #
-        # }
-        do_save = credentials.get("remember", False)
+            except Exception as e:
+                _log.exception(e)
+                successful = False
+                if "401" in str(e):
+                    self.set_status(HTTPStatus.UNAUTHORIZED)  # 401
+                else:
+                    self.set_status(HTTPStatus.INTERNAL_SERVER_ERROR)  # 500
 
-        # TODO: don't use global state
-        user_info = resource_manager.authenticate(
-            credentials["username"], credentials["password"], do_save
-        )
+        self.write(Success(success=successful).dict())
 
-        # NOTE: why is this here?
-        dirdetails = Path(Path.home() / "hydroshare" / "dirinfo.json")
-        if dirdetails.exists():
-            isFile = True
+    def _create_session(self, credentials: Credentials) -> None:
+        hs = HydroShare(username=credentials.username, password=credentials.password)
+        user_info = hs.my_user_info()
 
-        # TODO: add output schema. Something like:
-        # { "success" : "string",
-        #   "userInfo" : "string",
-        #   "isFile" : "boolean"
-        # }
-        self.write(
-            {
-                "success": user_info is not None,
-                "userInfo": user_info,
-                "isFile": isFile,
-            }
-        )
+        # salt the user id and create salted cookie
+        salt = secrets.randbits(16)
+        salted_token = f"{int(user_info['id'])}{salt}".encode()
+
+        self.set_secure_cookie(self.session_cookie_key, salted_token)
+
+        self.set_session(SessionStruct(session=hs, cookie=salted_token))
+
+    def _destroy_session(self):
+        self.clear_cookie(self.session_cookie_key)
+        self.set_session(SessionStruct(session=None, cookie=None))
 
 
 class Localmd5Handler(HeadersMixIn, BaseRequestHandler):
