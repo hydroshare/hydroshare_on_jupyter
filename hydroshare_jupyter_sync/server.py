@@ -1263,27 +1263,3 @@ def get_route_handlers(frontend_url, backend_url):
             MoveCopyFiles,
         ),
     ]
-
-
-if __name__ == "__main__":
-    # TODO: Remove run as module. Create __main__ or another kind of entrypoint
-    LEVELS = {
-        "debug": logging.DEBUG,
-        "info": logging.INFO,
-        "warning": logging.WARNING,
-        "error": logging.ERROR,
-        "critical": logging.CRITICAL,
-    }
-
-    if len(sys.argv) > 1:
-        level_name = sys.argv[1]
-        level = LEVELS.get(level_name, logging.NOTSET)
-        logging.basicConfig(level=level)
-
-    app = TestApp(get_route_handlers("/", "/syncApi"))
-    print("Starting server at localhost:8080")
-    tornado.options.parse_command_line()
-    signal.signal(signal.SIGINT, app.signal_handler)
-    app.listen(8080)
-    tornado.ioloop.PeriodicCallback(app.try_exit, 100).start()
-    tornado.ioloop.IOLoop.instance().start()
