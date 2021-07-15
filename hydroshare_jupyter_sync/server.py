@@ -181,7 +181,22 @@ class WebAppHandler(HeadersMixIn, BaseRequestHandler):
 
 
 class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
-    """Handles authenticating the user with HydroShare"""
+    """Handles authenticating the user with HydroShare.
+
+    HTTP Request type:
+        DELETE:
+            Action:
+                logout user
+        POST:
+            Action:
+                Login user. A cookie with key "user" is sent in response header. The
+                cookie maintains the login state. The cookie is generated using an
+                encrypted token consisting of the HydroShare id of the user + some
+                16-bit salt. The decrypted version is stored in memory for reference.
+            Body:
+                Content-Type: application/json
+                Schema: {"username": str, "password": str}
+    """
 
     _custom_headers = [("Access-Control-Allow-Methods", "OPTIONS,POST,DELETE")]
 
