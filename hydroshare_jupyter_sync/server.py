@@ -133,11 +133,18 @@ class BaseRequestHandler(SessionMixIn, IPythonHandler):  # TODO: will need to ch
             "x-requested-with, content-type, x-xsrftoken",
         )
 
+    def get_login_url(self) -> str:
+        # NOTE: hardcoded to login path, may want to change in the future
+        return "/syncApi/login"
+
     def prepare(self):
+        # NOTE: See: https://www.tornadoweb.org/en/stable/guide/security.html#user-authentication for a potential alternative solution
         super().prepare()
-        if not resource_manager.is_authenticated():
-            self.set_status(HTTPStatus.UNAUTHORIZED)
-            raise tornado.web.Finish
+        if not self.get_client_server_cookie_status():
+            self.set_status(HTTPStatus.FOUND)  # 302
+            # append requested uri as `next` Location parameter
+            uri = self.request.uri
+            self.redirect(f"{self.get_login_url()}?next={uri}")
 
     def options(self, _=None):
         # web browsers make an OPTIONS request to check what methods (line 31)
