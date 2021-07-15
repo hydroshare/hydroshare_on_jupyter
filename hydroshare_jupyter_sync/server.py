@@ -54,7 +54,7 @@ from .session_struct import SessionStruct
 # NOTE: This should be a bound composition element or collection in the future.
 # The current state does not support multiple connected users.
 # activity initialized at -1, ergo no connection made
-SESSION = SessionStruct(session=None, cookie=None)
+SESSION = SessionStruct(session=None, cookie=None, id=None)
 
 resource_manager = ResourceManager()
 
@@ -235,18 +235,19 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
     def _create_session(self, credentials: Credentials) -> None:
         hs = HydroShare(username=credentials.username, password=credentials.password)
         user_info = hs.my_user_info()
+        user_id = int(user_info["id"])
 
         # salt the user id and create salted cookie
         salt = secrets.randbits(16)
-        salted_token = f"{int(user_info['id'])}{salt}".encode()
+        salted_token = f"{user_id}{salt}".encode()
 
         self.set_secure_cookie(self.session_cookie_key, salted_token)
 
-        self.set_session(SessionStruct(session=hs, cookie=salted_token))
+        self.set_session(SessionStruct(session=hs, cookie=salted_token, id=user_id))
 
     def _destroy_session(self):
         self.clear_cookie(self.session_cookie_key)
-        self.set_session(SessionStruct(session=None, cookie=None))
+        self.set_session(SessionStruct(session=None, cookie=None, id=None))
 
 
 class Localmd5Handler(HeadersMixIn, BaseRequestHandler):
