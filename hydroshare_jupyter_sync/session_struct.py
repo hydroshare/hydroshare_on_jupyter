@@ -9,6 +9,7 @@ from typing import Union
 class SessionStruct:
     session: Union[HydroShare, None]
     cookie: Union[bytes, None]
+    id: Union[int, None]
 
     def __eq__(self, o: Union[bytes, "SessionStruct"]) -> bool:
         """Check if self.cookie is equal to o. If self.cookie is none, False."""
