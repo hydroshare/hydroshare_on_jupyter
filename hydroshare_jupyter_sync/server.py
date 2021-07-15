@@ -1201,48 +1201,15 @@ class MoveCopyFiles(HeadersMixIn, BaseRequestHandler):
 
 
 class UserInfoHandler(HeadersMixIn, BaseRequestHandler):
-    """Handles getting the user's information (name, email, etc)
-    from HydroShare and storing the user's
-    HydroShare credentials.
-    """
+    """Get user information from HydroShare"""
 
     _custom_headers = [("Access-Control-Allow-Methods", "GET, OPTIONS")]
 
     def get(self):
         """Gets the user's information (name, email, etc) from HydroShare"""
-        isFile = False
-        data, error = resource_manager.get_user_info()
-        # NOTE: what is this? I didn't see it anywhere else in the repo
-        dirdetails = Path(Path.home() / "hydroshare" / "dirinfo.json")
-        if dirdetails.exists():
-            isFile = True
-        # Needs output schema model
-        # {
-        # "data": {"type": "string?"},
-        # "success": {"type": bool}, probably will delete
-        # "isFile" : {"type": bool}, not sure what this is for, will delete
-        # "error": {"type": "string"} probably will delete. Seems redundant
-        # }
-        self.write(
-            {"data": data, "success": error is None, "isFile": isFile, "error": error}
-        )
-
-
-class TestApp(tornado.web.Application):
-    """Class for setting up the server & making sure it can exit cleanly"""
-
-    # NOTE: This seems unnecessary. Maybe it can be used as a smoke test, but still seems like it can be removed.
-
-    is_closing = False
-
-    def signal_handler(self, signum, frame):
-        logging.info("exiting...")
-        self.is_closing = True
-
-    def try_exit(self):
-        if self.is_closing:
-            tornado.ioloop.IOLoop.instance().stop()
-            logging.info("exit success")
+        session = self.get_session()
+        user = session.session.user(session.id).dict()
+        self.write(user)
 
 
 def get_route_handlers(frontend_url, backend_url):
