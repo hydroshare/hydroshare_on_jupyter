@@ -290,6 +290,7 @@ class Hsmd5Handler(HeadersMixIn, BaseRequestHandler):
     # NOTE: How is this different from Localmd5Handler?
 
     def get(self, res_id):
+        # NOTE: This is not implemented. Should it be?
         # TODO: Add schema. Is this a string, bytes, int?
         diff_overall = True
 
