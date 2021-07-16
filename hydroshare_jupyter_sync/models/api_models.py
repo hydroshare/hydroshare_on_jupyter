@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, StrictStr, StrictBool
 from typing import List
+from .resource_type_enum import ResourceTypeEnum
 
 
 class Credentials(BaseModel):
@@ -22,3 +23,16 @@ class ResourceMetadata(BaseModel):
 class CollectionOfResourceMetadata(BaseModel):
     # from https://github.com/samuelcolvin/pydantic/issues/675#issuecomment-513029543
     __root__: List[ResourceMetadata]
+
+
+class ResourceCreationRequest(BaseModel):
+    title: str
+    metadata: str
+    extra_metadata: str
+    edit_users: str
+    edit_groups: str
+    view_users: str
+    view_groups: str
+    keywords: List[str]
+    abstract: str
+    resource_type: ResourceTypeEnum
