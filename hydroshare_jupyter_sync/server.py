@@ -43,7 +43,7 @@ from .resource_manager import (
     HYDROSHARE_AUTHENTICATION_ERROR,
 )
 
-from .models.api_models import Credentials, Success
+from .models.api_models import Credentials, Success, CollectionOfResourceMetadata
 from .session_struct import SessionStruct
 
 
@@ -304,26 +304,14 @@ class ResourcesRootHandler(HeadersMixIn, BaseRequestHandler):
 
     _custom_headers = [("Access-Control-Allow-Methods", "GET, POST")]
 
-    # NOTE: what does "Gets" encapsulate? downloads the stuff? returns information about?
-
     def get(self):
-        # TODO: use output schema
-        # TODO: don't use global state
-        resources, error = resource_manager.get_list_of_user_resources()
-        archive_message = (
-            resource_manager.get_archive_message()
-        )  # seems like this can be deleted
+        session = self.get_session()
+        username = session.username
 
-        # TODO: add output schema
-        self.write(
-            {
-                "resources": resources,
-                "archive_message": archive_message,  # NOTE: this can be None, but it shouldn't be. Likely removable
-                "success": error
-                is None,  # TODO: Should just use headers instead of json to handle errors. Or just send back an "error" with context, but use a non-200
-                "error": error,
-            }
-        )
+        resources = list(session.session.search(owner=username))
+
+        # Marshall hsclient representation into CollectionOfResourceMetadata 
+        self.write(CollectionOfResourceMetadata.parse_obj(resources).json())
 
     # TODO: This should be moved to its own endpoint
     def post(self):
@@ -1231,10 +1219,6 @@ def get_route_handlers(frontend_url, backend_url):
             tornado.web.StaticFileHandler,
             {"path": str(assets_path)},
         ),
-        # Put this last to catch everything else
-        # order does matter
-        # Host patterns are processed sequentially in the order they were added. All matching patterns will be considered.
-        (frontend_url + r".*", WebAppHandler),
         # "backend"
         (
             url_path_join(backend_url, r"/download/(.*)"),
@@ -1272,4 +1256,8 @@ def get_route_handlers(frontend_url, backend_url):
             url_path_join(backend_url, r"/resources/([^/]+)/move-copy-files"),
             MoveCopyFiles,
         ),
+        # Put this last to catch everything else
+        # order does matter
+        # Host patterns are processed sequentially in the order they were added. All matching patterns will be considered.
+        (frontend_url + r".*", WebAppHandler),
     ]
