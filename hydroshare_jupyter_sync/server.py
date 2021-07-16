@@ -310,7 +310,7 @@ class ResourcesRootHandler(HeadersMixIn, BaseRequestHandler):
 
         resources = list(session.session.search(owner=username))
 
-        # Marshall hsclient representation into CollectionOfResourceMetadata 
+        # Marshall hsclient representation into CollectionOfResourceMetadata
         self.write(CollectionOfResourceMetadata.parse_obj(resources).json())
 
     # TODO: This should be moved to its own endpoint
@@ -322,6 +322,7 @@ class ResourcesRootHandler(HeadersMixIn, BaseRequestHandler):
         {"resource title": string
         "creators": list of strings}
         """
+        # TODO: IMO, this endpoint is not needed for the MVP
         # TODO: Add schema validation
         # {
         #   "title": {"type": "string"},
@@ -368,6 +369,9 @@ class ResourceHandler(HeadersMixIn, BaseRequestHandler):
 
     # TODO: Change name to be more representative
     # NOTE: Does this mean delete it locally or on HS?
+    # NOTE: I am curious if it's possible to leverage jupyter's file browser here to do
+    # the lifting?
+    # TODO: Split into two endpoints if we want to support deleting on hydroshare and locally
 
     def delete(self, res_id):
         # TODO: Needs a schema
@@ -394,6 +398,8 @@ class DirectorySelectorHandler(HeadersMixIn, BaseRequestHandler):
         returnValue = ""
         isFile = False
         dirpathinfo = json.loads(self.request.body.decode("utf-8"))
+        # NOTE: Ensure that path is descendent of specified root dir in config. Meaning /home/hydroshare,
+        # here, you could not go outside of the hydroshare directory.
         directoryPath = dirpathinfo["dirpath"]
         choice = dirpathinfo["choice"]
 
