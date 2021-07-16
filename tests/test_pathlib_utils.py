@@ -18,3 +18,25 @@ def test_expand_and_resolve(test, validation, user):
     os.environ["HOME"] = os.environ["USERPROFILE"] = user
 
     assert str(pathlib_utils.expand_and_resolve(test)) == validation
+
+
+TEST_IS_DESCENDANT = [
+    # child, parent, validation
+    ("~/test/some-file", "~/test", True),
+    ("/test/some-file", "/test", True),
+    ("~/test/../tests/some-file", "~/test", True),
+    ("/test/../tests/some-file/..", "/test", True),
+    ("/test/../some-file/..", "/test", False),
+    ("~/test/../", "~/test", False),
+    ("/test/../", "/test", False),
+    ("~/../test/../", "~", False),
+]
+
+
+@pytest.mark.parametrize("child,parent,validation", TEST_IS_DESCENDANT)
+def test_is_descendant(child, parent, validation):
+    # See test_expand_and_resolve for explanation
+    os.environ["HOME"] = os.environ["USERPROFILE"] = "/user"
+
+    result = pathlib_utils.is_descendant(child, parent)
+    assert result is validation
