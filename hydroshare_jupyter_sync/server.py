@@ -54,7 +54,7 @@ from .session_struct import SessionStruct
 # NOTE: This should be a bound composition element or collection in the future.
 # The current state does not support multiple connected users.
 # activity initialized at -1, ergo no connection made
-SESSION = SessionStruct(session=None, cookie=None, id=None)
+SESSION = SessionStruct(session=None, cookie=None, id=None, username=None)
 
 resource_manager = ResourceManager()
 
@@ -96,6 +96,9 @@ class SessionMixIn:
 
     def get_hs_session(self) -> HydroShare:
         return SESSION.session
+
+    def get_session_id(self) -> Union[int, None]:
+        return SESSION.id
 
     def get_client_cookie(self) -> Union[bytes, None]:
         """Get deciphered cookie value from client request"""
@@ -175,9 +178,8 @@ class WebAppHandler(HeadersMixIn, BaseRequestHandler):
     _custom_headers = [("Access-Control-Allow-Methods", "GET, OPTIONS")]
 
     def get(self):
-        # TODO: abstract this
-        running_in_dev_mode = __name__ == "__main__"
-        self.write(get_index_html(running_in_dev_mode))
+        debug = self.settings.get("debug", False)
+        self.write(get_index_html(dev_mode=debug))
 
 
 class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
@@ -236,6 +238,7 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
         hs = HydroShare(username=credentials.username, password=credentials.password)
         user_info = hs.my_user_info()
         user_id = int(user_info["id"])
+        username = user_info["username"]
 
         # salt the user id and create salted cookie
         salt = secrets.randbits(16)
@@ -243,11 +246,17 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
 
         self.set_secure_cookie(self.session_cookie_key, salted_token)
 
-        self.set_session(SessionStruct(session=hs, cookie=salted_token, id=user_id))
+        self.set_session(
+            SessionStruct(
+                session=hs, cookie=salted_token, id=user_id, username=username
+            )
+        )
 
     def _destroy_session(self):
         self.clear_cookie(self.session_cookie_key)
-        self.set_session(SessionStruct(session=None, cookie=None, id=None))
+        self.set_session(
+            SessionStruct(session=None, cookie=None, id=None, username=None)
+        )
 
 
 class Localmd5Handler(HeadersMixIn, BaseRequestHandler):
