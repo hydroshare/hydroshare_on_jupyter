@@ -298,9 +298,8 @@ class Hsmd5Handler(HeadersMixIn, BaseRequestHandler):
         self.write({"success": diff_overall})
 
 
-class ResourcesRootHandler(HeadersMixIn, BaseRequestHandler):
-    """Handles /resources. Gets a user's resources (with metadata) and
-    creates new resources."""
+class ListUserHydroShareResources(HeadersMixIn, BaseRequestHandler):
+    """List the HydroShare resources a user is an owner of."""
 
     _custom_headers = [("Access-Control-Allow-Methods", "GET, POST")]
 
@@ -313,53 +312,53 @@ class ResourcesRootHandler(HeadersMixIn, BaseRequestHandler):
         # Marshall hsclient representation into CollectionOfResourceMetadata
         self.write(CollectionOfResourceMetadata.parse_obj(resources).json())
 
-    # TODO: This should be moved to its own endpoint
-    def post(self):
-        """
-        Makes a new resource with the bare minimum amount of information
+    # # TODO: This should be moved to its own endpoint
+    # def post(self):
+    #     """
+    #     Makes a new resource with the bare minimum amount of information
 
-        Expects body:
-        {"resource title": string
-        "creators": list of strings}
-        """
-        # TODO: IMO, this endpoint is not needed for the MVP
-        # TODO: Add schema validation
-        # {
-        #   "title": {"type": "string"},
-        #   "creators": {"type": "list", "schema": "string"}
-        #
-        #
-        # }
-        body = json.loads(self.request.body.decode("utf-8"))
-        resource_title = body.get("title")
-        creators = body.get("creators")  # list of names (strings)
-        abstract = body.get("abstract")
-        privacy = body.get("privacy", "Private")  # Public or private
+    #     Expects body:
+    #     {"resource title": string
+    #     "creators": list of strings}
+    #     """
+    #     # TODO: IMO, this endpoint is not needed for the MVP
+    #     # TODO: Add schema validation
+    #     # {
+    #     #   "title": {"type": "string"},
+    #     #   "creators": {"type": "list", "schema": "string"}
+    #     #
+    #     #
+    #     # }
+    #     body = json.loads(self.request.body.decode("utf-8"))
+    #     resource_title = body.get("title")
+    #     creators = body.get("creators")  # list of names (strings)
+    #     abstract = body.get("abstract")
+    #     privacy = body.get("privacy", "Private")  # Public or private
 
-        if resource_title is None or creators is None:
-            self.set_status(400)
-            self.write(
-                {
-                    "success": False,
-                    "error": {
-                        "type": "InvalidRequest",
-                        "message": (
-                            "The request body must specify " '"title" and "creators".'
-                        ),
-                    },
-                }
-            )
-        else:
-            resource_id, error = resource_manager.create_HS_resource(
-                resource_title, creators, abstract, privacy
-            )
-            self.write(
-                {
-                    "resource_id": resource_id,
-                    "success": error is None,
-                    "error": error,
-                }
-            )
+    #     if resource_title is None or creators is None:
+    #         self.set_status(400)
+    #         self.write(
+    #             {
+    #                 "success": False,
+    #                 "error": {
+    #                     "type": "InvalidRequest",
+    #                     "message": (
+    #                         "The request body must specify " '"title" and "creators".'
+    #                     ),
+    #                 },
+    #             }
+    #         )
+    #     else:
+    #         resource_id, error = resource_manager.create_HS_resource(
+    #             resource_title, creators, abstract, privacy
+    #         )
+    #         self.write(
+    #             {
+    #                 "resource_id": resource_id,
+    #                 "success": error is None,
+    #                 "error": error,
+    #             }
+    #         )
 
 
 class ResourceHandler(HeadersMixIn, BaseRequestHandler):
