@@ -92,7 +92,7 @@ def parse() -> Union[argparse.Namespace, None]:
         "--config",
         nargs="?",
         type=argparse.FileType("r"),
-        help="Path to configuration file. By default read from ~/.config/hydroshare_jupyter_sync/config.ini then ~/.hydroshare_jupyter_sync_config if either exist.",
+        help="Path to configuration file. By default read from ~/.config/hydroshare_jupyter_sync/config then ~/.hydroshare_jupyter_sync_config if either exist.",
         required=False,
     )
 
