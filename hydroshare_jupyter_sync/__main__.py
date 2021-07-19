@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Union
 
 from .server import get_route_handlers
+from .cli import parse
 
 
 class TestApp(Application):
@@ -39,69 +40,7 @@ def get_test_app(**settings) -> Application:
     )
 
 
-def is_file_and_exists(f: Union[str, Path]) -> bool:
-    f = Path(f).resolve()
-    return f.is_file() and f.exists()
-
-
-def parse() -> Union[argparse.Namespace, None]:
-    parser = argparse.ArgumentParser(
-        prog="hydroshare_jupyter_sync",
-        description=(
-            """HydroShare Jupyter Sync:\n\t
-            A Jupyter server extension enabling management of HydroShare resource
-            files within Jupyter. Open HydroShare resources, work on their files,
-            and then sync those changes back to HydroShare using a drag-and-drop
-            interface.
-
-            Note:
-                Debug mode is enabled by default when starting the server via this CLI.
-            """
-        ),
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,  # This adds defaults to help page
-    )
-
-    parser.add_argument(
-        "-p",
-        "--port",
-        type=int,
-        nargs="?",
-        help="Port number to listen on",
-        default=8080,
-    )
-
-    parser.add_argument(
-        "-n",
-        "--hostname",
-        type=str,
-        nargs="?",
-        help="HTTP Server hostname",
-        default="127.0.0.1",  # localhost
-    )
-
-    parser.add_argument(
-        "-d",
-        "--no-debug",
-        action="store_true",
-        default=False,
-        help="Disable debugging mode",
-    )
-
-    parser.add_argument(
-        "-c",
-        "--config",
-        nargs="?",
-        type=argparse.FileType("r"),
-        help="Path to configuration file. By default read from ~/.config/hydroshare_jupyter_sync/config then ~/.hydroshare_jupyter_sync_config if either exist.",
-        required=False,
-    )
-
-    return parser.parse_args()
-
-
-def main():
-    parser = parse()
-
+def main(parser: argparse.Namespace):
     # clear argv. options parse command line somehow sets up logging
     # tornados logging setup is pretty broken. Do not want to pass any command line args
     # here
@@ -124,4 +63,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = parse()
+    main(parser)
