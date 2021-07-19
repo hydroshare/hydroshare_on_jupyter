@@ -41,7 +41,7 @@ REQUIREMENTS = [
     "jupyterlab",
     "notebook",
     "requests",
-    "pydantic",
+    "pydantic[dotenv]",
 ]
 
 # Development requirements
