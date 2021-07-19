@@ -1232,7 +1232,7 @@ def get_route_handlers(frontend_url, backend_url):
         ),
         (url_path_join(backend_url, "/login"), LoginHandler),
         (url_path_join(backend_url, r"/user"), UserInfoHandler),
-        (url_path_join(backend_url, r"/resources"), ResourcesRootHandler),
+        (url_path_join(backend_url, r"/resources"), ListUserHydroShareResources),
         (url_path_join(backend_url, r"/resources/([^/]+)"), ResourceHandler),
         (
             url_path_join(backend_url, r"/resources/([^/]+)/hs-files"),
