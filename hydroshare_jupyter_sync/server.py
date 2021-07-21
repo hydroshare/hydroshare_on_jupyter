@@ -14,6 +14,8 @@ import sys
 from pathlib import Path
 from http import HTTPStatus
 import secrets
+import re
+import shutil
 
 import requests
 import datetime
@@ -24,8 +26,11 @@ from hs_restclient import exceptions as HSExceptions
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
 from typing import Union
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 
 from hsclient import HydroShare
+from .hydroshare_resource_cache import HydroShareWithResourceCache
 
 from .config_reader_writer import (
     get_config_values,
@@ -43,7 +48,12 @@ from .resource_manager import (
     HYDROSHARE_AUTHENTICATION_ERROR,
 )
 
-from .models.api_models import Credentials, Success, CollectionOfResourceMetadata
+from .models.api_models import (
+    Credentials,
+    Success,
+    CollectionOfResourceMetadata,
+    ResourceFiles,
+)
 from .session_struct import SessionStruct
 
 
@@ -235,7 +245,9 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
         self.write(Success(success=successful).dict())
 
     def _create_session(self, credentials: Credentials) -> None:
-        hs = HydroShare(username=credentials.username, password=credentials.password)
+        hs = HydroShareWithResourceCache(
+            username=credentials.username, password=credentials.password
+        )
         user_info = hs.my_user_info()
         user_id = int(user_info["id"])
         username = user_info["username"]
@@ -301,7 +313,7 @@ class Hsmd5Handler(HeadersMixIn, BaseRequestHandler):
 class ListUserHydroShareResources(HeadersMixIn, BaseRequestHandler):
     """List the HydroShare resources a user is an owner of."""
 
-    _custom_headers = [("Access-Control-Allow-Methods", "GET, POST")]
+    _custom_headers = [("Access-Control-Allow-Methods", "GET")]
 
     def get(self):
         session = self.get_session()
@@ -359,6 +371,90 @@ class ListUserHydroShareResources(HeadersMixIn, BaseRequestHandler):
     #                 "error": error,
     #             }
     #         )
+
+
+class ListHydroShareResourceFiles(HeadersMixIn, BaseRequestHandler):
+    """List the files in a HydroShare resource."""
+
+    _custom_headers = [("Access-Control-Allow-Methods", "GET")]
+
+    def get(self, resource_id: str):
+        # NOTE: May want to sanitize input in future. i.e. require it be a min/certain length
+        session = self.get_hs_session()
+
+        resource = session.resource(resource_id)
+        files = [
+            file
+            # The file names and checksums are implicitly cached by the resource
+            for file in resource._checksums.keys()
+            if file.startswith("data/contents/")
+        ]
+
+        # Marshall hsclient representation into CollectionOfResourceMetadata
+        self.write(ResourceFiles(files=files).json())
+
+
+class HydroShareResourceHandler(HeadersMixIn, BaseRequestHandler):
+    """Download HydroShare resource to local file system."""
+
+    _custom_headers = [("Access-Control-Allow-Methods", "GET")]
+
+    def get(self, resource_id: str):
+        # NOTE: May want to sanitize input in future. i.e. require it be a min/certain length
+        session = self.get_hs_session()
+        resource = session.resource(resource_id)
+
+        # download resource to temp directory
+        with TemporaryDirectory() as temp_dir:
+            downloaded_zip = resource.download(temp_dir)
+            # unzip resource
+            with ZipFile(downloaded_zip, "r") as zr:
+                zr.extractall(self.settings["data_path"])
+
+        self.set_status(HTTPStatus.CREATED)  # 201
+
+
+class HydroShareResourceFileHandler(HeadersMixIn, BaseRequestHandler):
+    """Download file from HydroShare resource to local file system."""
+
+    BAGGIT_PREFIX_RE = r"^/?data/contents/?"
+    BAGGIT_PREFIX_MATCHER = re.compile(BAGGIT_PREFIX_RE)
+
+    _custom_headers = [("Access-Control-Allow-Methods", "GET")]
+
+    def get(self, resource_id: str, file_path: str):
+        # NOTE: May want to sanitize input in future. i.e. require it be a min/certain length
+        session = self.get_hs_session()
+        resource = session.resource(resource_id)
+
+        file_path = self._truncate_baggit_prefix(file_path)
+
+        # Download file to temp directory to avoid creating paths and failing to download content
+        with TemporaryDirectory() as temp_dir:
+            downloaded_file = resource.file_download(
+                file_path, save_path=temp_dir, zipped=False
+            )
+            fn = Path(downloaded_file).name
+
+            contents_path = (
+                Path(self.settings["data_path"]) / resource_id / "data/contents/"
+            )
+            contents_path.mkdir(parents=True, exist_ok=True)
+            shutil.move(downloaded_file, contents_path / fn)
+
+        self.set_status(HTTPStatus.CREATED)  # 20
+
+    @staticmethod
+    def _truncate_baggit_prefix(file_path: str):
+        baggit_prefix_match = HydroShareResourceFileHandler.BAGGIT_PREFIX_MATCHER.match(
+            file_path
+        )
+
+        if baggit_prefix_match is not None:
+            # left-truncate baggit prefix path
+            file_path = file_path[baggit_prefix_match.end() :]
+
+        return file_path
 
 
 class ResourceHandler(HeadersMixIn, BaseRequestHandler):
@@ -1233,7 +1329,19 @@ def get_route_handlers(frontend_url, backend_url):
         (url_path_join(backend_url, "/login"), LoginHandler),
         (url_path_join(backend_url, r"/user"), UserInfoHandler),
         (url_path_join(backend_url, r"/resources"), ListUserHydroShareResources),
-        (url_path_join(backend_url, r"/resources/([^/]+)"), ResourceHandler),
+        # (url_path_join(backend_url, r"/resources/([^/]+)"), ResourceHandler),
+        (
+            url_path_join(backend_url, r"/resources/([^/]+)"),
+            ListHydroShareResourceFiles,
+        ),
+        (
+            url_path_join(backend_url, r"/resources/([^/]+)/download"),
+            HydroShareResourceHandler,
+        ),
+        (
+            url_path_join(backend_url, r"/resources/([^/]+)/download/(.+)"),
+            HydroShareResourceFileHandler,
+        ),
         (
             url_path_join(backend_url, r"/resources/([^/]+)/hs-files"),
             ResourceHydroShareFilesRequestHandler,
