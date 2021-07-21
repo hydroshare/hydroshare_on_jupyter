@@ -4,6 +4,14 @@ from typing import List
 from .resource_type_enum import ResourceTypeEnum
 
 
+class Boolean(BaseModel):
+    value: bool
+
+    @classmethod
+    def get_value(cls, value: bool) -> bool:
+        return cls(value=value).value
+
+
 class Credentials(BaseModel):
     username: StrictStr = Field(...)
     password: StrictStr = Field(...)
