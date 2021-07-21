@@ -51,7 +51,7 @@ def parse() -> Union[argparse.Namespace, None]:
         "-c",
         "--config",
         nargs="?",
-        type=argparse.FileType("r"),
+        type=absolute_file_path,
         help="Path to configuration file. By default read from ~/.config/hydroshare_jupyter_sync/config then ~/.hydroshare_jupyter_sync_config if either exist.",
         required=False,
     )
@@ -63,3 +63,11 @@ def is_file_and_exists(f: Union[str, Path]) -> bool:
     """Expand and resolve path and return if it is a file."""
     f = expand_and_resolve(f)
     return f.is_file() and f.exists()
+
+
+def absolute_file_path(f: Union[str, Path]) -> str:
+    """Return absolute path to file, if exists."""
+    f = expand_and_resolve(f)
+    if is_file_and_exists(f):
+        return str(f)
+    raise FileNotFoundError(f"File: {f}, does not exist.")
