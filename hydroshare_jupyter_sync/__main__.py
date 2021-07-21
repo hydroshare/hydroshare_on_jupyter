@@ -11,6 +11,7 @@ from typing import Union
 
 from .server import get_route_handlers
 from .cli import parse
+from .config_setup import ConfigFile
 
 
 class TestApp(Application):
@@ -47,10 +48,15 @@ def main(parser: argparse.Namespace):
     sys.argv = []
     options.parse_command_line()
     debug_enabled = not parser.no_debug
+    # TODO: write logs to file in config.log
+
+    # parse config file
+    config = (
+        ConfigFile() if parser.config is None else ConfigFile(_env_file=parser.config)
+    )
 
     app = get_test_app(
-        default_hostname=parser.hostname,
-        debug=debug_enabled,
+        default_hostname=parser.hostname, debug=debug_enabled, data_path=config.data
     )
 
     logging.info(f"Server starting on {parser.hostname}:{parser.port}")
