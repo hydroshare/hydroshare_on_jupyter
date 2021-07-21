@@ -447,8 +447,8 @@ class HydroShareResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
 
     @staticmethod
     def _truncate_baggit_prefix(file_path: str):
-        baggit_prefix_match = HydroShareResourceFileHandler.BAGGIT_PREFIX_MATCHER.match(
-            file_path
+        baggit_prefix_match = (
+            HydroShareResourceEntityHandler.BAGGIT_PREFIX_MATCHER.match(file_path)
         )
 
         if baggit_prefix_match is not None:
