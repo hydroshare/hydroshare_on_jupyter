@@ -1,3 +1,4 @@
+from hsmodels.schemas import resource
 from pydantic import BaseModel, Field, StrictStr, StrictBool
 from typing import List
 from .resource_type_enum import ResourceTypeEnum
@@ -36,3 +37,7 @@ class ResourceCreationRequest(BaseModel):
     keywords: List[str]
     abstract: str
     resource_type: ResourceTypeEnum
+
+
+class ResourceFiles(BaseModel):
+    files: List[str] = Field(...)
