@@ -167,6 +167,11 @@ class BaseRequestHandler(SessionMixIn, IPythonHandler):  # TODO: will need to ch
         self.set_status(HTTPStatus.NO_CONTENT)
         self.finish()
 
+    @property
+    def data_path(self):
+        """Local HydroShare resources file system location."""
+        return self.settings.get("data_path")
+
 
 class HeadersMixIn:
     def set_default_headers(self):
@@ -411,7 +416,7 @@ class HydroShareResourceHandler(HeadersMixIn, BaseRequestHandler):
             downloaded_zip = resource.download(temp_dir)
             # unzip resource
             with ZipFile(downloaded_zip, "r") as zr:
-                zr.extractall(self.settings["data_path"])
+                zr.extractall(self.data_path)
 
         self.set_status(HTTPStatus.CREATED)  # 201
 
@@ -440,7 +445,7 @@ class HydroShareResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
             entity_type = EntityTypeEnum.FOLDER
 
         HydroShareEntityDownloadFactory.download(
-            entity_type, resource, self.settings["data_path"], path
+            entity_type, resource, self.data_path, path
         )
 
         self.set_status(HTTPStatus.CREATED)  # 201
