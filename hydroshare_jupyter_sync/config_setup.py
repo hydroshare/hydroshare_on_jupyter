@@ -28,6 +28,7 @@ class ConfigFile(BaseSettings):
     @root_validator
     def create_paths_if_do_not_exist(cls, values: dict):
         for key, path in values.items():
+            path = expand_and_resolve(path)
             if path.is_file():
                 raise FileNotDirectoryError(
                     f"Configuration setting: {key}={str(path)} is a file not a directory."
