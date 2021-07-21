@@ -49,12 +49,14 @@ from .resource_manager import (
 )
 
 from .models.api_models import (
+    Boolean,
     Credentials,
     Success,
     CollectionOfResourceMetadata,
     ResourceFiles,
 )
 from .session_struct import SessionStruct
+from .lib.resource_factories import HydroShareEntityDownloadFactory, EntityTypeEnum
 
 
 # Global singleton session wrapper. Contains:
@@ -414,35 +416,34 @@ class HydroShareResourceHandler(HeadersMixIn, BaseRequestHandler):
         self.set_status(HTTPStatus.CREATED)  # 201
 
 
-class HydroShareResourceFileHandler(HeadersMixIn, BaseRequestHandler):
-    """Download file from HydroShare resource to local file system."""
+class HydroShareResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
+    """Download file or folder from HydroShare resource to local file system."""
 
     BAGGIT_PREFIX_RE = r"^/?data/contents/?"
     BAGGIT_PREFIX_MATCHER = re.compile(BAGGIT_PREFIX_RE)
 
     _custom_headers = [("Access-Control-Allow-Methods", "GET")]
 
-    def get(self, resource_id: str, file_path: str):
+    def get(self, resource_id: str, path: str):
+        """Use query param, `folder` with a boolean value (True, true, 1 | False, false,
+        0) to indicate downloading a folder versus a file."""
         # NOTE: May want to sanitize input in future. i.e. require it be a min/certain length
         session = self.get_hs_session()
         resource = session.resource(resource_id)
 
-        file_path = self._truncate_baggit_prefix(file_path)
+        path = self._truncate_baggit_prefix(path)
 
-        # Download file to temp directory to avoid creating paths and failing to download content
-        with TemporaryDirectory() as temp_dir:
-            downloaded_file = resource.file_download(
-                file_path, save_path=temp_dir, zipped=False
-            )
-            fn = Path(downloaded_file).name
+        is_folder_entity = Boolean.get_value(self.get_query_argument("folder", False))
 
-            contents_path = (
-                Path(self.settings["data_path"]) / resource_id / "data/contents/"
-            )
-            contents_path.mkdir(parents=True, exist_ok=True)
-            shutil.move(downloaded_file, contents_path / fn)
+        entity_type = EntityTypeEnum.FILE
+        if is_folder_entity:
+            entity_type = EntityTypeEnum.FOLDER
 
-        self.set_status(HTTPStatus.CREATED)  # 20
+        HydroShareEntityDownloadFactory.download(
+            entity_type, resource, self.settings["data_path"], path
+        )
+
+        self.set_status(HTTPStatus.CREATED)  # 201
 
     @staticmethod
     def _truncate_baggit_prefix(file_path: str):
@@ -1340,7 +1341,7 @@ def get_route_handlers(frontend_url, backend_url):
         ),
         (
             url_path_join(backend_url, r"/resources/([^/]+)/download/(.+)"),
-            HydroShareResourceFileHandler,
+            HydroShareResourceEntityHandler,
         ),
         (
             url_path_join(backend_url, r"/resources/([^/]+)/hs-files"),
