@@ -168,9 +168,9 @@ class BaseRequestHandler(SessionMixIn, IPythonHandler):  # TODO: will need to ch
         self.finish()
 
     @property
-    def data_path(self):
+    def data_path(self) -> Path:
         """Local HydroShare resources file system location."""
-        return self.settings.get("data_path")
+        return Path(self.settings.get("data_path"))
 
 
 class HeadersMixIn:
