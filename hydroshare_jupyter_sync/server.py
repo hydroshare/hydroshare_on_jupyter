@@ -221,7 +221,8 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
     _custom_headers = [("Access-Control-Allow-Methods", "OPTIONS,POST,DELETE")]
 
     def prepare(self):
-        self.set_header("Content-Type", "application/json")
+        if self.request.headers["Content-Type"] != "application/json":
+            return self.set_status(HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
 
     def delete(self):
         # Ensure user is signed before destroying session
