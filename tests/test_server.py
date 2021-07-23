@@ -45,17 +45,6 @@ async def mocked_login_session(http_client, base_url, monkeypatch):
 
 
 @pytest.mark.gen_test
-async def test_hello_world(http_client, base_url, monkeypatch):
-    body = {"username": "test", "password": "test"}
-
-    monkeypatch.setattr(HydroShare, "my_user_info", my_user_info_mock)
-
-    req = HTTPRequest(base_url + "/syncApi/login", method="POST", body=json.dumps(body))
-    response = await http_client.fetch(req)
-    assert json.loads(response.body.decode("utf-8")) == {"success": True}
-
-
-@pytest.mark.gen_test
 async def test_login(mocked_login_session):
     response = await mocked_login_session
     assert json.loads(response.body.decode("utf-8")) == {"success": True}
