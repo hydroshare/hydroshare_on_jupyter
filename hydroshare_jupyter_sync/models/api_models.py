@@ -1,5 +1,13 @@
 from hsmodels.schemas import resource
-from pydantic import BaseModel, Field, StrictStr, StrictBool
+from pydantic import (
+    BaseModel,
+    Field,
+    StrictStr,
+    StrictBool,
+    conlist,
+    constr,
+    ConstrainedList,
+)
 from typing import List
 from .resource_type_enum import ResourceTypeEnum
 
@@ -48,4 +56,5 @@ class ResourceCreationRequest(BaseModel):
 
 
 class ResourceFiles(BaseModel):
-    files: List[str] = Field(...)
+    # str in list cannot contain .. or ~
+    files: List[constr(regex=r"^((?!~|\.{2}).)*$")] = Field(...)
