@@ -16,6 +16,7 @@ from http import HTTPStatus
 import secrets
 import re
 import shutil
+from pydantic import ValidationError
 
 import requests
 import datetime
@@ -25,7 +26,7 @@ import tornado.web
 from hs_restclient import exceptions as HSExceptions
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
-from typing import Union
+from typing import Union, List
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
@@ -461,6 +462,133 @@ class HydroShareResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
             file_path = file_path[baggit_prefix_match.end() :]
 
         return file_path
+
+
+class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
+    """Upload file or folder from local file system to existing HydroShare resource."""
+
+    BAGGIT_PREFIX_RE = r"^/?data/contents/?"
+    BAGGIT_PREFIX_MATCHER = re.compile(BAGGIT_PREFIX_RE)
+    BAGGIT_PREFIX = "/data/contents/"
+    _ZIP_FILENAME = "__zip.zip"
+
+    _custom_headers = [("Access-Control-Allow-Methods", "POST")]
+
+    def prepare(self):
+        super().prepare()
+        if self.request.headers["Content-Type"] != "application/json":
+            self.set_status(HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+
+    def post(self, resource_id: str):
+        """Upload one or more local entities (files or dirs) to existing HydroShare resource.
+        File paths are passed in the request body and must reside within a downloaded HS
+        resource directory inside the configured `data` directory.
+        (i.e. an entity inside: ~/hydroshare/<resource-id>/data/contents/)
+
+        The method adds the prefix `/data/contents` to each file path. If it already
+        exists, it is ignored. Thus, the following are equivalent:
+            - { "files": ["some-file"] }
+            - { "files": ["/data/contents/some-file"] }
+
+        HTTP Request type:
+            POST:
+                Action:
+                    Upload local entities to existing hydroshare resource.
+                Body:
+                    Content-Type: application/json
+                    Schema: {"files": [str] }
+                    Schema Notes: List members should be relative to `data` configuration directory (i.e. "/data/contents/file").
+                                  However, `~` and `..` are not allowed in provided paths and return 403 status.
+                                  (i.e. "data/contents/../../" is not allowed)
+        """
+        # TODO: Add the ability to version data
+        try:
+            # Marshall request body
+            files = ResourceFiles.parse_raw(self.request.body.decode("utf-8")).files
+
+        except ValidationError:
+            # fail fast
+            return self.set_status(HTTPStatus.FORBIDDEN)
+
+        session = self.get_hs_session()
+        # create resource object. Will fail if invalid/user does not have access.
+        resource = session.resource(resource_id)
+
+        files = self._add_baggit_prefix_and_drop_nonexistant_files(resource_id, files)
+
+        with TemporaryDirectory() as temp_dir:
+            zip_file = Path(temp_dir) / self._ZIP_FILENAME
+
+            # create zip archive
+            with ZipFile(zip_file, "w") as zipped:
+                for file in files:
+                    zipped.write(
+                        file,
+                        # maintain file system structure relative to where data is stored in baggit (/data/contents/)
+                        # Example: `/data/contents/dir1/some-file.txt` will be archived in the zip at, `/dir1/some-file.txt`
+                        file.relative_to(
+                            self.data_path / f"{resource_id}/{self.BAGGIT_PREFIX}"
+                        ),
+                    )
+
+                # upload zip to HydroShare
+                resource.file_upload(zip_file)
+                self._unpack_zip_on_hydroshare(resource, zip_file.name)
+
+        self.set_status(HTTPStatus.CREATED)  # 201
+
+    def _unpack_zip_on_hydroshare(
+        self, resource, filename: str, location: str = ""
+    ) -> None:
+        # unpack and delete zip
+        unzip_path = url_path_join(
+            resource._hsapi_path,
+            "functions",
+            "unzip",
+            "data",
+            "contents",
+            location,
+            filename,
+        )
+        # post job to HydroShare
+        resource._hs_session.post(
+            unzip_path,
+            status_code=200,
+            data={"overwrite": "true", "ingest_metadata": "true"},
+        )
+
+    def _add_baggit_prefix_and_drop_nonexistant_files(
+        self, resource_id: str, files: List[str]
+    ) -> List[Path]:
+        # prepend baggit prefix, files/dirs that don't exist are dropped
+        return [
+            self.data_path / f"{resource_id}/{self._prepend_baggit_prefix(f)}"
+            for f in files
+            if (
+                self.data_path / f"{resource_id}/{self._prepend_baggit_prefix(f)}"
+            ).exists()
+        ]
+
+    @staticmethod
+    def _truncate_baggit_prefix(file_path: str) -> str:
+        baggit_prefix_match = LocalResourceEntityHandler.BAGGIT_PREFIX_MATCHER.match(
+            file_path
+        )
+
+        if baggit_prefix_match is not None:
+            # left-truncate baggit prefix path
+            file_path = file_path[baggit_prefix_match.end() :]
+
+        return file_path
+
+    @staticmethod
+    def _prepend_baggit_prefix(file_path: str) -> str:
+        # remove existing prefix to sanitize the input
+        left_truncated_path = LocalResourceEntityHandler._truncate_baggit_prefix(
+            file_path
+        )
+
+        return f"{LocalResourceEntityHandler.BAGGIT_PREFIX}{left_truncated_path}"
 
 
 class ResourceHandler(HeadersMixIn, BaseRequestHandler):
@@ -1343,6 +1471,10 @@ def get_route_handlers(frontend_url, backend_url):
         (
             url_path_join(backend_url, r"/resources/([^/]+)/download"),
             HydroShareResourceHandler,
+        ),
+        (
+            url_path_join(backend_url, r"/resources/([^/]+)/upload"),
+            LocalResourceEntityHandler,
         ),
         (
             url_path_join(backend_url, r"/resources/([^/]+)/download/(.+)"),
