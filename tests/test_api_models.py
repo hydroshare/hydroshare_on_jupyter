@@ -38,3 +38,24 @@ def test_collection_of_resource_metadata_raises():
 
     with pytest.raises(pydantic.error_wrappers.ValidationError):
         assert m.CollectionOfResourceMetadata.parse_obj([metadata, metadata_subset])
+
+
+def test_resource_files_should_pass():
+    data = {"files": ["/data", "/data/contents", ""]}
+    m.ResourceFiles(**data)
+
+
+RESOURCE_FILES_SHOULD_FAIL_CASES = [
+    (["~"]),
+    (""),
+    (["../"]),
+    (["/fake/file/../../"]),
+    (["/something~"]),
+]
+
+
+@pytest.mark.parametrize("test_data", RESOURCE_FILES_SHOULD_FAIL_CASES)
+def test_resource_files_should_fail(test_data):
+    data = {"files": test_data}
+    with pytest.raises(pydantic.ValidationError):
+        m.ResourceFiles(**data)
