@@ -143,10 +143,10 @@ class BaseRequestHandler(SessionMixIn, IPythonHandler):  # TODO: will need to ch
 
     def set_default_headers(self):
         # TODO: change from * (any server) to our specific url (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/40)
-        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header("Access-Control-Allow-Origin", "localhost")
         self.set_header(
             "Access-Control-Allow-Headers",
-            "x-requested-with, content-type, x-xsrftoken",
+            "x-requested-with, content-type, x-xsrftoken, cookie",
         )
 
     def get_login_url(self) -> str:
@@ -235,7 +235,7 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
     _custom_headers = [("Access-Control-Allow-Methods", "OPTIONS,POST,DELETE")]
 
     def prepare(self):
-        if self.request.headers["Content-Type"] != "application/json":
+        if self.request.headers.get("Content-Type", None) != "application/json":
             return self.set_status(HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
 
     def delete(self):
