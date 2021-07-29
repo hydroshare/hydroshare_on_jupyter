@@ -195,9 +195,23 @@ class WebAppHandler(HeadersMixIn, BaseRequestHandler):
 
     _custom_headers = [("Access-Control-Allow-Methods", "GET, OPTIONS")]
 
+    def prepare(self):
+        # NOTE: Bypass base request prepare. This should change in the future
+        pass
+
     def get(self):
-        debug = self.settings.get("debug", False)
-        self.write(get_index_html(dev_mode=debug))
+        debug = "dev" if self.settings.get("debug", False) else "dist"
+
+        template_kwargs = {
+            "frontend_path": "/",
+            "backend_path": "/syncApi",
+            "bundle_suffix": debug,
+            "getting_started_notebook_path": "",
+            "notebook_url_path_prefix": None,
+        }
+        # NOTE: This may need to change to accommodate multiple template directories
+        # when integrating with Jupyter.
+        self.render("root.html", **template_kwargs)
 
 
 class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
