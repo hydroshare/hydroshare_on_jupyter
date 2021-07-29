@@ -2,6 +2,9 @@ from tornado.httpclient import HTTPRequest, HTTPClient, HTTPResponse
 from tornado.httputil import HTTPHeaders
 from hsclient import HydroShare
 from hydroshare_jupyter_sync.__main__ import get_test_app
+from hydroshare_jupyter_sync.hydroshare_resource_cache import (
+    HydroShareWithResourceCache,
+)
 import json
 import pytest
 from dataclasses import dataclass
@@ -10,7 +13,7 @@ from typing import Union
 
 
 def my_user_info_mock(*args, **kwargs):
-    return {"id": 42}
+    return {"id": 42, "username": "test"}
 
 
 def get_user_cookie(headers: HTTPHeaders) -> Union[Morsel, None]:
@@ -38,8 +41,14 @@ def app():
 async def mocked_login_session(http_client, base_url, monkeypatch):
     body = {"username": "test", "password": "test"}
     monkeypatch.setattr(HydroShare, "my_user_info", my_user_info_mock)
+    monkeypatch.setattr(HydroShareWithResourceCache, "my_user_info", my_user_info_mock)
 
-    req = HTTPRequest(base_url + "/syncApi/login", method="POST", body=json.dumps(body))
+    req = HTTPRequest(
+        base_url + "/syncApi/login",
+        method="POST",
+        body=json.dumps(body),
+        headers={"content-type": "application/json"},
+    )
     response = await http_client.fetch(req)
     return response
 
@@ -60,7 +69,7 @@ async def test_login_then_login_with_another_account(
     # first login was successful, so subsequent calls to login ignore passed credentials
     body = {"username": "", "password": ""}
     response_cookie = get_user_cookie_from_http_response(response)
-    wrapper_cookie = {"Cookie": response_cookie}
+    wrapper_cookie = {"Cookie": response_cookie, "content-type": "application/json"}
 
     req = HTTPRequest(
         base_url + "/syncApi/login",
@@ -80,7 +89,7 @@ async def test_login_then_login_with_another_account(
 async def test_valid_logout(mocked_login_session, http_client, base_url):
     response = await mocked_login_session  # type: HTTPResponse
     response_cookie = get_user_cookie_from_http_response(response)
-    wrapper_cookie = {"Cookie": response_cookie}
+    wrapper_cookie = {"Cookie": response_cookie, "content-type": "application/json"}
 
     req = HTTPRequest(
         base_url + "/syncApi/login",
@@ -122,7 +131,7 @@ async def test_invalid_logout(http_client, base_url):
 async def test_redirect_to_login_if_not_logged_in(http_client, base_url):
     # In theory, each endpoint that is not the login endpoint should be checked
     login_url = "/syncApi/login"
-    uri = "/"
+    uri = "/syncApi/user"
     req = HTTPRequest(
         base_url + uri,
         method="GET",

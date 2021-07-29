@@ -3,14 +3,21 @@ import pydantic
 from hydroshare_jupyter_sync.models import api_models as m
 
 
-def test_collection_of_resource_metadata():
-    metadata = m.ResourceMetadata(
+@pytest.fixture
+def resource_metadata():
+    return m.ResourceMetadata(
         resource_type="resource",
         resource_title="title",
         resource_id="42",
         immutable=True,
         resource_url="www.fake.org",
+        date_created="2021-01-01",
+        date_last_updated="2021-01-02",
     )
+
+
+def test_collection_of_resource_metadata(resource_metadata):
+    metadata = resource_metadata
     metadata_dict = metadata.dict()
 
     assert m.CollectionOfResourceMetadata.parse_obj([metadata, metadata, metadata])
@@ -22,14 +29,8 @@ def test_collection_of_resource_metadata():
     assert m.CollectionOfResourceMetadata.parse_obj([metadata_dict])
 
 
-def test_collection_of_resource_metadata_raises():
-    metadata = m.ResourceMetadata(
-        resource_type="resource",
-        resource_title="title",
-        resource_id="42",
-        immutable=True,
-        resource_url="www.fake.org",
-    )
+def test_collection_of_resource_metadata_raises(resource_metadata):
+    metadata = resource_metadata
 
     metadata_subset = {
         "resource_type": "resource",
