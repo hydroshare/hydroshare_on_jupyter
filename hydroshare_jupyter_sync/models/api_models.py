@@ -35,6 +35,8 @@ class ResourceMetadata(BaseModel):
     resource_id: str = Field(...)
     immutable: bool = Field(...)
     resource_url: str = Field(...)
+    date_created: str = Field(...)
+    date_last_updated: str = Field(...)
 
 
 class CollectionOfResourceMetadata(BaseModel):
