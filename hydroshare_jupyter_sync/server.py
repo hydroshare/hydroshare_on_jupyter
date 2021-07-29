@@ -279,7 +279,8 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
         salt = secrets.randbits(16)
         salted_token = f"{user_id}{salt}".encode()
 
-        self.set_secure_cookie(self.session_cookie_key, salted_token)
+        # cookie is tied to session, meaning it has no expire date
+        self.set_secure_cookie(self.session_cookie_key, salted_token, expires_days=None)
 
         self.set_session(
             SessionStruct(
