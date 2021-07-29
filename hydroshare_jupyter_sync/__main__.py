@@ -37,6 +37,7 @@ def get_test_app(**settings) -> Application:
         get_route_handlers("/", "/syncApi"),
         cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
         login_url="/syncApi/login",
+        template_path=Path(__file__).resolve().parent / "templates",
         **settings,
     )
 
