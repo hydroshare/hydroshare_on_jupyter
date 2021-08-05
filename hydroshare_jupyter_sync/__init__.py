@@ -18,7 +18,7 @@ PARENT_DIR = Path(__file__).parent.resolve()
 EXTENSION_METADATA_PATH = PARENT_DIR / f"{EXTENSION_DIRNAME}/package.json"
 
 # read metadata from js extension package metadata file, `package.json`
-extension_metadata = json.load(EXTENSION_METADATA_PATH.read_text())
+extension_metadata = json.loads(EXTENSION_METADATA_PATH.read_text())
 
 
 def _jupyter_labextension_paths():
