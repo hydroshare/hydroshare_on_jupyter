@@ -1,47 +1,47 @@
-'''
-This file sets up the jupyter server extension to launch our backend
-server when jupyter is launched.
+"""
+Setup jupyterlab server and lab extensions. Add tornado HTTP handlers to jupyter session.
+"""
+import json
+from pathlib import Path
 
-Author: 2019-20 CUAHSI Olin SCOPE Team
-Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
-'''
-# !/usr/bin/python
-# -*- coding: utf-8
-
-import logging
-from hydroshare_jupyter_sync.config_reader_writer import get_config_values
-from hydroshare_jupyter_sync.index_html import (set_backend_url,
-                                                set_frontend_url)
+# local imports
 from .server import get_route_handlers
-from notebook.utils import url_path_join
+
+# Constants
+FRONTEND_PATH = "/sync"
+BACKEND_PATH = "/syncApi"
+
+MODULE_NAME = "hydroshare_jupyter_sync"
+EXTENSION_DIRNAME = "labextension"
+
+PARENT_DIR = Path(__file__).parent.resolve()
+EXTENSION_METADATA_PATH = PARENT_DIR / f"{EXTENSION_DIRNAME}/package.json"
+
+# read metadata from js extension package metadata file, `package.json`
+extension_metadata = json.load(EXTENSION_METADATA_PATH.read_text())
 
 
-def _jupyter_server_extension_paths():
-    """Creates the path to load the jupyter server extension.
+def _jupyter_labextension_paths():
+    return [{"src": EXTENSION_DIRNAME, "dest": extension_metadata["name"]}]
+
+
+def _jupyter_server_extension_points():
+    return [{"module": MODULE_NAME}]
+
+
+def _load_jupyter_server_extension(server_app):
+    """Registers the API handler to receive HTTP requests from the frontend extension.
+
+    Parameters
+    ----------
+    server_app: jupyterlab.labapp.LabApp
+        JupyterLab application instance
     """
-    return [{
-        "module": "hydroshare_jupyter_sync"
-    }]
+    handlers = get_route_handlers(FRONTEND_PATH, BACKEND_PATH)
+
+    server_app.web_app.add_handlers(".*$", handlers)
+    server_app.log.info(f"Registered {MODULE_NAME} extension")
 
 
-def load_jupyter_server_extension(nb_server_app):
-    """Sets up logging to a specific file, sets frontend & backend urls,
-    and loads up the server extension.
-    """
-    nb_server_app.log.info("Successfully loaded hydroshare_jupyter_sync server "
-                           "extension.")
-
-    config = get_config_values(['logPath'])
-    log_file_path = None
-    if config:
-        log_file_path = config.get('logPath')
-    logging.basicConfig(level=logging.DEBUG, filename=log_file_path)
-
-    web_app = nb_server_app.web_app
-
-    frontend_base_url = url_path_join(web_app.settings['base_url'], 'sync')
-    backend_base_url = url_path_join(web_app.settings['base_url'], 'syncApi')
-    set_backend_url(backend_base_url)
-    set_frontend_url(frontend_base_url)
-    handlers = get_route_handlers(frontend_base_url, backend_base_url)
-    web_app.add_handlers('.*$', handlers)
+# For backward compatibility with the classical notebook
+load_jupyter_server_extension = _load_jupyter_server_extension
