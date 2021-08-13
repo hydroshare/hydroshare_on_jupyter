@@ -1,0 +1,2 @@
+class AggregateFSMapResourceMembershipError(Exception):
+    pass
