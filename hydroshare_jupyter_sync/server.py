@@ -26,7 +26,7 @@ import tornado.web
 from hs_restclient import exceptions as HSExceptions
 from notebook.base.handlers import IPythonHandler
 from notebook.utils import url_path_join
-from typing import Union, List
+from typing import Union, List, Optional
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
@@ -168,6 +168,10 @@ class BaseRequestHandler(SessionMixIn, IPythonHandler):  # TODO: will need to ch
         self.set_status(HTTPStatus.NO_CONTENT)
         self.finish()
 
+    def get_template_path(self) -> Optional[str]:
+        """Override template path and set application specific template path. Only applies to sub-classes."""
+        return Path(__file__).parent.resolve() / "templates"
+
     @property
     def data_path(self) -> Path:
         """Local HydroShare resources file system location."""
@@ -203,7 +207,7 @@ class WebAppHandler(HeadersMixIn, BaseRequestHandler):
         debug = "dev" if self.settings.get("debug", False) else "dist"
 
         template_kwargs = {
-            "frontend_path": "/",
+            "frontend_path": "/sync",
             "backend_path": "/syncApi",
             "bundle_suffix": debug,
             "getting_started_notebook_path": "",
