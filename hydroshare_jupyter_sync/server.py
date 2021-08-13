@@ -239,6 +239,9 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
     """
 
     _custom_headers = [("Access-Control-Allow-Methods", "OPTIONS,POST,DELETE")]
+    # instance flag indicating if a request concluded in a successful login.
+    # switched in `post`. used in `on_finish` to instantiate local and remote FSMaps
+    successful_login = False
 
     def prepare(self):
         if self.request.headers.get("Content-Type", None) != "application/json":
@@ -257,21 +260,22 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
         # account bc of the `user` cookie
         credentials = Credentials.parse_raw(self.request.body.decode("utf-8"))
 
-        successful = True
+        self.successful_login = True
         # client and server cookies don't match or is out of date
         if not self.get_client_server_cookie_status():
             try:
                 self._create_session(credentials)
 
             except Exception as e:
+                self.successful_login = False
                 _log.exception(e)
-                successful = False
                 if "401" in str(e):
                     self.set_status(HTTPStatus.UNAUTHORIZED)  # 401
                 else:
                     self.set_status(HTTPStatus.INTERNAL_SERVER_ERROR)  # 500
 
-        self.write(Success(success=successful).dict())
+        # self.successful_login initialized to False in `prepare`
+        self.write(Success(success=self.successful_login).dict())
 
     def _create_session(self, credentials: Credentials) -> None:
         hs = HydroShareWithResourceCache(
@@ -294,11 +298,33 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
             )
         )
 
+    def on_finish(self) -> None:
+        if self.successful_login and session_sync_struct.is_empty:
+
+            # it is possible for a user who does not send cookies with their request to "login"
+            # multiple times. this is unlikely, but it is possible. additionally, logins from
+            # different browser tabs may also cause result in multiple successful logins.
+            # note: here, it is assumed and implicitly enforced that a user cannot be logged into
+            # multiple accounts at once. in the future, this may be desirable, but at the moment
+            # this is not possible. the session cookie is retains the login state. even if a user
+            # logins in successfully, gets a cookie, and then logs in with a different account (but
+            # sends the first session cookie) the first account will remain logged in.
+
+            # only create new sync session if the current is empty
+            # NOTE: based on the way `is_empty` is implemented, it is possible for some attrs of the
+            # _SessionSyncSingleton to be empty/None and some to be present and True is returned.
+            # this may come up in the future as a place where the session is corrupted.
+            hs_session = self.get_hs_session()
+            session_sync_struct.new_sync_session(self.data_path, hs_session)
+
     def _destroy_session(self):
+        # handle logout logic
         self.clear_cookie(self.session_cookie_key)
         self.set_session(
             SessionStruct(session=None, cookie=None, id=None, username=None)
         )
+        # shutdown previous resources and reset session sync to initial state
+        session_sync_struct.reset_session()
 
 
 class Localmd5Handler(HeadersMixIn, BaseRequestHandler):
@@ -427,6 +453,7 @@ class ListHydroShareResourceFiles(HeadersMixIn, BaseRequestHandler):
 class HydroShareResourceHandler(HeadersMixIn, BaseRequestHandler):
     """Download HydroShare resource to local file system."""
 
+    resource_id: str
     _custom_headers = [("Access-Control-Allow-Methods", "GET")]
 
     def get(self, resource_id: str):
@@ -441,7 +468,14 @@ class HydroShareResourceHandler(HeadersMixIn, BaseRequestHandler):
             with ZipFile(downloaded_zip, "r") as zr:
                 zr.extractall(self.data_path)
 
+        # set instance variable for `on_finish`
+        self.resource_id = resource_id
         self.set_status(HTTPStatus.CREATED)  # 201
+
+    def on_finish(self) -> None:
+        if self.get_status() == HTTPStatus.CREATED:
+            # dispatch resource downloaded event with resource_id
+            session.event_broker.dispatch("RESOURCE_DOWNLOADED", self.resource_id)
 
 
 class HydroShareResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
@@ -449,6 +483,7 @@ class HydroShareResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
 
     BAGGIT_PREFIX_RE = r"^/?data/contents/?"
     BAGGIT_PREFIX_MATCHER = re.compile(BAGGIT_PREFIX_RE)
+    resource_id: str
 
     _custom_headers = [("Access-Control-Allow-Methods", "GET")]
 
@@ -471,7 +506,16 @@ class HydroShareResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
             entity_type, resource, self.data_path, path
         )
 
+        # set instance variable for `on_finish`
+        self.resource_id = resource_id
         self.set_status(HTTPStatus.CREATED)  # 201
+
+    def on_finish(self) -> None:
+        if self.get_status() == HTTPStatus.CREATED:
+            # dispatch resource entity downloaded event with resource_id
+            session.event_broker.dispatch(
+                "RESOURCE_ENTITY_DOWNLOADED", self.resource_id
+            )
 
     @staticmethod
     def _truncate_baggit_prefix(file_path: str):
@@ -493,6 +537,7 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
     BAGGIT_PREFIX_MATCHER = re.compile(BAGGIT_PREFIX_RE)
     BAGGIT_PREFIX = "/data/contents/"
     _ZIP_FILENAME = "__zip.zip"
+    resource_id: str
 
     _custom_headers = [("Access-Control-Allow-Methods", "POST")]
 
@@ -557,7 +602,14 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
                 resource.file_upload(zip_file)
                 self._unpack_zip_on_hydroshare(resource, zip_file.name)
 
+        # set instance variable for `on_finish`
+        self.resource_id = resource_id
         self.set_status(HTTPStatus.CREATED)  # 201
+
+    def on_finish(self) -> None:
+        if self.get_status() == HTTPStatus.CREATED:
+            # dispatch resource uploaded event with resource_id
+            session.event_broker.dispatch("RESOURCE_ENTITY_UPLOADED", self.resource_id)
 
     def _unpack_zip_on_hydroshare(
         self, resource, filename: str, location: str = ""
