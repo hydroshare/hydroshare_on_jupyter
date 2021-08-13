@@ -5,6 +5,7 @@ from hydroshare_jupyter_sync.__main__ import get_test_app
 from hydroshare_jupyter_sync.hydroshare_resource_cache import (
     HydroShareWithResourceCache,
 )
+from hydroshare_jupyter_sync.session import _SessionSyncSingleton
 import json
 import pytest
 from dataclasses import dataclass
@@ -42,6 +43,7 @@ async def mocked_login_session(http_client, base_url, monkeypatch):
     body = {"username": "test", "password": "test"}
     monkeypatch.setattr(HydroShare, "my_user_info", my_user_info_mock)
     monkeypatch.setattr(HydroShareWithResourceCache, "my_user_info", my_user_info_mock)
+    monkeypatch.setattr(_SessionSyncSingleton, "is_empty", False)
 
     req = HTTPRequest(
         base_url + "/syncApi/login",
