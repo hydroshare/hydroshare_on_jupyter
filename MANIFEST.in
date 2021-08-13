@@ -1,1 +1,2 @@
 include hydroshare_jupyter_sync/assets/*
+include hydroshare_jupyter_sync/labextension
