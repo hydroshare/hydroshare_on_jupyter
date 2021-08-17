@@ -58,7 +58,8 @@ from .models.api_models import (
 )
 from .session_struct import SessionStruct
 from .session import session_sync_struct
-from .websocket_handler import FileSystemEventWebSocketHandler
+
+# from .websocket_handler import FileSystemEventWebSocketHandler
 from .lib.resource_factories import HydroShareEntityDownloadFactory, EntityTypeEnum
 
 
@@ -1529,10 +1530,10 @@ def get_route_handlers(frontend_url, backend_url):
             {"path": str(assets_path)},
         ),
         # "backend"
-        (
-            url_path_join(backend_url, r"/ws"),
-            FileSystemEventWebSocketHandler,
-        ),
+        # (
+        #     url_path_join(backend_url, r"/ws"),
+        #     FileSystemEventWebSocketHandler,
+        # ),
         (
             url_path_join(backend_url, r"/download/(.*)"),
             tornado.web.StaticFileHandler,
