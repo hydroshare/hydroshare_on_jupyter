@@ -7,7 +7,7 @@ from tornado import options
 from tornado import ioloop
 from tornado.web import Application
 from pathlib import Path
-from .server import get_route_handlers
+from .handlers import get_route_handlers
 from .cli import parse
 from .config_setup import ConfigFile
 

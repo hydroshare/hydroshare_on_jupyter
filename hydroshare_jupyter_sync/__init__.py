@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 # local imports
-from .server import get_route_handlers
+from .handlers import get_route_handlers
 
 # Constants
 FRONTEND_PATH = "/sync"
