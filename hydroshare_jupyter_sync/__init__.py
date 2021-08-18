@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 # local imports
+from .config_setup import ConfigFile
 from .handlers import get_route_handlers
 
 # Constants
@@ -39,8 +40,18 @@ def _load_jupyter_server_extension(server_app):
     """
     handlers = get_route_handlers(FRONTEND_PATH, BACKEND_PATH)
 
+    # `cookie_secret` inherited from `server_app`
     server_app.web_app.add_handlers(".*$", handlers)
     server_app.log.info(f"Registered {MODULE_NAME} extension")
+
+    # parse config file. if env variables present, they take precedence.
+    # looks for config in following order:
+    # 1. "~/.config/hydroshare_jupyter_sync/config"
+    # 2. "~/.hydroshare_jupyter_sync_config"
+    config = ConfigFile()
+
+    # pass config file settings to Tornado Application (web app)
+    server_app.web_app.settings.update(config.dict())
 
 
 # For backward compatibility with the classical notebook
