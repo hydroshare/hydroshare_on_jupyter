@@ -7,7 +7,7 @@ from pathlib import Path
 def test_config_file():
     with TemporaryDirectory() as temp:
         log = Path(temp) / "logs"
-        ConfigFile(data=temp, log=log)
+        ConfigFile(data_path=temp, log_path=log)
 
 
 def test_config_log_is_file():
@@ -15,7 +15,7 @@ def test_config_log_is_file():
         with TemporaryDirectory() as temp:
             log = Path(temp) / "logs"
             log.touch()
-            ConfigFile(data=temp, log=log)
+            ConfigFile(data_path=temp, log_path=log)
 
 
 def test_config_using_env_vars(monkeypatch):
@@ -25,8 +25,8 @@ def test_config_using_env_vars(monkeypatch):
         monkeypatch.setenv("DATA", str(temp))
         monkeypatch.setenv("LOG", str(log))
         c = ConfigFile()
-        assert str(c.data) == str(temp)
-        assert str(c.log) == str(log)
+        assert str(c.data_path) == str(temp)
+        assert str(c.log_path) == str(log)
 
 
 def test_config_using_env_file():
@@ -42,5 +42,5 @@ def test_config_using_env_file():
             f.write(env_contents)
 
         c = ConfigFile(_env_file=env_file)
-        assert str(c.data) == str(temp)
-        assert str(c.log) == str(log)
+        assert str(c.data_path) == str(temp)
+        assert str(c.log_path) == str(log)
