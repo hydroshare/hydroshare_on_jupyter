@@ -328,6 +328,7 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
         session_sync_struct.reset_session()
 
 
+# NOTE: deprecated
 class Localmd5Handler(HeadersMixIn, BaseRequestHandler):
     """Handles calculation of local md5 values"""
 
@@ -351,6 +352,7 @@ class Localmd5Handler(HeadersMixIn, BaseRequestHandler):
         )
 
 
+# NOTE: deprecated
 class Hsmd5Handler(HeadersMixIn, BaseRequestHandler):
     """Handles calculation of local md5 values"""
 
@@ -666,6 +668,7 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
         return f"{LocalResourceEntityHandler.BAGGIT_PREFIX}{left_truncated_path}"
 
 
+# NOTE: deprecated
 class ResourceHandler(HeadersMixIn, BaseRequestHandler):
     """Handles resource-specific requests made to /resources/<resource_id>"""
 
@@ -693,6 +696,7 @@ class ResourceHandler(HeadersMixIn, BaseRequestHandler):
         )
 
 
+# NOTE: deprecated
 class DirectorySelectorHandler(HeadersMixIn, BaseRequestHandler):
     """Handles downloading of hydroshare data in user selected directory"""
 
@@ -792,6 +796,7 @@ class DirectorySelectorHandler(HeadersMixIn, BaseRequestHandler):
         return returnValue
 
 
+# NOTE: deprecated
 class ResourceLocalFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
     """Facilitates getting, deleting, and uploading to the files contained in
     a resource on the local disk"""
@@ -954,6 +959,7 @@ class ResourceLocalFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
         )
 
 
+# NOTE: deprecated
 class ResourceHydroShareFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
     """Handles getting and deleting the files in a HydroShare resource"""
 
@@ -1065,6 +1071,7 @@ MOVE = "move"
 COPY = "copy"
 
 
+# NOTE: deprecated
 class DownloadHydroShareFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
     _custom_headers = [("Access-Control-Allow-Methods", "POST")]
 
@@ -1097,6 +1104,7 @@ class DownloadHydroShareFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
         )
 
 
+# NOTE: deprecated
 def checkFileSyncStatus(temporaryRoot, res_id):
     serverIsLatest = "HydroShare is latest"
     localIsLatest = "Local is Latest"
@@ -1143,6 +1151,7 @@ def checkFileSyncStatus(temporaryRoot, res_id):
     temporaryRoot = sorted(contents, key=lambda x: x["syncStatus"] == " ")
 
 
+# NOTE: deprecated
 def checkHydroShareSyncStatus(local_or_hs_file_data, res_id, is_local_data):
     serverIsLatest = "HydroShare is latest"
     localIsLatest = "Local is Latest"
@@ -1168,6 +1177,7 @@ def checkHydroShareSyncStatus(local_or_hs_file_data, res_id, is_local_data):
         )
 
 
+# NOTE: deprecated
 def addParameters(
     data, data_to_compare, localIsLatest, serverIsLatest, res_id, is_local_data
 ):
@@ -1264,6 +1274,7 @@ def addParameters(
                 )
 
 
+# NOTE: deprecated
 class CheckSyncStatusFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
     _custom_headers = [("Access-Control-Allow-Methods", "POST")]
     filesChanged = "sync"
@@ -1342,6 +1353,7 @@ class CheckSyncStatusFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
         )
 
 
+# NOTE: deprecated
 class DownloadedLocalFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
     _custom_headers = [("Access-Control-Allow-Methods", "GET")]
 
@@ -1369,6 +1381,7 @@ class DownloadedLocalFilesRequestHandler(HeadersMixIn, BaseRequestHandler):
             )
 
 
+# NOTE: deprecated
 class MoveCopyFiles(HeadersMixIn, BaseRequestHandler):
     """Handles moving (or renaming) files within the local filesystem,
     on HydroShare, and between the two."""
@@ -1520,6 +1533,7 @@ class UserInfoHandler(HeadersMixIn, BaseRequestHandler):
         self.write(user)
 
 
+# NOTE: deprecated
 def get_route_handlers(frontend_url, backend_url):
     # routes look like they need to be updated to remove .*
     return [
