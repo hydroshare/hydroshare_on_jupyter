@@ -1,4 +1,4 @@
-from pydantic import BaseSettings, root_validator
+from pydantic import BaseSettings, Field, root_validator
 from pathlib import Path
 from typing import Union
 from .utilities.pathlib_utils import first_existing_file, expand_and_resolve
@@ -18,8 +18,9 @@ class FileNotDirectoryError(Exception):
 
 
 class ConfigFile(BaseSettings):
-    data: Path = _DEFAULT_DATA_PATH
-    log: Path = _DEFAULT_LOG_PATH
+    # case-insensitive alias values DATA and LOG
+    data_path: Path = Field(_DEFAULT_DATA_PATH, env="data")
+    log_path: Path = Field(_DEFAULT_LOG_PATH, env="log")
 
     class Config:
         env_file: Union[str, None] = first_existing_file(_DEFAULT_CONFIG_FILE_LOCATIONS)
