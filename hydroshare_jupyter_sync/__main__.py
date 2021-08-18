@@ -55,7 +55,7 @@ def main(parser: argparse.Namespace):
     )
 
     app = get_test_app(
-        default_hostname=parser.hostname, debug=debug_enabled, data_path=config.data
+        default_hostname=parser.hostname, debug=debug_enabled, **config.dict()
     )
 
     logging.info(f"Server starting on {parser.hostname}:{parser.port}")
