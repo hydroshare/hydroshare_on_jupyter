@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 def log_event(fn):
     @wraps(fn)
     def wrapper(self, event):
-        logger.info(event)
+        logger.debug(event)
         return fn(self, event)
 
     return wrapper
