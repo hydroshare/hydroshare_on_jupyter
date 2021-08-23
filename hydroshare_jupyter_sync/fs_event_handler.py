@@ -29,7 +29,8 @@ def log_event(fn):
 
 
 def fs_event_handler_factory(event_broker: EventBroker) -> FileSystemEventHandler:
-    """Wrap FSEventHandler in event_broker context."""
+    """Wrap FSEventHandler in event_broker context. There should be only one resource per
+    FSEventHandler instance."""
 
     class FSEventHandler(PatternMatchingEventHandler):
         def __init__(self, local_fs_map: LocalFSResourceMap):
