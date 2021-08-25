@@ -103,7 +103,7 @@ class LocalFSMap(FSMap, IEntityFSMap):
     """Class representing the relationship between *local* HydroShare resources', resource files,
     and resource MD5 Hashes."""
 
-    def __init__(self, fs_root: Union[str, Path]) -> Dict[ResourceId, FSResourceMap]:
+    def __init__(self, fs_root: Union[str, Path]) -> None:
         super().__init__()
         self.fs_root = Path(fs_root).expanduser().resolve()
 
@@ -154,9 +154,7 @@ class RemoteFSMap(FSMap):
     """Class representing the relationship between remote HydroShare resource's, resource files, and
     resource MD5 Hashes."""
 
-    def __init__(
-        self, fs_root: Union[str, Path], hydroshare: HydroShare
-    ) -> Dict[ResourceId, FSResourceMap]:
+    def __init__(self, fs_root: Union[str, Path], hydroshare: HydroShare) -> None:
         super().__init__()
         self.fs_root = Path(fs_root).expanduser().resolve()
         self._hydroshare = hydroshare
