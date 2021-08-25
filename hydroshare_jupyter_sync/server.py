@@ -478,7 +478,9 @@ class HydroShareResourceHandler(HeadersMixIn, BaseRequestHandler):
     def on_finish(self) -> None:
         if self.get_status() == HTTPStatus.CREATED:
             # dispatch resource downloaded event with resource_id
-            session.event_broker.dispatch("RESOURCE_DOWNLOADED", self.resource_id)
+            session_sync_struct.event_broker.dispatch(
+                "RESOURCE_DOWNLOADED", self.resource_id
+            )
 
 
 class HydroShareResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
@@ -516,7 +518,7 @@ class HydroShareResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
     def on_finish(self) -> None:
         if self.get_status() == HTTPStatus.CREATED:
             # dispatch resource entity downloaded event with resource_id
-            session.event_broker.dispatch(
+            session_sync_struct.event_broker.dispatch(
                 "RESOURCE_ENTITY_DOWNLOADED", self.resource_id
             )
 
@@ -612,7 +614,7 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
     def on_finish(self) -> None:
         if self.get_status() == HTTPStatus.CREATED:
             # dispatch resource uploaded event with resource_id
-            session.event_broker.dispatch("RESOURCE_ENTITY_UPLOADED", self.resource_id)
+            session_sync_struct.event_broker.dispatch("RESOURCE_ENTITY_UPLOADED", self.resource_id)
 
     def _unpack_zip_on_hydroshare(
         self, resource, filename: str, location: str = ""
