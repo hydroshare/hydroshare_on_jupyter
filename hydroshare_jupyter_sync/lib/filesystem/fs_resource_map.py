@@ -63,7 +63,7 @@ class FSResourceMap(UserDict, IFSResourceMap):
 class LocalFSResourceMap(FSResourceMap, IEntityFSResourceMap):
     """Concrete class representing the relationship between a local file (not directory) path to the file's MD5 Hash."""
 
-    def __init__(self, resource_path: Union[Path, str]) -> Dict[Path, MD5Hash]:
+    def __init__(self, resource_path: Union[Path, str]) -> None:
         super().__init__()
         self.resource_path = Path(resource_path).expanduser().resolve()
         self.resource_id = resource_path.name
@@ -172,7 +172,7 @@ class LocalFSResourceMap(FSResourceMap, IEntityFSResourceMap):
 
 
 class RemoteFSResourceMap(FSResourceMap):
-    def __init__(self, resource: Resource) -> Dict[Path, MD5Hash]:
+    def __init__(self, resource: Resource) -> None:
         super().__init__()
         self.resource = resource
         self.resource_id = resource.resource_id
