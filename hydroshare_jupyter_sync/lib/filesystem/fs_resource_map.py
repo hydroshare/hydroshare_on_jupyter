@@ -98,8 +98,8 @@ class LocalFSResourceMap(FSResourceMap, IEntityFSResourceMap):
     def update_resource(self) -> None:
         # clear data dictionary
         self.data = dict()
-        for resource_file in self.data_path.glob("**/*"):
-            # insert relative file path to data_path and md5 digest
+        for resource_file in self.contents_path.glob("**/*"):
+            # insert relative file path to contents_path and md5 digest
             self._insert(resource_file)
 
     @property
@@ -111,7 +111,7 @@ class LocalFSResourceMap(FSResourceMap, IEntityFSResourceMap):
         return self.resource_path / self.resource_id
 
     @property
-    def data_path(self):
+    def contents_path(self):
         """Return assumed path to resource data (i.e. `/some/path/{resource_id}/{resource_id}/data/contents`)"""
         return self.base_directory / "data" / "contents"
 
@@ -125,7 +125,7 @@ class LocalFSResourceMap(FSResourceMap, IEntityFSResourceMap):
         ).resolve()
 
     def _is_member(self, resource_file: Union[Path, str]) -> bool:
-        if self._is_child_of_data_path(resource_file):
+        if self._is_child_of_contents_path(resource_file):
             return self._as_child_of_base_directory(resource_file) in self.data
         return False
 
@@ -135,7 +135,7 @@ class LocalFSResourceMap(FSResourceMap, IEntityFSResourceMap):
         return (
             abs_path.is_file()
             and not abs_path.is_symlink()
-            and self._is_child_of_data_path(abs_path)
+            and self._is_child_of_contents_path(abs_path)
         )
 
     def _as_child_of(
@@ -144,16 +144,16 @@ class LocalFSResourceMap(FSResourceMap, IEntityFSResourceMap):
         abs_path = self._abs_path(resource_file)
         return abs_path.relative_to(parents)
 
-    def _as_child_of_data_path(self, resource_file: Union[Path, str]) -> Path:
-        return self._as_child_of(resource_file, self.data_path)
+    def _as_child_of_contents_path(self, resource_file: Union[Path, str]) -> Path:
+        return self._as_child_of(resource_file, self.contents_path)
 
     def _as_child_of_base_directory(self, resource_file: Union[Path, str]) -> Path:
         return self._as_child_of(resource_file, self.base_directory)
 
-    def _is_child_of_data_path(self, resource_file: Union[Path, str]) -> bool:
+    def _is_child_of_contents_path(self, resource_file: Union[Path, str]) -> bool:
         try:
-            # ensure is child of data_path
-            self._as_child_of_data_path(resource_file)
+            # ensure is child of contents_path
+            self._as_child_of_contents_path(resource_file)
             return True
         except ValueError:
             return False
