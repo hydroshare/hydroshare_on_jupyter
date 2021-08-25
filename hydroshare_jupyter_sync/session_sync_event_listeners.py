@@ -51,7 +51,7 @@ class SessionSyncEventListeners(ISessionSyncStruct):
 
             # bind handler to observer
             watcher = self.observer.schedule(
-                event_handler, res.data_path, recursive=True
+                event_handler, res.contents_path, recursive=True
             )
 
             self.fs_observers[resource_id] = watcher
