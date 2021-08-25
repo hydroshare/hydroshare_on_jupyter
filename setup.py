@@ -42,6 +42,7 @@ REQUIREMENTS = [
     "notebook",
     "requests",
     "pydantic[dotenv]",
+    "watchdog",
 ]
 
 # Development requirements
