@@ -1,13 +1,12 @@
 from abc import ABC, abstractmethod
 from collections import UserDict
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import List, Union
 from hsclient import HydroShare
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .fs_resource_map import (
     RemoteFSResourceMap,
-    FSResourceMap,
     LocalFSResourceMap,
 )
 

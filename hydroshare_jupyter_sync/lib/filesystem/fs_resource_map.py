@@ -5,8 +5,6 @@ from hsclient import Resource
 import hashlib
 from pathlib import Path
 
-from .types import MD5Hash
-
 
 def compute_file_md5_hexdigest(file: Union[str, Path]) -> str:
     """Compute a file's md5 hexdigest. Read file as chunks to conserve memory usage."""
