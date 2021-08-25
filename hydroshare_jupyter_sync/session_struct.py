@@ -63,7 +63,9 @@ class SessionSyncStruct(ISessionSyncStruct):
             event_handler = _event_handler_factory(res)
 
             # bind handler to observer
-            watcher = observer.schedule(event_handler, res.data_path, recursive=True)
+            watcher = observer.schedule(
+                event_handler, res.contents_path, recursive=True
+            )
 
             fs_observers[res_id] = watcher
 
