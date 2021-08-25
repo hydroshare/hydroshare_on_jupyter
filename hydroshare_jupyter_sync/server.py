@@ -370,7 +370,7 @@ class Hsmd5Handler(HeadersMixIn, BaseRequestHandler):
 
 
 class ListUserHydroShareResources(HeadersMixIn, BaseRequestHandler):
-    """List the HydroShare resources a user is an owner of."""
+    """List the HydroShare resources a user has edit permission of."""
 
     _custom_headers = [("Access-Control-Allow-Methods", "GET")]
 
@@ -378,7 +378,7 @@ class ListUserHydroShareResources(HeadersMixIn, BaseRequestHandler):
         session = self.get_session()
         username = session.username
 
-        resources = list(session.session.search(owner=username))
+        resources = list(session.session.search(edit_permission=True))
 
         # Marshall hsclient representation into CollectionOfResourceMetadata
         self.write(CollectionOfResourceMetadata.parse_obj(resources).json())

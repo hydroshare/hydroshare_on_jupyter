@@ -175,9 +175,9 @@ class RemoteFSMap(FSMap):
         username = hydroshare._hs_session._session.auth[0]
 
         # NOTE: assumes only resources desired for tracking are owned. may not be desirable.
-        # get user owned resources
+        # get resources the user can edit
         remote_resources = {
-            res.resource_id for res in hydroshare.search(owner=username)
+            res.resource_id for res in hydroshare.search(edit_permission=True)
         }
         # naively get local resources based on fs_root location and directory name length
         naive_local_resources = set(fs_map._get_resource_ids())
