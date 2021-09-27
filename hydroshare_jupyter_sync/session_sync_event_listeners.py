@@ -34,7 +34,12 @@ class SessionSyncEventListeners(ISessionSyncStruct):
     def resource_entity_downloaded(self, resource_id) -> None:
         # if resource already in agg map, add resource file
         if resource_id in self.aggregate_fs_map.local_map:
-            self.aggregate_fs_map.add_resource_file(resource_id)
+            # TODO: `add_resource_file` is not method on `AggregateFSMap`. For now, both local and
+            # remote resources stored in the `AggregateFSMap` instance are updated. this is
+            # computationally burdensome and not necessary, but has desirable guarantees. a proper
+            # solution should be implemented in the future.
+            self.aggregate_fs_map.update_resource(resource_id)
+            # self.aggregate_fs_map.add_resource_file(resource_id)
 
         else:
             self._add_resource_to_agg_map_and_create_watcher(resource_id)
