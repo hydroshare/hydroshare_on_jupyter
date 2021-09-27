@@ -6,6 +6,9 @@ import asyncio
 
 from .server import SessionMixIn
 
+# event types
+from .fs_events import Events
+
 # from .session import event_broker, session_sync_struct as session
 from .session import session_sync_struct as session
 
@@ -26,20 +29,45 @@ class FileSystemEventWebSocketHandler(SessionMixIn, WebSocketHandler):
 
         # send initial state/status
         message = session.aggregate_fs_map.get_sync_state().json()
-        logging.info(f"opening message {message}")
+        logging.debug(message)
         self.write_message(message)
 
         # subscribe to FSEvents
-        session.event_broker.subscribe("STATUS", self._get_resource_status)
+        logging.debug("subscribing to events")
+        self._subscribe_to_events()
 
     def on_message(self, message):
         # message handler
-        logging.info(message)
-        self.write_message("You said " + message)
+        logging.debug(message)
 
     def on_close(self):
         # unsubscribe to FSEvents
-        session.event_broker.unsubscribe("STATUS", self._get_resource_status)
+        logging.debug("unsubscribing from events")
+        self._unsubscribe_from_events()
+
+    def _subscribe_to_events(self):
+        session.event_broker.subscribe(Events.STATUS, self._get_resource_status)
+        session.event_broker.subscribe(
+            Events.RESOURCE_ENTITY_UPLOADED, self._get_resource_status
+        )
+        session.event_broker.subscribe(
+            Events.RESOURCE_DOWNLOADED, self._get_resource_status
+        )
+        session.event_broker.subscribe(
+            Events.RESOURCE_ENTITY_DOWNLOADED, self._get_resource_status
+        )
+
+    def _unsubscribe_from_events(self):
+        session.event_broker.subscribe(Events.STATUS, self._get_resource_status)
+        session.event_broker.subscribe(
+            Events.RESOURCE_ENTITY_UPLOADED, self._get_resource_status
+        )
+        session.event_broker.subscribe(
+            Events.RESOURCE_DOWNLOADED, self._get_resource_status
+        )
+        session.event_broker.subscribe(
+            Events.RESOURCE_ENTITY_DOWNLOADED, self._get_resource_status
+        )
 
     def _get_resource_status(self, res_id: str) -> str:
         """Write json stringified resource sync state"""
