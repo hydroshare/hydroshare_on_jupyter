@@ -7,6 +7,7 @@ from pydantic import (
     conlist,
     constr,
     ConstrainedList,
+    validator,
 )
 from typing import List
 from .resource_type_enum import ResourceTypeEnum
@@ -37,6 +38,13 @@ class ResourceMetadata(BaseModel):
     resource_url: str = Field(...)
     date_created: str = Field(...)
     date_last_updated: str = Field(...)
+    creator: str = Field(...)
+    authors: List[str] = Field(...)
+
+    # NOTE: remove once https://github.com/hydroshare/hsclient/issues/23 has been resolved
+    @validator("authors", pre=True, always=True)
+    def handle_null_author(cls, v):
+        return v or []
 
 
 class CollectionOfResourceMetadata(BaseModel):
