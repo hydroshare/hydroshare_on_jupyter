@@ -59,7 +59,7 @@ class MainPage extends React.Component<ReduxType, never>  {
           viewResource={this.handleViewResource}
           resources={this.props.resources}
         />
-        {!this.props.attemptingLogin && !this.props.authenticationFailed && !this.props.checkingFile && <SelectDirModal/> }
+        {/* {!this.props.attemptingLogin && !this.props.authenticationFailed && !this.props.checkingFile && <SelectDirModal/> } */}
       </div>
     )
   }

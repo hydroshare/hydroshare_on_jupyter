@@ -1,23 +1,23 @@
-import * as React from 'react';
-import { connect } from 'react-redux';
+import * as React from "react";
+import { connect } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
-import { push } from 'connected-react-router';
+import { push } from "connected-react-router";
 
-import '../styles/ResourcePage.scss';
+import "../styles/ResourcePage.scss";
 
 import FileManager from "../components/FileManager";
 import Loading from "../components/Loading";
 import Modal, { TextInput } from "../components/modals/Modal";
 import NewFileModal from "../components/modals/NewFileModal";
 import EditPrivacyModal from "../components/modals/EditPrivacyModal";
-import ResourceMetadata from '../components/ResourceMetadata';
-import ArchiveMessage from '../components/ArchiveMessage';
-import ReadMeDisplay from '../components/ReadMeDisplay';
-import UploadFileModal from '../components/modals/UploadFileModal';
-import DeleteLocallyConfirmationModal from '../components/modals/DeleteLocallyConfirmationModal';
-import GettingStarted from '../components/GettingStarted';
+import ResourceMetadata from "../components/ResourceMetadata";
+import ArchiveMessage from "../components/ArchiveMessage";
+import ReadMeDisplay from "../components/ReadMeDisplay";
+import UploadFileModal from "../components/modals/UploadFileModal";
+import DeleteLocallyConfirmationModal from "../components/modals/DeleteLocallyConfirmationModal";
+import GettingStarted from "../components/GettingStarted";
 
-import * as resourcesActions from '../store/actions/resources';
+import * as resourcesActions from "../store/actions/resources";
 import {
   createNewFileOrFolder,
   copyFileOrFolder,
@@ -29,7 +29,7 @@ import {
   deleteResources,
   checkSyncStatusFiles,
   checkSyncHydroShareStatusFiles,
-} from '../store/async-actions';
+} from "../store/async-actions";
 import {
   IFile,
   IFolder,
@@ -37,28 +37,32 @@ import {
   IRootState,
   IResourceFilesData,
   PATH_PREFIXES,
-} from '../store/types';
+} from "../store/types";
 
 const mapStateToProps = ({ resources, router, user }: IRootState) => {
   // Extract the resource ID from the URL
   // @ts-ignore object possibly undefined
-  const regexMatch = router.location.pathname.split('/').pop().match(/^\w+/);
+  const regexMatch = router.location.pathname.split("/").pop().match(/^\w+/);
   let resourceForPage;
   let resourceId = undefined;
 
   if (regexMatch) {
     resourceId = regexMatch.pop() as string;
     if (resourceId) {
-      resourceForPage = resources.allResources[resourceId]
+      resourceForPage = resources.allResources[resourceId];
     } else {
       return;
     }
   }
-  const archiveMessage = resources.archiveMessage
-  const username = user.userInfo?.username
+  const archiveMessage = resources.archiveMessage;
+  const username = user.userInfo?.username;
   return {
-    fetchingHydroShareFiles: resourceId ? resources.resourceHydroShareFilesBeingFetched.has(resourceId) : false,
-    fetchingLocalFiles: resourceId ? resources.resourceLocalFilesBeingFetched.has(resourceId) : false,
+    fetchingHydroShareFiles: resourceId
+      ? resources.resourceHydroShareFilesBeingFetched.has(resourceId)
+      : false,
+    fetchingLocalFiles: resourceId
+      ? resources.resourceLocalFilesBeingFetched.has(resourceId)
+      : false,
     fetchingResourceMetadata: resources.fetchingResources,
     resource: resourceForPage,
     archiveMessage: archiveMessage,
@@ -68,42 +72,63 @@ const mapStateToProps = ({ resources, router, user }: IRootState) => {
   };
 };
 
-
 const mapDispatchToProps = (dispatch: ThunkDispatch<{}, {}, any>) => {
   return {
-    createNewFile: (resource: IResource, filename: string, type: string) => dispatch(createNewFileOrFolder(resource, filename, type)),
-    deleteResourceFilesOrFolders: (resource: IResource, paths: string[]) => dispatch(deleteResourceFilesOrFolders(resource, paths)),
-    getFilesIfNeeded: (resource: IResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
-    downloadFiles: (resource: IResource, paths: string[]) => dispatch(resourcesActions.downloadFilesOfResource(resource, paths)),
-    checkSyncStatusFiles:(resource: IResource, paths: string[]) => dispatch(checkSyncStatusFiles(resource, paths)),
-    checkSyncLocalFiles:(resource: IResource) => dispatch(resourcesActions.getFilesIfNeeded(resource)),
-    checkSyncHydroShareStatusFiles:(resource: IResource, paths: string[]) => dispatch(checkSyncHydroShareStatusFiles(resource, paths)),
-    openFile: (resource: IResource, file: IFile | IFolder) => dispatch(resourcesActions.openFileInJupyter(resource, file)),
-    copyFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(copyFileOrFolder(resource, file, destination)),
-    moveFileOrFolder: (resource: IResource, file: IFile, destination: IFolder) => dispatch(moveFileOrFolder(resource, file, destination)),
-    uploadNewFile: (resource: IResource, file: FormData) => dispatch(uploadNewFile(resource, file)),
+    createNewFile: (resource: IResource, filename: string, type: string) =>
+      dispatch(createNewFileOrFolder(resource, filename, type)),
+    deleteResourceFilesOrFolders: (resource: IResource, paths: string[]) =>
+      dispatch(deleteResourceFilesOrFolders(resource, paths)),
+    getFilesIfNeeded: (resource: IResource) =>
+      dispatch(resourcesActions.getFilesIfNeeded(resource)),
+    downloadFiles: (resource: IResource, paths: string[]) =>
+      dispatch(resourcesActions.downloadFilesOfResource(resource, paths)),
+    checkSyncStatusFiles: (resource: IResource, paths: string[]) =>
+      dispatch(checkSyncStatusFiles(resource, paths)),
+    checkSyncLocalFiles: (resource: IResource) =>
+      dispatch(resourcesActions.getFilesIfNeeded(resource)),
+    checkSyncHydroShareStatusFiles: (resource: IResource, paths: string[]) =>
+      dispatch(checkSyncHydroShareStatusFiles(resource, paths)),
+    openFile: (resource: IResource, file: IFile | IFolder) =>
+      dispatch(resourcesActions.openFileInJupyter(resource, file)),
+    copyFileOrFolder: (
+      resource: IResource,
+      file: IFile,
+      destination: IFolder
+    ) => dispatch(copyFileOrFolder(resource, file, destination)),
+    moveFileOrFolder: (
+      resource: IResource,
+      file: IFile,
+      destination: IFolder
+    ) => dispatch(moveFileOrFolder(resource, file, destination)),
+    uploadNewFile: (resource: IResource, file: FormData) =>
+      dispatch(uploadNewFile(resource, file)),
     // a new call to uploadNewDir
 
-    renameFileOrFolder: (resource: IResource, srcPath: string, destPath: string) => dispatch(renameFileOrFolder(resource, srcPath, destPath)),
-    goBackToResources: () => dispatch(push('/')),
-    deleteResourcesLocally: (resources: IResource[]) => dispatch(deleteResources(resources, true)),
-  }
+    renameFileOrFolder: (
+      resource: IResource,
+      srcPath: string,
+      destPath: string
+    ) => dispatch(renameFileOrFolder(resource, srcPath, destPath)),
+    goBackToResources: () => dispatch(push("/")),
+    deleteResourcesLocally: (resources: IResource[]) =>
+      dispatch(deleteResources(resources, true)),
+  };
 };
 
-type PropsType = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
+type PropsType = ReturnType<typeof mapStateToProps> &
+  ReturnType<typeof mapDispatchToProps>;
 
 type StateType = {
-  filesOrFoldersToConfirmDeleting: string[] | undefined
-  modal: MODAL_TYPES,
-  selectedFileToUpload: any,
-  selectedFileToRename: IFile | IFolder | null,
+  filesOrFoldersToConfirmDeleting: string[] | undefined;
+  modal: MODAL_TYPES;
+  selectedFileToUpload: any;
+  selectedFileToRename: IFile | IFolder | null;
 };
 
 /**
  * Component that displays the resource page (resource metadata, getting started, archive message, resource files, and readme display)
  */
 class ResourcePage extends React.Component<PropsType, StateType> {
-
   state: StateType = {
     filesOrFoldersToConfirmDeleting: undefined,
     modal: MODAL_TYPES.NONE,
@@ -113,15 +138,20 @@ class ResourcePage extends React.Component<PropsType, StateType> {
 
   displayModal = (type: MODAL_TYPES) => this.setState({ modal: type });
 
-  showConfirmArchiveResourceModal = (type: MODAL_TYPES) => this.setState({ modal: MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE });
+  showConfirmArchiveResourceModal = (type: MODAL_TYPES) =>
+    this.setState({ modal: MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE });
 
-  displayDeleteConfirmationModal = (paths: string[]) => this.setState({
-    modal: MODAL_TYPES.DELETE,
-    filesOrFoldersToConfirmDeleting: paths,
-  });
+  displayDeleteConfirmationModal = (paths: string[]) =>
+    this.setState({
+      modal: MODAL_TYPES.DELETE,
+      filesOrFoldersToConfirmDeleting: paths,
+    });
 
   doDeleteSelectedFiles = () => {
-    this.props.deleteResourceFilesOrFolders(this.props.resource!, this.state.filesOrFoldersToConfirmDeleting!);
+    this.props.deleteResourceFilesOrFolders(
+      this.props.resource!,
+      this.state.filesOrFoldersToConfirmDeleting!
+    );
     this.setState({
       filesOrFoldersToConfirmDeleting: undefined,
       modal: MODAL_TYPES.NONE,
@@ -133,15 +163,13 @@ class ResourcePage extends React.Component<PropsType, StateType> {
   };
 
   checkSyncStatus = (paths: string[]) => {
-    this.props.checkSyncStatusFiles(this.props.resource!, paths!)
-  }
+    this.props.checkSyncStatusFiles(this.props.resource!, paths!);
+  };
   checkSyncHydroShare = (paths: string[]) => {
-    this.props.checkSyncHydroShareStatusFiles(this.props.resource!, paths!)
-  }
+    this.props.checkSyncHydroShareStatusFiles(this.props.resource!, paths!);
+  };
   hideModal = () => this.setState({ modal: MODAL_TYPES.NONE });
-  checkingRefresh: boolean;
-  
-
+  checkingRefresh: boolean = false;
 
   public render() {
     const {
@@ -180,8 +208,7 @@ class ResourcePage extends React.Component<PropsType, StateType> {
     }
 
     this.props.getFilesIfNeeded(resource);
-    this.props.downloadFiles(resource, this.props.paths)
-  
+    this.props.downloadFiles(resource, this.props.paths);
 
     // const toggleAllLocalSelected = () => this.props.toggleSelectedAllLocal(resource!);
     // const toggleAllHydroShareSelected = () => this.props.toggleSelectedAllHydroShare(resource!);
@@ -200,7 +227,9 @@ class ResourcePage extends React.Component<PropsType, StateType> {
     };
 
     const editPrivacy = () => {
-      window.location.replace(`https://www.hydroshare.org/resource/${resource.id}/`);
+      window.location.replace(
+        `https://www.hydroshare.org/resource/${resource.id}/`
+      );
       this.setState({ modal: MODAL_TYPES.NONE });
     };
 
@@ -210,22 +239,24 @@ class ResourcePage extends React.Component<PropsType, StateType> {
 
     const uploadFile = (file: any) => {
       const formData = new FormData();
-      formData.append('file', this.state.selectedFileToUpload);
+      formData.append("file", this.state.selectedFileToUpload);
       this.props.uploadNewFile(this.props.resource!, formData);
       this.hideModal();
     };
 
-    const displayRenameHydroShareFileModal = (fileOrFolder: IFile | IFolder) => {
+    const displayRenameHydroShareFileModal = (
+      fileOrFolder: IFile | IFolder
+    ) => {
       this.setState({
         modal: MODAL_TYPES.RENAME_HYDROSHARE_FILE,
-        selectedFileToRename: fileOrFolder
+        selectedFileToRename: fileOrFolder,
       });
     };
 
     const displayRenameWorkspaceFileModal = (fileOrFolder: IFile | IFolder) => {
       this.setState({
         modal: MODAL_TYPES.RENAME_WORKSPACE_FILE,
-        selectedFileToRename: fileOrFolder
+        selectedFileToRename: fileOrFolder,
       });
     };
 
@@ -240,7 +271,11 @@ class ResourcePage extends React.Component<PropsType, StateType> {
     };
 
     const openFile = (file: IFile) => this.props.openFile(resource, file);
-    const openFileInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resource?.id}/`, '_blank');
+    const openFileInHydroShare = () =>
+      window.open(
+        `https://www.hydroshare.org/resource/${this.props.resource?.id}/`,
+        "_blank"
+      );
 
     let modal;
 
@@ -249,57 +284,74 @@ class ResourcePage extends React.Component<PropsType, StateType> {
         modal = <NewFileModal close={this.hideModal} submit={createNewFile} />;
         break;
       case MODAL_TYPES.DELETE:
-        modal = <DeleteConfirmationModal
-          close={this.hideModal}
-          submit={this.doDeleteSelectedFiles}
-          paths={this.state.filesOrFoldersToConfirmDeleting!}
-        />;
+        modal = (
+          <DeleteConfirmationModal
+            close={this.hideModal}
+            submit={this.doDeleteSelectedFiles}
+            paths={this.state.filesOrFoldersToConfirmDeleting!}
+          />
+        );
         break;
       case MODAL_TYPES.EDIT_PRIVACY:
-        modal = <EditPrivacyModal
-          close={this.hideModal}
-          submit={editPrivacy}
-        />;
-        break
+        modal = (
+          <EditPrivacyModal close={this.hideModal} submit={editPrivacy} />
+        );
+        break;
       case MODAL_TYPES.UPLOAD_FILE:
-        modal = <UploadFileModal
-          close={this.hideModal}
-          submit={uploadFile}
-          onFileChange={onSelectedFileToUploadChange}
-        />
-        break
+        modal = (
+          <UploadFileModal
+            close={this.hideModal}
+            submit={uploadFile}
+            onFileChange={onSelectedFileToUploadChange}
+          />
+        );
+        break;
       case MODAL_TYPES.RENAME_HYDROSHARE_FILE:
-        modal = <RenameFileModal
-          close={this.hideModal}
-          submit={renameFileOrFolder}
-          fileOrFolder={this.state.selectedFileToRename}
-          renameLocation={"HydroShare"}
-        />
-        break
+        modal = (
+          <RenameFileModal
+            close={this.hideModal}
+            submit={renameFileOrFolder}
+            fileOrFolder={this.state.selectedFileToRename}
+            renameLocation={"HydroShare"}
+          />
+        );
+        break;
       case MODAL_TYPES.RENAME_WORKSPACE_FILE:
-        modal = <RenameFileModal
-          close={this.hideModal}
-          submit={renameFileOrFolder}
-          fileOrFolder={this.state.selectedFileToRename}
-          renameLocation={"Workspace"}
-        />
-        break
+        modal = (
+          <RenameFileModal
+            close={this.hideModal}
+            submit={renameFileOrFolder}
+            fileOrFolder={this.state.selectedFileToRename}
+            renameLocation={"Workspace"}
+          />
+        );
+        break;
       case MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE:
         const selectedArchResources = Array(this.props.resource!);
-        modal = <DeleteLocallyConfirmationModal
-          close={this.hideModal}
-          resources={selectedArchResources}
-          submit={deleteResourceLocally}
-        />
+        modal = (
+          <DeleteLocallyConfirmationModal
+            close={this.hideModal}
+            resources={selectedArchResources}
+            submit={deleteResourceLocally}
+          />
+        );
         break;
     }
 
     let gettingStarted;
-    // @ts-ignore
-    if (window.NOTEBOOK_URL_PATH_PREFIX && window.GETTING_STARTED_NOTEBOOK_PATH) {
-      gettingStarted = <GettingStarted
-        promptDeleteLocally={() => this.displayModal(MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE)}
-      />
+    if (
+      // @ts-ignore
+      window.NOTEBOOK_URL_PATH_PREFIX &&
+      // @ts-ignore
+      window.GETTING_STARTED_NOTEBOOK_PATH
+    ) {
+      gettingStarted = (
+        <GettingStarted
+          promptDeleteLocally={() =>
+            this.displayModal(MODAL_TYPES.CONFIRM_ARCHIVE_RESOURCE)
+          }
+        />
+      );
     }
     return (
       <div className="page resource-details">
@@ -308,7 +360,9 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           promptEditPrivacy={() => this.displayModal(MODAL_TYPES.EDIT_PRIVACY)}
         />
         {gettingStarted}
-        {this.props.archiveMessage && <ArchiveMessage message={this.props.archiveMessage} />}
+        {this.props.archiveMessage && (
+          <ArchiveMessage message={this.props.archiveMessage} />
+        )}
         <FileManager
           fetchingHydroShareFiles={fetchingHydroShareFiles}
           fetchingLocalFiles={fetchingLocalFiles}
@@ -327,12 +381,11 @@ class ResourcePage extends React.Component<PropsType, StateType> {
           checkSyncStatus={this.checkSyncStatus}
           checkSyncHydroShare={this.checkSyncHydroShare}
         />
-        
+
         {modal}
       </div>
-    )
+    );
   }
-
 }
 // <ReadMeDisplay localReadMe={this.props.resource ? this.props.resource.localReadMe : "# No ReadMe yet"} resId={resource.id} />
 enum MODAL_TYPES {
@@ -347,16 +400,20 @@ enum MODAL_TYPES {
 }
 
 type DeleteConfirmationModalProps = {
-  close: () => any
-  submit: () => any
-  paths: string[]
+  close: () => any;
+  submit: () => any;
+  paths: string[];
 };
 
-const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (props: DeleteConfirmationModalProps) => {
+const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
+  props: DeleteConfirmationModalProps
+) => {
   // Remove the prefix (i.e. hs: or local:) from each path
-  const pathsCleaned = props.paths.map(p => p.split(':')[1]);
+  const pathsCleaned = props.paths.map((p) => p.split(":")[1]);
   const count = pathsCleaned.length;
-  const message = `Are you sure you want to delete the following ${count} item${count === 1 ? '' : 's'}?`;
+  const message = `Are you sure you want to delete the following ${count} item${
+    count === 1 ? "" : "s"
+  }?`;
   return (
     <Modal
       close={props.close}
@@ -367,36 +424,50 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (props: 
       isWarning={true}
     >
       <p>{message}</p>
-      {pathsCleaned.map(p => <p>{p}</p>)}
+      {pathsCleaned.map((p) => (
+        <p>{p}</p>
+      ))}
     </Modal>
   );
 };
 
 type RenameFileModalProps = {
-  close: () => any
-  submit: (item: IFile | IFolder, destPath: string) => any
-  fileOrFolder: IFile | IFolder | null
-  renameLocation: string
+  close: () => any;
+  submit: (item: IFile | IFolder, destPath: string) => any;
+  fileOrFolder: IFile | IFolder | null;
+  renameLocation: string;
 };
 
-const RenameFileModal: React.FC<RenameFileModalProps> = (props: RenameFileModalProps) => {
+const RenameFileModal: React.FC<RenameFileModalProps> = (
+  props: RenameFileModalProps
+) => {
   const [state, setState] = React.useState({
     renameTextField: props.fileOrFolder!.name,
   });
   // Remove the prefix (i.e. hs: or local:) from each path
-  const disable = props.renameLocation === "HydroShare" && props.fileOrFolder?.type === "folder";
+  const disable =
+    props.renameLocation === "HydroShare" &&
+    props.fileOrFolder?.type === "folder";
 
-  const handleChange = (renameTextField: string) => setState({ renameTextField });
+  const handleChange = (renameTextField: string) =>
+    setState({ renameTextField });
   const renameFile = () => {
     props.submit(props.fileOrFolder!, state.renameTextField);
     props.close();
   };
 
   let content = disable ? (
-    <p>To rename a HydroShare folder, please click the "Open in HydroShare" button and rename the folder there.</p>
+    <p>
+      To rename a HydroShare folder, please click the "Open in HydroShare"
+      button and rename the folder there.
+    </p>
   ) : (
-      <TextInput onChange={handleChange} value={state.renameTextField} title="Rename file" />
-    );
+    <TextInput
+      onChange={handleChange}
+      value={state.renameTextField}
+      title="Rename file"
+    />
+  );
 
   const isValid = !disable && state.renameTextField.length > 0;
 
@@ -414,7 +485,4 @@ const RenameFileModal: React.FC<RenameFileModalProps> = (props: RenameFileModalP
   );
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ResourcePage);
+export default connect(mapStateToProps, mapDispatchToProps)(ResourcePage);
