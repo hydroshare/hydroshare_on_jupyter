@@ -26,7 +26,7 @@ def _jupyter_labextension_paths():
     return [{"src": EXTENSION_DIRNAME, "dest": extension_metadata["name"]}]
 
 
-def _jupyter_server_extension_points():
+def _jupyter_server_extension_paths():
     return [{"module": MODULE_NAME}]
 
 
