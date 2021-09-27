@@ -1,10 +1,11 @@
-from tornado.httpclient import HTTPRequest, HTTPClient, HTTPResponse
+from tornado.httpclient import HTTPRequest, HTTPResponse
 from tornado.httputil import HTTPHeaders
 from hsclient import HydroShare
 from hydroshare_jupyter_sync.__main__ import get_test_app
 from hydroshare_jupyter_sync.hydroshare_resource_cache import (
     HydroShareWithResourceCache,
 )
+from hydroshare_jupyter_sync.server import LocalResourceEntityHandler
 from hydroshare_jupyter_sync.session import _SessionSyncSingleton
 import json
 import pytest
@@ -146,3 +147,46 @@ async def test_redirect_to_login_if_not_logged_in(http_client, base_url):
     assert response.code == 302
     # assert redirect to login prepended to uri request
     assert response.headers["location"] == f"{login_url}?next={uri}"
+
+
+TRUNCATE_BAGGIT_PREFIX_TEST_DATA = [
+    # Tuple[test: str, validation: str]
+    ("data/contents/file", "file"),
+    ("/data/contents/file", "file"),
+    # TODO: Fix BAGGIT_PREFIX_RE regex to cover this case.
+    ("/data/contentsfile", "file"),
+    ("/data/contents/dir/file", "dir/file"),
+]
+
+
+@pytest.mark.parametrize("test,validation", TRUNCATE_BAGGIT_PREFIX_TEST_DATA)
+def test__truncate_baggit_prefix(test, validation):
+
+    assert LocalResourceEntityHandler._truncate_baggit_prefix(test) == validation
+
+
+BAGGIT_PREFIX = LocalResourceEntityHandler.BAGGIT_PREFIX
+TRUNCATE_BAGGIT_PREPEND_TEST_DATA = [
+    # Tuple[test: str, validation: str]
+    (
+        f"{BAGGIT_PREFIX}file",
+        f"{BAGGIT_PREFIX}file",
+    ),
+    (
+        f"{BAGGIT_PREFIX}dir/file",
+        f"{BAGGIT_PREFIX}dir/file",
+    ),
+    (
+        "file",
+        f"{BAGGIT_PREFIX}file",
+    ),
+    (
+        "dir/file",
+        f"{BAGGIT_PREFIX}dir/file",
+    ),
+]
+
+
+@pytest.mark.parametrize("test,validation", TRUNCATE_BAGGIT_PREPEND_TEST_DATA)
+def test__prepend_baggit_prefix(test, validation):
+    assert LocalResourceEntityHandler._prepend_baggit_prefix(test) == validation
