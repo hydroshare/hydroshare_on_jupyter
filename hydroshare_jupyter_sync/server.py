@@ -376,7 +376,6 @@ class ListUserHydroShareResources(HeadersMixIn, BaseRequestHandler):
 
     def get(self):
         session = self.get_session()
-        username = session.username
 
         resources = list(session.session.search(edit_permission=True))
 
@@ -540,7 +539,7 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
 
     BAGGIT_PREFIX_RE = r"^/?data/contents/?"
     BAGGIT_PREFIX_MATCHER = re.compile(BAGGIT_PREFIX_RE)
-    BAGGIT_PREFIX = "/data/contents/"
+    BAGGIT_PREFIX = "data/contents/"
     _ZIP_FILENAME = "__zip.zip"
     resource_id: str
 
@@ -587,6 +586,7 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
         resource = session.resource(resource_id)
 
         files = self._add_baggit_prefix_and_drop_nonexistant_files(resource_id, files)
+        resource_path_prefix = self.data_path / f"{resource_id}/{resource_id}"
 
         with TemporaryDirectory() as temp_dir:
             zip_file = Path(temp_dir) / self._ZIP_FILENAME
@@ -598,9 +598,7 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
                         file,
                         # maintain file system structure relative to where data is stored in baggit (/data/contents/)
                         # Example: `/data/contents/dir1/some-file.txt` will be archived in the zip at, `/dir1/some-file.txt`
-                        file.relative_to(
-                            self.data_path / f"{resource_id}/{self.BAGGIT_PREFIX}"
-                        ),
+                        file.relative_to(resource_path_prefix / self.BAGGIT_PREFIX),
                     )
 
                 # upload zip to HydroShare
@@ -614,7 +612,9 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
     def on_finish(self) -> None:
         if self.get_status() == HTTPStatus.CREATED:
             # dispatch resource uploaded event with resource_id
-            session_sync_struct.event_broker.dispatch("RESOURCE_ENTITY_UPLOADED", self.resource_id)
+            session_sync_struct.event_broker.dispatch(
+                "RESOURCE_ENTITY_UPLOADED", self.resource_id
+            )
 
     def _unpack_zip_on_hydroshare(
         self, resource, filename: str, location: str = ""
@@ -640,12 +640,11 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
         self, resource_id: str, files: List[str]
     ) -> List[Path]:
         # prepend baggit prefix, files/dirs that don't exist are dropped
+        resource_path_prefix = self.data_path / f"{resource_id}/{resource_id}"
         return [
-            self.data_path / f"{resource_id}/{self._prepend_baggit_prefix(f)}"
+            resource_path_prefix / self._prepend_baggit_prefix(f)
             for f in files
-            if (
-                self.data_path / f"{resource_id}/{self._prepend_baggit_prefix(f)}"
-            ).exists()
+            if (resource_path_prefix / self._prepend_baggit_prefix(f)).exists()
         ]
 
     @staticmethod
