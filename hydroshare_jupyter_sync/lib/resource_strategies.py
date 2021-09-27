@@ -16,9 +16,9 @@ class AbstractHydroShareEntityDownloadStrategy(ABC):
         """Interface for HydroShare file system entity download"""
 
     def create_intermediary_directories(self, path: Path) -> Path:
-        """Handles the creation of {data_path}/{resource_id}/data/contents"""
+        """Handles the creation of {data_path}/{resource_id}/{resource_id}/data/contents"""
         contents_path = (
-            Path(self.data_path) / self.resource.resource_id / "data/contents" / path
+            Path(self.data_path) / self.resource.resource_id / self.resource.resource_id / "data/contents" / path
         )
         contents_path.mkdir(parents=True, exist_ok=True)
         return contents_path
