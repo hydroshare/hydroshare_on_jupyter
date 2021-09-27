@@ -52,6 +52,7 @@ from .resource_manager import (
 from .models.api_models import (
     Boolean,
     Credentials,
+    DataDir,
     Success,
     CollectionOfResourceMetadata,
     ResourceFiles,
@@ -219,6 +220,19 @@ class WebAppHandler(HeadersMixIn, BaseRequestHandler):
         # NOTE: This may need to change to accommodate multiple template directories
         # when integrating with Jupyter.
         self.render("root.html", **template_kwargs)
+
+
+class DataDirectoryHandler(HeadersMixIn, BaseRequestHandler):
+    """Return absolute path to directory configured to store HydroShare data locally."""
+
+    _custom_headers = [("Access-Control-Allow-Methods", "GET, OPTIONS")]
+
+    def prepare(self):
+        # NOTE: Bypass base request prepare. This should change in the future
+        pass
+
+    def get(self):
+        self.write(DataDir(data_directory=str(self.data_path)).dict())
 
 
 class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
