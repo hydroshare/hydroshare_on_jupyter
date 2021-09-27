@@ -1,88 +1,98 @@
-import {ChangeEvent} from "react";
-import * as React from 'react';
+import { ChangeEvent } from "react";
+import * as React from "react";
 
-import '../styles/ResourceList.scss';
+import "../styles/ResourceList.scss";
 
-import DeleteLocallyConfirmationModal from './modals/DeleteLocallyConfirmationModal';
+import DeleteLocallyConfirmationModal from "./modals/DeleteLocallyConfirmationModal";
 
-import {
-  IResource,
-} from '../store/types';
+import { IResource } from "../store/types";
 import Loading from "./Loading";
 import Modal from "./modals/Modal";
-import { SortTriangleSVG } from './FilePane';
+import { SortTriangleSVG } from "./FilePane";
 
-import NewResourceModal from './modals/NewResourceModal';
-import { ICreateResourceRequest } from '../store/types';
+import NewResourceModal from "./modals/NewResourceModal";
+import { ICreateResourceRequest } from "../store/types";
 
 interface IResourceListProps {
-  className?: string
-  deleteResources: (resources: IResource[]) => any
-  deleteResourcesLocally: (resources: IResource[]) => any
-  fetchingResources: boolean
-  viewResource: any
+  className?: string;
+  deleteResources: (resources: IResource[]) => any;
+  deleteResourcesLocally: (resources: IResource[]) => any;
+  fetchingResources: boolean;
+  viewResource: any;
   resources: {
-      [resourceId: string]: IResource
-  }
-  createResource: (newResource: ICreateResourceRequest) => any
+    [resourceId: string]: IResource;
+  };
+  createResource: (newResource: ICreateResourceRequest) => any;
 }
 
 interface IStateTypes {
-  allResourcesSelected: boolean
-  filterBy: string
-  modal: MODAL_TYPES
-  selectedResources: Set<string>
-  sortAscending: boolean
-  sortBy: SORT_BY_OPTIONS
+  allResourcesSelected: boolean;
+  filterBy: string;
+  modal: MODAL_TYPES;
+  selectedResources: Set<string>;
+  sortAscending: boolean;
+  sortBy: SORT_BY_OPTIONS;
 }
 
 /**
  * Component that displays the list of a user's resources
  * Contains the actions bar for managing resources
  */
-export default class ResourceList extends React.Component<IResourceListProps, IStateTypes> {
-
-    state = {
-      allResourcesSelected: false,
-      filterBy: '',
-      resourceToMaybeDelete: undefined,
-      modal: MODAL_TYPES.NONE,
-      selectedResources: new Set<string>(),
-      sortAscending: true,
-      sortBy: SORT_BY_OPTIONS.TITLE,
-    };
+export default class ResourceList extends React.Component<
+  IResourceListProps,
+  IStateTypes
+> {
+  state = {
+    allResourcesSelected: false,
+    filterBy: "",
+    resourceToMaybeDelete: undefined,
+    modal: MODAL_TYPES.NONE,
+    selectedResources: new Set<string>(),
+    sortAscending: true,
+    sortBy: SORT_BY_OPTIONS.TITLE,
+  };
 
   createResource = (data: ICreateResourceRequest) => {
     this.props.createResource(data);
     this.closeModal();
   };
 
-    deleteSelectedResource = () => {
-      this.props.deleteResources(Array.from(this.state.selectedResources).map(r => this.props.resources[r]));
-      this.setState({modal: MODAL_TYPES.NONE});
-    };
+  deleteSelectedResource = () => {
+    this.props.deleteResources(
+      Array.from(this.state.selectedResources).map(
+        (r) => this.props.resources[r]
+      )
+    );
+    this.setState({ modal: MODAL_TYPES.NONE });
+  };
 
-    deleteSelectedResourceLocally = () => {
-      this.props.deleteResourcesLocally(Array.from(this.state.selectedResources).map(r => this.props.resources[r]));
-      this.setState({modal: MODAL_TYPES.NONE});
-    };
+  deleteSelectedResourceLocally = () => {
+    this.props.deleteResourcesLocally(
+      Array.from(this.state.selectedResources).map(
+        (r) => this.props.resources[r]
+      )
+    );
+    this.setState({ modal: MODAL_TYPES.NONE });
+  };
 
-    showConfirmResourceDeletionModal = () => this.setState({ modal: MODAL_TYPES.CONFIRM_RESOURCE_DELETION });
-    showNewResourceModal = () => this.setState({ modal: MODAL_TYPES.NEW_RESOURCE });
-    showConfirmDeleteResourceLocallyModal = () => this.setState({ modal: MODAL_TYPES.CONFIRM_DELETE_LOCALLY_RESOURCE });
+  showConfirmResourceDeletionModal = () =>
+    this.setState({ modal: MODAL_TYPES.CONFIRM_RESOURCE_DELETION });
+  showNewResourceModal = () =>
+    this.setState({ modal: MODAL_TYPES.NEW_RESOURCE });
+  showConfirmDeleteResourceLocallyModal = () =>
+    this.setState({ modal: MODAL_TYPES.CONFIRM_DELETE_LOCALLY_RESOURCE });
 
+  setSortBy = (sortBy: SORT_BY_OPTIONS) => {
+    if (sortBy === this.state.sortBy) {
+      // If the user clicked the header of the column we're already sorted by, toggle sorting ascending/descending
+      this.setState({ sortAscending: !this.state.sortAscending });
+    } else {
+      // Otherwise change the the column we're sorted by
+      this.setState({ sortBy });
+    }
+  };
 
-    setSortBy = (sortBy: SORT_BY_OPTIONS) => {
-      if (sortBy === this.state.sortBy) {
-        // If the user clicked the header of the column we're already sorted by, toggle sorting ascending/descending
-        this.setState({sortAscending: !this.state.sortAscending});
-      } else {
-        // Otherwise change the the column we're sorted by
-        this.setState({sortBy});
-      }
-    };
-
-    closeModal = () => this.setState({ modal: MODAL_TYPES.NONE });
+  closeModal = () => this.setState({ modal: MODAL_TYPES.NONE });
 
   toggleAllResourcesSelected = () => {
     let selectedResources;
@@ -105,33 +115,37 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       selectedResources.add(resource.id);
     }
     this.setState({
-      allResourcesSelected: selectedResources.size === Object.keys(this.props.resources).length,
+      allResourcesSelected:
+        selectedResources.size === Object.keys(this.props.resources).length,
       selectedResources,
     });
   };
 
-  getFilteredSortedResources = () => Object.values(this.props.resources)
-    .filter(r => r.title.toLowerCase().includes(this.state.filterBy.toLowerCase()))
-    .sort((r1, r2) => {
-      switch (this.state.sortBy) {
-        case SORT_BY_OPTIONS.TITLE:
-          if (this.state.sortAscending) {
-            return r1.title.localeCompare(r2.title);
-          } else {
-            return r2.title.localeCompare(r1.title);
-          }
-        case SORT_BY_OPTIONS.LAST_MODIFIED:
-          if (this.state.sortAscending) {
-            return r1.lastUpdated?.diff(r2.lastUpdated)
-          } else {
-            return r2.lastUpdated?.diff(r1.lastUpdated)
-          }
-        case SORT_BY_OPTIONS.OWNER:
-          if (this.state.sortAscending) {
-            return r1.creator.localeCompare(r2.creator);
-          } else {
-            return r2.creator.localeCompare(r1.creator);
-          }
+  getFilteredSortedResources = () =>
+    Object.values(this.props.resources)
+      .filter((r: IResource) =>
+        r.title.toLowerCase().includes(this.state.filterBy.toLowerCase())
+      )
+      .sort((r1, r2) => {
+        switch (this.state.sortBy) {
+          case SORT_BY_OPTIONS.TITLE:
+            if (this.state.sortAscending) {
+              return r1.title.localeCompare(r2.title);
+            } else {
+              return r2.title.localeCompare(r1.title);
+            }
+          case SORT_BY_OPTIONS.LAST_MODIFIED:
+            if (this.state.sortAscending) {
+              return r1.lastUpdated?.diff(r2.lastUpdated);
+            } else {
+              return r2.lastUpdated?.diff(r1.lastUpdated);
+            }
+          case SORT_BY_OPTIONS.OWNER:
+            if (this.state.sortAscending) {
+              return r1.creator.localeCompare(r2.creator);
+            } else {
+              return r2.creator.localeCompare(r1.creator);
+            }
           case SORT_BY_OPTIONS.COPIED_LOCALLY:
             const r1Val = r1.localCopyExists ? "Local" : "HydroShare";
             const r2Val = r2.localCopyExists ? "Local" : "HydroShare";
@@ -140,12 +154,14 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
             } else {
               return r2Val.localeCompare(r1Val);
             }
-        default: // Should never happen, but needed to satisfy TypeScript
-          return 0;
-      }
-    });
+          default:
+            // Should never happen, but needed to satisfy TypeScript
+            return 0;
+        }
+      });
 
-  filterTextChanged = (e: ChangeEvent<HTMLInputElement>) => this.setState({filterBy: e.target.value});
+  filterTextChanged = (e: ChangeEvent<HTMLInputElement>) =>
+    this.setState({ filterBy: e.target.value });
 
   public render() {
     const {
@@ -155,118 +171,180 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
       sortBy,
     } = this.state;
 
-
     let content: React.ReactNode;
     if (this.props.fetchingResources) {
-      content = <Loading/>;
+      content = <Loading />;
     } else {
-      const resourcesToShow = this.getFilteredSortedResources()   
+      const resourcesToShow = this.getFilteredSortedResources();
       if (resourcesToShow.length > 0) {
-        content = resourcesToShow.map(resource => (
-            <div className="table-row">
-              <input
-                type="checkbox"
-                checked={selectedResources.has(resource.id)}
-                onChange={() => this.toggleSingleResourceSelected(resource)}
-              />
-              <span onClick={() => this.props.viewResource(resource)} className="clickable">{resource.title}</span>
-              <span>{resource.lastUpdated.format('MMMM D, YYYY')}</span>
-              <span>{resource.creator || 'Unknown'}</span>
-              <span>{resource.localCopyExists ? 'Local' : 'HydroShare'}</span>
-              
-            </div>
-          )
-        );
+        content = resourcesToShow.map((resource) => (
+          <div className="table-row">
+            <input
+              type="checkbox"
+              checked={selectedResources.has(resource.id)}
+              onChange={() => this.toggleSingleResourceSelected(resource)}
+            />
+            <span
+              onClick={() => this.props.viewResource(resource)}
+              className="clickable"
+            >
+              {resource.title}
+            </span>
+            <span>{resource.lastUpdated.format("MMMM D, YYYY")}</span>
+            <span>{resource.creator || "Unknown"}</span>
+            <span>{resource.localCopyExists ? "Local" : "HydroShare"}</span>
+          </div>
+        ));
       } else {
         content = <div className="no-results">No resources</div>;
       }
     }
 
-    const deleteButtonClassName = selectedResources.size === 0 ? "button-disabled": "button-enabled";
+    const deleteButtonClassName =
+      selectedResources.size === 0 ? "button-disabled" : "button-enabled";
 
     let modal;
     switch (this.state.modal) {
       case MODAL_TYPES.NEW_RESOURCE:
-        modal = <NewResourceModal
-          close={this.closeModal}
-          createResource={this.createResource}
-        />;
+        modal = (
+          <NewResourceModal
+            close={this.closeModal}
+            createResource={this.createResource}
+          />
+        );
         break;
       case MODAL_TYPES.CONFIRM_RESOURCE_DELETION:
-        const selectedDelResources = Array.from(this.state.selectedResources).map(r => this.props.resources[r]);
-        modal = <ResourceDeleteConfirmationModal
-          close={this.closeModal}
-          resources={selectedDelResources}
-          submit={this.deleteSelectedResource}
-        />
+        const selectedDelResources = Array.from(
+          this.state.selectedResources
+        ).map((r) => this.props.resources[r]);
+        modal = (
+          <ResourceDeleteConfirmationModal
+            close={this.closeModal}
+            resources={selectedDelResources}
+            submit={this.deleteSelectedResource}
+          />
+        );
         break;
       case MODAL_TYPES.CONFIRM_DELETE_LOCALLY_RESOURCE:
-        const selectedArchResources = Array.from(this.state.selectedResources).map(r => this.props.resources[r]);
-        modal = <DeleteLocallyConfirmationModal
-          close={this.closeModal}
-          resources={selectedArchResources}
-          submit={this.deleteSelectedResourceLocally}
-        />
+        const selectedArchResources = Array.from(
+          this.state.selectedResources
+        ).map((r) => this.props.resources[r]);
+        modal = (
+          <DeleteLocallyConfirmationModal
+            close={this.closeModal}
+            resources={selectedArchResources}
+            submit={this.deleteSelectedResourceLocally}
+          />
+        );
         break;
     }
 
-    const classNames = ['ResourceList', 'table'];
+    const classNames = ["ResourceList", "table"];
     if (this.props.className) {
       classNames.push(this.props.className);
     }
-    const sortOrder = sortAscending ? 'sort-ascending' : 'sort-descending';
+    const sortOrder = sortAscending ? "sort-ascending" : "sort-descending";
     return (
-      <div className={classNames.join(' ')}>
+      <div className={classNames.join(" ")}>
         <div className="ResourceList-header">
           <h2>My Resources</h2>
-          <p>Here is a list of your HydroShare resources. To open one, simply click on its name.</p>
-          <p>A resource is a collection of files on HydroShare, a place for sharing code and water data. These files can be code (e.g. Python or R), data (e.g. .csv, .xlsx, .geojson), or any other type of file.</p>
-          <p>The list below shows the resources that exist in HydroShare and in JupyterHub. Resources only in HydroShare can be synced to JupyterHub, and then you can run code and edit data. All changes should be made
-             in JupyterHub and then synced to HydroShare. Think of JupyterHub as your workspace and HydroShare are your sharing or archival space. </p>
-          <p>To begin, click the <b>New Resource</b> button to create a new resource or click on an existing resource in the list to view files in that resource.</p> 
-          <p><b>Delete: </b> This will delete a resource from your workspace and from HydroShare. Please save any files you want to your desktop before deleting as all of your work will be lost.</p>
+          <p>
+            Here is a list of your HydroShare resources. To open one, simply
+            click on its name.
+          </p>
+          <p>
+            A resource is a collection of files on HydroShare, a place for
+            sharing code and water data. These files can be code (e.g. Python or
+            R), data (e.g. .csv, .xlsx, .geojson), or any other type of file.
+          </p>
+          <p>
+            The list below shows the resources that exist in HydroShare and in
+            JupyterHub. Resources only in HydroShare can be synced to
+            JupyterHub, and then you can run code and edit data. All changes
+            should be made in JupyterHub and then synced to HydroShare. Think of
+            JupyterHub as your workspace and HydroShare are your sharing or
+            archival space.{" "}
+          </p>
+          <p>
+            To begin, click the <b>New Resource</b> button to create a new
+            resource or click on an existing resource in the list to view files
+            in that resource.
+          </p>
+          <p>
+            <b>Delete: </b> This will delete a resource from your workspace and
+            from HydroShare. Please save any files you want to your desktop
+            before deleting as all of your work will be lost.
+          </p>
         </div>
         <div className="actions-row">
-          <input className="search" type="text" placeholder="Search" onChange={this.filterTextChanged}/>
-          <button className="button-enabled" onClick={this.showNewResourceModal}><span>New Resource</span></button>
+          <input
+            className="search"
+            type="text"
+            placeholder="Search"
+            onChange={this.filterTextChanged}
+          />
+          <button
+            className="button-enabled"
+            onClick={this.showNewResourceModal}
+          >
+            <span>New Resource</span>
+          </button>
           <button
             className={deleteButtonClassName}
             disabled={selectedResources.size === 0}
-            onClick={this.showConfirmResourceDeletionModal}>
+            onClick={this.showConfirmResourceDeletionModal}
+          >
             <span>Delete</span>
           </button>
-          <button className={deleteButtonClassName}
+          <button
+            className={deleteButtonClassName}
             disabled={selectedResources.size === 0}
-            onClick={this.showConfirmDeleteResourceLocallyModal}>
-            <span>Remove from workspace</span></button>
+            onClick={this.showConfirmDeleteResourceLocallyModal}
+          >
+            <span>Remove from workspace</span>
+          </button>
         </div>
         <div className="table-header table-row">
           <span className="checkbox">
-            <input type="checkbox" checked={allResourcesSelected} onChange={this.toggleAllResourcesSelected}/>
+            <input
+              type="checkbox"
+              checked={allResourcesSelected}
+              onChange={this.toggleAllResourcesSelected}
+            />
           </span>
           <button
-            className={'clickable ' + (sortBy === SORT_BY_OPTIONS.TITLE ? sortOrder : '')}
+            className={
+              "clickable " + (sortBy === SORT_BY_OPTIONS.TITLE ? sortOrder : "")
+            }
             onClick={() => this.setSortBy(SORT_BY_OPTIONS.TITLE)}
           >
             Name
             {sortBy === SORT_BY_OPTIONS.TITLE && SortTriangleSVG}
           </button>
           <button
-            className={'clickable ' + (sortBy === SORT_BY_OPTIONS.LAST_MODIFIED ? sortOrder : '')}
+            className={
+              "clickable " +
+              (sortBy === SORT_BY_OPTIONS.LAST_MODIFIED ? sortOrder : "")
+            }
             onClick={() => this.setSortBy(SORT_BY_OPTIONS.LAST_MODIFIED)}
           >
             Last Modified on HydroShare
             {sortBy === SORT_BY_OPTIONS.LAST_MODIFIED && SortTriangleSVG}
           </button>
           <button
-            className={'clickable ' + (sortBy === SORT_BY_OPTIONS.OWNER ? sortOrder : '')}
+            className={
+              "clickable " + (sortBy === SORT_BY_OPTIONS.OWNER ? sortOrder : "")
+            }
             onClick={() => this.setSortBy(SORT_BY_OPTIONS.OWNER)}
           >
             Owner
             {sortBy === SORT_BY_OPTIONS.OWNER && SortTriangleSVG}
           </button>
           <button
-            className={'clickable ' + (sortBy === SORT_BY_OPTIONS.COPIED_LOCALLY ? sortOrder : '')}
+            className={
+              "clickable " +
+              (sortBy === SORT_BY_OPTIONS.COPIED_LOCALLY ? sortOrder : "")
+            }
             onClick={() => this.setSortBy(SORT_BY_OPTIONS.COPIED_LOCALLY)}
           >
             Location
@@ -275,28 +353,45 @@ export default class ResourceList extends React.Component<IResourceListProps, IS
         </div>
         {content}
         {modal}
-        </div>
+      </div>
     );
   }
 }
 
 type RDCModalProps = {
-  close: () => any
-  resources: IResource[]
-  submit: () => any
+  close: () => any;
+  resources: IResource[];
+  submit: () => any;
 };
 
-const ResourceDeleteConfirmationModal: React.FC<RDCModalProps> = (props: RDCModalProps) => {
+const ResourceDeleteConfirmationModal: React.FC<RDCModalProps> = (
+  props: RDCModalProps
+) => {
   return (
-    <Modal close={props.close} title="Confirm Deletion" submit={props.submit} isValid={true} submitText="Delete" isWarning={true}>
-      <p className="body-header">Are you sure you want to delete the following resources?</p>
-      {props.resources.map(r => <p className="list-resources">{r.title}</p>)}
-      <p>This will delete a resource from your workspace and from HydroShare.</p>
-      <p>Please save any files you want to your desktop before deleting as all of your work will be lost.</p>
+    <Modal
+      close={props.close}
+      title="Confirm Deletion"
+      submit={props.submit}
+      isValid={true}
+      submitText="Delete"
+      isWarning={true}
+    >
+      <p className="body-header">
+        Are you sure you want to delete the following resources?
+      </p>
+      {props.resources.map((r) => (
+        <p className="list-resources">{r.title}</p>
+      ))}
+      <p>
+        This will delete a resource from your workspace and from HydroShare.
+      </p>
+      <p>
+        Please save any files you want to your desktop before deleting as all of
+        your work will be lost.
+      </p>
     </Modal>
-  )
+  );
 };
-
 
 enum MODAL_TYPES {
   NONE,
