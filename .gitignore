@@ -279,3 +279,6 @@ miniconda3/
 # IPython
 profile_default/
 ipython_config.py
+
+# typescript/javascript package manager files
+yarn.lock
