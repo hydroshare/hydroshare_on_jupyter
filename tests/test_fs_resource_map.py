@@ -34,19 +34,19 @@ def resource_mock() -> Tuple[ResourcePath, DataDir]:
         temp_dir = Path(temp_dir).resolve()
 
         # create intermediate data dir following bagit layout
-        data_dir = temp_dir / resource_name / resource_name / "data" / "contents"
-        data_dir.mkdir(parents=True)
+        contents_dir = temp_dir / resource_name / resource_name / "data" / "contents"
+        contents_dir.mkdir(parents=True)
 
-        yield temp_dir / resource_name, data_dir
+        yield temp_dir / resource_name, contents_dir
 
 
 # tests
 def test_local_fs_resource_map(resource_mock):
-    rdir, data_dir = resource_mock
+    rdir, contents_path = resource_mock
     fsmap = LocalFSResourceMap(rdir)
 
     assert fsmap.base_directory == rdir / rdir.name
-    assert fsmap.data_path == data_dir
+    assert fsmap.contents_path == contents_path
 
 
 def test_local_fs_resource_map_add_file(resource_mock):
