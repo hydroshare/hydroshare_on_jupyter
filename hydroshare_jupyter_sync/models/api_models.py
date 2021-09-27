@@ -68,3 +68,7 @@ class ResourceCreationRequest(BaseModel):
 class ResourceFiles(BaseModel):
     # str in list cannot contain .. or ~
     files: List[constr(regex=r"^((?!~|\.{2}).)*$")] = Field(...)
+
+
+class DataDir(BaseModel):
+    data_directory: str = Field(...)
