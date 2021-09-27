@@ -3,6 +3,7 @@ from notebook.utils import url_path_join
 import tornado
 from ..websocket_handler import FileSystemEventWebSocketHandler
 from ..server import (
+    DataDirectoryHandler,
     LoginHandler,
     UserInfoHandler,
     ListUserHydroShareResources,
@@ -33,6 +34,10 @@ def get_route_handlers(frontend_url, backend_url):
         (
             url_path_join(backend_url, r"/ws"),
             FileSystemEventWebSocketHandler,
+        ),
+        (
+            url_path_join(backend_url, r"/data_directory"),
+            DataDirectoryHandler,
         ),
         (
             url_path_join(backend_url, r"/download/(.*)"),
