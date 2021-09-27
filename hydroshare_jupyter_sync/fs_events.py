@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 # type hint imports
 from typing import Callable, Union
@@ -12,10 +12,10 @@ NOOP = lambda _: ...
 
 
 class Events(Enum):
-    LOGIN_SUCCESSFUL = Callable[[Union[Path, str], HydroShare], None]
-    STATUS = Callable[[ResourceId], None]
-    RESOURCE_DOWNLOADED = Callable[[ResourceId], None]
-    RESOURCE_ENTITY_DOWNLOADED = Callable[[ResourceId], None]
-    RESOURCE_ENTITY_UPLOADED = Callable[[ResourceId], None]
+    LOGIN_SUCCESSFUL = auto()  # Callable[[Union[Path, str], HydroShare], None]
+    STATUS = auto()  # Callable[[ResourceId], None]
+    RESOURCE_DOWNLOADED = auto()  # Callable[[ResourceId], None]
+    RESOURCE_ENTITY_DOWNLOADED = auto()  # Callable[[ResourceId], None]
+    RESOURCE_ENTITY_UPLOADED = auto()  # Callable[[ResourceId], None]
     # TODO: implement below.
-    LOGOUT = NOOP
+    LOGOUT = auto()  # NOOP
