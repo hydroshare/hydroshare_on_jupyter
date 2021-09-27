@@ -1,67 +1,63 @@
-
-import * as React from 'react';
-import { ReactElement, useState } from 'react';
+import * as React from "react";
+import { ReactElement, useState } from "react";
 import {
   Draggable,
   DraggableStateSnapshot,
   Droppable,
   DroppableStateSnapshot,
-} from 'react-beautiful-dnd';
+} from "react-beautiful-dnd";
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {TiTick} from 'react-icons/ti';
-import {MdCancel} from 'react-icons/md';
-import {FaQuestion} from 'react-icons/fa';
-import * as moment from 'moment';
+import { TiTick } from "react-icons/ti";
+import { MdCancel } from "react-icons/md";
+import { FaQuestion } from "react-icons/fa";
+import * as moment from "moment";
 
-import {
-  FileOrFolderTypes,
-  IFile,
-  IFolder,
-} from '../store/types';
+import { FileOrFolderTypes, IFile, IFolder } from "../store/types";
 
-import '../styles/FilePane.scss';
+import "../styles/FilePane.scss";
 import Loading from "./Loading";
-import { IconType } from 'react-icons/lib';
+import { IconType } from "react-icons/lib";
 
 // @ts-ignore
-const DOWNLOAD_URL = (window.BACKEND_API_URL) + '/download';
+const DOWNLOAD_URL = window.BACKEND_API_URL + "/download";
 const optionsCursorTrueWithMargin = {
   followCursor: true,
   shiftX: 20,
-  shiftY: 0
-}
+  shiftY: 0,
+};
 
 interface IFilePaneState {
-  allFilesAndFoldersSelected: boolean
-  expandedFolders: Set<string>
-  selectedFilesAndFolders: Set<string>
-  sortAscending: boolean
-  sortBy: SORT_BY_OPTIONS
-  hovered: boolean
-  hoverableId: string
+  allFilesAndFoldersSelected: boolean;
+  expandedFolders: Set<string>;
+  selectedFilesAndFolders: Set<string>;
+  sortAscending: boolean;
+  sortBy: SORT_BY_OPTIONS;
+  hovered: boolean;
+  hoverableId: string;
 }
 
 interface IFilePaneProps {
-  resourceId: string
-  className: string
-  rootDir: IFolder
-  droppableId: string
-  filterByName?: string
-  header?: ReactElement
-  loading?: boolean
-  openFile?: (f: IFile) => any
-  openFileInHydroShare?: (f: IFile) => any
-  onSelectedFilesAndFoldersChange?: (items: Set<String>) => any
-  promptRenameFile: (fileOrFolder: IFile | IFolder) => any
-  fileLocation: string
+  resourceId: string;
+  className: string;
+  rootDir: IFolder;
+  droppableId: string;
+  filterByName?: string;
+  header?: ReactElement;
+  loading?: boolean;
+  openFile?: (f: IFile) => any;
+  openFileInHydroShare?: (f: IFile) => any;
+  onSelectedFilesAndFoldersChange?: (items: Set<string>) => any | void;
+  promptRenameFile: (fileOrFolder: IFile | IFolder) => any;
+  fileLocation: string;
 }
-
 
 /**
  * Component that displays the list of files in a resource
  */
-export default class FilePane extends React.Component<IFilePaneProps, IFilePaneState> {
-
+export default class FilePane extends React.Component<
+  IFilePaneProps,
+  IFilePaneState
+> {
   state = {
     allFilesAndFoldersSelected: false,
     expandedFolders: new Set<string>(),
@@ -69,59 +65,60 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     sortAscending: true,
     sortBy: SORT_BY_OPTIONS.SYNCSTATUS,
     hovered: false,
-    hoverableId: ''
+    hoverableId: "",
   };
 
   render() {
-
-    const className = ['FilePane', 'table'];
+    const className = ["FilePane", "table"];
     if (this.props.className) {
       className.push(this.props.className);
     }
 
     if (this.props.loading) {
       return (
-        <div className={className.join(' ')}>
-          <div className="FilePane-header">
-            {this.props.header}
-          </div>
+        <div className={className.join(" ")}>
+          <div className="FilePane-header">{this.props.header}</div>
           <Loading />
         </div>
-      )
+      );
     }
 
     let filesAndFolders: (IFile | IFolder)[] | undefined = undefined;
     if (this.props.rootDir) {
       if (this.props.filterByName) {
-        filesAndFolders = this.filterFilesAndFolders(this.props.rootDir.contents, this.props.filterByName.toLowerCase());
+        filesAndFolders = this.filterFilesAndFolders(
+          this.props.rootDir.contents,
+          this.props.filterByName.toLowerCase()
+        );
       } else {
         filesAndFolders = this.props.rootDir.contents;
       }
       filesAndFolders = this.getFolderContentsSorted(filesAndFolders);
     }
 
-    const sortOrder = this.state.sortAscending ? 'sort-ascending' : 'sort-descending';
+    const sortOrder = this.state.sortAscending
+      ? "sort-ascending"
+      : "sort-descending";
 
     let content: React.ReactNode;
     if (filesAndFolders && filesAndFolders.length > 0) {
-      content = filesAndFolders?.map((item, idx) => this.generateFileOrFolderElement(item, idx, this.props.openFile));
+      content = filesAndFolders?.map((item, idx) =>
+        this.generateFileOrFolderElement(item, idx, this.props.openFile)
+      );
     } else {
-      content = (
-        <div className="no-results">
-          No files
-        </div>
-      )
+      content = <div className="no-results">No files</div>;
     }
 
     return (
-      <div className={className.join(' ')}>
-        <div className="FilePane-header">
-          {this.props.header}
-        </div>
+      <div className={className.join(" ")}>
+        <div className="FilePane-header">{this.props.header}</div>
         <Droppable droppableId={this.props.droppableId}>
           {(provided, snapshot) => (
             <div
-              className={this.getDroppableClasses(snapshot, 'FilePane-files-container')}
+              className={this.getDroppableClasses(
+                snapshot,
+                "FilePane-files-container"
+              )}
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
@@ -134,28 +131,56 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
                   />
                 </span>
                 <button
-                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.NAME ? sortOrder : '')}
-                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.NAME)}>
+                  className={
+                    "clickable " +
+                    (this.state.sortBy === SORT_BY_OPTIONS.NAME
+                      ? sortOrder
+                      : "")
+                  }
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.NAME)}
+                >
                   Name
-                  {this.state.sortBy === SORT_BY_OPTIONS.NAME && SortTriangleSVG}
+                  {this.state.sortBy === SORT_BY_OPTIONS.NAME &&
+                    SortTriangleSVG}
                 </button>
                 <button
-                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.TYPE ? sortOrder : '')}
-                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.TYPE)}>
+                  className={
+                    "clickable " +
+                    (this.state.sortBy === SORT_BY_OPTIONS.TYPE
+                      ? sortOrder
+                      : "")
+                  }
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.TYPE)}
+                >
                   Type
-                  {this.state.sortBy === SORT_BY_OPTIONS.TYPE && SortTriangleSVG}
+                  {this.state.sortBy === SORT_BY_OPTIONS.TYPE &&
+                    SortTriangleSVG}
                 </button>
                 <button
-                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SIZE ? sortOrder : '')}
-                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}>
+                  className={
+                    "clickable " +
+                    (this.state.sortBy === SORT_BY_OPTIONS.SIZE
+                      ? sortOrder
+                      : "")
+                  }
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.SIZE)}
+                >
                   Size
-                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE && SortTriangleSVG}
+                  {this.state.sortBy === SORT_BY_OPTIONS.SIZE &&
+                    SortTriangleSVG}
                 </button>
                 <button
-                  className={'clickable ' + (this.state.sortBy === SORT_BY_OPTIONS.SYNCSTATUS ? sortOrder : '')}
-                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.SYNCSTATUS)}>
-                  Sync 
-                  {this.state.sortBy === SORT_BY_OPTIONS.SYNCSTATUS && SortTriangleSVG}
+                  className={
+                    "clickable " +
+                    (this.state.sortBy === SORT_BY_OPTIONS.SYNCSTATUS
+                      ? sortOrder
+                      : "")
+                  }
+                  onClick={() => this.setSortBy(SORT_BY_OPTIONS.SYNCSTATUS)}
+                >
+                  Sync
+                  {this.state.sortBy === SORT_BY_OPTIONS.SYNCSTATUS &&
+                    SortTriangleSVG}
                 </button>
               </div>
               <div className="scrollable-container">
@@ -167,17 +192,23 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
         </Droppable>
       </div>
     );
-  };
+  }
 
-  filterFilesAndFolders = (items: (IFile | IFolder)[], filter: string): (IFile | IFolder)[] => {
+  filterFilesAndFolders = (
+    items: (IFile | IFolder)[],
+    filter: string
+  ): (IFile | IFolder)[] => {
     let filteredItems: (IFile | IFolder)[] = [];
-    items.forEach(item => {
+    items.forEach((item) => {
       // Add the file or folder if the name matches the filter
       if (item.name.toLowerCase().includes(filter)) {
         filteredItems.push(item);
       } else if (item.type === FileOrFolderTypes.FOLDER) {
         // See if any of the folder's contents match
-        let contents = this.filterFilesAndFolders((item as IFolder).contents, filter);
+        let contents = this.filterFilesAndFolders(
+          (item as IFolder).contents,
+          filter
+        );
         if (contents.length > 0) {
           // Since some of the contents match, add this folder, but only show the contents that match the filter
           let filteredFolder = { ...item, contents };
@@ -191,70 +222,126 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
 
   handleMenuClick = (item: IFile | IFolder, action: CONTEXT_MENU_ACTIONS) => {
     switch (action) {
-      case (CONTEXT_MENU_ACTIONS.RENAME):
+      case CONTEXT_MENU_ACTIONS.RENAME:
         this.props.promptRenameFile(item);
         break;
-      case (CONTEXT_MENU_ACTIONS.DOWNLOAD):
+      case CONTEXT_MENU_ACTIONS.DOWNLOAD:
         const itemPath = item.path.split(":")[1];
-        window.open(DOWNLOAD_URL + "/" + this.props.resourceId + "/" + this.props.resourceId + "/data/contents" + itemPath)
-
+        window.open(
+          DOWNLOAD_URL +
+            "/" +
+            this.props.resourceId +
+            "/" +
+            this.props.resourceId +
+            "/data/contents" +
+            itemPath
+        );
     }
-  }
+  };
 
   // TODO: Add copy file option to context menu (https://github.com/hydroshare/hydroshare_jupyter_sync/issues/42)
-  generateFileOrFolderElement = (item: IFile | IFolder, index: number, openFile: ((f: IFile) => IFile) | undefined, nestLevel: number = 0) => {
+  generateFileOrFolderElement = (
+    item: IFile | IFolder,
+    index: number,
+    openFile: ((f: IFile) => IFile) | undefined,
+    nestLevel: number = 0
+  ) => {
     if (item.type === FileOrFolderTypes.FOLDER) {
-      return (<div>
-        <ContextMenuTrigger id={item.path}>{this.generateFolderElement(item as IFolder, index, openFile, nestLevel)}</ContextMenuTrigger>
-        <ContextMenu className="context-menu" id={item.path}>
-          <MenuItem className="menu-item clickable" data={{ action: CONTEXT_MENU_ACTIONS.RENAME }} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
-            Rename
+      return (
+        <div>
+          <ContextMenuTrigger id={item.path}>
+            {this.generateFolderElement(
+              item as IFolder,
+              index,
+              openFile,
+              nestLevel
+            )}
+          </ContextMenuTrigger>
+          <ContextMenu className="context-menu" id={item.path}>
+            <MenuItem
+              className="menu-item clickable"
+              data={{ action: CONTEXT_MENU_ACTIONS.RENAME }}
+              onClick={() =>
+                this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)
+              }
+            >
+              Rename
             </MenuItem>
-        </ContextMenu>
-      </div>);
+          </ContextMenu>
+        </div>
+      );
     } else {
       return (
         <div>
-          <ContextMenuTrigger id={item.path}>{this.generateFileElement(item as IFile, index, openFile, nestLevel)}</ContextMenuTrigger>
+          <ContextMenuTrigger id={item.path}>
+            {this.generateFileElement(
+              item as IFile,
+              index,
+              openFile,
+              nestLevel
+            )}
+          </ContextMenuTrigger>
           <ContextMenu className="context-menu" id={item.path}>
-            <MenuItem className="menu-item clickable" data={{ action: CONTEXT_MENU_ACTIONS.RENAME }} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)}>
+            <MenuItem
+              className="menu-item clickable"
+              data={{ action: CONTEXT_MENU_ACTIONS.RENAME }}
+              onClick={() =>
+                this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.RENAME)
+              }
+            >
               Rename
             </MenuItem>
-            {this.props.fileLocation === "Workspace" ? <MenuItem className="menu-item clickable" data={{ action: CONTEXT_MENU_ACTIONS.DOWNLOAD }} onClick={() => this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.DOWNLOAD)}>
-              Download
-            </MenuItem> : null}
+            {this.props.fileLocation === "Workspace" ? (
+              <MenuItem
+                className="menu-item clickable"
+                data={{ action: CONTEXT_MENU_ACTIONS.DOWNLOAD }}
+                onClick={() =>
+                  this.handleMenuClick(item, CONTEXT_MENU_ACTIONS.DOWNLOAD)
+                }
+              >
+                Download
+              </MenuItem>
+            ) : null}
           </ContextMenu>
-        </div>);
+        </div>
+      );
     }
   };
 
   onHover = (id: any) => {
-    this.setState({ hoverableId: id })
+    this.setState({ hoverableId: id });
   };
   onOut = () => {
-    this.setState({ hoverableId: '' })
+    this.setState({ hoverableId: "" });
   };
-  generateFileElement = (file: IFile, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
-
+  generateFileElement = (
+    file: IFile,
+    index: number,
+    openFile: ((f: IFile) => any) | undefined,
+    nestLevel: number = 0
+  ) => {
     {
       this.state.hoverableId == file.path && (
         <div style={{ color: "red" }} id="hoverableId">
           Last Modified : {file.modifiedTime?.toString()}
-
         </div>
-      )
+      );
     }
-    const openInHydroShare = () => window.open(`https://www.hydroshare.org/resource/${this.props.resourceId}/`, '_blank');
+    const openInHydroShare = () =>
+      window.open(
+        `https://www.hydroshare.org/resource/${this.props.resourceId}/`,
+        "_blank"
+      );
     const onClick = openFile ? () => openFile(file) : undefined;
     // Choose color of row based on file sync status
-    let rowCssClass = 'table-row file-element row-not-sync';
-    if (file.syncStatus == ' ') {
-      rowCssClass = 'table-row file-element row-file-not-exist'
-    } else  if (file.syncStatus == 'In Sync'){
-      rowCssClass = 'table-row file-element'
+    let rowCssClass = "table-row file-element row-not-sync";
+    if (file.syncStatus == " ") {
+      rowCssClass = "table-row file-element row-file-not-exist";
+    } else if (file.syncStatus == "In Sync") {
+      rowCssClass = "table-row file-element";
     }
     return (
-      <Draggable draggableId={file.path} index={index} key={file.path} >
+      <Draggable draggableId={file.path} index={index} key={file.path}>
         {(provided, snapshot) => (
           <div
             className={this.getDraggableClasses(snapshot, rowCssClass)}
@@ -264,39 +351,93 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
             onMouseEnter={() => this.onHover(file.path)}
             onMouseLeave={() => this.onOut()}
           >
-            {this.generateTableCell(this.generateCheckBox(file),file.modifiedTime,file.fileChanged)}
-            {this.generateTableCell(file.name,file.modifiedTime,file.fileChanged, nestLevel, onClick,)}
-            {this.generateTableCell(file.type || 'file',file.modifiedTime,file.fileChanged)}
-            {this.generateTableCell(this.getFormattedSizeString(file.sizeBytes),file.modifiedTime,file.fileChanged)}
-            {this.generateTableCell(file.syncStatus == 'In Sync' ? <TiTick title="In Sync" /> :file.syncStatus == 'Out of Sync'? <MdCancel title="Out of Sync"/> : <FaQuestion  title="Unknown"/>, file.modifiedTime,file.fileChanged)}
+            {this.generateTableCell(
+              this.generateCheckBox(file),
+              file.modifiedTime,
+              file.fileChanged
+            )}
+            {this.generateTableCell(
+              file.name,
+              file.modifiedTime,
+              file.fileChanged,
+              nestLevel,
+              onClick
+            )}
+            {this.generateTableCell(
+              file.type || "file",
+              file.modifiedTime,
+              file.fileChanged
+            )}
+            {this.generateTableCell(
+              this.getFormattedSizeString(file.sizeBytes),
+              file.modifiedTime,
+              file.fileChanged
+            )}
+            {this.generateTableCell(
+              file.syncStatus == "In Sync" ? (
+                <TiTick title="In Sync" />
+              ) : file.syncStatus == "Out of Sync" ? (
+                <MdCancel title="Out of Sync" />
+              ) : (
+                <FaQuestion title="Unknown" />
+              ),
+              file.modifiedTime,
+              file.fileChanged
+            )}
           </div>
         )}
       </Draggable>
     );
-  }
+  };
 
-
-  generateFolderElement = (folder: IFolder, index: number, openFile: ((f: IFile) => any) | undefined, nestLevel: number = 0) => {
-    let rowCssClass = 'table-row file-element row-not-sync';
-    if (folder.syncStatus == ' ') {
-      rowCssClass = 'table-row file-element row-file-not-exist'
-    } else  if (folder.syncStatus == 'In Sync'){
-      rowCssClass = 'table-row file-element'
+  generateFolderElement = (
+    folder: IFolder,
+    index: number,
+    openFile: ((f: IFile) => any) | undefined,
+    nestLevel: number = 0
+  ) => {
+    let rowCssClass = "table-row file-element row-not-sync";
+    if (folder.syncStatus == " ") {
+      rowCssClass = "table-row file-element row-file-not-exist";
+    } else if (folder.syncStatus == "In Sync") {
+      rowCssClass = "table-row file-element";
     }
     const folderLineItem = (
       <Draggable draggableId={folder.path} index={0} key={folder.path}>
         {(provided, snapshot) => (
           <div
-            className={this.getDraggableClasses(snapshot,rowCssClass )}
+            className={this.getDraggableClasses(snapshot, rowCssClass)}
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
           >
-            {this.generateTableCell(this.generateCheckBox(folder),folder.modifiedTime,folder.fileChanged)}
+            {this.generateTableCell(
+              this.generateCheckBox(folder),
+              folder.modifiedTime,
+              folder.fileChanged
+            )}
             {this.generateFolderNameTableCell(folder, nestLevel)}
-            {this.generateTableCell('folder',folder.modifiedTime,folder.fileChanged)}
-            {this.generateTableCell(this.getFormattedSizeString(folder.sizeBytes),folder.modifiedTime,folder.fileChanged)}
-            {this.generateTableCell(folder.syncStatus == 'In Sync' ? <TiTick title="In Sync" /> :folder.syncStatus == 'Out of Sync'? <MdCancel title="Out of Sync"/> : <FaQuestion  title="Unknown"/>,folder.modifiedTime,folder.fileChanged)}
+            {this.generateTableCell(
+              "folder",
+              folder.modifiedTime,
+              folder.fileChanged
+            )}
+            {this.generateTableCell(
+              this.getFormattedSizeString(folder.sizeBytes),
+              folder.modifiedTime,
+              folder.fileChanged
+            )}
+            {this.generateTableCell(
+              folder.syncStatus == "In Sync" ? (
+                <TiTick title="In Sync" />
+              ) : folder.syncStatus == "Out of Sync" ? (
+                <MdCancel title="Out of Sync" />
+              ) : (
+                <FaQuestion title="Unknown" />
+              ),
+              folder.modifiedTime,
+              folder.fileChanged
+            )}
           </div>
         )}
       </Draggable>
@@ -305,8 +446,11 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     let folderContentsLineItems: ReactElement[];
     if (folder.contents /*&& this.state.expandedFolders.has(folder.path)*/) {
       let contents = [...folder.contents];
-      folderContentsLineItems = this.getFolderContentsSorted(contents).map((item, idx) =>
-        this.generateFileOrFolderElement(item, idx + 1, openFile, nestLevel + 1));
+      folderContentsLineItems = this.getFolderContentsSorted(
+        contents
+      ).map((item, idx) =>
+        this.generateFileOrFolderElement(item, idx + 1, openFile, nestLevel + 1)
+      );
     }
 
     return (
@@ -326,20 +470,31 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     );
   };
 
-  generateTableCell = (content: ReactElement | string | number | moment.Moment | IconType, appendToolTip: moment.Moment | undefined, fileInfo: string | undefined, nestLevel: number = 0, onClick: any = undefined) => {
+  generateTableCell = (
+    content: ReactElement | string | number | moment.Moment | IconType,
+    appendToolTip: moment.Moment | undefined,
+    fileInfo: string | undefined,
+    nestLevel: number = 0,
+    onClick: any = undefined
+  ) => {
     const style = {
       //paddingLeft: `${nestLevel * 10}px`,
-      paddingLeft: `${nestLevel}px`
+      paddingLeft: `${nestLevel}px`,
     };
-    const time = appendToolTip ===undefined ? " ":appendToolTip.toString();
-    const tooltip = typeof content === 'string' ? content+", Modified Time: "+time+", FileInfo: "+ fileInfo : "Modified Time: "+time+", FileInfo: "+ fileInfo;
+    const time = appendToolTip === undefined ? " " : appendToolTip.toString();
+    const tooltip =
+      typeof content === "string"
+        ? content + ", Modified Time: " + time + ", FileInfo: " + fileInfo
+        : "Modified Time: " + time + ", FileInfo: " + fileInfo;
     const classNames: Array<string> = [];
     if (onClick) {
-      classNames.push('clickable');
+      classNames.push("clickable");
     }
-    const text = moment.isMoment(content) ? content.format('MMM D, YYYY') : content;
+    const text = moment.isMoment(content)
+      ? content.format("MMM D, YYYY")
+      : content;
     return (
-      <div title={tooltip} onClick={onClick} className={classNames.join(' ')}>
+      <div title={tooltip} onClick={onClick} className={classNames.join(" ")}>
         <span style={style}>{text}</span>
       </div>
     );
@@ -350,14 +505,14 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       paddingLeft: `${nestLevel * 7}px`,
     };
     const tooltip = folder.name;
-    const classNames = 'clickable ' + /*(this.state.expandedFolders.has(folder.path) ?*/ 'expanded' /*: 'collapsed')*/;
+    const classNames =
+      "clickable " +
+      /*(this.state.expandedFolders.has(folder.path) ?*/ "expanded"; /*: 'collapsed')*/
     const onClick = () => this.toggleFolderExpanded(folder);
     return (
       <div title={tooltip} onClick={onClick} className={classNames}>
         <span style={style}>
-          <div className="icon-container">
-            {SortTriangleSVG}
-          </div>
+          <div className="icon-container">{SortTriangleSVG}</div>
           {folder.name}
         </span>
       </div>
@@ -367,64 +522,80 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
   generateCheckBox = (item: IFile | IFolder) => {
     const onClick = () => this.toggleSingleFileOrFolderSelected(item);
     return (
-      <input type="checkbox" onClick={onClick} checked={this.state.selectedFilesAndFolders.has(item.path)} />
+      <input
+        type="checkbox"
+        onClick={onClick}
+        checked={this.state.selectedFilesAndFolders.has(item.path)}
+      />
     );
   };
 
-  getDroppableClasses = (snapshot: DroppableStateSnapshot, classes: string = '') => {
-    if (snapshot.isDraggingOver) classes += ' draggable-over';
+  getDroppableClasses = (
+    snapshot: DroppableStateSnapshot,
+    classes: string = ""
+  ) => {
+    if (snapshot.isDraggingOver) classes += " draggable-over";
     return classes;
   };
 
-  getDraggableClasses = (snapshot: DraggableStateSnapshot, classes: string = '') => {
-    if (snapshot.isDragging) classes += ' dragging';
+  getDraggableClasses = (
+    snapshot: DraggableStateSnapshot,
+    classes: string = ""
+  ) => {
+    if (snapshot.isDragging) classes += " dragging";
     return classes;
   };
 
-  getFolderContentsSorted = (items: (IFile | IFolder)[]) => items.sort((i1, i2) => {
-    const {
-      sortAscending,
-      sortBy,
-    } = this.state;
-    switch (sortBy) {
-      case SORT_BY_OPTIONS.NAME:
-        if (sortAscending) {
-          return this.getItemNameForSort(i1).localeCompare(this.getItemNameForSort(i2));
-        } else {
-          return this.getItemNameForSort(i2).localeCompare(this.getItemNameForSort(i1));
-        }
-      case SORT_BY_OPTIONS.TYPE:
-        if (sortAscending) {
-          return (i1.type || '').localeCompare(i2.type || '');
-        } else {
-          return (i2.type || '').localeCompare(i1.type || '');
-        }
-      case SORT_BY_OPTIONS.LAST_MODIFIED:
-        if (!i1.modifiedTime && !i2.modifiedTime) {
-          // Neither have a defined last modified time, so consider them equal
+  getFolderContentsSorted = (items: (IFile | IFolder)[]) =>
+    items.sort((i1, i2) => {
+      const { sortAscending, sortBy } = this.state;
+      switch (sortBy) {
+        case SORT_BY_OPTIONS.NAME:
+          if (sortAscending) {
+            return this.getItemNameForSort(i1).localeCompare(
+              this.getItemNameForSort(i2)
+            );
+          } else {
+            return this.getItemNameForSort(i2).localeCompare(
+              this.getItemNameForSort(i1)
+            );
+          }
+        case SORT_BY_OPTIONS.TYPE:
+          if (sortAscending) {
+            return (i1.type || "").localeCompare(i2.type || "");
+          } else {
+            return (i2.type || "").localeCompare(i1.type || "");
+          }
+        case SORT_BY_OPTIONS.LAST_MODIFIED:
+          if (!i1.modifiedTime && !i2.modifiedTime) {
+            // Neither have a defined last modified time, so consider them equal
+            return 0;
+          }
+          if (!i1.modifiedTime) {
+            // Put i1 second if ascending, i2 if descending
+            return sortAscending ? -1 : 1;
+          }
+          if (!i2.modifiedTime) {
+            // Put i2 second if ascending, i1 if descending
+            return sortAscending ? 1 : -1;
+          }
+          if (sortAscending) {
+            return i1.modifiedTime?.diff(i2.modifiedTime);
+          } else {
+            return i2.modifiedTime?.diff(i1.modifiedTime);
+          }
+        case SORT_BY_OPTIONS.SIZE:
+          return (
+            (sortAscending ? 1 : -1) *
+            ((i1.sizeBytes || -1) - (i2.sizeBytes || -1))
+          );
+        case SORT_BY_OPTIONS.SYNCSTATUS:
+          return i1.fileChanged > i2.fileChanged ? -1 : 1;
+        default:
+          // Should never happen, but needed to satisfy TypeScript
           return 0;
-        }
-        if (!i1.modifiedTime) {
-          // Put i1 second if ascending, i2 if descending
-          return sortAscending ? -1 : 1;
-        }
-        if (!i2.modifiedTime) {
-          // Put i2 second if ascending, i1 if descending
-          return sortAscending ? 1 : -1;
-        }
-        if (sortAscending) {
-          return i1.modifiedTime?.diff(i2.modifiedTime)
-        } else {
-          return i2.modifiedTime?.diff(i1.modifiedTime)
-        }
-      case SORT_BY_OPTIONS.SIZE:
-        return (sortAscending ? 1 : -1) * ((i1.sizeBytes || -1) - (i2.sizeBytes || -1));
-      case SORT_BY_OPTIONS.SYNCSTATUS:
-      return (i1.fileChanged > i2.fileChanged) ? -1: 1
-      default: // Should never happen, but needed to satisfy TypeScript
-        return 0;
-    }
-  });
+      }
+    });
 
   getItemNameForSort = (item: IFile | IFolder): string => {
     if (item.type === FileOrFolderTypes.FOLDER) {
@@ -457,11 +628,15 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
   toggleAllFilesAndFoldersSelected = () => {
     let selectedFilesAndFolders = new Set<string>();
     if (!this.state.allFilesAndFoldersSelected) {
-      this.props.rootDir.contents.forEach(item => {
+      this.props.rootDir.contents.forEach((item) => {
         if (item.type === FileOrFolderTypes.FILE) {
           selectedFilesAndFolders.add(item.path);
         } else {
-          this.setFolderSelected(selectedFilesAndFolders, item as IFolder, true);
+          this.setFolderSelected(
+            selectedFilesAndFolders,
+            item as IFolder,
+            true
+          );
         }
       });
     }
@@ -493,7 +668,11 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
       selectedFilesAndFolders.delete(item.path);
     }
     if (item.type === FileOrFolderTypes.FOLDER) {
-      this.setFolderSelected(selectedFilesAndFolders, item as IFolder, makeSelected);
+      this.setFolderSelected(
+        selectedFilesAndFolders,
+        item as IFolder,
+        makeSelected
+      );
     }
     this.setState({
       allFilesAndFoldersSelected: false,
@@ -504,13 +683,17 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
     }
   };
 
-  setFolderSelected = (set: Set<string>, folder: IFolder, isSelected: boolean) => {
+  setFolderSelected = (
+    set: Set<string>,
+    folder: IFolder,
+    isSelected: boolean
+  ) => {
     if (isSelected) {
       set.add(folder.path);
     } else {
       set.delete(folder.path);
     }
-    folder.contents?.forEach(item => {
+    folder.contents?.forEach((item) => {
       if (item.type === FileOrFolderTypes.FOLDER) {
         this.setFolderSelected(set, item as IFolder, isSelected);
       } else {
@@ -525,16 +708,17 @@ export default class FilePane extends React.Component<IFilePaneProps, IFilePaneS
 
   getFormattedSizeString = (sizeBytes: number): string => {
     if (sizeBytes === undefined || sizeBytes === null) {
-      return 'Unknown';
+      return "Unknown";
     }
     if (sizeBytes === 0) {
-      return '0B';
+      return "0B";
     }
     const labelIndex = Math.floor(Math.log10(sizeBytes) / 3);
-    const sizeInHumanReadableUnits = Math.round(sizeBytes / Math.pow(10, 3 * labelIndex));
+    const sizeInHumanReadableUnits = Math.round(
+      sizeBytes / Math.pow(10, 3 * labelIndex)
+    );
     return `${sizeInHumanReadableUnits}${HUMAN_READABLE_FILE_SIZES[labelIndex]}`;
   };
-
 }
 
 enum SORT_BY_OPTIONS {
@@ -551,15 +735,16 @@ enum CONTEXT_MENU_ACTIONS {
   DELETE,
 }
 
-const HUMAN_READABLE_FILE_SIZES = [
-  'B',
-  'KB',
-  'MB',
-  'GB',
-  'TB',
-  'YB',
-];
+const HUMAN_READABLE_FILE_SIZES = ["B", "KB", "MB", "GB", "TB", "YB"];
 
-export const SortTriangleSVG = <svg xmlns="http://www.w3.org/2000/svg" className="triangle" width="10" height="10" viewBox="0 0 2.646 2.646">
-  <path d="M0 0l1.323 2.646L2.646 0z" />
-</svg>;
+export const SortTriangleSVG = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="triangle"
+    width="10"
+    height="10"
+    viewBox="0 0 2.646 2.646"
+  >
+    <path d="M0 0l1.323 2.646L2.646 0z" />
+  </svg>
+);
