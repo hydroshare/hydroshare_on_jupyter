@@ -91,8 +91,6 @@ export const ResourceGrid: React.FC = () => {
   const { data, isFetching } = useListUserHydroShareResourcesQuery();
   const selectKey = -1;
 
-  console.log(data);
-
   return (
     <Paper className={classes.root}>
       <TableContainer className={classes.container}>
