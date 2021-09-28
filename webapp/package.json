@@ -18,7 +18,6 @@
     "notistack": "^1.0.10",
     "react-beautiful-dnd": "^13.1.0",
     "react-contextmenu": "^2.14.0",
-    "react-dom": "^17.0.2",
     "react-folder-browser": "^0.1.1",
     "react-hover": "^2.1.1",
     "react-icons": "^4.2.0",
@@ -32,6 +31,7 @@
   },
   "scripts": {
     "build": "yarn run _webpack && yarn run _install",
+    "install": "yarn run build:labextension",
     "clean": "jlpm run _clean_build",
     "_install": "jupyter labextension install .",
     "_develop": "jupyter labextension develop .",
