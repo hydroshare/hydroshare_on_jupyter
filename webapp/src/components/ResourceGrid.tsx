@@ -9,8 +9,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { useListUserHydroShareResourcesQuery } from "../store/sync-api";
-import { Switch, Route, Link as RouterLink } from "react-router-dom";
-import { ResourcePage } from "./ResourcePage";
+import { Link as RouterLink } from "react-router-dom";
 
 export const formatDate = (value: string): string => {
   /* Create Date object from string representation. 
