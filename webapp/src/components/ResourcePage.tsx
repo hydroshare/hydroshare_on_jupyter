@@ -406,33 +406,59 @@ export const ResourcePage: React.FC<ResourcePageProps> = (props) => {
             const result = store.dispatch(
               syncApi.endpoints.uploadResourceEntity.initiate(payload)
             );
+            result.unsubscribe();
           }
           break;
         case ResourceActions.DownloadFiles.id:
           {
-            const { selectedFiles } = actionData.state;
+            const {
+              selectedFiles,
+            }: { selectedFiles: FileStatus[] } = actionData.state;
 
             // TODO: do something with futures
             // TODO: handle case when a directory is passed. All children of directory should be
             // passed as a request.
             selectedFiles.map((file) => {
-              const result = store
-                .dispatch(
+              // guard for only_local files
+              if (file.status === "only_local") {
+                const snackbarMessage = `Cannot download local file: ${file.name}`;
+                enqueueSnackbar(snackbarMessage, {
+                  variant: "error",
+                });
+                return file;
+              }
+
+              const func = async () => {
+                const rawResult = store.dispatch(
                   syncApi.endpoints.downloadResourceEntity.initiate({
                     resource_id,
                     file: file.id,
                   })
-                )
-                .then(({ error }) => {
-                  // emit error if download fails
-                  if (error) {
-                    const snackbarMessage = `File download: ${file.name} failed.`;
-                    enqueueSnackbar(snackbarMessage, {
-                      variant: "error",
-                      persist: true,
-                    });
-                  }
-                });
+                );
+                const result = await rawResult;
+                rawResult.unsubscribe();
+                const { status, error } = result;
+
+                // emit file downloaded success message
+                if (status === "fulfilled") {
+                  const snackbarMessage = `Successfully downloaded: ${file.name}`;
+                  enqueueSnackbar(snackbarMessage, {
+                    variant: "success",
+                  });
+                }
+
+                // emit error if download fails
+                if (error) {
+                  const snackbarMessage = `File download: ${file.name} failed`;
+                  enqueueSnackbar(snackbarMessage, {
+                    variant: "error",
+                    persist: true,
+                  });
+                }
+                return result;
+              };
+
+              return func();
             });
           }
           break;
