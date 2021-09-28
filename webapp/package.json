@@ -31,7 +31,7 @@
   },
   "scripts": {
     "build": "yarn run _webpack && yarn run _install",
-    "install": "yarn run build && yarn run build:labextension",
+    "install_extension": "yarn run build:labextension",
     "clean": "jlpm run _clean_build",
     "_install": "jupyter labextension install .",
     "_develop": "jupyter labextension develop .",
