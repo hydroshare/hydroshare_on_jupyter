@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
   },
   container: {
-    height: "inherit",
+    height: "calc(100% - 64px)", // 64px = height of application bar. Used to fit table in widget area. Likely "better" way to do this.
     overflowY: "scroll",
   },
 }));
