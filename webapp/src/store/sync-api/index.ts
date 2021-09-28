@@ -52,6 +52,7 @@ export const syncApi = createApi({
     // list resources user can edit
     listUserHydroShareResources: build.query<IResourceMetadata[], void>({
       query: () => "resources",
+      keepUnusedDataFor: 5,
       // @ts-ignore
       providesTags: (result, error) =>
         // if successful request, add to Resource IDed by it's HS resource id.
@@ -83,12 +84,14 @@ export const syncApi = createApi({
     downloadResource: build.query<void, string>({
       query: (resource_id) => `resources/${resource_id}/download`,
       providesTags: ["EndSession"],
+      keepUnusedDataFor: 0,
     }),
     // download a file or folder to the local fs from HydroShare
     downloadResourceEntity: build.query<void, IResourceFileDownloadRequest>({
       query: ({ resource_id, file }) =>
         `resources/${resource_id}/download/${file}`,
       providesTags: ["EndSession"],
+      keepUnusedDataFor: 0,
     }),
     // upload a file or folder from the local fs to HydroShare
     uploadResourceEntity: build.mutation<void, IResourceFilesRequest>({
