@@ -30,15 +30,16 @@
     "yup": "^0.32.9"
   },
   "scripts": {
-    "build": "yarn run _webpack && yarn run _install",
-    "install_extension": "yarn run build:labextension",
-    "clean": "jlpm run _clean_build",
+    "build": "yarn run _webpack && yarn run _install && yarn run build:labextension && yarn run enable:labextension",
+    "dev": "yarn run _webpack && yarn run _install",
+    "clean": "yarn run _clean_build",
     "_install": "jupyter labextension install .",
     "_develop": "jupyter labextension develop .",
     "_webpack": "webpack --mode=development --config=config/webpack.config.js --stats-error-details",
     "build:labextension": "jupyter labextension build .",
+    "enable:labextension": "jupyter serverextension enable --py hydroshare_jupyter_sync --sys-prefix",
     "_transpile": "tsc",
-    "_clean_build": "rm -rf tsconfig.tsbuildinfo build/",
+    "_clean_build": "rm -rf tsconfig.tsbuildinfo build/ node_modules yarn.lock",
     "_clean_labextension": "rm -rf ../hydroshare_jupyter_sync/labextension/"
   },
   "devDependencies": {
