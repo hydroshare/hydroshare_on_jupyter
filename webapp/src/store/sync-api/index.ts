@@ -10,12 +10,17 @@ import {
   IResourceFileDownloadRequest,
   IDataDirectory,
 } from "./interfaces";
+import { getBaseUrl } from "../../utilities/getJupyterConfigData";
 
-const BACKEND_PREFIX = "syncApi";
+// requires enabling topLevelAwait in webpack. see https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html#custom-webpack-config
+const BASE_URL = await getBaseUrl();
+const URI = BASE_URL + "syncApi/";
+console.log(`baseUrl: ${BASE_URL}`);
+console.log(`uri: ${URI}`);
 
 export const syncApi = createApi({
   reducerPath: "syncApi",
-  baseQuery: fetchBaseQuery({ baseUrl: `/${BACKEND_PREFIX}/` }),
+  baseQuery: fetchBaseQuery({ baseUrl: URI }),
   tagTypes: ["EndSession", "Resource"],
   endpoints: (build) => ({
     // log user in
