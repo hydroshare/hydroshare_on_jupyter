@@ -1,15 +1,21 @@
-import React from "react";
-import Paper from "@material-ui/core/Paper";
-import { Checkbox, CircularProgress } from "@material-ui/core";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
+import {
+  Checkbox,
+  CircularProgress,
+  Fab,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@material-ui/core";
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { useListUserHydroShareResourcesQuery } from "../store/sync-api";
+import GetAppIcon from "@material-ui/icons/GetApp";
+import React from "react";
 import { Link as RouterLink } from "react-router-dom";
+import { useListUserHydroShareResourcesQuery } from "../store/sync-api";
+import { DownloadFab } from "./DownloadFab";
 
 export const formatDate = (value: string): string => {
   /* Create Date object from string representation. 
@@ -92,6 +98,7 @@ export const ResourceGrid: React.FC = () => {
 
   return (
     <Paper className={classes.root}>
+      <DownloadFab />
       <TableContainer className={classes.container}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
