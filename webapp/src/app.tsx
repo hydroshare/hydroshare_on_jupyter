@@ -19,6 +19,11 @@ import { IDataDirectory } from "./store/sync-api/interfaces";
 import { PageConfig } from "@jupyterlab/coreutils";
 import { SnackbarProvider, SnackbarProviderProps } from "notistack";
 import SingleSlide from "./components/SingleSlide";
+import {
+  getBaseUrl,
+  getJupyterConfigData,
+} from "./utilities/getJupyterConfigData";
+import { OpenFile } from "./components/OpenFile";
 
 // setup chonky
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
@@ -61,16 +66,22 @@ const ReactApp: React.FC<ReactAppProps> = ({ close, docManager }) => {
   const renders = useRenders();
   const classes = useStyles();
   const [dataDirectory, setDataDirectory] = useState<string>(undefined!);
-
-  const serverRoot = PageConfig.getOption("preferredDir");
+  const [serverRoot, setServerRoot] = useState<string>("");
 
   useEffect(() => {
-    async function fetchDataDirectory() {
-      const res = await fetch("/syncApi/data_directory");
+    async function fetchConfigData() {
+      const configData = await getJupyterConfigData();
+
+      const BASE_URL = configData["baseUrl"];
+      const URI = BASE_URL + "syncApi/data_directory";
+      const SERVER_ROOT = configData["serverRoot"];
+
+      const res = await fetch(URI);
       const data: IDataDirectory = await res.json();
+      setServerRoot(SERVER_ROOT);
       setDataDirectory(data.data_directory);
     }
-    fetchDataDirectory();
+    fetchConfigData();
   }, []);
 
   return (

@@ -1,7 +1,12 @@
 import { resourceUpdate, fsUpdate } from "../store/actions";
 import store from "../store/store";
-const WS_PROTOCOL = "ws://";
-const WS_URI = "/syncApi/ws";
+import { getBaseUrl } from "../utilities/getJupyterConfigData";
+
+/* constants */
+const BASE_URL = await getBaseUrl();
+// toggle between wss and ws depending on if the current protocol is https
+const WS_PROTOCOL = window.location.protocol.includes("s") ? "wss://" : "ws://";
+const WS_URI = `${BASE_URL}syncApi/ws`;
 const HOSTNAME = window.location.hostname;
 const PORT = window.location.port;
 const WS_URL = `${WS_PROTOCOL}${HOSTNAME}:${PORT}${WS_URI}`;
