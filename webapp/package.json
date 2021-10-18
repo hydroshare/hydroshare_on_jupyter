@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "main": "build/index.js",
+  "types": "build/index.d.ts",
   "dependencies": {
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
@@ -30,17 +31,24 @@
     "yup": "^0.32.9"
   },
   "scripts": {
-    "build": "yarn run _webpack && yarn run _install && yarn run build:labextension && yarn run enable:labextension",
-    "dev": "yarn run _webpack && yarn run _install",
-    "clean": "yarn run _clean_build",
-    "_install": "jupyter labextension install .",
-    "_develop": "jupyter labextension develop .",
-    "_webpack": "webpack --mode=development --config=config/webpack.config.js --stats-error-details",
+    "build": "yarn run build:bin && yarn run build:labextension:dev",
+    "build:all": "yarn run build:bin && yarn run build:labextension",
+    "build:bin": "tsc && yarn run build:copy_svgs",
+    "build:copy_svgs": "cpy '**/*.svg' '../build' --parents --cwd=src",
     "build:labextension": "jupyter labextension build .",
-    "enable:labextension": "jupyter serverextension enable --py hydroshare_jupyter_sync --sys-prefix",
-    "_transpile": "tsc",
-    "_clean_build": "rm -rf tsconfig.tsbuildinfo build/ node_modules yarn.lock",
-    "_clean_labextension": "rm -rf ../hydroshare_jupyter_sync/labextension/"
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "build:prod": "yarn run clean && yarn run build:bin && yarn run build:labextension",
+    "clean": "yarn run clean:bin",
+    "clean:all": "yarn run clean:bin && yarn run clean:labextension",
+    "clean:labextension": "rimraf ../hydroshare_jupyter_sync/labextension",
+    "clean:bin": "rimraf build tsconfig.tsbuildinfo",
+    "eslint": "eslint . --ext .ts,.tsx --fix",
+    "eslint:check": "eslint . --ext .ts,.tsx",
+    "install:extension": "yarn run build",
+    "prepare": "yarn run clean && yarn run build:prod",
+    "watch": "run-p watch:src watch:labextension",
+    "watch:labextension": "jupyter labextension watch .",
+    "watch:src": "tsc -w"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.14.5",
@@ -59,6 +67,7 @@
     "@types/react-router": "^5.1.16",
     "@types/react-router-dom": "^5.1.8",
     "babel-loader": "^8.2.2",
+    "cpy-cli": "^3.1.1",
     "css-loader": "^6.2.0",
     "css-modules-typescript-loader": "^4.0.1",
     "react": "^17.0.2",
@@ -95,7 +104,8 @@
   },
   "jupyterlab": {
     "extension": true,
-    "outputDir": "../hydroshare_jupyter_sync/labextension"
+    "outputDir": "../hydroshare_jupyter_sync/labextension",
+    "webpackConfig": "./webpack.config.js"
   },
   "files": [
     "build/**/*"
