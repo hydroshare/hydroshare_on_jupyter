@@ -16,14 +16,14 @@ import { ResourcePage } from "./components/ResourcePage";
 import { PluginServicesContext } from "./contexts";
 import store from "./store/store";
 import { IDataDirectory } from "./store/sync-api/interfaces";
-import { PageConfig } from "@jupyterlab/coreutils";
 import { SnackbarProvider, SnackbarProviderProps } from "notistack";
 import SingleSlide from "./components/SingleSlide";
-import {
-  getBaseUrl,
-  getJupyterConfigData,
-} from "./utilities/getJupyterConfigData";
-import { OpenFile } from "./components/OpenFile";
+import { getJupyterConfigData } from "./utilities/getJupyterConfigData";
+import { SnackbarUtilsConfigurator } from "./components/SnackbarUtil";
+import { AppToolBar } from "./components/AppToolBar";
+import { SorterContext } from "./contexts/SorterContext";
+import { useSorterContext } from "./hooks/useSorterContext";
+import { columns } from "./consts/columns";
 
 // setup chonky
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
@@ -67,6 +67,7 @@ const ReactApp: React.FC<ReactAppProps> = ({ close, docManager }) => {
   const classes = useStyles();
   const [dataDirectory, setDataDirectory] = useState<string>(undefined!);
   const [serverRoot, setServerRoot] = useState<string>("");
+  const sorterContextValues = useSorterContext();
 
   useEffect(() => {
     async function fetchConfigData() {
@@ -88,6 +89,7 @@ const ReactApp: React.FC<ReactAppProps> = ({ close, docManager }) => {
     <Provider store={store}>
       <ThemeProvider theme={defaultTheme}>
         <SnackbarProvider {...snackbarConfig}>
+          <SnackbarUtilsConfigurator />
           <Box className={classes.root}>
             <Router>
               <AppBar />
@@ -99,7 +101,12 @@ const ReactApp: React.FC<ReactAppProps> = ({ close, docManager }) => {
               >
                 <Switch>
                   {/* Routes are only accessible post login */}
-                  <AppRoute exact path="/" component={ResourceGrid} />
+                  <AppRoute exact path="/">
+                    <SorterContext.Provider value={sorterContextValues}>
+                      <AppToolBar />
+                      <ResourceGrid columns={columns} />
+                    </SorterContext.Provider>
+                  </AppRoute>
                   <AppRoute
                     path="/resources/:resource_id"
                     component={ResourcePage}
