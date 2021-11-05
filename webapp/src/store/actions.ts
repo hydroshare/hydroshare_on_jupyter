@@ -1,5 +1,5 @@
 import { createAction } from "@reduxjs/toolkit";
-import { FSState } from "./reducers";
+import { FSState } from "./sync-api/types";
 
 export const login = createAction<undefined>("LOGIN");
 export const logout = createAction<undefined>("LOGOUT");
