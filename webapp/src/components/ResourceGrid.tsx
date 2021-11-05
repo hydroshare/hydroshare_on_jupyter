@@ -1,7 +1,6 @@
 import {
   Checkbox,
   CircularProgress,
-  Fab,
   Paper,
   Table,
   TableBody,
@@ -11,73 +10,19 @@ import {
   TableRow,
 } from "@material-ui/core";
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import GetAppIcon from "@material-ui/icons/GetApp";
-import React from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
+import { Column } from "../consts/columns";
+import { SorterContext } from "../contexts/SorterContext";
+import useArray from "../hooks/useArray";
+import { ItemOrderingEnum } from "../hooks/useOrdering";
 import { useListUserHydroShareResourcesQuery } from "../store/sync-api";
+import { IResourceMetadata } from "../store/sync-api/interfaces";
+import { ResourceId } from "../store/sync-api/types";
+import downloadResourcesAndToastResults from "../utilities/downloadResourcesAndToastResults";
 import { DownloadFab } from "./DownloadFab";
-
-export const formatDate = (value: string): string => {
-  /* Create Date object from string representation. 
-  If provided date string representation is unparseable, throw Error.
-
-  Return date string in format: "%b %e,%Y %I:%M %p" (i.e. Sep 10,2021 11:06 AM)
-  See: date manual for format control details (https://man7.org/linux/man-pages/man1/date.1.html)
-  */
-  const parsedDate = new Date(value);
-
-  if (isNaN(parsedDate.getDate())) {
-    const errorMessage = `failed to format date: ${value}`;
-    throw new Error(errorMessage);
-  }
-
-  const formattedTime = parsedDate.toLocaleString("en-US", {
-    timeStyle: "short",
-  });
-  const formattedDate = parsedDate.toLocaleString("en-US", {
-    dateStyle: "medium",
-  });
-
-  return `${formattedDate} ${formattedTime}`;
-};
-
-const formatCreator = (value: string): string => {
-  // assumes two naming conventions:
-  // 1. John Smith -> John Smith
-  // 2. Smith, John -> John Smith
-  return value.split(", ").reverse().join(" ");
-};
-
-interface Column {
-  id: "resource_title" | "creator" | "date_created" | "date_last_updated";
-  label: string;
-  minWidth?: number;
-  align?: "right";
-  format?: <T>(value: T) => T;
-  link?: boolean;
-}
-
-const columns: Column[] = [
-  { id: "resource_title", label: "Title", minWidth: 170, link: true },
-  {
-    id: "creator",
-    label: "Creator",
-    minWidth: 170,
-    format: formatCreator,
-  },
-  {
-    id: "date_created",
-    label: "Date Created",
-    minWidth: 170,
-    format: formatDate,
-  },
-  {
-    id: "date_last_updated",
-    label: "Date Last Modified",
-    minWidth: 170,
-    format: formatDate,
-  },
-];
+import { ColumnKeys } from "../consts/columns";
+import { Sorter, CaseInsensitiveStringSorter } from "../utilities/sorters";
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -86,25 +31,118 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
   },
   container: {
-    height: "calc(100% - 64px)", // 64px = height of application bar. Used to fit table in widget area. Likely "better" way to do this.
+    // will need to change if size of second application bar changes
+    height: "calc(100% - 128px)", // 2 x 64px = height of application bar. Used to fit table in widget area. Likely "better" way to do this.
     overflowY: "scroll",
   },
 }));
 
-export const ResourceGrid: React.FC = () => {
+interface ResourceCheckbox extends IResourceMetadata {
+  checked: boolean;
+}
+
+export interface ResourceGridProps {
+  columns: Column[];
+}
+
+const sortResourceListingByColumnId = <T extends keyof ColumnKeys>(
+  arr: ResourceCheckbox[],
+  columnId: T,
+  sorter: Sorter<T>,
+  ordering?: ItemOrderingEnum
+): ResourceCheckbox[] => {
+  // NOTE: shallow copy, might not be desired depending on use
+  let arrCpy = [...arr];
+
+  // sort and reverse are both in place methods
+  arrCpy.sort((a, b) =>
+    sorter.sort(a[columnId as string], b[columnId as string])
+  );
+
+  if (ordering === ItemOrderingEnum.Descending) {
+    arrCpy.reverse();
+  }
+  return arrCpy;
+};
+
+export const ResourceGrid = ({ columns }: ResourceGridProps) => {
   const classes = useStyles();
   const { data, isFetching } = useListUserHydroShareResourcesQuery();
+
+  const { ordering, sortingColumn } = useContext(SorterContext);
+
   const selectKey = -1;
+
+  const { array, set: setArray, update } = useArray<ResourceCheckbox>([]);
+  const [allChecked, setAllChecked] = useState<boolean>(false);
+
+  useMemo(() => {
+    data
+      ? setArray(
+          // default sort columns ascending by resource_title
+          sortResourceListingByColumnId(
+            data.map((res) => ({
+              ...res,
+              checked: false,
+            })),
+            "resource_title",
+            CaseInsensitiveStringSorter
+          )
+        )
+      : setArray([]);
+  }, [data]);
+
+  useMemo(() => {
+    if (array.length > 0) {
+      // get sorter
+      const { sorter } = columns.find(({ id }) => id === sortingColumn)!;
+
+      // sort column
+      setArray((arr) =>
+        sortResourceListingByColumnId(arr, sortingColumn, sorter, ordering)
+      );
+    }
+  }, [data, sortingColumn, ordering, columns]);
+
+  const getCheckedResources = (): ResourceId[] => {
+    // return a list of resource id's where checked is true.
+    return array.flatMap(({ checked, resource_id }) =>
+      checked ? resource_id : []
+    );
+  };
 
   return (
     <Paper className={classes.root}>
-      <DownloadFab />
+      {/* display download fab if one or more checkboxes is clicked. */}
+      {array.some(({ checked }) => checked === true) && (
+        <DownloadFab
+          onClick={() => {
+            const checkedResources = getCheckedResources();
+            downloadResourcesAndToastResults(checkedResources);
+          }}
+        />
+      )}
       <TableContainer className={classes.container}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
               <TableCell key={selectKey}>
-                <Checkbox />
+                <Checkbox
+                  onChange={() => {
+                    setAllChecked((state) => {
+                      const newState = !state;
+                      // update all buttons with new state
+                      setArray((arrayState) =>
+                        arrayState.map((res) => ({
+                          ...res,
+                          checked: newState,
+                        }))
+                      );
+                      return newState;
+                    });
+                  }}
+                  checked={allChecked}
+                />
               </TableCell>
               {columns.map((column) => (
                 <TableCell
@@ -130,11 +168,24 @@ export const ResourceGrid: React.FC = () => {
               </TableRow>
             ) : (
               // display resource table
-              data?.map((row, index) => {
+              array?.map((row, index) => {
+                // NOTE: this should probably be memoized
                 return (
                   <TableRow hover role="checkbox" tabIndex={-1} key={index}>
                     <TableCell key={selectKey}>
-                      <Checkbox />
+                      <Checkbox
+                        onChange={() => {
+                          update(index, ({ checked, ...rest }) => ({
+                            ...rest,
+                            checked: !checked,
+                          }));
+                        }}
+                        checked={(() => {
+                          return array.length > 0
+                            ? array[index].checked
+                            : false;
+                        })()}
+                      />
                     </TableCell>
                     {columns.map((column) => {
                       // format value if format field specified in column definition
