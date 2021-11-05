@@ -1,51 +1,44 @@
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useRef,
-  useMemo,
-  useCallback,
-} from "react";
-import { RouteComponentProps } from "react-router-dom";
+import { CircularProgress, Paper } from "@material-ui/core";
+import ComputerIcon from "@material-ui/icons/Computer";
+// icon imports
+import SyncIcon from "@material-ui/icons/Sync";
+import SyncDisabledIcon from "@material-ui/icons/SyncDisabled";
 import {
-  GenericFileActionHandler,
-  FullFileBrowser,
-  FileActionHandler,
   ChonkyActions,
+  ChonkyIconName,
+  ChonkyIconProps,
+  defineFileAction,
+  FileActionHandler,
   FileBrowser,
   FileData,
   FileList,
   FileNavbar,
   FileToolbar,
-  defineFileAction,
-  ChonkyIconName,
+  GenericFileActionHandler,
 } from "chonky";
-import {
-  OpenFilesPayload,
-  ChangeSelectionPayload,
-} from "chonky/dist/types/action-payloads.types";
-import syncApi, {
-  useDataDirectoryQuery,
-  useDownloadResourceEntityQuery,
-  useListHydroShareResourceFilesQuery,
-  useUploadResourceEntityMutation,
-} from "../store/sync-api";
+import { ChonkyIconFA } from "chonky-icon-fontawesome";
+import { OpenFilesPayload } from "chonky/dist/types/action-payloads.types";
+import path from "path";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { RouteComponentProps } from "react-router-dom";
+import { PluginServicesContext } from "../contexts";
+import useClickToCloseSnackbar from "../hooks/useClickToCloseSnackbar";
+import { useAppSelector } from "../store/hooks";
+import { FSState } from "../store/sync-api/types";
 import store from "../store/store";
-import { Paper, CircularProgress } from "@material-ui/core";
+import syncApi, {
+  useListHydroShareResourceFilesQuery,
+} from "../store/sync-api";
 import {
   IResourceFiles,
   IResourceFilesRequest,
-  IResourceFileDownloadRequest,
 } from "../store/sync-api/interfaces";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { FSState } from "../store/reducers";
-import path from "path";
-
-// icon imports
-import SyncIcon from "@material-ui/icons/Sync";
-import SyncDisabledIcon from "@material-ui/icons/SyncDisabled";
-import ComputerIcon from "@material-ui/icons/Computer";
-// only on hydroshare: HydroShare icon
 
 export const ResourceActions = {
   OpenResourceOnHydroShare: defineFileAction({
@@ -131,14 +124,6 @@ export const FileStatusIcons = {
   only_remote: "HS",
   out_of_sync: <SyncDisabledIcon />,
 };
-
-import { ChonkyIconProps } from "chonky";
-import { ChonkyIconFA } from "chonky-icon-fontawesome";
-import { IDocumentManager } from "@jupyterlab/docmanager";
-import { PluginServicesContext } from "../contexts";
-import { OutputParametricSelector } from "reselect";
-import useClickToCloseSnackbar from "../hooks/useClickToCloseSnackbar";
-import { RestoreOutlined } from "@material-ui/icons";
 
 export const FileStatusEmoji: React.FC<ChonkyIconProps> = React.memo(
   (props) => {
