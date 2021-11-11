@@ -23,7 +23,7 @@ class ConfigFile(BaseSettings):
     # case-insensitive alias values DATA and LOG
     data_path: Path = Field(_DEFAULT_DATA_PATH, env="data")
     log_path: Path = Field(_DEFAULT_LOG_PATH, env="log")
-    oauth_path: Optional[OAuthFile] = Field(None, env="oauth")
+    oauth_path: Union[OAuthFile, str, None] = Field(None, env="oauth")
 
     class Config:
         env_file: Union[str, None] = first_existing_file(_DEFAULT_CONFIG_FILE_LOCATIONS)
@@ -41,10 +41,10 @@ class ConfigFile(BaseSettings):
             path.mkdir()
         return v
 
-    @validator("oauth_path", pre=True)
+    @validator("oauth_path")
     def unpickle_oauth_path(cls, v):
         if v is None:
-            return
+            return v
         path = expand_and_resolve(v)
         if not path.is_file():
             error_message = "Provided OAUTH configuration value must be file."
