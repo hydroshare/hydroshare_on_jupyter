@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from hsclient import HydroShare
 from watchdog.observers import Observer
+import logging
 
 # type hint imports
 from typing import Optional, Union
@@ -15,6 +16,8 @@ from .fs_event_handler import fs_event_handler_factory
 from .fs_events import Events
 from .session_struct_interface import ISessionSyncStruct
 from .session_sync_event_listeners import SessionSyncEventListeners
+
+_log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -47,6 +50,7 @@ class SessionSyncStruct(ISessionSyncStruct):
     ) -> "SessionSyncStruct":
         # instantiate and populate local and remote FSMaps
         agg_map = AggregateFSMap.create_map(fs_root, hydroshare)
+        _log.info("created AggregateFSMap")
 
         event_broker = EventBroker(Events)
         # `event_broker` context given to each factory object
@@ -54,7 +58,9 @@ class SessionSyncStruct(ISessionSyncStruct):
 
         # create and start observer thread
         observer = Observer()
+        _log.info("observer created")
         observer.start()
+        _log.info("observer started")
 
         # mapping of resource_id to application specific watchdog FileSystemEventHandler instance
         fs_observers = dict()
@@ -62,6 +68,7 @@ class SessionSyncStruct(ISessionSyncStruct):
             # create a resource specific event handler
             event_handler = _event_handler_factory(res)
 
+            _log.info(f"scheduling {res_id} observer")
             # bind handler to observer
             watcher = observer.schedule(
                 event_handler, res.contents_path, recursive=True
@@ -77,6 +84,7 @@ class SessionSyncStruct(ISessionSyncStruct):
             fs_observers=fs_observers,
             event_handler_factory=_event_handler_factory,
         ).setup_event_listeners()
+        _log.info("event listeners setup")
 
         return cls(
             aggregate_fs_map=agg_map,
