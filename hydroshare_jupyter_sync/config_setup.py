@@ -23,7 +23,7 @@ class ConfigFile(BaseSettings):
     # case-insensitive alias values DATA and LOG
     data_path: Path = Field(_DEFAULT_DATA_PATH, env="data")
     log_path: Path = Field(_DEFAULT_LOG_PATH, env="log")
-    oauth_path: Optional[OAuthContents] = Field(None, env="oauth")
+    oauth_path: Optional[OAuthFile] = Field(None, env="oauth")
 
     class Config:
         env_file: Union[str, None] = first_existing_file(_DEFAULT_CONFIG_FILE_LOCATIONS)
@@ -51,7 +51,6 @@ class ConfigFile(BaseSettings):
             raise FileNotFoundError(error_message)
 
         with open(path, "rb") as f:
-            deserialized_model =  pickle.load(f)                
-        model = OAuthFile.parse_obj(deserialized_model)
+            deserialized_model = pickle.load(f)
 
-        return model.dict()[0] # type: OAuthContents
+        return OAuthFile.parse_obj(deserialized_model)
