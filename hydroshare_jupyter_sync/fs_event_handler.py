@@ -13,6 +13,7 @@ from .lib.filesystem.fs_resource_map import LocalFSResourceMap
 from .lib.events.event_broker import EventBroker
 
 from functools import wraps
+from pathlib import Path
 import logging
 
 # module level log
@@ -61,8 +62,11 @@ def fs_event_handler_factory(event_broker: EventBroker) -> FileSystemEventHandle
             event_broker.dispatch(Events.STATUS, self.resource_id)
 
         def on_deleted(self, event: FileDeletedEvent) -> None:
-            # remove file from local fs map
-            self._res_map.delete_file(event.src_path)
+            # imperatively check if the file exists. propagates from known issue with OSX's KQueue.
+            # related to https://github.com/gorakhargosh/watchdog/issues/803
+            if not Path(event.src_path).exists():
+                # remove file from local fs map
+                self._res_map.delete_file(event.src_path)
 
             # dispatch new state
             event_broker.dispatch(Events.STATUS, self.resource_id)
@@ -70,10 +74,9 @@ def fs_event_handler_factory(event_broker: EventBroker) -> FileSystemEventHandle
         def on_moved(self, event: FileMovedEvent) -> None:
             # update/add file in local fs map, remove file from local fs map
             self._res_map.delete_file(event.src_path)
+            self._res_map.delete_file(event.dest_path)
 
-            # NOTE: change in the future. Right now, this covers all cases.
             self._res_map.add_file(event.dest_path)
-            self._res_map.update_file(event.dest_path)
 
             # dispatch new state
             event_broker.dispatch(Events.STATUS, self.resource_id)
