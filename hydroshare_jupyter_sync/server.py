@@ -54,10 +54,12 @@ from .models.api_models import (
     Boolean,
     Credentials,
     DataDir,
+    OAuthCredentials,
     Success,
     CollectionOfResourceMetadata,
     ResourceFiles,
 )
+from .models.oauth import OAuthContents, OAuthFile
 from .session_struct import SessionStruct
 from .session import session_sync_struct
 
@@ -185,6 +187,15 @@ class BaseRequestHandler(SessionMixIn, JupyterHandler):  # TODO: will need to ch
         """Local HydroShare resources file system location."""
         return Path(self.settings.get("data_path"))
 
+    @property
+    def oauth_creds(self) -> Union[OAuthCredentials, None]:
+        """Local HydroShare resources file system location."""
+        creds = self.settings.get("oauth_path")  # type: OAuthFile
+        # implicit None if creds **is** None
+        if creds is not None:
+            oauth_contents, client_id= creds.dict()
+            return OAuthCredentials(token=oauth_contents.access_token, client_id=client_id)
+
 
 class HeadersMixIn:
     def set_default_headers(self):
@@ -237,6 +248,22 @@ class DataDirectoryHandler(HeadersMixIn, BaseRequestHandler):
 
     def get(self):
         self.write(DataDir(data_directory=str(self.data_path)).dict())
+
+
+class UsingOAuth(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
+    """Return OAuthCredentials if they are specified in configuration. Field values are empty strings if
+    not configured."""
+
+    _custom_headers = [("Access-Control-Allow-Methods", "GET, OPTIONS")]
+
+    def prepare(self):
+        # NOTE: Bypass base request prepare. This should change in the future
+        pass
+
+    def get(self):
+        if self.oauth_creds:
+            self.write(self.oauth_creds.dict())
+        self.write(OAuthCredentials(client_id="", token="").dict())
 
 
 class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
