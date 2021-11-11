@@ -17,6 +17,7 @@ class FileSystemEventWebSocketHandler(SessionMixIn, WebSocketHandler):
     def prepare(self):
         # get current running event loop in main thread
         self.loop = asyncio.get_event_loop()
+        logging.info("got event loop")
 
         if not self.get_client_server_cookie_status():
             self.set_status(HTTPStatus.FOUND)  # 302
@@ -29,21 +30,21 @@ class FileSystemEventWebSocketHandler(SessionMixIn, WebSocketHandler):
 
         # send initial state/status
         message = session.aggregate_fs_map.get_sync_state().json()
-        logging.debug(message)
+        logging.info(message)
         self.write_message(message)
 
         # subscribe to FSEvents
-        logging.debug("subscribing to events")
         self._subscribe_to_events()
+        logging.info("subscribed to events")
 
     def on_message(self, message):
         # message handler
-        logging.debug(message)
+        logging.info(message)
 
     def on_close(self):
         # unsubscribe to FSEvents
-        logging.debug("unsubscribing from events")
         self._unsubscribe_from_events()
+        logging.info("unsubscribed from events")
 
     def _subscribe_to_events(self):
         session.event_broker.subscribe(Events.STATUS, self._get_resource_status)
@@ -58,16 +59,20 @@ class FileSystemEventWebSocketHandler(SessionMixIn, WebSocketHandler):
         )
 
     def _unsubscribe_from_events(self):
-        session.event_broker.subscribe(Events.STATUS, self._get_resource_status)
-        session.event_broker.subscribe(
-            Events.RESOURCE_ENTITY_UPLOADED, self._get_resource_status
-        )
-        session.event_broker.subscribe(
-            Events.RESOURCE_DOWNLOADED, self._get_resource_status
-        )
-        session.event_broker.subscribe(
-            Events.RESOURCE_ENTITY_DOWNLOADED, self._get_resource_status
-        )
+        # TODO: bug lifetime of event_broker not guaranteed. event_broker is destroyed by logout logic
+        try:
+            session.event_broker.unsubscribe(Events.STATUS, self._get_resource_status)
+            session.event_broker.unsubscribe(
+                Events.RESOURCE_ENTITY_UPLOADED, self._get_resource_status
+            )
+            session.event_broker.unsubscribe(
+                Events.RESOURCE_DOWNLOADED, self._get_resource_status
+            )
+            session.event_broker.unsubscribe(
+                Events.RESOURCE_ENTITY_DOWNLOADED, self._get_resource_status
+            )
+        except AttributeError as e:
+            pass
 
     def _get_resource_status(self, res_id: str) -> str:
         """Write json stringified resource sync state"""
