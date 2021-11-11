@@ -193,8 +193,10 @@ class BaseRequestHandler(SessionMixIn, JupyterHandler):  # TODO: will need to ch
         creds = self.settings.get("oauth_path")  # type: OAuthFile
         # implicit None if creds **is** None
         if creds is not None:
-            oauth_contents, client_id= creds.dict()
-            return OAuthCredentials(token=oauth_contents.access_token, client_id=client_id)
+            oauth_contents, client_id = creds
+            return OAuthCredentials(
+                token=oauth_contents["access_token"], client_id=client_id
+            )
 
 
 class HeadersMixIn:
@@ -263,7 +265,8 @@ class UsingOAuth(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
     def get(self):
         if self.oauth_creds:
             self.write(self.oauth_creds.dict())
-        self.write(OAuthCredentials(client_id="", token="").dict())
+        else:
+            self.write(OAuthCredentials(client_id="", token="").dict())
 
 
 class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
