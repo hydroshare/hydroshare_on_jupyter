@@ -3,7 +3,7 @@ import pickle
 from pathlib import Path
 from typing import Optional, Union
 from .utilities.pathlib_utils import first_existing_file, expand_and_resolve
-from .models.oauth import OAuthFile
+from .models.oauth import OAuthFile, OAuthContents
 
 _DEFAULT_CONFIG_FILE_LOCATIONS = (
     "~/.config/hydroshare_jupyter_sync/config",
@@ -23,7 +23,7 @@ class ConfigFile(BaseSettings):
     # case-insensitive alias values DATA and LOG
     data_path: Path = Field(_DEFAULT_DATA_PATH, env="data")
     log_path: Path = Field(_DEFAULT_LOG_PATH, env="log")
-    oauth_path: Optional[OAuthFile] = Field(None, env="oauth")
+    oauth_path: Optional[OAuthContents] = Field(None, env="oauth")
 
     class Config:
         env_file: Union[str, None] = first_existing_file(_DEFAULT_CONFIG_FILE_LOCATIONS)
@@ -51,5 +51,7 @@ class ConfigFile(BaseSettings):
             raise FileNotFoundError(error_message)
 
         with open(path, "rb") as f:
-            deserialized = pickle.load(f)                
-        return deserialized
+            deserialized_model =  pickle.load(f)                
+        model = OAuthFile.parse_obj(deserialized_model)
+
+        return model.dict()[0] # type: OAuthContents
