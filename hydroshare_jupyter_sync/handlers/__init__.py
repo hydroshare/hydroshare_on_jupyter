@@ -12,6 +12,7 @@ from ..server import (
     LocalResourceEntityHandler,
     HydroShareResourceEntityHandler,
     WebAppHandler,
+    UsingOAuth,
 )
 
 
@@ -31,6 +32,10 @@ def get_route_handlers(frontend_url, backend_url):
             {"path": str(assets_path)},
         ),
         # "backend"
+        (
+            url_path_join(backend_url, r"/oauth"),
+            UsingOAuth,
+        ),
         (
             url_path_join(backend_url, r"/ws"),
             FileSystemEventWebSocketHandler,
