@@ -1,16 +1,20 @@
-from hsmodels.schemas import resource
 from pydantic import (
     BaseModel,
     Field,
     StrictStr,
     StrictBool,
-    conlist,
     constr,
-    ConstrainedList,
     validator,
 )
-from typing import List
+from typing import List, Union
 from .resource_type_enum import ResourceTypeEnum
+
+
+class ModelNoExtra(BaseModel):
+    """does not permit extra fields"""
+
+    class Config:
+        extra = "forbid"
 
 
 class Boolean(BaseModel):
@@ -21,9 +25,44 @@ class Boolean(BaseModel):
         return cls(value=value).value
 
 
-class Credentials(BaseModel):
+class StandardCredentials(ModelNoExtra):
     username: StrictStr = Field(...)
     password: StrictStr = Field(...)
+
+
+class OAuthCredentials(ModelNoExtra):
+    client_id: StrictStr = Field(...)
+    token: StrictStr = Field(...)
+
+
+CredentialTypes = Union[StandardCredentials, OAuthCredentials]
+
+
+class Credentials(BaseModel):
+    __root__: CredentialTypes = Field(...)
+
+    def dict(
+        self,
+        *,
+        include: Union["AbstractSetIntStr", "MappingIntStrAny"] = None,
+        exclude: Union["AbstractSetIntStr", "MappingIntStrAny"] = None,
+        by_alias: bool = False,
+        skip_defaults: bool = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False
+    ) -> "DictStrAny":
+        d = super().dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+        )
+        # return contents of root key dropping it in the process
+        return d["__root__"]
 
 
 class Success(BaseModel):
@@ -45,6 +84,10 @@ class ResourceMetadata(BaseModel):
     @validator("authors", pre=True, always=True)
     def handle_null_author(cls, v):
         return v or []
+
+    @validator("creator", pre=True, always=True)
+    def handle_null_creator(cls, v):
+        return "" if v is None else v
 
 
 class CollectionOfResourceMetadata(BaseModel):
