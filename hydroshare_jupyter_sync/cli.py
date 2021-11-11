@@ -4,7 +4,12 @@ from typing import Union
 from .utilities.pathlib_utils import expand_and_resolve
 
 
-def parse() -> Union[argparse.Namespace, None]:
+class CommandNamespace:
+    start: str = "start"
+    configure: str = "configure"
+
+
+def parse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="hydroshare_jupyter_sync",
         description=(
@@ -21,42 +26,56 @@ def parse() -> Union[argparse.Namespace, None]:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,  # This adds defaults to help page
     )
 
-    parser.add_argument(
+    commands = parser.add_subparsers(title="commands", dest="command")
+    start = commands.add_parser(
+        CommandNamespace.start,
+        help="start a stand-alone instance of the backend server extension.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,  # This adds defaults to help page
+    )
+    commands.add_parser(
+        CommandNamespace.configure,
+        help="link hydroshare_jupyter_sync's lab and server extension with jupyter.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,  # This adds defaults to help page
+    )
+
+    start.add_argument(
         "-p",
         "--port",
         type=int,
         nargs="?",
-        help="Port number to listen on",
+        help="port number to listen on",
         default=8080,
     )
 
-    parser.add_argument(
+    start.add_argument(
         "-n",
         "--hostname",
         type=str,
         nargs="?",
-        help="HTTP Server hostname",
+        help="HTTP server hostname",
         default="127.0.0.1",  # localhost
     )
 
-    parser.add_argument(
+    # default to run in debug mode
+    start.add_argument(
         "-d",
         "--no-debug",
         action="store_true",
         default=False,
-        help="Disable debugging mode",
+        help="disable debugging mode",
+        dest="debug",
     )
 
-    parser.add_argument(
+    start.add_argument(
         "-c",
         "--config",
         nargs="?",
         type=absolute_file_path,
-        help="Path to configuration file. By default read from ~/.config/hydroshare_jupyter_sync/config then ~/.hydroshare_jupyter_sync_config if either exist.",
+        help="path to configuration file. by default read from ~/.config/hydroshare_jupyter_sync/config then ~/.hydroshare_jupyter_sync_config if either exist.",
         required=False,
     )
 
-    return parser.parse_args()
+    return parser
 
 
 def is_file_and_exists(f: Union[str, Path]) -> bool:
