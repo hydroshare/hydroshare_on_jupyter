@@ -25,6 +25,7 @@ import tornado.options
 import tornado.web
 from hs_restclient import exceptions as HSExceptions
 from notebook.base.handlers import IPythonHandler
+from jupyter_server.base.handlers import JupyterHandler
 from notebook.utils import url_path_join
 from typing import Union, List, Optional
 from tempfile import TemporaryDirectory
@@ -103,6 +104,9 @@ class SessionMixIn:
     """MixIn with methods for reading the state of the current session."""
 
     session_cookie_key = "user"
+    # TODO: implement current user property
+    # if not included, when deployed on jupyterhub, jupyterhub.log.log_request username = user.name causes crash
+    current_user = ""
 
     def get_current_user(self):
         # @overrides BaseRequestHandler.get_current_user()
@@ -141,7 +145,7 @@ class SessionMixIn:
         return None
 
 
-class BaseRequestHandler(SessionMixIn, IPythonHandler):  # TODO: will need to change
+class BaseRequestHandler(SessionMixIn, JupyterHandler):  # TODO: will need to change
     """Sets the headers for all the request handlers that extend
     this class"""
 
@@ -236,7 +240,8 @@ class DataDirectoryHandler(HeadersMixIn, BaseRequestHandler):
 
 
 class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
-    """Handles authenticating the user with HydroShare.
+    """Handles authenticating the user with HydroShare. Accepts standard auth using username and
+    password or using OAuth2.
 
     HTTP Request type:
         DELETE:
@@ -250,7 +255,7 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
                 16-bit salt. The decrypted version is stored in memory for reference.
             Body:
                 Content-Type: application/json
-                Schema: {"username": str, "password": str}
+                Schema: {"username": str, "password": str} | {"client_id": str, "token": str}
     """
 
     _custom_headers = [("Access-Control-Allow-Methods", "OPTIONS,POST,DELETE")]
@@ -274,6 +279,7 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
         # do not use the DELETE method first, they will still be signed into the first
         # account bc of the `user` cookie
         credentials = Credentials.parse_raw(self.request.body.decode("utf-8"))
+        self.log.info("parsed user credentials")
 
         self.successful_login = True
         # client and server cookies don't match or is out of date
@@ -283,7 +289,7 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
 
             except Exception as e:
                 self.successful_login = False
-                _log.exception(e)
+                self.log.exception(e)
                 if "401" in str(e):
                     self.set_status(HTTPStatus.UNAUTHORIZED)  # 401
                 else:
@@ -293,9 +299,7 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
         self.write(Success(success=self.successful_login).dict())
 
     def _create_session(self, credentials: Credentials) -> None:
-        hs = HydroShareWithResourceCache(
-            username=credentials.username, password=credentials.password
-        )
+        hs = HydroShare(**credentials.dict())
         user_info = hs.my_user_info()
         user_id = int(user_info["id"])
         username = user_info["username"]
@@ -306,6 +310,7 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
 
         # cookie is tied to session, meaning it has no expire date
         self.set_secure_cookie(self.session_cookie_key, salted_token, expires_days=None)
+        self.log.info("creating session")
 
         self.set_session(
             SessionStruct(
@@ -330,7 +335,9 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
             # _SessionSyncSingleton to be empty/None and some to be present and True is returned.
             # this may come up in the future as a place where the session is corrupted.
             hs_session = self.get_hs_session()
+            self.log.info("got hydroshare session")
             session_sync_struct.new_sync_session(self.data_path, hs_session)
+            self.log.info("created sync session")
 
     def _destroy_session(self):
         # handle logout logic
