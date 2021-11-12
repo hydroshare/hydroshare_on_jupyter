@@ -7,6 +7,8 @@ from pydantic import (
     validator,
 )
 from typing import List, Union
+from hsclient import Token
+
 from .resource_type_enum import ResourceTypeEnum
 
 
@@ -32,7 +34,7 @@ class StandardCredentials(ModelNoExtra):
 
 class OAuthCredentials(ModelNoExtra):
     client_id: StrictStr = Field(...)
-    token: StrictStr = Field(...)
+    token: Token = ...
 
 
 CredentialTypes = Union[StandardCredentials, OAuthCredentials]
