@@ -59,7 +59,7 @@ from .models.api_models import (
     CollectionOfResourceMetadata,
     ResourceFiles,
 )
-from .models.oauth import OAuthContents, OAuthFile
+from .models.oauth import OAuthFile
 from .session_struct import SessionStruct
 from .session import session_sync_struct
 
@@ -195,7 +195,7 @@ class BaseRequestHandler(SessionMixIn, JupyterHandler):  # TODO: will need to ch
         if creds is not None:
             oauth_contents, client_id = creds
             return OAuthCredentials(
-                token=oauth_contents["access_token"], client_id=client_id
+                token=oauth_contents, client_id=client_id
             )
 
 
