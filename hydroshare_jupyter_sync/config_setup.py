@@ -3,7 +3,7 @@ import pickle
 from pathlib import Path
 from typing import Optional, Union
 from .utilities.pathlib_utils import first_existing_file, expand_and_resolve
-from .models.oauth import OAuthFile, OAuthContents
+from .models.oauth import OAuthFile
 
 _DEFAULT_CONFIG_FILE_LOCATIONS = (
     "~/.config/hydroshare_jupyter_sync/config",
