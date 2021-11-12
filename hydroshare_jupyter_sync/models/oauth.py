@@ -1,19 +1,12 @@
 from pydantic import BaseModel
+from hsclient import Token
 
 # typing imports
 from typing import Tuple, Union
 
 
-class OAuthContents(BaseModel):
-    access_token: str
-    token_type: str
-    refresh_token: str
-    scope: str
-    expires_in: str
-
-
 class OAuthFile(BaseModel):
-    __root__: Tuple[OAuthContents, str]
+    __root__: Tuple[Token, str]
 
     def dict(
         self,
