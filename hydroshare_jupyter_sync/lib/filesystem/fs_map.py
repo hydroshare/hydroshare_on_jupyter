@@ -169,7 +169,8 @@ class RemoteFSMap(FSMap):
         # NOTE: assumes user if logged in and using standard username, pass auth. Likely should
         # guard in future.
         # get username
-        username = hydroshare._hs_session._session.auth[0]
+        # TODO: Remove
+        # username = hydroshare._hs_session._session.auth[0]
 
         # NOTE: assumes only resources desired for tracking are owned. may not be desirable.
         # get resources the user can edit
