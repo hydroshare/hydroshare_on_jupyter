@@ -194,9 +194,7 @@ class BaseRequestHandler(SessionMixIn, JupyterHandler):  # TODO: will need to ch
         # implicit None if creds **is** None
         if creds is not None:
             oauth_contents, client_id = creds
-            return OAuthCredentials(
-                token=oauth_contents, client_id=client_id
-            )
+            return OAuthCredentials(token=oauth_contents, client_id=client_id)
 
 
 class HeadersMixIn:
@@ -266,7 +264,15 @@ class UsingOAuth(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
         if self.oauth_creds:
             self.write(self.oauth_creds.dict())
         else:
-            self.write(OAuthCredentials(client_id="", token="").dict())
+            # TODO: In the future, a model denoting that oauth is not enabled should be returned instead.
+            empty = {
+                "client_id": "",
+                "token": {
+                    "access_token": "",
+                    "token_type": "",
+                },
+            }
+            self.write(OAuthCredentials.parse_obj(empty).dict())
 
 
 class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
