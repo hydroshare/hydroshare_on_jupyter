@@ -9,6 +9,7 @@ import {
   IResourceFilesRequest,
   IResourceFileDownloadRequest,
   IDataDirectory,
+  IOAuthCredential,
 } from "./interfaces";
 import { getBaseUrl } from "../../utilities/getJupyterConfigData";
 
@@ -34,6 +35,17 @@ export const syncApi = createApi({
       // invalidate all tags
       invalidatesTags: ["EndSession", "Resource"],
     }),
+    // login using OAuth
+    oAuthLogin: build.mutation<ISuccess, IOAuthCredential>({
+      query: (creds) => ({
+        url: `login`,
+        params: { _xsrf: getCookie("_xsrf") },
+        method: "POST",
+        body: creds,
+      }),
+      // invalidate all tags
+      invalidatesTags: ["EndSession", "Resource"],
+    }),
     // log user out
     logout: build.mutation<void, void>({
       query: () => ({
@@ -44,6 +56,10 @@ export const syncApi = createApi({
       }),
       // invalidate all tags
       invalidatesTags: ["EndSession", "Resource"],
+    }),
+    // get data directory (i.e. where hydroshare resources are stored locally)
+    usingOAuth: build.query<IOAuthCredential, void>({
+      query: () => "oauth",
     }),
     // get data directory (i.e. where hydroshare resources are stored locally)
     dataDirectory: build.query<IDataDirectory, void>({
@@ -123,6 +139,8 @@ export const {
   useDownloadResourceQuery,
   useDownloadResourceEntityQuery,
   useUploadResourceEntityMutation,
+  useOAuthLoginMutation,
+  useUsingOAuthQuery,
 } = syncApi;
 
 export default syncApi;
