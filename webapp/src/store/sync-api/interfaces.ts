@@ -46,3 +46,17 @@ export interface IUserInfo {
 export interface IDataDirectory {
   data_directory: string;
 }
+
+export interface IOAuthCredential {
+  client_id: string;
+  token: IOAuthToken;
+}
+
+export interface IOAuthToken {
+  access_token: string;
+  token_type: string;
+  scope?: string;
+  state?: string;
+  expires_in?: number;
+  refresh_token?: string;
+}
