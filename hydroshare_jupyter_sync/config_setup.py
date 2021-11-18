@@ -29,7 +29,7 @@ class ConfigFile(BaseSettings):
         env_file: Union[str, None] = first_existing_file(_DEFAULT_CONFIG_FILE_LOCATIONS)
         env_file_encoding = "utf-8"
 
-    @validator("data_path", "log_path")
+    @validator("data_path", "log_path", pre=True)
     def create_paths_if_do_not_exist(cls, v: Path):
         # for key, path in values.items():
         path = expand_and_resolve(v)
@@ -39,7 +39,7 @@ class ConfigFile(BaseSettings):
             )
         elif not path.exists():
             path.mkdir()
-        return v
+        return path
 
     @validator("oauth_path")
     def unpickle_oauth_path(cls, v):
