@@ -1,5 +1,5 @@
 import pytest
-from hydroshare_jupyter_sync.models.oauth import OAuthFile
+from hydroshare_on_jupyter.models.oauth import OAuthFile
 
 
 @pytest.fixture

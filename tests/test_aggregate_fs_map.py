@@ -4,7 +4,7 @@ from hsclient import HydroShare
 from pathlib import Path
 from pydantic import BaseSettings, Field
 
-from hydroshare_jupyter_sync.lib.filesystem.aggregate_fs_map import AggregateFSMap
+from hydroshare_on_jupyter.lib.filesystem.aggregate_fs_map import AggregateFSMap
 
 
 def get_env_file_path() -> Path:

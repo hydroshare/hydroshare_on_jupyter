@@ -1,12 +1,12 @@
 from tornado.httpclient import HTTPRequest, HTTPResponse
 from tornado.httputil import HTTPHeaders
 from hsclient import HydroShare
-from hydroshare_jupyter_sync.__main__ import get_test_app
-from hydroshare_jupyter_sync.hydroshare_resource_cache import (
+from hydroshare_on_jupyter.__main__ import get_test_app
+from hydroshare_on_jupyter.hydroshare_resource_cache import (
     HydroShareWithResourceCache,
 )
-from hydroshare_jupyter_sync.server import LocalResourceEntityHandler
-from hydroshare_jupyter_sync.session import _SessionSyncSingleton
+from hydroshare_on_jupyter.server import LocalResourceEntityHandler
+from hydroshare_on_jupyter.session import _SessionSyncSingleton
 import json
 import pytest
 from dataclasses import dataclass

@@ -6,7 +6,7 @@ from hashlib import md5
 import pytest
 from typing import Tuple, NewType
 
-from hydroshare_jupyter_sync.lib.filesystem.fs_resource_map import LocalFSResourceMap
+from hydroshare_on_jupyter.lib.filesystem.fs_resource_map import LocalFSResourceMap
 
 # type declarations
 ResourcePath = NewType("ResourcePath", Path)
