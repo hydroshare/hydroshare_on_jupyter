@@ -1,58 +1,65 @@
-This Jupyter server extension and web app enable easy management of HydroShare resource files in CUAHSI JupyterHub or
-on any computer running a Jupyter notebook server. It allows the user to easily open a HydroShare resource,
-work on its files in Jupyter, and then sync those changes back to HydroShare using a simple drag-and-drop
-interface.
+# HydroShare on Jupyter
 
-![CUAHSI Jupyter Sync resource list](https://imgur.com/uqvjp5G.png)
+HydroShare on Jupyter brings HydroShare resource management to JupyterLab's development environment.
+Download, edit, upload, and synchronize your HydroShare resources without leaving Jupyter!
+Collaborate, iterate, and stay up to date with HydroShare on Jupyter.
 
-![CUAHSI Jupyter Sync resource page](https://imgur.com/v5tbB9X.png)
+## Installation
+
+In accordance with the python community, we support and advise the usage of virtual environments in
+any workflow using python. In the following installation guide, we use python's built-in venv module
+to create a virtual environment in which the tools will be installed. Note this is just personal
+preference, any python virtual environment manager should work just fine (conda, pipenv, etc. ).
 
 
-# Installation
+```python
+# Create and activate python environment, requires python >= 3.7
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install --upgrade pip
 
-To install latest release of the app, run the following: 
+# Install
+python3 -m pip install hydroshare_on_jupyter
 
-```bash
-$ cd hydroshare_jupyter_sync
-$ pip install hydroshare_jupyter_sync
+# Link extension to JupyterLab
+python3 -m hydroshare_on_jupyter configure
+
+# Launch JupyterLab and start collaborating!
+python3 -m jupyter lab
 ```
 
-Then activate the server extension using
+## Configuration
 
+
+HydroShare on Jupyter looks for configuration information in environment variables first, then at
+the following path locations:
+
+1. `~/.config/hydroshare_on_jupyter/config`
+2. `~/.hydroshare_on_jupyter_config`
+
+The first configuration file found is used if it exists. However, environment variables take
+precedence, meaning they override configuration file values if they are set.
+
+HydroShare on Jupyter configuration files use `KEY=VALUE` semantics (example below). Only one
+configuration variable should be specified per line. Line comments can be created by starting a line
+with `#`.
+
+### Configuration Variables
+
+- `DATA` : directory where HydroShare resources are saved, default `~/hydroshare`.
+- `OAUTH` : canonical HydroShare OAuth2 pickle file, default None. Allows bypassing login by using OAuth2 via HydroShare.
+
+Example configuration file
+
+```shell
+# file: ~/.config/hydroshare_on_jupyter/config
+DATA=~/Downloads
 ```
-jupyter serverextension enable --py hydroshare_jupyter_sync --sys-prefix
-```
 
-Lastly, launch your Jupyter server from your home directory:
+**Note**
 
-```
-jupyter notebook
-```
-
-and navigate to the CUAHSI Jupyter Sync URL:
-
-```
-http://localhost:8888/sync
-```
-# Configuration
-
-Choose custom directory to provide your custom path where you want to store HydroShare data or 
-choose default directory to store HydroShare data in your home folder
-
-![CUAHSI Jupyter Sync path selector](https://imgur.com/0UeTkyY.png)
-
-Your installation can be customized by creating (or editing) a config file in
-`~/hydroshare/config.json`. Below are all the possible options to specify:
-
-* `dataPath`: The path (asked with the Path Selector dialog during the initialization of application) where the resource
- data is stored
-
-* `logPath`: The path to the log file in which to save logging output. 
-
-# For Developers
-
-A system diagram of our app is displayed below:
-
-![CUAHSI Jupyter Sync system diagram](https://imgur.com/6NWsxHi.png)
-
-View the `README.md` files in `webapp` and `backend` for more technical details.
+By default, HydroShare on Jupyter saves HydroShare resources to `~/hydroshare`. This means, if
+JupyterLab is started from a directory where `~/hydroshare` is not a descendent (e.g.
+`~/Downloads`), you will not be able to open the HydroShare resource files you download using
+HydroShare on Jupyter. To resolve this, either open JupyterLab from `~` or change the directory
+HydroShare on Jupyter saves resources to using the data `DATA` configuration variable.
