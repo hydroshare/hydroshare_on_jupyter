@@ -23,12 +23,11 @@ here = Path(__file__).resolve().parent
 webpath = here / "webapp"
 
 # path to pre-built lab-extension
-EXTENSION_NAME = "hydroshare_jupyter_sync"
-LABEXTENSION_PATH = here / EXTENSION_NAME / "labextension"
+LABEXTENSION_PATH = here / PKGNAME / "labextension"
 
 # Package author information
-AUTHOR = "CUAHSI"
-AUTHOR_EMAIL = "scope-cuahsi@olin.edu"
+AUTHOR = "Austin Raney"
+AUTHOR_EMAIL = "araney@cuahsi.org"
 
 MAINTAINER = "Austin Raney"
 MAINTAINER_EMAIL = "araney@cuahsi.org"
