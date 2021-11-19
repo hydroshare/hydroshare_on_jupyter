@@ -1,7 +1,7 @@
 import pytest
 import os
 
-from hydroshare_jupyter_sync.utilities import pathlib_utils
+from hydroshare_on_jupyter.utilities import pathlib_utils
 
 TEST_EXPAND_AND_RESOLVE_CASES = [
     ("~/test", "/test_user/test", "/test_user"),

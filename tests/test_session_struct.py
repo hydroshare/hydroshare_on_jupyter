@@ -1,5 +1,5 @@
 import pytest
-from hydroshare_jupyter_sync.session_struct import SessionStruct
+from hydroshare_on_jupyter.session_struct import SessionStruct
 
 
 @pytest.fixture
