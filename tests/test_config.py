@@ -22,7 +22,8 @@ def test_config_log_is_file():
 def test_config_using_env_vars(monkeypatch):
     """Test configuration using environment variables"""
     with TemporaryDirectory() as temp:
-        log = Path(temp) / "logs"
+        temp = Path(temp).resolve()
+        log = (Path(temp) / "logs").resolve()
         monkeypatch.setenv("DATA", str(temp))
         monkeypatch.setenv("LOG", str(log))
         c = ConfigFile()
