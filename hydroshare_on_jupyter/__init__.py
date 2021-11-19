@@ -60,8 +60,8 @@ def _load_jupyter_server_extension(server_app: ServerApp):
 
     # parse config file. if env variables present, they take precedence.
     # looks for config in following order:
-    # 1. "~/.config/hydroshare_jupyter_sync/config"
-    # 2. "~/.hydroshare_jupyter_sync_config"
+    # 1. "~/.config/hydroshare_on_jupyter/config"
+    # 2. "~/.hydroshare_on_jupyter_config"
     config = ConfigFile()
 
     # pass config file settings to Tornado Application (web app)
