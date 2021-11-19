@@ -6,25 +6,12 @@ Author: 2019-20 CUAHSI Olin SCOPE Team
 Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
 """
 # -*- coding: utf-8 -*-
-import json
-import logging
-import os
-import signal
-import sys
 from pathlib import Path
 from http import HTTPStatus
 import secrets
 import re
-import shutil
 from pydantic import ValidationError
 
-import requests
-import datetime
-import tornado.ioloop
-import tornado.options
-import tornado.web
-from hs_restclient import exceptions as HSExceptions
-from notebook.base.handlers import IPythonHandler
 from jupyter_server.base.handlers import JupyterHandler
 from notebook.utils import url_path_join
 from typing import Union, List, Optional
@@ -32,23 +19,6 @@ from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
 from hsclient import HydroShare
-from .hydroshare_resource_cache import HydroShareWithResourceCache
-
-from .config_reader_writer import (
-    get_config_values,
-    set_config_values,
-)
-from .credential_reader_writer import credential_path
-from .index_html import get_index_html
-from .resource_hydroshare_data import (
-    ResourceHydroShareData,
-    HS_PREFIX,
-)
-from .resource_local_data import ResourceLocalData, LOCAL_PREFIX
-from .resource_manager import (
-    ResourceManager,
-    HYDROSHARE_AUTHENTICATION_ERROR,
-)
 
 from .models.api_models import (
     Boolean,
@@ -75,31 +45,6 @@ from .lib.resource_factories import HydroShareEntityDownloadFactory, EntityTypeE
 # The current state does not support multiple connected users.
 # activity initialized at -1, ergo no connection made
 SESSION = SessionStruct(session=None, cookie=None, id=None, username=None)
-
-resource_manager = ResourceManager()
-
-_log = logging.getLogger(__name__)
-
-WORKSPACE_FILES_ERROR = {
-    "type": "WorkspaceFileError",
-    "message": "HydroShare files not present in Workspace",
-}
-
-# TODO: These are constants, so change case
-# also, this should be moved to the config setup
-assets_path = Path(__file__).absolute().parent / "assets"
-data_path = Path.cwd() / "hydroshare" / "local_hs_resources"
-
-isFile = False
-# If we're running this file directly with Python, we'll be firing up a full
-# Tornado web server, so use Tornado's RequestHandler as our base class.
-# Otherwise (i.e. if this is being run by a Jupyter notebook server) we want to
-# use IPythonHandler as our base class. (See the code at the bottom of this
-# file for the server launching.)
-# NOTE: Given that IPythonHandler is a subclass of tornado.web.RequestHandler, I don't
-# think it is an issue to use it as the base class. This may come up in the future and
-# need to be changed.
-# BaseHandler = tornado.web.RequestHandler if __name__ == "__main__" else IPythonHandler
 
 
 class SessionMixIn:
