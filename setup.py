@@ -1,6 +1,10 @@
 """
-Author: 2019-20 CUAHSI Olin SCOPE Team
+Intellectual Property: 2019-20 CUAHSI Olin SCOPE Team
 Vicky McDermott, Kyle Combes, Emily Lepert, and Charlie Weiss
+
+Author: Austin Raney
+Author Email: araney@cuahsi.org
+Author Affiliation: CUAHSI
 
 Maintainer: Austin Raney
 Maintainer Email: araney@cuahsi.org
