@@ -1,6 +1,6 @@
 import pytest
 import pydantic
-from hydroshare_jupyter_sync.models import api_models as m
+from hydroshare_on_jupyter.models import api_models as m
 
 
 @pytest.fixture
@@ -13,6 +13,8 @@ def resource_metadata():
         resource_url="www.fake.org",
         date_created="2021-01-01",
         date_last_updated="2021-01-02",
+        creator="some creator",
+        authors=["some author"],
     )
 
 
