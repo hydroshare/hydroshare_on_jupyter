@@ -1,5 +1,5 @@
 {
-  "name": "hydroshare_jupyter_sync",
+  "name": "hydroshare_on_jupyter",
   "version": "0.1.0",
   "private": true,
   "main": "build/index.js",
@@ -40,7 +40,7 @@
     "build:prod": "yarn run clean && yarn run build:bin && yarn run build:labextension",
     "clean": "yarn run clean:bin",
     "clean:all": "yarn run clean:bin && yarn run clean:labextension",
-    "clean:labextension": "rimraf ../hydroshare_jupyter_sync/labextension",
+    "clean:labextension": "rimraf ../hydroshare_on_jupyter/labextension",
     "clean:bin": "rimraf build tsconfig.tsbuildinfo",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "eslint:check": "eslint . --ext .ts,.tsx",
@@ -104,7 +104,7 @@
   },
   "jupyterlab": {
     "extension": true,
-    "outputDir": "../hydroshare_jupyter_sync/labextension",
+    "outputDir": "../hydroshare_on_jupyter/labextension",
     "webpackConfig": "./webpack.config.js"
   },
   "files": [
