@@ -11,9 +11,9 @@ class CommandNamespace:
 
 def parse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="hydroshare_jupyter_sync",
+        prog="hydroshare_on_jupyter",
         description=(
-            """HydroShare Jupyter Sync:\n\t
+            """HydroShare on Jupyter:\n\t
             A Jupyter server extension enabling management of HydroShare resource
             files within Jupyter. Open HydroShare resources, work on their files,
             and then sync those changes back to HydroShare using a drag-and-drop
@@ -34,7 +34,7 @@ def parse() -> argparse.ArgumentParser:
     )
     commands.add_parser(
         CommandNamespace.configure,
-        help="link hydroshare_jupyter_sync's lab and server extension with jupyter.",
+        help="link hydroshare_on_jupyter's lab and server extension with jupyter.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,  # This adds defaults to help page
     )
 
@@ -71,7 +71,7 @@ def parse() -> argparse.ArgumentParser:
         "--config",
         nargs="?",
         type=absolute_file_path,
-        help="path to configuration file. by default read from ~/.config/hydroshare_jupyter_sync/config then ~/.hydroshare_jupyter_sync_config if either exist.",
+        help="path to configuration file. by default read from ~/.config/hydroshare_on_jupyter/config then ~/.hydroshare_on_jupyter_config if either exist.",
         required=False,
     )
 

@@ -20,8 +20,9 @@ MODULE_DIR = Path(__file__).parent.resolve()
 _ERROR_MESSAGE_PREFIX = "Fatal, cannot link labextension."
 
 # path to pre-built lab-extension
-EXTENSION_NAME = "hydroshare_jupyter_sync"
+EXTENSION_NAME = "hydroshare_on_jupyter"
 LABEXTENSION_PATH = MODULE_DIR / "labextension"
+
 
 class TestApp(Application):
     """Class for setting up the server & making sure it can exit cleanly"""

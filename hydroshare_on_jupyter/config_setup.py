@@ -6,8 +6,8 @@ from .utilities.pathlib_utils import first_existing_file, expand_and_resolve
 from .models.oauth import OAuthFile
 
 _DEFAULT_CONFIG_FILE_LOCATIONS = (
-    "~/.config/hydroshare_jupyter_sync/config",
-    "~/.hydroshare_jupyter_sync_config",
+    "~/.config/hydroshare_on_jupyter/config",
+    "~/.hydroshare_on_jupyter_config",
 )
 
 _DEFAULT_DATA_PATH = expand_and_resolve("~/hydroshare")
