@@ -1,6 +1,6 @@
 import pytest
 import pickle
-from hydroshare_jupyter_sync.config_setup import ConfigFile, FileNotDirectoryError
+from hydroshare_on_jupyter.config_setup import ConfigFile, FileNotDirectoryError
 from tempfile import TemporaryDirectory, TemporaryFile
 from pathlib import Path
 
@@ -34,6 +34,7 @@ def test_config_using_env_vars(monkeypatch):
 def test_config_using_env_file():
     """Test configuration using environment variables"""
     with TemporaryDirectory() as temp:
+        temp = Path(temp).resolve()
         log = Path(temp) / "logs"
         env_contents = f"""
         DATA={temp}
@@ -67,12 +68,12 @@ def oauth_file(oauth_data) -> Path:
 
     filename = ".hs_auth"
     with TemporaryDirectory() as dir:
-        oauth_path = Path(dir) / filename
+        oauth_path = (Path(dir) / filename).resolve()
         with open(oauth_path, "wb") as f:
             pickle.dump(oauth_data, f, protocol=2)
         yield oauth_path
 
 
 def test_config_oauth(oauth_file, oauth_data):
-    o = ConfigFile(oauth_path=oauth_file)
-    assert o.oauth_path.access_token == oauth_data[0]["access_token"]
+    o = ConfigFile(oauth_path=str(oauth_file))
+    assert o.oauth_path.__root__[0].access_token == oauth_data[0]["access_token"]
