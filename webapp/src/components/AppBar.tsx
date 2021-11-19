@@ -80,7 +80,7 @@ export default function ButtonAppBar() {
             </a>
           </IconButton>
           <Typography variant="h6" className={classes.appBarTitle}>
-            HS Sync
+            HS on Jupyter
           </Typography>
           <Button color="inherit" onClick={handleResourceClick}>
             Resources
