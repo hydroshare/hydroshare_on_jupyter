@@ -22,7 +22,7 @@ const REQUIRED_SERVICES: Token<any>[] = [IDocumentManager];
  * Initialization data for the react-widget extension.
  */
 const extension: JupyterFrontEndPlugin<void> = {
-  id: "hydroshare_jupyter_sync",
+  id: "hydroshare_on_jupyter",
   autoStart: true,
   optional: [ILauncher],
   requires: REQUIRED_SERVICES,
@@ -36,14 +36,14 @@ const extension: JupyterFrontEndPlugin<void> = {
     const command = CommandIDs.create;
     commands.addCommand(command, {
       caption: "Create a new React Widget",
-      label: "HydroShare Jupyter Sync",
+      label: "HydroShare on Jupyter",
       icon: CuahsiLogo,
       execute: () => {
         // NOTE: if passing services to react app becomes cumbersome and difficult to maintain, it
         // may be desirable to pass a registry function that encapsulates services and their methods.
         const content = new App(docManager);
         const widget = new MainAreaWidget({ content });
-        widget.title.label = "HydroShare Jupyter Sync";
+        widget.title.label = "HydroShare on Jupyter";
         widget.title.icon = CuahsiLogo;
         app.shell.add(widget, "main");
       },
