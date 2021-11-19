@@ -49,7 +49,7 @@ REQUIREMENTS = [
 # Development requirements
 DEVELOPMENT_REQUIREMENTS = ["pytest", "pytest-tornado"]
 
-SHORT_DESCRIPTION = "A web app and server for syncing files between the local filesystem and HydroShare. Can run as a Jupyter notebook extension."
+SHORT_DESCRIPTION = "A JupyterLab extension for downloading, uploading, editing, and syncing your HydroShare resources without leaving Jupyter."
 
 
 # Long description
