@@ -38,7 +38,6 @@ PYTHON_REQUIRES = ">=3.7"
 
 # Package dependency requirements
 REQUIREMENTS = [
-    "hs-restclient",  # TODO: remove hs-restclient
     "hsclient>=0.2.0",
     "jupyterlab",
     "notebook",
