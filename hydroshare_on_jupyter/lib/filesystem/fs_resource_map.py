@@ -1,21 +1,11 @@
 from abc import ABC, abstractmethod
 from collections import UserDict
-from typing import Dict, List, Union
+from typing import List, Union
 from hsclient import Resource
-import hashlib
 from pathlib import Path
 
-
-def compute_file_md5_hexdigest(file: Union[str, Path]) -> str:
-    """Compute a file's md5 hexdigest. Read file as chunks to conserve memory usage."""
-    with open(file, "rb") as f:
-        hash = hashlib.md5()
-        chunk = f.read(8192)
-        while chunk:
-            hash.update(chunk)
-            chunk = f.read(8192)
-
-        return hash.hexdigest()
+# local imports
+from .utilities import compute_file_md5_hexdigest, get_resource_checksums
 
 
 # abstract interfaces
@@ -190,8 +180,4 @@ class RemoteFSResourceMap(FSResourceMap):
         # force resource to re-fetch manifest-md5.txt from hs
         self.resource._parsed_checksums = None
 
-        self.data = {
-            Path(k): v
-            for k, v in self.resource._checksums.items()
-            if k.startswith("data/contents/")
-        }
+        self.data = get_resource_checksums(self.resource)
