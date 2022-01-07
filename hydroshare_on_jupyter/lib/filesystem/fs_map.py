@@ -177,12 +177,14 @@ class RemoteFSMap(FSMap):
         remote_resources = {
             res.resource_id for res in hydroshare.search(edit_permission=True)
         }
+
         # naively get local resources based on fs_root location and directory name length
         naive_local_resources = set(fs_map._get_resource_ids())
 
         # resources s.t. user is owner and some files from res are local
         users_local_resources = naive_local_resources & remote_resources
 
+        # create hsclient.HydroShare.Resource object for each resource that is naively on the local fs
         res_objs = [
             fs_map._hydroshare.resource(res_id) for res_id in users_local_resources
         ]
