@@ -350,9 +350,14 @@ class ListHydroShareResourceFiles(HeadersMixIn, BaseRequestHandler):
     _custom_headers = [("Access-Control-Allow-Methods", "GET")]
 
     def get(self, resource_id: str):
+        # used in `on_finish`
+        self.resource_id = resource_id
+
         # NOTE: May want to sanitize input in future. i.e. require it be a min/certain length
         session = self.get_hs_session()
 
+        # TODO: add `force` argument to force update resource checksums from hydroshare
+        # implement with use_cache flag
         resource = session.resource(resource_id)
         files = [
             file
@@ -363,6 +368,13 @@ class ListHydroShareResourceFiles(HeadersMixIn, BaseRequestHandler):
 
         # Marshall hsclient representation into CollectionOfResourceMetadata
         self.write(ResourceFiles(files=files).json())
+
+    def on_finish(self) -> None:
+        # emit event to notify that a local resource has been listed. if there is local copy, it
+        # will need to be added to aggregate map
+        session_sync_struct.event_broker.dispatch(
+            "RESOURCE_FILES_LISTED", self.resource_id
+        )
 
 
 class HydroShareResourceHandler(HeadersMixIn, BaseRequestHandler):
