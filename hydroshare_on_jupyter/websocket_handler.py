@@ -49,6 +49,9 @@ class FileSystemEventWebSocketHandler(SessionMixIn, WebSocketHandler):
     def _subscribe_to_events(self):
         session.event_broker.subscribe(Events.STATUS, self._get_resource_status)
         session.event_broker.subscribe(
+            Events.RESOURCE_STATUS, self._get_resource_status
+        )
+        session.event_broker.subscribe(
             Events.RESOURCE_ENTITY_UPLOADED, self._get_resource_status
         )
         session.event_broker.subscribe(
@@ -62,6 +65,9 @@ class FileSystemEventWebSocketHandler(SessionMixIn, WebSocketHandler):
         # TODO: bug lifetime of event_broker not guaranteed. event_broker is destroyed by logout logic
         try:
             session.event_broker.unsubscribe(Events.STATUS, self._get_resource_status)
+            session.event_broker.unsubscribe(
+                Events.RESOURCE_STATUS, self._get_resource_status
+            )
             session.event_broker.unsubscribe(
                 Events.RESOURCE_ENTITY_UPLOADED, self._get_resource_status
             )
