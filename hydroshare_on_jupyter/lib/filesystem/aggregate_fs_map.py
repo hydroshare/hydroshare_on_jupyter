@@ -20,6 +20,16 @@ class AggregateFSMap(IFSMap, IEntityFSMap):
     # IFSMap implementations
 
     @classmethod
+    def create_empty_map(
+        cls, fs_root: Union[Path, str], hydroshare: HydroShare
+    ) -> "AggregateFSMap":
+        # create local and remote map instances
+        remote_map = RemoteFSMap(fs_root, hydroshare)
+        local_map = LocalFSMap(fs_root)
+
+        return cls(local_map=local_map, remote_map=remote_map)
+
+    @classmethod
     def create_map(
         cls, fs_root: Union[Path, str], hydroshare: HydroShare
     ) -> "AggregateFSMap":
