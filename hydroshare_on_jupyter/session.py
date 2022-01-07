@@ -15,7 +15,18 @@ class _SessionSyncSingleton:
     def new_sync_session(
         self, fs_root: Union[Path, str], hydroshare: HydroShare
     ) -> None:
-        new_session = partial(SessionSyncStruct.create_sync_struct, fs_root, hydroshare)
+        # greedily fill fs aggregate map with local resources and checksums from HS.
+        # this implicates a delay, directly post login, for a user to hit any server endpoint.
+        # wait time is linearly related to the number of local resources (that the user is an editor of)
+        # this is detrimental if a user attempts to hit an endpoint or connect via websocket during the wait time.
+        # specifically, this can cause unintended timeouts
+        # OLD IMPLEMENTATION. Retaining for historical clarity
+        # new_session = partial(SessionSyncStruct.create_sync_struct, fs_root, hydroshare)
+
+        # lazily fill fs aggregate map. local file system is not searched for local resources that
+        # an HS user is an editor of until they try to list the files in a specified resource.
+        # this resolves the issues mentioned above
+        new_session = partial(SessionSyncStruct.init_sync_struct, fs_root, hydroshare)
         self._handle_session(new_session)
 
     def reset_session(self) -> None:
