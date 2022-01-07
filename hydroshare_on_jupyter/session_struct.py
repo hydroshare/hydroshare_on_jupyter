@@ -94,6 +94,46 @@ class SessionSyncStruct(ISessionSyncStruct):
             event_handler_factory=_event_handler_factory,
         )
 
+    @classmethod
+    def init_sync_struct(
+        cls, fs_root: Union[Path, str], hydroshare: HydroShare
+    ) -> "SessionSyncStruct":
+        # instantiate and populate local and remote FSMaps
+        # NOTE: call with large overhead
+        agg_map = AggregateFSMap.create_empty_map(fs_root, hydroshare)
+        _log.info("created empty AggregateFSMap")
+
+        event_broker = EventBroker(Events)
+        # `event_broker` context given to each factory object
+        _event_handler_factory = fs_event_handler_factory(event_broker)
+
+        # create and start observer thread
+        observer = Observer()
+        _log.info("observer created")
+        observer.start()
+        _log.info("observer started")
+
+        # mapping of resource_id to application specific watchdog FileSystemEventHandler instance
+        fs_observers = dict()
+
+        # setup event listeners
+        SessionSyncEventListeners(
+            aggregate_fs_map=agg_map,
+            event_broker=event_broker,
+            observer=observer,
+            fs_observers=fs_observers,
+            event_handler_factory=_event_handler_factory,
+        ).setup_event_listeners()
+        _log.info("event listeners setup")
+
+        return cls(
+            aggregate_fs_map=agg_map,
+            event_broker=event_broker,
+            observer=observer,
+            fs_observers=fs_observers,
+            event_handler_factory=_event_handler_factory,
+        )
+
     def shutdown(self) -> None:
         # unsubscribe from all event
         self._cleanup_event_broker()
