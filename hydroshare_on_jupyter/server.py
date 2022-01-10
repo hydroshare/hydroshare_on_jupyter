@@ -393,7 +393,9 @@ class HydroShareResourceHandler(HeadersMixIn, BaseRequestHandler):
             downloaded_zip = resource.download(temp_dir)
             # unzip resource
             with ZipFile(downloaded_zip, "r") as zr:
-                zr.extractall(self.data_path)
+                # respect HydroShare baggit file structure convention
+                # data_path / resource_id / resource_id / ...
+                zr.extractall(self.data_path / resource_id)
 
         # set instance variable for `on_finish`
         self.resource_id = resource_id
