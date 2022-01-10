@@ -54,12 +54,6 @@ class FileSystemEventWebSocketHandler(SessionMixIn, WebSocketHandler):
         session.event_broker.subscribe(
             Events.RESOURCE_ENTITY_UPLOADED, self._get_resource_status
         )
-        session.event_broker.subscribe(
-            Events.RESOURCE_DOWNLOADED, self._get_resource_status
-        )
-        session.event_broker.subscribe(
-            Events.RESOURCE_ENTITY_DOWNLOADED, self._get_resource_status
-        )
 
     def _unsubscribe_from_events(self):
         # TODO: bug lifetime of event_broker not guaranteed. event_broker is destroyed by logout logic
@@ -70,12 +64,6 @@ class FileSystemEventWebSocketHandler(SessionMixIn, WebSocketHandler):
             )
             session.event_broker.unsubscribe(
                 Events.RESOURCE_ENTITY_UPLOADED, self._get_resource_status
-            )
-            session.event_broker.unsubscribe(
-                Events.RESOURCE_DOWNLOADED, self._get_resource_status
-            )
-            session.event_broker.unsubscribe(
-                Events.RESOURCE_ENTITY_DOWNLOADED, self._get_resource_status
             )
         except AttributeError as e:
             pass
