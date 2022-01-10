@@ -56,6 +56,9 @@ class SessionSyncEventListeners(ISessionSyncStruct):
         else:
             self._add_resource_to_agg_map_and_create_watcher(resource_id)
 
+        # emit RESOURCE_STATUS signal
+        self.event_broker.dispatch(Events.RESOURCE_STATUS, resource_id)
+
     def resource_entity_downloaded(self, resource_id: ResourceId) -> None:
         # if resource already in agg map, add resource file
         if resource_id in self.aggregate_fs_map.local_map:
@@ -68,6 +71,9 @@ class SessionSyncEventListeners(ISessionSyncStruct):
 
         else:
             self._add_resource_to_agg_map_and_create_watcher(resource_id)
+
+        # emit RESOURCE_STATUS signal
+        self.event_broker.dispatch(Events.RESOURCE_STATUS, resource_id)
 
     def _add_resource_to_agg_map_and_create_watcher(self, resource_id: ResourceId):
         self.aggregate_fs_map.add_resource(resource_id)
