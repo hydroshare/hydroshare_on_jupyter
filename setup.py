@@ -16,7 +16,7 @@ from setuptools import setup, find_packages
 
 # define package name globally
 PKGNAME = "hydroshare_on_jupyter"
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 
 # define webapp path globally
 here = Path(__file__).resolve().parent
