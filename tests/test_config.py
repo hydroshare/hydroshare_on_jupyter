@@ -1,13 +1,22 @@
 import pytest
 import pickle
 from hydroshare_on_jupyter.config_setup import ConfigFile, FileNotDirectoryError
-from tempfile import TemporaryDirectory, TemporaryFile
+from tempfile import TemporaryDirectory
 from pathlib import Path
 
+TEST_CONFIG_FILE_CASES = ("logs", "dir_that_does_not_exist/logs")
 
-def test_config_file():
+
+@pytest.mark.parametrize("log_dir", TEST_CONFIG_FILE_CASES)
+def test_config_file(log_dir: str):
     with TemporaryDirectory() as temp:
-        log = Path(temp) / "logs"
+        log = Path(temp) / log_dir
+        ConfigFile(data_path=temp, log_path=log)
+
+
+def test_config_creatifile():
+    with TemporaryDirectory() as temp:
+        log = Path(temp) / "dir_that_does_not_exist" / "logs"
         ConfigFile(data_path=temp, log_path=log)
 
 
