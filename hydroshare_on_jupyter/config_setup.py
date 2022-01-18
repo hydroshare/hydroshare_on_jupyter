@@ -38,7 +38,7 @@ class ConfigFile(BaseSettings):
                 f"Configuration path: {str(path)} is a file not a directory."
             )
         elif not path.exists():
-            path.mkdir()
+            path.mkdir(parents=True)
         return path
 
     @validator("oauth_path")
