@@ -24,6 +24,7 @@ from .models.api_models import (
     Boolean,
     Credentials,
     DataDir,
+    ServerRootDir,
     OAuthCredentials,
     Success,
     CollectionOfResourceMetadata,
@@ -35,7 +36,6 @@ from .session import session_sync_struct
 
 # from .websocket_handler import FileSystemEventWebSocketHandler
 from .lib.resource_factories import HydroShareEntityDownloadFactory, EntityTypeEnum
-
 
 # Global singleton session wrapper. Contains:
 # - hs_client.HydroShare instance
@@ -193,6 +193,20 @@ class DataDirectoryHandler(HeadersMixIn, BaseRequestHandler):
 
     def get(self):
         self.write(DataDir(data_directory=str(self.data_path)).dict())
+
+
+class ServerRootHandler(HeadersMixIn, BaseRequestHandler):
+    """Return expanded absolute path to Jupyter Server root directory."""
+
+    _custom_headers = [("Access-Control-Allow-Methods", "GET, OPTIONS")]
+
+    def prepare(self):
+        # NOTE: Bypass base request prepare. This should change in the future
+        pass
+
+    def get(self):
+        server_root = Path(self.settings["server_root_dir"]).expanduser().resolve()
+        self.write(ServerRootDir(server_root=str(server_root)).dict())
 
 
 class UsingOAuth(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
