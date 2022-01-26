@@ -154,7 +154,7 @@ export interface IResourcePageProps {
 
 const basename = (path: string): string => {
   const parts = path.split("/");
-  return parts.at(-1) || "";
+  return parts.length > 0 ? parts[parts.length - 1] : ""
 };
 
 const flattenFSStateToFileStatusArray = ({
@@ -321,8 +321,7 @@ export const ResourcePage: React.FC<ResourcePageProps> = (props) => {
           } = actionData.payload as OpenFilesFileStatusPayload;
 
           if (targetFile?.isDir) {
-            const leafDir =
-              currentDirChain.at(-1) || ({ id: "", name: "" } as FileData);
+            const leafDir = currentDirChain.length > 0 ? currentDirChain[currentDirChain.length - 1] : ({ id: "", name: "" } as FileData);
 
             if (targetFile.id.length > leafDir.id.length) {
               // navigate down the file tree
@@ -463,7 +462,7 @@ export const ResourcePage: React.FC<ResourcePageProps> = (props) => {
   ];
 
   useEffect(() => {
-    const leafDir = currentDirChain.at(-1) || rootDir;
+    const leafDir = currentDirChain.length > 0 ? currentDirChain[currentDirChain.length - 1] : rootDir;
     // update files in view
     const newFiles = createFilesArray(leafDir, files);
     setCurrentFiles(newFiles);
