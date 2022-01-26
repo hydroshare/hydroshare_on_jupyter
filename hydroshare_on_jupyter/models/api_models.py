@@ -117,3 +117,7 @@ class ResourceFiles(BaseModel):
 
 class DataDir(BaseModel):
     data_directory: str = Field(...)
+
+
+class ServerRootDir(BaseModel):
+    server_root: str = Field(...)
