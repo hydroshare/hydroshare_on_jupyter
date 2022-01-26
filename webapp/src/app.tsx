@@ -80,7 +80,6 @@ const ReactApp: React.FC<ReactAppProps> = ({ close, docManager }) => {
       const SERVER_ROOT_URI = BASE_URL + `${BACKEND_PREFIX}/root_directory`;
       const OAUTH_URI = BASE_URL + `${BACKEND_PREFIX}/oauth`;
 
-      // const SERVER_ROOT = configData["serverRoot"];
       const server_root_res = await fetch(SERVER_ROOT_URI);
       const SERVER_ROOT: IServerRootDirectory = await server_root_res.json();
 
