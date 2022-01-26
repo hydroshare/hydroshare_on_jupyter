@@ -15,7 +15,7 @@ import { ResourceGrid } from "./components/ResourceGrid";
 import { ResourcePage } from "./components/ResourcePage";
 import { PluginServicesContext } from "./contexts";
 import store from "./store/store";
-import { IDataDirectory, IOAuthCredential } from "./store/sync-api/interfaces";
+import { IDataDirectory, IOAuthCredential, IServerRootDirectory} from "./store/sync-api/interfaces";
 import { SnackbarProvider, SnackbarProviderProps } from "notistack";
 import SingleSlide from "./components/SingleSlide";
 import { getJupyterConfigData } from "./utilities/getJupyterConfigData";
@@ -74,14 +74,19 @@ const ReactApp: React.FC<ReactAppProps> = ({ close, docManager }) => {
     async function fetchConfigData() {
       const configData = await getJupyterConfigData();
 
+      const BACKEND_PREFIX = "syncApi"
       const BASE_URL = configData["baseUrl"];
-      const DATA_DIR_URI = BASE_URL + "syncApi/data_directory";
-      const OAUTH_URI = BASE_URL + "syncApi/oauth";
-      const SERVER_ROOT = configData["serverRoot"];
+      const DATA_DIR_URI = BASE_URL + `${BACKEND_PREFIX}/data_directory`;
+      const SERVER_ROOT_URI = BASE_URL + `${BACKEND_PREFIX}/root_directory`;
+      const OAUTH_URI = BASE_URL + `${BACKEND_PREFIX}/oauth`;
+
+      // const SERVER_ROOT = configData["serverRoot"];
+      const server_root_res = await fetch(SERVER_ROOT_URI);
+      const SERVER_ROOT: IServerRootDirectory = await server_root_res.json();
 
       const res = await fetch(DATA_DIR_URI);
       const data: IDataDirectory = await res.json();
-      setServerRoot(SERVER_ROOT);
+      setServerRoot(SERVER_ROOT.server_root);
       setDataDirectory(data.data_directory);
 
       // get if oauth is being used. if it is, store that information and login
