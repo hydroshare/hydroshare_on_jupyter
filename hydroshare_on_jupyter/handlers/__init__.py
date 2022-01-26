@@ -4,6 +4,7 @@ import tornado
 from ..websocket_handler import FileSystemEventWebSocketHandler
 from ..server import (
     DataDirectoryHandler,
+    ServerRootHandler,
     LoginHandler,
     UserInfoHandler,
     ListUserHydroShareResources,
@@ -43,6 +44,10 @@ def get_route_handlers(frontend_url, backend_url):
         (
             url_path_join(backend_url, r"/data_directory"),
             DataDirectoryHandler,
+        ),
+        (
+            url_path_join(backend_url, r"/root_directory"),
+            ServerRootHandler,
         ),
         (
             url_path_join(backend_url, r"/download/(.*)"),
