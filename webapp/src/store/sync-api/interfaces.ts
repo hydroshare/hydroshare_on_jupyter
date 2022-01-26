@@ -47,6 +47,10 @@ export interface IDataDirectory {
   data_directory: string;
 }
 
+export interface IServerRootDirectory {
+  server_root: string;
+}
+
 export interface IOAuthCredential {
   client_id: string;
   token: IOAuthToken;
