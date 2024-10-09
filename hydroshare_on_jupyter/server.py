@@ -13,7 +13,9 @@ import re
 from pydantic import ValidationError
 
 from jupyter_server.base.handlers import JupyterHandler
-from notebook.utils import url_path_join
+# TODO: cleanup
+# from notebook.utils import url_path_join
+from jupyter_server.utils import url_path_join
 from typing import Union, List, Optional
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
@@ -192,7 +194,7 @@ class DataDirectoryHandler(HeadersMixIn, BaseRequestHandler):
         pass
 
     def get(self):
-        self.write(DataDir(data_directory=str(self.data_path)).dict())
+        self.write(DataDir(data_directory=str(self.data_path)).model_dump())
 
 
 class ServerRootHandler(HeadersMixIn, BaseRequestHandler):
@@ -206,7 +208,7 @@ class ServerRootHandler(HeadersMixIn, BaseRequestHandler):
 
     def get(self):
         server_root = Path(self.settings["server_root_dir"]).expanduser().resolve()
-        self.write(ServerRootDir(server_root=str(server_root)).dict())
+        self.write(ServerRootDir(server_root=str(server_root)).model_dump())
 
 
 class UsingOAuth(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
@@ -221,7 +223,7 @@ class UsingOAuth(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
 
     def get(self):
         if self.oauth_creds:
-            self.write(self.oauth_creds.dict())
+            self.write(self.oauth_creds.model_dump())
         else:
             # TODO: In the future, a model denoting that oauth is not enabled should be returned instead.
             empty = {
@@ -231,7 +233,7 @@ class UsingOAuth(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
                     "token_type": "",
                 },
             }
-            self.write(OAuthCredentials.parse_obj(empty).dict())
+            self.write(OAuthCredentials.model_validate(empty).model_dump())
 
 
 class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
@@ -273,7 +275,7 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
         # NOTE: A user can login and then try to login to another account, but if they
         # do not use the DELETE method first, they will still be signed into the first
         # account bc of the `user` cookie
-        credentials = Credentials.parse_raw(self.request.body.decode("utf-8"))
+        credentials = Credentials.model_validate_json(self.request.body.decode("utf-8"))
         self.log.info("parsed user credentials")
 
         self.successful_login = True
@@ -291,10 +293,10 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
                     self.set_status(HTTPStatus.INTERNAL_SERVER_ERROR)  # 500
 
         # self.successful_login initialized to False in `prepare`
-        self.write(Success(success=self.successful_login).dict())
+        self.write(Success(success=self.successful_login).model_dump())
 
     def _create_session(self, credentials: Credentials) -> None:
-        hs = HydroShare(**credentials.dict())
+        hs = HydroShare(**credentials.model_dump())
         user_info = hs.my_user_info()
         user_id = int(user_info["id"])
         username = user_info["username"]
@@ -355,7 +357,7 @@ class ListUserHydroShareResources(HeadersMixIn, BaseRequestHandler):
         resources = list(session.session.search(edit_permission=True))
 
         # Marshall hsclient representation into CollectionOfResourceMetadata
-        self.write(CollectionOfResourceMetadata.parse_obj(resources).json())
+        self.write(CollectionOfResourceMetadata.model_validate(resources).model_dump_json())
 
 
 class ListHydroShareResourceFiles(HeadersMixIn, BaseRequestHandler):
@@ -381,7 +383,7 @@ class ListHydroShareResourceFiles(HeadersMixIn, BaseRequestHandler):
         ]
 
         # Marshall hsclient representation into CollectionOfResourceMetadata
-        self.write(ResourceFiles(files=files).json())
+        self.write(ResourceFiles(files=files).model_dump_json())
 
     def on_finish(self) -> None:
         # emit event to notify that a local resource has been listed. if there is local copy, it
@@ -516,7 +518,7 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
         # TODO: Add the ability to version data
         try:
             # Marshall request body
-            files = ResourceFiles.parse_raw(self.request.body.decode("utf-8")).files
+            files = ResourceFiles.model_validate_json(self.request.body.decode("utf-8")).files
 
         except ValidationError:
             # fail fast
@@ -596,7 +598,7 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
 
         if baggit_prefix_match is not None:
             # left-truncate baggit prefix path
-            file_path = file_path[baggit_prefix_match.end() :]
+            file_path = file_path[baggit_prefix_match.end():]
 
         return file_path
 
@@ -618,5 +620,5 @@ class UserInfoHandler(HeadersMixIn, BaseRequestHandler):
     def get(self):
         """Gets the user's information (name, email, etc) from HydroShare"""
         session = self.get_session()
-        user = session.session.user(session.id).dict()
+        user = session.session.user(session.id).model_dump()
         self.write(user)

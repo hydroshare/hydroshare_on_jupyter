@@ -37,11 +37,12 @@ PYTHON_REQUIRES = ">=3.7"
 
 # Package dependency requirements
 REQUIREMENTS = [
-    "hsclient>=0.2.0",
+    "hsclient>=1.0.1",
     "jupyterlab",
     "notebook",
     "requests",
-    "pydantic[dotenv]",
+    "pydantic==2.7.*",
+    "pydantic-settings==2.5.*",
     "watchdog",
 ]
 

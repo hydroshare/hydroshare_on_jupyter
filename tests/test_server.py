@@ -1,17 +1,18 @@
+import json
+from http.cookies import SimpleCookie, Morsel
+from typing import Union
+
+import pytest
+from hsclient import HydroShare
 from tornado.httpclient import HTTPRequest, HTTPResponse
 from tornado.httputil import HTTPHeaders
-from hsclient import HydroShare
+
 from hydroshare_on_jupyter.__main__ import get_test_app
 from hydroshare_on_jupyter.hydroshare_resource_cache import (
     HydroShareWithResourceCache,
 )
 from hydroshare_on_jupyter.server import LocalResourceEntityHandler
 from hydroshare_on_jupyter.session import _SessionSyncSingleton
-import json
-import pytest
-from dataclasses import dataclass
-from http.cookies import SimpleCookie, Morsel
-from typing import Union
 
 
 def my_user_info_mock(*args, **kwargs):

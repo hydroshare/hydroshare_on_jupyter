@@ -2,7 +2,8 @@ import pytest
 import os
 from hsclient import HydroShare
 from pathlib import Path
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from hydroshare_on_jupyter.lib.filesystem.aggregate_fs_map import AggregateFSMap
 
@@ -13,18 +14,20 @@ def get_env_file_path() -> Path:
 
 
 class HydroShareCreds(BaseSettings):
-    username: str = Field(..., env="HYDRO_USERNAME")
-    password: str = Field(..., env="HYDRO_PASSWORD")
+    username: str = Field(..., validation_alias="HYDRO_USERNAME")
+    password: str = Field(..., validation_alias="HYDRO_PASSWORD")
 
-    class Config:
-        env_file = get_env_file_path()
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(env_file=get_env_file_path(), env_file_encoding="utf-8")
+    # TODO: cleanup - also clean up imports above
+    # class Config:
+    #     env_file = get_env_file_path()
+    #     env_file_encoding = "utf-8"
 
 
 @pytest.fixture
 def hydroshare():
     creds = HydroShareCreds()
-    hs = HydroShare(**creds.dict())
+    hs = HydroShare(**creds.model_dump())
     return hs
 
 

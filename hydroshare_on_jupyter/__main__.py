@@ -114,7 +114,7 @@ def configure_jupyter() -> None:
 def start_stand_alone_session(
     hostname: str, port: int, debug: bool, config: ConfigFile
 ) -> None:
-    app = get_test_app(default_hostname=hostname, debug=debug, **config.dict())
+    app = get_test_app(default_hostname=hostname, debug=debug, **config.model_dump())
 
     logging.info(f"Server starting on {hostname}:{port}")
     logging.info(f"Debugging mode {'enabled' if debug else 'disabled'}")

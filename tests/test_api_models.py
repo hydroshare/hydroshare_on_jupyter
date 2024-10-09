@@ -20,15 +20,15 @@ def resource_metadata():
 
 def test_collection_of_resource_metadata(resource_metadata):
     metadata = resource_metadata
-    metadata_dict = metadata.dict()
+    metadata_dict = metadata.model_dump()
 
-    assert m.CollectionOfResourceMetadata.parse_obj([metadata, metadata, metadata])
-    assert m.CollectionOfResourceMetadata.parse_obj([metadata])
+    assert m.CollectionOfResourceMetadata.model_validate([metadata, metadata, metadata])
+    assert m.CollectionOfResourceMetadata.model_validate([metadata])
     # test as dictionaries
-    assert m.CollectionOfResourceMetadata.parse_obj(
+    assert m.CollectionOfResourceMetadata.model_validate(
         [metadata_dict, metadata_dict, metadata_dict]
     )
-    assert m.CollectionOfResourceMetadata.parse_obj([metadata_dict])
+    assert m.CollectionOfResourceMetadata.model_validate([metadata_dict])
 
 
 def test_collection_of_resource_metadata_raises(resource_metadata):
@@ -39,8 +39,8 @@ def test_collection_of_resource_metadata_raises(resource_metadata):
         "resource_title": "title",
     }
 
-    with pytest.raises(pydantic.error_wrappers.ValidationError):
-        assert m.CollectionOfResourceMetadata.parse_obj([metadata, metadata_subset])
+    with pytest.raises(pydantic.ValidationError):
+        assert m.CollectionOfResourceMetadata.model_validate([metadata, metadata_subset])
 
 
 def test_resource_files_should_pass():

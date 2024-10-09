@@ -17,5 +17,5 @@ def testing_data():
 
 
 def test_it_works(testing_data):
-    o = OAuthFile.parse_obj(testing_data)
-    o.dict()[1] == testing_data[1]
+    o = OAuthFile.model_validate(testing_data)
+    assert o.model_dump()[1] == testing_data[1]

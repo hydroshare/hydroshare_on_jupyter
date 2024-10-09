@@ -1,4 +1,5 @@
-from pydantic import BaseSettings, Field, root_validator, validator
+from pydantic import Field, field_validator, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 import pickle
 from pathlib import Path
 from typing import Optional, Union
@@ -21,27 +22,36 @@ class FileNotDirectoryError(Exception):
 
 class ConfigFile(BaseSettings):
     # case-insensitive alias values DATA and LOG
-    data_path: Path = Field(_DEFAULT_DATA_PATH, env="data")
-    log_path: Path = Field(_DEFAULT_LOG_PATH, env="log")
-    oauth_path: Union[OAuthFile, str, None] = Field(None, env="oauth")
+    data_path: Optional[Path] = Field(_DEFAULT_DATA_PATH, validation_alias="data")
+    log_path: Optional[Path] = Field(_DEFAULT_LOG_PATH, validation_alias="log")
+    oauth_path: Union[OAuthFile, str, None] = Field(None, validation_alias="oauth")
 
-    class Config:
-        env_file: Union[str, None] = first_existing_file(_DEFAULT_CONFIG_FILE_LOCATIONS)
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(
+        env_file=first_existing_file(_DEFAULT_CONFIG_FILE_LOCATIONS),
+        env_file_encoding='utf-8'
+    )
+    # TODO: cleanup
+    # class Config:
+    #     env_file: Union[str, None] = first_existing_file(_DEFAULT_CONFIG_FILE_LOCATIONS)
+    #     env_file_encoding = "utf-8"
 
-    @validator("data_path", "log_path", pre=True)
-    def create_paths_if_do_not_exist(cls, v: Path):
-        # for key, path in values.items():
-        path = expand_and_resolve(v)
-        if path.is_file():
-            raise FileNotDirectoryError(
-                f"Configuration path: {str(path)} is a file not a directory."
-            )
-        elif not path.exists():
-            path.mkdir(parents=True)
-        return path
+    @model_validator(mode="after")
+    def create_paths_if_do_not_exist(self):
 
-    @validator("oauth_path")
+        def check_path(path: Path):
+            path = expand_and_resolve(path)
+            if path.is_file():
+                raise FileNotDirectoryError(
+                    f"Configuration path: {str(path)} is a file not a directory."
+                )
+            elif not path.exists():
+                path.mkdir(parents=True)
+
+        check_path(self.data_path)
+        check_path(self.log_path)
+        return self
+
+    @field_validator("oauth_path")
     def unpickle_oauth_path(cls, v):
         if v is None:
             return v
@@ -53,4 +63,4 @@ class ConfigFile(BaseSettings):
         with open(path, "rb") as f:
             deserialized_model = pickle.load(f)
 
-        return OAuthFile.parse_obj(deserialized_model)
+        return OAuthFile.model_validate(deserialized_model)
