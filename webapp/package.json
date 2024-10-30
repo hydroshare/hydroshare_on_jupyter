@@ -7,6 +7,7 @@
   "dependencies": {
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
+    "@material-ui/styles": "^4.11.5",
     "@reduxjs/toolkit": "^1.6.1",
     "axios": "^0.21.1",
     "chonky": "^2.2.0",
@@ -19,6 +20,7 @@
     "notistack": "^1.0.10",
     "react-beautiful-dnd": "^13.1.0",
     "react-contextmenu": "^2.14.0",
+    "react-dom": "^16.14.0",
     "react-folder-browser": "^0.1.1",
     "react-hover": "^2.1.1",
     "react-icons": "^4.2.0",
@@ -70,7 +72,7 @@
     "cpy-cli": "^3.1.1",
     "css-loader": "^6.2.0",
     "css-modules-typescript-loader": "^4.0.1",
-    "react": "^17.0.2",
+    "react": "^16.14.0",
     "react-svg-loader": "^3.0.3",
     "sass": "^1.36.0",
     "sass-loader": "^12.1.0",
@@ -94,7 +96,7 @@
     "@jupyterlab/ui-components": "^3.1.X",
     "@lumino/widgets": "^1.26.X",
     "@types/node": "^16.4.X",
-    "react": "^17.0.X"
+    "react": "^16.14.0"
   },
   "babel": {
     "presets": [
