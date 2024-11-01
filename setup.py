@@ -42,7 +42,7 @@ REQUIREMENTS = [
     "notebook",
     "requests",
     "pydantic==2.7.*",
-    "pydantic-settings==2.5.*",
+    "pydantic_settings==2.5.*",
     "watchdog",
 ]
 

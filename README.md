@@ -13,19 +13,29 @@ preference, any python virtual environment manager should work just fine (conda,
 
 
 ```python
-# Create and activate python environment, requires python >= 3.7
-python3 -m venv venv
+# Create and activate python environment, requires python >= 3.7 and python <= 3.12
+# Export the path
+export PATH="/<your-path>/.pyenv/versions/3.12.0/bin/:$PATH"
+
+python -m venv venv
 source venv/bin/activate
-python3 -m pip install --upgrade pip
+python -m pip install --upgrade pip
+
+# Dependencies.
+python setup.py install 
 
 # Install
-python3 -m pip install hydroshare_on_jupyter
+python -m pip install hydroshare_on_jupyter
+
+# Install npm modules in webapp. We should be able to see the labextension directory created under hydroshare_on_jupyter dir.
+npm install
+
 
 # Link extension to JupyterLab
-python3 -m hydroshare_on_jupyter configure
+python -m hydroshare_on_jupyter configure
 
 # Launch JupyterLab and start collaborating!
-python3 -m jupyter lab
+python -m jupyter lab
 ```
 
 ## Configuration
