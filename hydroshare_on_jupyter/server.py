@@ -113,9 +113,9 @@ class BaseRequestHandler(SessionMixIn, JupyterHandler):  # TODO: will need to ch
         # NOTE: hardcoded to login path, may want to change in the future
         return "/syncApi/login"
 
-    def prepare(self):
+    async def prepare(self):
         # NOTE: See: https://www.tornadoweb.org/en/stable/guide/security.html#user-authentication for a potential alternative solution
-        super().prepare()
+        await super().prepare()
         if not self.get_client_server_cookie_status():
             self.set_status(HTTPStatus.FOUND)  # 302
             # append requested uri as `next` Location parameter
