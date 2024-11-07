@@ -21,6 +21,8 @@ from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
 from hsclient import HydroShare
+from hsclient.json_models import ResourcePreview
+
 
 from .models.api_models import (
     Boolean,
@@ -31,6 +33,7 @@ from .models.api_models import (
     Success,
     CollectionOfResourceMetadata,
     ResourceFiles,
+    ResourceMetadata,
 )
 from .models.oauth import OAuthFile
 from .session_struct import SessionStruct
@@ -349,6 +352,18 @@ class LoginHandler(MutateSessionMixIn, HeadersMixIn, BaseRequestHandler):
 class ListUserHydroShareResources(HeadersMixIn, BaseRequestHandler):
     """List the HydroShare resources a user has edit permission of."""
 
+    def map_resource_model_types(self, res_preview_models: list[ResourcePreview]) -> List[ResourceMetadata]:
+        # take an instance of ResourcePreview (hsclient) and convert to ResourceMetadata
+        resource_metadata_models = []
+        for res_prev_model in res_preview_models:
+            data = res_prev_model.model_dump()
+            # remove hsclient-specific fields
+            for field in ("abstract", "doi", "public", "discoverable" "shareable", "coverages", "published",
+                          "resource_map_url", "science_metadata_url"):
+                data.pop(field, None)
+            resource_metadata_models.append(ResourceMetadata(**data))
+        return resource_metadata_models
+
     _custom_headers = [("Access-Control-Allow-Methods", "GET")]
 
     def get(self):
@@ -356,7 +371,8 @@ class ListUserHydroShareResources(HeadersMixIn, BaseRequestHandler):
 
         resources = list(session.session.search(edit_permission=True))
 
-        # Marshall hsclient representation into CollectionOfResourceMetadata
+        # create CollectionOfResourceMetadata from the list of ResourceMetadata models
+        resources = self.map_resource_model_types(resources)
         self.write(CollectionOfResourceMetadata.model_validate(resources).model_dump_json())
 
 
