@@ -37,7 +37,7 @@ PYTHON_REQUIRES = ">=3.7"
 
 # Package dependency requirements
 REQUIREMENTS = [
-    "hsclient>=1.0.4",
+    "hsclient>=1.0.5",
     "jupyterlab==4.2.*",
     "notebook==6.5.*",
     "requests",
