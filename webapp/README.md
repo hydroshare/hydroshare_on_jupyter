@@ -1,4 +1,4 @@
-# CUAHSI Jupyter Sync Frontend
+# HydroShare on Jupyter - Frontend
 
 The frontend is a [React](https://reactjs.org/) app written in [TypeScript](https://typescriptlang.org/).
 It uses [Redux](https://redux.js.org/) for state management and gets all of its data from the backend via HTTP requests.
