@@ -19,9 +19,6 @@ class ModelNoExtra(BaseModel):
     """does not permit extra fields"""
 
     model_config = ConfigDict(extra="forbid")
-    # TODO: cleanup - also cleanup imports above
-    # class Config:
-    #     extra = "forbid"
 
 
 class Boolean(BaseModel):
@@ -45,41 +42,6 @@ class OAuthCredentials(ModelNoExtra):
 CredentialTypes = Union[StandardCredentials, OAuthCredentials]
 
 Credentials = RootModel[CredentialTypes]
-
-# TODO: cleanup
-# class Credentials(RootModel, BaseModel):
-#     root: CredentialTypes = Field(...)
-#
-#     def model_dump(
-#         self,
-#         *,
-#         mode: Literal['json', 'python'] | str = 'python',
-#         include: "IncEx" = None,
-#         exclude: "IncEx" = None,
-#         context: dict[str, Any] | None = None,
-#         by_alias: bool = False,
-#         exclude_unset: bool = False,
-#         exclude_defaults: bool = False,
-#         exclude_none: bool = False,
-#         round_trip: bool = False,
-#         warnings: bool | Literal['none', 'warn', 'error'] = True,
-#         serialize_as_any: bool = False,
-#     ) -> dict[str, Any]:
-#         d = super().model_dump(
-#             mode=mode,
-#             include=include,
-#             exclude=exclude,
-#             context=context,
-#             by_alias=by_alias,
-#             exclude_unset=exclude_unset,
-#             exclude_defaults=exclude_defaults,
-#             exclude_none=exclude_none,
-#             round_trip=round_trip,
-#             warnings=warnings,
-#             serialize_as_any=serialize_as_any,
-#         )
-#         # return contents of root key dropping it in the process
-#         return d["root"]
 
 
 class Success(BaseModel):

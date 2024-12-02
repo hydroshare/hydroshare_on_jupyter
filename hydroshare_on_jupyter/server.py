@@ -13,8 +13,6 @@ import re
 from pydantic import ValidationError
 
 from jupyter_server.base.handlers import JupyterHandler
-# TODO: cleanup
-# from notebook.utils import url_path_join
 from jupyter_server.utils import url_path_join
 from typing import Union, List, Optional
 from tempfile import TemporaryDirectory

@@ -1,6 +1,5 @@
 from pathlib import Path
-# TODO: cleanup
-# from notebook.utils import url_path_join
+
 from jupyter_server.utils import url_path_join
 import tornado
 from ..websocket_handler import FileSystemEventWebSocketHandler

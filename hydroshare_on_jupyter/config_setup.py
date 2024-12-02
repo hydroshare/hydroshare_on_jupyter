@@ -30,10 +30,6 @@ class ConfigFile(BaseSettings):
         env_file=first_existing_file(_DEFAULT_CONFIG_FILE_LOCATIONS),
         env_file_encoding='utf-8'
     )
-    # TODO: cleanup
-    # class Config:
-    #     env_file: Union[str, None] = first_existing_file(_DEFAULT_CONFIG_FILE_LOCATIONS)
-    #     env_file_encoding = "utf-8"
 
     @model_validator(mode="after")
     def create_paths_if_do_not_exist(self):

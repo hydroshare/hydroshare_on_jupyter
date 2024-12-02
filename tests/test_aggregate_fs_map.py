@@ -18,10 +18,6 @@ class HydroShareCreds(BaseSettings):
     password: str = Field(..., validation_alias="HYDRO_PASSWORD")
 
     model_config = SettingsConfigDict(env_file=get_env_file_path(), env_file_encoding="utf-8")
-    # TODO: cleanup - also clean up imports above
-    # class Config:
-    #     env_file = get_env_file_path()
-    #     env_file_encoding = "utf-8"
 
 
 @pytest.fixture
