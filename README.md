@@ -15,18 +15,18 @@ preference, any python virtual environment manager should work just fine (conda,
 ```python
 # Create and activate python environment, requires python >= 3.7
 
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
-python -m pip install --upgrade pip
+python3 -m pip install --upgrade pip
 
 # Install
-python -m pip install hydroshare_on_jupyter
+python3 -m pip install hydroshare_on_jupyter
 
 # Link extension to JupyterLab
-python -m hydroshare_on_jupyter configure
+python3 -m hydroshare_on_jupyter configure
 
 # Launch JupyterLab and start collaborating!
-python -m jupyter lab
+python3 -m jupyter lab
 ```
 
 ## Configuration
@@ -72,15 +72,15 @@ For contributing, please follow the following steps:
 
 1. Clone the repository: `git clone https://github.com/hydroshare/hydroshare_on_jupyter.git`
 2. Create a branch: `git checkout -b my-branch`
-3. Create and activate a virtual environment (python >= 3.7): `python -m venv venv`
+3. Create and activate a virtual environment (python >= 3.7): `python3 -m venv venv`
 4. Activate the virtual environment: `source venv/bin/activate`
 5. Build the frontend: Refer to webapp/README.md for instructions.   
 6. Build the backend:
 
     6.1. Navigate to the root of the project: `hydroshare_on_jupyter`
 
-    6.2. Run: `python pip install -e .`
-7. Link extension to JupyterLab: `python -m hydroshare_on_jupyter configure` 
+    6.2. Run: `python3 pip install -e .`
+7. Link extension to JupyterLab: `python3 -m hydroshare_on_jupyter configure` 
 8. Check the list of configured extensions: `jupyter labextension list --verbose`
 
    8.1.  Make sure the HydroShare on Jupyter extension is listed
@@ -88,7 +88,7 @@ For contributing, please follow the following steps:
 
    9.1. Make sure the HydroShare on Jupyter server extension is listed
 10. Set up the DATA environment variable: `export DATA=~/hydroshare/Downloads`
-11. Launch JupyterLab: `python -m jupyter lab --debug --notebook-dir=~/hydroshare`
+11. Launch JupyterLab: `python3 -m jupyter lab --debug --notebook-dir=~/hydroshare`
 12. You should see the HydroShare on Jupyter extension in the JupyterLab launcher. Double click to open HydroShare on Jupyter.
 13. Commit and push your changes.
 14. Create a pull request GitHub.
