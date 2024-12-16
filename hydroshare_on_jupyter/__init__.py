@@ -65,7 +65,7 @@ def _load_jupyter_server_extension(server_app: ServerApp):
     config = ConfigFile()
 
     # pass config file settings to Tornado Application (web app)
-    server_app.web_app.settings.update(config.dict())
+    server_app.web_app.settings.update(config.model_dump())
 
 
 # For backward compatibility with the classical notebook

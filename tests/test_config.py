@@ -11,13 +11,13 @@ TEST_CONFIG_FILE_CASES = ("logs", "dir_that_does_not_exist/logs")
 def test_config_file(log_dir: str):
     with TemporaryDirectory() as temp:
         log = Path(temp) / log_dir
-        ConfigFile(data_path=temp, log_path=log)
+        ConfigFile(data=temp, log=log)
 
 
 def test_config_creatifile():
     with TemporaryDirectory() as temp:
         log = Path(temp) / "dir_that_does_not_exist" / "logs"
-        ConfigFile(data_path=temp, log_path=log)
+        ConfigFile(data=temp, log=log)
 
 
 def test_config_log_is_file():
@@ -25,7 +25,7 @@ def test_config_log_is_file():
         with TemporaryDirectory() as temp:
             log = Path(temp) / "logs"
             log.touch()
-            ConfigFile(data_path=temp, log_path=log)
+            ConfigFile(data=temp, log=log)
 
 
 def test_config_using_env_vars(monkeypatch):
@@ -66,6 +66,7 @@ def oauth_data():
             "token_type": "Bearer",
             "refresh_token": "some_fake_token",
             "scope": "scope",
+            "state": "",
             "expires_in": 2592000,
         },
         "some_fake_token",
@@ -84,5 +85,5 @@ def oauth_file(oauth_data) -> Path:
 
 
 def test_config_oauth(oauth_file, oauth_data):
-    o = ConfigFile(oauth_path=str(oauth_file))
-    assert o.oauth_path.__root__[0].access_token == oauth_data[0]["access_token"]
+    o = ConfigFile(oauth=str(oauth_file))
+    assert o.oauth_path.root[0].access_token == oauth_data[0]["access_token"]

@@ -14,6 +14,7 @@ preference, any python virtual environment manager should work just fine (conda,
 
 ```python
 # Create and activate python environment, requires python >= 3.7
+
 python3 -m venv venv
 source venv/bin/activate
 python3 -m pip install --upgrade pip
@@ -63,3 +64,32 @@ JupyterLab is started from a directory where `~/hydroshare` is not a descendent 
 `~/Downloads`), you will not be able to open the HydroShare resource files you download using
 HydroShare on Jupyter. To resolve this, either open JupyterLab from `~` or change the directory
 HydroShare on Jupyter saves resources to using the data `DATA` configuration variable.
+
+## Development
+
+HydroShare on Jupyter is open source and is available on [GitHub](https://github.com/hydroshare/hydroshare_on_jupyter).
+For contributing, please follow the following steps:
+
+1. Clone the repository: `git clone https://github.com/hydroshare/hydroshare_on_jupyter.git`
+2. Create a branch: `git checkout -b my-branch`
+3. Create and activate a virtual environment (python >= 3.7): `python3 -m venv venv`
+4. Activate the virtual environment: `source venv/bin/activate`
+5. Build the frontend: Refer to webapp/README.md for instructions.   
+6. Build the backend:
+
+    6.1. Navigate to the root of the project: `hydroshare_on_jupyter`
+
+    6.2. Run: `python3 pip install -e .`
+7. Link extension to JupyterLab: `python3 -m hydroshare_on_jupyter configure` 
+8. Check the list of configured extensions: `jupyter labextension list --verbose`
+
+   8.1.  Make sure the HydroShare on Jupyter extension is listed
+9. Check the list of server extensions: `jupyter server extension list`
+
+   9.1. Make sure the HydroShare on Jupyter server extension is listed
+10. Set up the DATA environment variable: `export DATA=~/hydroshare/Downloads`
+11. Launch JupyterLab: `python3 -m jupyter lab --debug --notebook-dir=~/hydroshare`
+12. You should see the HydroShare on Jupyter extension in the JupyterLab launcher. Double click to open HydroShare on Jupyter.
+13. Commit and push your changes.
+14. Create a pull request GitHub.
+

@@ -17,7 +17,15 @@ def test_expand_and_resolve(test, validation, user):
     # unix-like os use `HOME`. Windows use `USERPROFILE`
     os.environ["HOME"] = os.environ["USERPROFILE"] = user
 
-    assert str(pathlib_utils.expand_and_resolve(test)) == validation
+    path = pathlib_utils.expand_and_resolve(test)
+    # remove drive letter if it exists in path (windows) for comparison
+    if path.drive:
+        # this is the case on windows
+        path = path.relative_to(path.drive)
+        # change the path to unix-like
+        path = path.as_posix()
+
+    assert str(path) == validation
 
 
 TEST_IS_DESCENDANT = [

@@ -16,7 +16,7 @@ from setuptools import setup, find_packages
 
 # define package name globally
 PKGNAME = "hydroshare_on_jupyter"
-VERSION = "0.1.5"
+VERSION = "0.1.6"
 
 # define webapp path globally
 here = Path(__file__).resolve().parent
@@ -37,11 +37,12 @@ PYTHON_REQUIRES = ">=3.7"
 
 # Package dependency requirements
 REQUIREMENTS = [
-    "hsclient>=0.2.0",
-    "jupyterlab",
-    "notebook",
+    "hsclient>=1.0.5",
+    "jupyterlab==4.2.*",
+    "notebook==6.5.*",
     "requests",
-    "pydantic[dotenv]",
+    "pydantic==2.7.*",
+    "pydantic-settings==2.5.*",
     "watchdog",
 ]
 

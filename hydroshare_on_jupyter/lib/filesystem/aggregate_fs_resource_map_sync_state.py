@@ -1,5 +1,5 @@
 from __future__ import annotations
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 from pathlib import Path
 from typing import Set, List, TYPE_CHECKING
 from .fs_resource_map import LocalFSResourceMap, RemoteFSResourceMap
@@ -62,8 +62,8 @@ class AggregateFSResourceMapSyncState(BaseModel):
         )
 
 
-class AggregateFSResourceMapSyncStateCollection(BaseModel):
-    __root__: List[AggregateFSResourceMapSyncState]
+class AggregateFSResourceMapSyncStateCollection(RootModel):
+    root: List[AggregateFSResourceMapSyncState]
 
     @classmethod
     def from_aggregate_map(
@@ -74,7 +74,7 @@ class AggregateFSResourceMapSyncStateCollection(BaseModel):
 
         res_intersection = set(lm) & set(rm)
 
-        return cls.parse_obj(
+        return cls.model_validate(
             [
                 AggregateFSResourceMapSyncState.from_resource_maps(
                     local_resource_map=lm[res_id], remote_resource_map=rm[res_id]

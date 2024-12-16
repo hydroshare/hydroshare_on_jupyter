@@ -1,12 +1,15 @@
 from pydantic import (
+    RootModel,
     BaseModel,
     Field,
     StrictStr,
     StrictBool,
     constr,
-    validator,
+    field_validator,
+    ConfigDict,
+    StringConstraints,
 )
-from typing import List, Union
+from typing import List, Union, Literal, Any, Annotated
 from hsclient import Token
 
 from .resource_type_enum import ResourceTypeEnum
@@ -15,8 +18,7 @@ from .resource_type_enum import ResourceTypeEnum
 class ModelNoExtra(BaseModel):
     """does not permit extra fields"""
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
 
 
 class Boolean(BaseModel):
@@ -39,32 +41,7 @@ class OAuthCredentials(ModelNoExtra):
 
 CredentialTypes = Union[StandardCredentials, OAuthCredentials]
 
-
-class Credentials(BaseModel):
-    __root__: CredentialTypes = Field(...)
-
-    def dict(
-        self,
-        *,
-        include: Union["AbstractSetIntStr", "MappingIntStrAny"] = None,
-        exclude: Union["AbstractSetIntStr", "MappingIntStrAny"] = None,
-        by_alias: bool = False,
-        skip_defaults: bool = None,
-        exclude_unset: bool = False,
-        exclude_defaults: bool = False,
-        exclude_none: bool = False
-    ) -> "DictStrAny":
-        d = super().dict(
-            include=include,
-            exclude=exclude,
-            by_alias=by_alias,
-            skip_defaults=skip_defaults,
-            exclude_unset=exclude_unset,
-            exclude_defaults=exclude_defaults,
-            exclude_none=exclude_none,
-        )
-        # return contents of root key dropping it in the process
-        return d["__root__"]
+Credentials = RootModel[CredentialTypes]
 
 
 class Success(BaseModel):
@@ -83,18 +60,18 @@ class ResourceMetadata(BaseModel):
     authors: List[str] = Field(...)
 
     # NOTE: remove once https://github.com/hydroshare/hsclient/issues/23 has been resolved
-    @validator("authors", pre=True, always=True)
+    @field_validator("authors", mode="before")
     def handle_null_author(cls, v):
         return v or []
 
-    @validator("creator", pre=True, always=True)
+    @field_validator("creator", mode="before")
     def handle_null_creator(cls, v):
         return "" if v is None else v
 
 
-class CollectionOfResourceMetadata(BaseModel):
+class CollectionOfResourceMetadata(RootModel):
     # from https://github.com/samuelcolvin/pydantic/issues/675#issuecomment-513029543
-    __root__: List[ResourceMetadata]
+    root: List[ResourceMetadata]
 
 
 class ResourceCreationRequest(BaseModel):
@@ -110,9 +87,14 @@ class ResourceCreationRequest(BaseModel):
     resource_type: ResourceTypeEnum
 
 
+ResFileType = Annotated[str, StringConstraints(pattern=r"^((?!~|\.{2}).)*$")]
+
+
 class ResourceFiles(BaseModel):
     # str in list cannot contain .. or ~
-    files: List[constr(regex=r"^((?!~|\.{2}).)*$")] = Field(...)
+    files: List[ResFileType] = Field(...)
+
+    model_config = ConfigDict(regex_engine='python-re')
 
 
 class DataDir(BaseModel):
