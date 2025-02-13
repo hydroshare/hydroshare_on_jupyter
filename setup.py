@@ -33,7 +33,7 @@ MAINTAINER = "Austin Raney"
 MAINTAINER_EMAIL = "araney@cuahsi.org"
 
 # package version requirement
-PYTHON_REQUIRES = ">=3.7"
+PYTHON_REQUIRES = ">=3.9"
 
 # Package dependency requirements
 REQUIREMENTS = [
