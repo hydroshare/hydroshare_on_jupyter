@@ -39,6 +39,7 @@ PYTHON_REQUIRES = ">=3.7"
 REQUIREMENTS = [
     "hsclient>=1.0.5",
     "jupyterlab==4.2.*",
+    "hsclient>=1.1.0",
     "notebook==6.5.*",
     "requests",
     "pydantic==2.7.*",
