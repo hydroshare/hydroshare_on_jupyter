@@ -33,12 +33,12 @@ MAINTAINER = "Austin Raney"
 MAINTAINER_EMAIL = "araney@cuahsi.org"
 
 # package version requirement
-PYTHON_REQUIRES = ">=3.7"
+PYTHON_REQUIRES = ">=3.9"
 
 # Package dependency requirements
 REQUIREMENTS = [
-    "hsclient>=1.0.5",
-    "jupyterlab==4.2.*",
+    "hsclient>=1.1.0",
+    "jupyterlab==4.3.*",
     "notebook==6.5.*",
     "requests",
     "pydantic==2.7.*",
