@@ -16,7 +16,7 @@ from setuptools import setup, find_packages
 
 # define package name globally
 PKGNAME = "hydroshare_on_jupyter"
-VERSION = "0.1.6"
+VERSION = "0.2.0"
 
 # define webapp path globally
 here = Path(__file__).resolve().parent
@@ -37,7 +37,7 @@ PYTHON_REQUIRES = ">=3.9"
 
 # Package dependency requirements
 REQUIREMENTS = [
-    "hsclient>=1.1.0",
+    "hsclient>=1.1.3",
     "jupyterlab==4.3.*",
     "notebook==6.5.*",
     "requests",
