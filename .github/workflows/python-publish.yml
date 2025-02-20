@@ -31,3 +31,8 @@ jobs:
         python -m build
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
+      # https://docs.pypi.org/trusted-publishers/adding-a-publisher/
+      # https://github.com/pypa/gh-action-pypi-publish?tab=readme-ov-file#specifying-a-different-username
+      with:
+        user: ${{ secrets.PYPI_USERNAME }}
+        password: ${{ secrets.PYPI_PASSWORD }}
