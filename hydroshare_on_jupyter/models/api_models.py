@@ -4,12 +4,11 @@ from pydantic import (
     Field,
     StrictStr,
     StrictBool,
-    constr,
     field_validator,
     ConfigDict,
     StringConstraints,
 )
-from typing import List, Union, Literal, Any, Annotated
+from typing import List, Union, Annotated
 from hsclient import Token
 
 from .resource_type_enum import ResourceTypeEnum
@@ -87,12 +86,12 @@ class ResourceCreationRequest(BaseModel):
     resource_type: ResourceTypeEnum
 
 
-ResFileType = Annotated[str, StringConstraints(pattern=r"^((?!~|\.{2}).)*$")]
-
+def get_res_file_type():
+    return Annotated[str, StringConstraints(pattern=r"^((?!~|\.{2}).)*$")]
 
 class ResourceFiles(BaseModel):
     # str in list cannot contain .. or ~
-    files: List[ResFileType] = Field(...)
+    files: List[get_res_file_type()] = Field(...)
 
     model_config = ConfigDict(regex_engine='python-re')
 
