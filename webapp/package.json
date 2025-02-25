@@ -1,6 +1,6 @@
 {
   "name": "hydroshare_on_jupyter",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "main": "build/index.js",
   "types": "build/index.d.ts",
