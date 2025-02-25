@@ -558,9 +558,9 @@ class LocalResourceEntityHandler(HeadersMixIn, BaseRequestHandler):
                         file.relative_to(resource_path_prefix / self.BAGGIT_PREFIX),
                     )
 
-                # upload zip to HydroShare
-                resource.file_upload(zip_file)
-                self._unpack_zip_on_hydroshare(resource, zip_file.name)
+            # upload zip to HydroShare
+            resource.file_upload(zip_file)
+            self._unpack_zip_on_hydroshare(resource, zip_file.name)
 
         # set instance variable for `on_finish`
         self.resource_id = resource_id
